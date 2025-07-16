@@ -11,12 +11,12 @@ body {
 }
 
 a {
-    color: #6cf;
+    color: #fff;
     text-decoration: none;
     transition: color 0.2s;
 }
 a:hover {
-    color: #fff;
+    color: #ccc;
 }
 
 button, .btn {
@@ -32,7 +32,7 @@ button, .btn {
 }
 button:hover, .btn:hover {
     background: #333;
-    color: #6cf;
+    color: #fff;
 }
 
 input, textarea, select {
@@ -79,16 +79,16 @@ hr {
 }
 
 /* Акценты для статусов задач */
-.status-todo { background: #222; color: #6B7280; }
-.status-inprogress { background: #222; color: #3B82F6; }
-.status-review { background: #222; color: #F59E0B; }
-.status-testing { background: #222; color: #8B5CF6; }
-.status-ready { background: #222; color: #EC4899; }
-.status-done { background: #222; color: #10B981; }
+.status-todo { background: #222; color: #ccc; }
+.status-inprogress { background: #333; color: #fff; }
+.status-review { background: #444; color: #fff; }
+.status-testing { background: #555; color: #fff; }
+.status-ready { background: #666; color: #fff; }
+.status-done { background: #777; color: #fff; }
 
 /* Акцент для комментариев после тестирования */
 .comment-testing_feedback {
-    border-left: 4px solid #8B5CF6;
+    border-left: 4px solid #666;
     background: #181828;
     padding-left: 12px;
 }

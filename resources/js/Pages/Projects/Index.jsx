@@ -35,7 +35,7 @@ export default function Index({ auth, projects, filters }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-green-400 leading-tight">Проекты</h2>}
+            header={<h2 className="font-semibold text-xl text-white leading-tight">Проекты</h2>}
         >
             <Head title="Проекты" />
 
@@ -43,12 +43,12 @@ export default function Index({ auth, projects, filters }) {
                 {/* Заголовок и кнопка создания */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold text-green-400">Проекты</h1>
+                        <h1 className="text-2xl font-bold text-white">Проекты</h1>
                         <p className="text-gray-400 mt-1">Управление проектами и задачами</p>
                     </div>
                     <Link
                         href={route('projects.create')}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                         <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -70,7 +70,7 @@ export default function Index({ auth, projects, filters }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Название проекта..."
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-green-400 placeholder-gray-500 focus:outline-none focus:border-green-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
                                 />
                             </div>
                             <div>
@@ -80,7 +80,7 @@ export default function Index({ auth, projects, filters }) {
                                 <select
                                     value={status}
                                     onChange={handleStatusChange}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-green-400 focus:outline-none focus:border-green-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
                                 >
                                     <option value="">Все статусы</option>
                                     <option value="active">Активный</option>
@@ -92,7 +92,7 @@ export default function Index({ auth, projects, filters }) {
                             <div className="flex items-end space-x-2">
                                 <button
                                     type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                                 >
                                     Поиск
                                 </button>
@@ -127,7 +127,7 @@ export default function Index({ auth, projects, filters }) {
                         {!search && !status && (
                             <Link
                                 href={route('projects.create')}
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                             >
                                 Создать проект
                             </Link>
@@ -145,9 +145,9 @@ export default function Index({ auth, projects, filters }) {
                                     href={link.url}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                         link.active
-                                            ? 'bg-green-600 text-white'
+                                            ? 'bg-gray-600 text-white'
                                             : link.url
-                                            ? 'bg-gray-800 text-green-400 hover:bg-gray-700'
+                                            ? 'bg-gray-800 text-white hover:bg-gray-700'
                                             : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                     }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}

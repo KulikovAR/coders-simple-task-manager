@@ -5,34 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Project;
 use App\Http\Requests\TaskRequest;
+use App\Services\TaskService;
+use App\Services\ProjectService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TaskController extends Controller
 {
+    public function __construct(
+        private TaskService $taskService,
+        private ProjectService $projectService
+    ) {}
+
     public function index(Request $request)
     {
-        $query = Task::with(['project', 'sprint'])->withCount('comments');
-
-        if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
-
-        if ($request->filled('project_id')) {
-            $query->where('project_id', $request->project_id);
-        }
-
-        $tasks = $query->orderBy('created_at', 'desc')->paginate(12);
-        $projects = Project::orderBy('name')->get();
+        $tasks = $this->taskService->getUserTasks(Auth::user(), $request->only(['search', 'status', 'priority', 'project_id']));
+        $projects = $this->projectService->getUserProjectsList(Auth::user());
 
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
@@ -43,7 +32,7 @@ class TaskController extends Controller
 
     public function create(Request $request)
     {
-        $projects = Project::orderBy('name')->get();
+        $projects = $this->projectService->getUserProjectsList(Auth::user());
         $selectedProjectId = $request->get('project_id');
 
         return Inertia::render('Tasks/Form', [
@@ -54,7 +43,13 @@ class TaskController extends Controller
 
     public function store(TaskRequest $request)
     {
-        $task = Task::create($request->validated());
+        $project = Project::findOrFail($request->validated()['project_id']);
+        
+        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Задача успешно создана.');
@@ -62,6 +57,10 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
         $task->load(['project', 'sprint', 'comments.user']);
         
         return Inertia::render('Tasks/Show', [
@@ -71,7 +70,11 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        $projects = Project::orderBy('name')->get();
+        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $projects = $this->projectService->getUserProjectsList(Auth::user());
         
         return Inertia::render('Tasks/Form', [
             'task' => $task,
@@ -81,7 +84,11 @@ class TaskController extends Controller
 
     public function update(TaskRequest $request, Task $task)
     {
-        $task->update($request->validated());
+        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $task = $this->taskService->updateTask($task, $request->validated());
 
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Задача успешно обновлена.');
@@ -89,9 +96,34 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
-        $task->delete();
+        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $this->taskService->deleteTask($task);
 
         return redirect()->route('tasks.index')
             ->with('success', 'Задача успешно удалена.');
+    }
+
+    public function updateStatus(Request $request, Task $task)
+    {
+        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $request->validate([
+            'status_id' => 'required|exists:task_statuses,id',
+        ]);
+
+        $status = \App\Models\TaskStatus::findOrFail($request->status_id);
+        $task = $this->taskService->updateTaskStatus($task, $status);
+
+        // Для Inertia лучше вернуть JSON, если запрос AJAX
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'task' => $task]);
+        }
+
+        return redirect()->back()->with('success', 'Статус задачи успешно обновлен.');
     }
 } 

@@ -20,6 +20,7 @@ class ProjectRequest extends FormRequest
             'deadline' => 'nullable|date|after:today',
             'docs' => 'nullable|array',
             'docs.*' => 'nullable|url',
+            'owner_id' => 'nullable|exists:users,id',
         ];
     }
 

@@ -7,9 +7,42 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TaskService
 {
+    public function getUserTasks(User $user, array $filters = []): LengthAwarePaginator
+    {
+        $query = Task::with(['project', 'sprint'])->withCount('comments')
+            ->whereHas('project', function($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', function($memberQuery) use ($user) {
+                      $memberQuery->where('user_id', $user->id);
+                  });
+            });
+
+        if (!empty($filters['search'])) {
+            $query->where(function($q) use ($filters) {
+                $q->where('title', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        if (!empty($filters['project_id'])) {
+            $query->where('project_id', $filters['project_id']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate(12);
+    }
+
     public function getProjectTasks(Project $project): Collection
     {
         return $project->tasks()

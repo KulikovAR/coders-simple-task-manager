@@ -20,7 +20,7 @@ class ProjectController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $projects = $this->projectService->getUserProjects($request->user());
+        $projects = $this->projectService->getUserProjects($request->user(), $request->only(['search', 'status']));
         
         return response()->json(
             ApiResponse::success($projects, 'Проекты успешно загружены')

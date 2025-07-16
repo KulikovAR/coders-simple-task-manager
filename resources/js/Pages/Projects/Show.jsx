@@ -34,13 +34,17 @@ export default function Show({ auth, project, tasks }) {
 
     const getTaskStatusColor = (status) => {
         switch (status) {
-            case 'todo':
+            case 'To Do':
                 return 'bg-gray-500 bg-opacity-20 text-gray-400';
-            case 'in_progress':
+            case 'In Progress':
                 return 'bg-blue-500 bg-opacity-20 text-blue-400';
-            case 'review':
+            case 'Review':
                 return 'bg-yellow-500 bg-opacity-20 text-yellow-400';
-            case 'done':
+            case 'Testing':
+                return 'bg-purple-500 bg-opacity-20 text-purple-400';
+            case 'Ready for Release':
+                return 'bg-pink-500 bg-opacity-20 text-pink-400';
+            case 'Done':
                 return 'bg-green-500 bg-opacity-20 text-green-400';
             default:
                 return 'bg-gray-500 bg-opacity-20 text-gray-400';
@@ -49,13 +53,17 @@ export default function Show({ auth, project, tasks }) {
 
     const getTaskStatusText = (status) => {
         switch (status) {
-            case 'todo':
+            case 'To Do':
                 return 'К выполнению';
-            case 'in_progress':
+            case 'In Progress':
                 return 'В работе';
-            case 'review':
+            case 'Review':
                 return 'На проверке';
-            case 'done':
+            case 'Testing':
+                return 'Тестирование';
+            case 'Ready for Release':
+                return 'Готово к релизу';
+            case 'Done':
                 return 'Завершена';
             default:
                 return status;
@@ -65,7 +73,7 @@ export default function Show({ auth, project, tasks }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-green-400 leading-tight">Проект</h2>}
+            header={<h2 className="font-semibold text-xl text-white leading-tight">Проект</h2>}
         >
             <Head title={project.name} />
 
@@ -73,7 +81,7 @@ export default function Show({ auth, project, tasks }) {
                 {/* Заголовок и действия */}
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-bold text-green-400 mb-2">{project.name}</h1>
+                        <h1 className="text-3xl font-bold text-white mb-2">{project.name}</h1>
                         <div className="flex items-center space-x-4 text-sm text-gray-400">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
                                 {getStatusText(project.status)}
@@ -86,14 +94,20 @@ export default function Show({ auth, project, tasks }) {
                     </div>
                     <div className="flex space-x-3">
                         <Link
+                            href={route('projects.board', project.id)}
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                            Доска
+                        </Link>
+                        <Link
                             href={route('projects.edit', project.id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             Редактировать
                         </Link>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             Добавить задачу
                         </Link>
@@ -103,7 +117,7 @@ export default function Show({ auth, project, tasks }) {
                 {/* Описание */}
                 {project.description && (
                     <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                        <h3 className="text-lg font-medium text-green-400 mb-3">Описание</h3>
+                        <h3 className="text-lg font-medium text-white mb-3">Описание</h3>
                         <p className="text-gray-400 whitespace-pre-wrap">{project.description}</p>
                     </div>
                 )}
@@ -111,7 +125,7 @@ export default function Show({ auth, project, tasks }) {
                 {/* Документы */}
                 {project.docs && project.docs.length > 0 && (
                     <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                        <h3 className="text-lg font-medium text-green-400 mb-3">Документы</h3>
+                        <h3 className="text-lg font-medium text-white mb-3">Документы</h3>
                         <div className="space-y-2">
                             {project.docs.map((doc, index) => (
                                 <a
@@ -119,7 +133,7 @@ export default function Show({ auth, project, tasks }) {
                                     href={doc}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+                                    className="flex items-center text-white hover:text-gray-300 transition-colors"
                                 >
                                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -134,10 +148,10 @@ export default function Show({ auth, project, tasks }) {
                 {/* Задачи */}
                 <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-medium text-green-400">Задачи ({tasks.length})</h3>
+                        <h3 className="text-lg font-medium text-white">Задачи ({tasks.length})</h3>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
-                            className="text-green-400 hover:text-green-300 text-sm font-medium"
+                            className="text-white hover:text-gray-300 text-sm font-medium"
                         >
                             + Добавить задачу
                         </Link>
@@ -149,8 +163,8 @@ export default function Show({ auth, project, tasks }) {
                                 <div key={task.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
                                     <div className="flex justify-between items-start">
                                         <div className="flex-1">
-                                            <h4 className="text-green-400 font-medium mb-2">
-                                                <Link href={route('tasks.show', task.id)} className="hover:text-green-300">
+                                            <h4 className="text-white font-medium mb-2">
+                                                <Link href={route('tasks.show', task.id)} className="hover:text-gray-300">
                                                     {task.title}
                                                 </Link>
                                             </h4>
@@ -160,8 +174,8 @@ export default function Show({ auth, project, tasks }) {
                                                 </p>
                                             )}
                                             <div className="flex items-center space-x-4 text-sm text-gray-400">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTaskStatusColor(task.status)}`}>
-                                                    {getTaskStatusText(task.status)}
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTaskStatusColor(task.status?.name || 'todo')}`}>
+                                                    {getTaskStatusText(task.status?.name || 'todo')}
                                                 </span>
                                                 {task.priority && (
                                                     <span className="text-yellow-400">Приоритет: {task.priority}</span>
@@ -174,13 +188,13 @@ export default function Show({ auth, project, tasks }) {
                                         <div className="flex space-x-2 ml-4">
                                             <Link
                                                 href={route('tasks.edit', task.id)}
-                                                className="text-blue-400 hover:text-blue-300 text-sm"
+                                                className="text-white hover:text-gray-300 text-sm"
                                             >
                                                 Редактировать
                                             </Link>
                                             <Link
                                                 href={route('tasks.show', task.id)}
-                                                className="text-green-400 hover:text-green-300 text-sm"
+                                                className="text-white hover:text-gray-300 text-sm"
                                             >
                                                 Просмотр
                                             </Link>
@@ -198,7 +212,7 @@ export default function Show({ auth, project, tasks }) {
                             <p className="text-gray-500 mb-4">Создайте первую задачу для этого проекта</p>
                             <Link
                                 href={route('tasks.create', { project_id: project.id })}
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                             >
                                 Создать задачу
                             </Link>

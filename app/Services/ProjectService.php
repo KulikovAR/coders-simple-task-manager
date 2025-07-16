@@ -12,9 +12,27 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProjectService
 {
-    public function getUserProjects(User $user): Collection
+    public function getUserProjects(User $user, array $filters = []): LengthAwarePaginator
     {
-        return $user->projects()->with(['owner', 'members.user'])->get();
+        $query = $user->projects()->withCount('tasks');
+
+        if (!empty($filters['search'])) {
+            $query->where(function($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate(12);
+    }
+
+    public function getUserProjectsList(User $user): Collection
+    {
+        return $user->projects()->orderBy('name')->get();
     }
 
     public function createProject(array $data, User $user): Project
