@@ -2,7 +2,15 @@
 
 ## Обзор
 
-CSTM (Coders Simple Task Manager) предоставляет RESTful API для управления задачами.
+CSTM (Coders Simple Task Manager) предоставляет RESTful API для управления проектами, спринтами и задачами.
+
+## Новые поля (v2)
+
+- **Задача**:
+  - `result` — текстовое поле (nullable). Описание результата работы по задаче (что было сделано).
+  - `merge_request` — строка (nullable, ссылка). Ссылка на Merge Request или Pull Request, связанный с задачей.
+- **Проект**:
+  - `docs` — массив ссылок на Google Docs (nullable). Список документации по проекту.
 
 ## Базовый URL
 
@@ -83,25 +91,11 @@ Authorization: Bearer {your-token}
 
 **Требует аутентификации:** Да
 
-**Ответ:**
-```json
-{
-    "success": true,
-    "data": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com"
-    },
-    "message": "Success",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
-}
-```
+### Проекты
 
-### Задачи
+#### Получение списка проектов
 
-#### Получение списка задач
-
-**GET** `/api/tasks`
+**GET** `/api/projects`
 
 **Требует аутентификации:** Да
 
@@ -109,15 +103,162 @@ Authorization: Bearer {your-token}
 ```json
 {
     "success": true,
-    "data": [],
-    "message": "Tasks retrieved successfully",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
+    "data": [
+        {
+            "id": 1,
+            "name": "My Project",
+            "description": "Project description",
+            "owner_id": 1,
+            "docs": [
+                "https://docs.google.com/document/d/abc123",
+                "https://docs.google.com/document/d/xyz456"
+            ],
+            "created_at": "2024-01-01T00:00:00.000000Z",
+            "updated_at": "2024-01-01T00:00:00.000000Z",
+            "owner": {...},
+            "members": [...]
+        }
+    ],
+    "message": "Проекты успешно загружены"
 }
 ```
 
+#### Создание проекта
+
+**POST** `/api/projects`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "name": "Новый проект",
+    "description": "Описание проекта",
+    "docs": [
+        "https://docs.google.com/document/d/abc123",
+        "https://docs.google.com/document/d/xyz456"
+    ]
+}
+```
+
+**Ответ:**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "Новый проект",
+        "description": "Описание проекта",
+        "owner_id": 1,
+        "docs": [
+            "https://docs.google.com/document/d/abc123",
+            "https://docs.google.com/document/d/xyz456"
+        ]
+    },
+    "message": "Проект успешно создан"
+}
+```
+
+#### Получение проекта
+
+**GET** `/api/projects/{id}`
+
+**Требует аутентификации:** Да
+
+#### Обновление проекта
+
+**PUT** `/api/projects/{id}`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "name": "Обновленное имя",
+    "docs": ["https://docs.google.com/document/d/abc123"]
+}
+```
+
+#### Удаление проекта
+
+**DELETE** `/api/projects/{id}`
+
+**Требует аутентификации:** Да
+
+#### Добавление участника
+
+**POST** `/api/projects/{id}/members`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "user_id": 2,
+    "role": "member"
+}
+```
+
+#### Удаление участника
+
+**DELETE** `/api/projects/{id}/members/{user_id}`
+
+**Требует аутентификации:** Да
+
+### Спринты
+
+#### Получение списка спринтов проекта
+
+**GET** `/api/projects/{project_id}/sprints`
+
+**Требует аутентификации:** Да
+
+#### Создание спринта
+
+**POST** `/api/projects/{project_id}/sprints`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "name": "Sprint 1",
+    "description": "First sprint",
+    "start_date": "2024-01-01",
+    "end_date": "2024-01-15",
+    "status": "planned"
+}
+```
+
+#### Получение спринта
+
+**GET** `/api/sprints/{id}`
+
+**Требует аутентификации:** Да
+
+#### Обновление спринта
+
+**PUT** `/api/sprints/{id}`
+
+**Требует аутентификации:** Да
+
+#### Удаление спринта
+
+**DELETE** `/api/sprints/{id}`
+
+**Требует аутентификации:** Да
+
+### Задачи
+
+#### Получение списка задач проекта
+
+**GET** `/api/projects/{project_id}/tasks`
+
+**Требует аутентификации:** Да
+
 #### Создание задачи
 
-**POST** `/api/tasks`
+**POST** `/api/projects/{project_id}/tasks`
 
 **Требует аутентификации:** Да
 
@@ -126,7 +267,11 @@ Authorization: Bearer {your-token}
 {
     "title": "Новая задача",
     "description": "Описание задачи",
-    "priority": "high"
+    "sprint_id": 1,
+    "assignee_id": 2,
+    "priority": "high",
+    "result": "Описание результата",
+    "merge_request": "https://github.com/example/pr-123"
 }
 ```
 
@@ -135,12 +280,16 @@ Authorization: Bearer {your-token}
 {
     "success": true,
     "data": {
+        "id": 1,
         "title": "Новая задача",
         "description": "Описание задачи",
-        "priority": "high"
+        "sprint_id": 1,
+        "assignee_id": 2,
+        "priority": "high",
+        "result": "Описание результата",
+        "merge_request": "https://github.com/example/pr-123"
     },
-    "message": "Task created successfully",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
+    "message": "Задача успешно создана"
 }
 ```
 
@@ -149,18 +298,6 @@ Authorization: Bearer {your-token}
 **GET** `/api/tasks/{id}`
 
 **Требует аутентификации:** Да
-
-**Ответ:**
-```json
-{
-    "success": true,
-    "data": {
-        "id": "1"
-    },
-    "message": "Task 1 details",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
-}
-```
 
 #### Обновление задачи
 
@@ -171,22 +308,10 @@ Authorization: Bearer {your-token}
 **Тело запроса:**
 ```json
 {
-    "title": "Обновленная задача",
-    "status": "completed"
-}
-```
-
-**Ответ:**
-```json
-{
-    "success": true,
-    "data": {
-        "id": "1",
-        "title": "Обновленная задача",
-        "status": "completed"
-    },
-    "message": "Task 1 updated successfully",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
+    "title": "Обновленный заголовок",
+    "description": "Обновленное описание",
+    "result": "Обновленный результат",
+    "merge_request": "https://github.com/example/pr-124"
 }
 ```
 
@@ -196,13 +321,87 @@ Authorization: Bearer {your-token}
 
 **Требует аутентификации:** Да
 
+#### Изменение статуса задачи
+
+**PUT** `/api/tasks/{id}/status`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "status_id": 2
+}
+```
+
+#### Назначение исполнителя
+
+**PUT** `/api/tasks/{id}/assign`
+
+**Требует аутентификации:** Да
+
+**Тело запроса:**
+```json
+{
+    "assignee_id": 2
+}
+```
+
+#### Получение доски проекта
+
+**GET** `/api/projects/{project_id}/board`
+
+**Требует аутентификации:** Да
+
 **Ответ:**
 ```json
 {
     "success": true,
-    "data": null,
-    "message": "Task 1 deleted successfully",
-    "timestamp": "2024-01-01T00:00:00.000000Z"
+    "data": [
+        {
+            "id": 1,
+            "name": "To Do",
+            "order": 1,
+            "color": "#6B7280",
+            "tasks": [...]
+        },
+        {
+            "id": 2,
+            "name": "In Progress",
+            "order": 2,
+            "color": "#3B82F6",
+            "tasks": [...]
+        },
+        {
+            "id": 3,
+            "name": "Review",
+            "order": 3,
+            "color": "#F59E0B",
+            "tasks": [...]
+        },
+        {
+            "id": 4,
+            "name": "Testing",
+            "order": 4,
+            "color": "#8B5CF6",
+            "tasks": [...]
+        },
+        {
+            "id": 5,
+            "name": "Ready for Release",
+            "order": 5,
+            "color": "#EC4899",
+            "tasks": [...]
+        },
+        {
+            "id": 6,
+            "name": "Done",
+            "order": 6,
+            "color": "#10B981",
+            "tasks": [...]
+        }
+    ],
+    "message": "Доска проекта успешно загружена"
 }
 ```
 
@@ -212,9 +411,33 @@ Authorization: Bearer {your-token}
 - **201** - Ресурс создан
 - **400** - Ошибка валидации
 - **401** - Не авторизован
+- **403** - Доступ запрещен
 - **404** - Ресурс не найден
 - **422** - Ошибка валидации данных
 - **500** - Внутренняя ошибка сервера
+
+## Валидация
+
+### Проекты
+- `name` - обязательное, строка, максимум 255 символов
+- `description` - необязательное, строка, максимум 1000 символов
+- `docs` - необязательное, массив строк (URL)
+
+### Спринты
+- `name` - обязательное, строка, максимум 255 символов
+- `description` - необязательное, строка, максимум 1000 символов
+- `start_date` - обязательное, дата, не раньше сегодня
+- `end_date` - обязательное, дата, после start_date
+- `status` - необязательное, одно из: planned, active, completed
+
+### Задачи
+- `title` - обязательное, строка, максимум 255 символов
+- `description` - необязательное, строка, максимум 1000 символов
+- `sprint_id` - необязательное, существующий ID спринта
+- `assignee_id` - необязательное, существующий ID пользователя
+- `priority` - необязательное, одно из: low, medium, high, critical
+- `result` - необязательное, строка
+- `merge_request` - необязательное, строка (URL)
 
 ## Rate Limiting
 
@@ -228,44 +451,14 @@ API имеет ограничение на количество запросов
 # Health check
 curl -X GET http://localhost:8000/api/health
 
-# Получение задач (с токеном)
-curl -X GET http://localhost:8000/api/tasks \
+# Создание проекта
+curl -X POST http://localhost:8000/api/projects \
+  -H "Authorization: Bearer {your-token}" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Test Project", "description": "Test", "docs": ["https://docs.google.com/document/d/abc123"]}'
+
+# Получение задач проекта
+curl -X GET http://localhost:8000/api/projects/1/tasks \
   -H "Authorization: Bearer {your-token}" \
   -H "Accept: application/json"
 ```
-
-### С помощью Postman
-
-1. Импортируйте коллекцию
-2. Установите базовый URL: `http://localhost:8000/api`
-3. Добавьте токен в заголовки авторизации
-4. Тестируйте эндпоинты
-
-## Разработка
-
-### Добавление нового эндпоинта
-
-1. Создайте контроллер в `app/Http/Controllers/Api/`
-2. Добавьте роут в `routes/api.php`
-3. Используйте `ApiResponse` для стандартизации ответов
-4. Добавьте валидацию с помощью Form Requests
-5. Напишите тесты
-
-### Структура файлов
-
-```
-app/
-├── Http/
-│   ├── Controllers/
-│   │   └── Api/
-│   │       └── TaskController.php
-│   └── Resources/
-│       └── ApiResponse.php
-├── Exceptions/
-│   └── Handler.php
-└── Providers/
-    └── RouteServiceProvider.php
-
-routes/
-└── api.php
-``` 

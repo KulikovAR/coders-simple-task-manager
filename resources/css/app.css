@@ -1,3 +1,94 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    background: #111;
+    color: #fff;
+    font-family: Consolas, monospace;
+    min-height: 100vh;
+    margin: 0;
+}
+
+a {
+    color: #6cf;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #fff;
+}
+
+button, .btn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+button:hover, .btn:hover {
+    background: #333;
+    color: #6cf;
+}
+
+input, textarea, select {
+    background: #181818;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background: #181818;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #222;
+    margin: 16px 0;
+}
+
+.card {
+    background: #181818;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.status-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-right: 4px;
+    font-weight: bold;
+}
+
+/* Акценты для статусов задач */
+.status-todo { background: #222; color: #6B7280; }
+.status-inprogress { background: #222; color: #3B82F6; }
+.status-review { background: #222; color: #F59E0B; }
+.status-testing { background: #222; color: #8B5CF6; }
+.status-ready { background: #222; color: #EC4899; }
+.status-done { background: #222; color: #10B981; }
+
+/* Акцент для комментариев после тестирования */
+.comment-testing_feedback {
+    border-left: 4px solid #8B5CF6;
+    background: #181828;
+    padding-left: 12px;
+}
