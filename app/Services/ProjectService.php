@@ -14,7 +14,13 @@ class ProjectService
 {
     public function getUserProjects(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = $user->projects()->withCount('tasks');
+        $query = Project::where('owner_id', $user->id)
+            ->orWhereHas('members', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->withCount('tasks')
+            ->withCount('members')
+            ->with(['owner', 'members.user']);
 
         if (!empty($filters['search'])) {
             $query->where(function($q) use ($filters) {
@@ -42,13 +48,6 @@ class ProjectService
             'description' => $data['description'] ?? null,
             'owner_id' => $user->id,
             'docs' => $data['docs'] ?? [],
-        ]);
-
-        // Добавляем владельца как участника
-        ProjectMember::create([
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-            'role' => 'owner',
         ]);
 
         // Создаем стандартные статусы для проекта

@@ -32,6 +32,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/edit', [App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
     Route::put('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
+    
+    // Управление участниками проектов
+    Route::post('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'addMember'])->name('projects.members.add');
+    Route::delete('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'removeMember'])->name('projects.members.remove');
 
     // Задачи
     Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');

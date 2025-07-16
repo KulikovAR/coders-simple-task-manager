@@ -3,92 +3,114 @@
 @tailwind utilities;
 
 body {
-    background: #111;
+    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    background: #000 !important;
     color: #fff;
-    font-family: Consolas, monospace;
-    min-height: 100vh;
-    margin: 0;
 }
 
-a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-a:hover {
-    color: #ccc;
-}
-
-button, .btn {
-    background: #222;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 4px;
-    padding: 6px 16px;
+* {
+    border-radius: 0 !important;
     font-family: inherit;
-    font-size: 1rem;
-    cursor: pointer;
+}
+
+input, select, textarea, button {
+    border-radius: 0 !important;
+    font-family: inherit;
+    background: #111 !important;
+    color: #fff !important;
+    border: 1px solid #222 !important;
+}
+
+input:focus, select:focus, textarea:focus, button:focus {
+    outline: none;
+    border-color: #444 !important;
+    box-shadow: none;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #7a8599 !important;
+    opacity: 1 !important;
+}
+
+.bg-gray-900, .bg-gray-800, .bg-gray-700 {
+    background: #000 !important;
+}
+
+/* Дополнительно для всех серых фонов */
+.bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600 {
+    background: #000 !important;
+}
+
+/* Белый фон тоже делаем черным */
+.bg-white {
+    background: #000 !important;
+}
+
+.border, .border-gray-800, .border-gray-700 {
+    border-color: #222 !important;
+}
+
+button, .button, .btn, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+    border-radius: 0 !important;
+    font-family: inherit;
+    background: #111 !important;
+    color: #fff !important;
+    border: 1px solid #222 !important;
+    box-shadow: none !important;
     transition: background 0.2s, color 0.2s;
 }
-button:hover, .btn:hover {
-    background: #333;
-    color: #fff;
+
+button:hover, .button:hover, .btn:hover, .bg-gray-700:hover, .bg-gray-800:hover, .bg-gray-900:hover {
+    background: #222 !important;
+    color: #fff !important;
 }
 
-input, textarea, select {
-    background: #181818;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 4px;
-    padding: 6px 10px;
+.rounded, .rounded-lg, .rounded-md, .rounded-full, .rounded-sm {
+    border-radius: 0 !important;
+}
+
+.text-white {
+    color: #fff !important;
+}
+
+.text-gray-400 {
+    color: #b0b8c1 !important;
+}
+
+.text-gray-500 {
+    color: #7a8599 !important;
+}
+
+.text-blue-400, .text-blue-500, .text-blue-600, .text-green-400, .text-green-500, .text-yellow-400, .text-yellow-500, .text-pink-400, .text-pink-500, .text-purple-400, .text-purple-500 {
+    color: #b0b8c1 !important;
+}
+
+.bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-green-500, .bg-green-400, .bg-yellow-500, .bg-yellow-400, .bg-pink-500, .bg-pink-400, .bg-purple-500, .bg-purple-400 {
+    background: #111 !important;
+}
+
+.bg-opacity-20, .bg-opacity-30, .bg-opacity-40, .bg-opacity-50 {
+    opacity: 1 !important;
+}
+
+.shadow, .shadow-md, .shadow-lg, .shadow-sm, .shadow-xl, .shadow-inner, .shadow-none {
+    box-shadow: none !important;
+}
+
+/* NavLink стили */
+.nav-link {
+    color: #7a8599 !important;
+    border-bottom: 2px solid transparent;
+    background: transparent !important;
     font-family: inherit;
-    font-size: 1rem;
-    margin-bottom: 8px;
+    font-weight: 500;
+    transition: color 0.2s, border-bottom 0.2s;
 }
-
-::-webkit-scrollbar {
-    width: 8px;
-    background: #181818;
+.nav-link.active, .nav-link[aria-current="page"] {
+    color: #fff !important;
+    border-bottom: 2px solid #fff !important;
+    background: transparent !important;
 }
-::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid #222;
-    margin: 16px 0;
-}
-
-.card {
-    background: #181818;
-    border: 1px solid #222;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.status-label {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    margin-right: 4px;
-    font-weight: bold;
-}
-
-/* Акценты для статусов задач */
-.status-todo { background: #222; color: #ccc; }
-.status-inprogress { background: #333; color: #fff; }
-.status-review { background: #444; color: #fff; }
-.status-testing { background: #555; color: #fff; }
-.status-ready { background: #666; color: #fff; }
-.status-done { background: #777; color: #fff; }
-
-/* Акцент для комментариев после тестирования */
-.comment-testing_feedback {
-    border-left: 4px solid #666;
-    background: #181828;
-    padding-left: 12px;
+.nav-link:hover {
+    color: #fff !important;
 }

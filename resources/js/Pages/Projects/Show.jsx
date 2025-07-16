@@ -1,7 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Show({ auth, project, tasks }) {
+    const [showAddMember, setShowAddMember] = useState(false);
+    
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        role: 'member',
+    });
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'active':
@@ -70,6 +78,24 @@ export default function Show({ auth, project, tasks }) {
         }
     };
 
+    const handleAddMember = (e) => {
+        e.preventDefault();
+        post(route('projects.members.add', project.id), {
+            onSuccess: () => {
+                reset();
+                setShowAddMember(false);
+            },
+        });
+    };
+
+    const handleRemoveMember = (userId) => {
+        if (confirm('Вы уверены, что хотите удалить этого участника из проекта?')) {
+            router.delete(route('projects.members.remove', project.id), {
+                data: { user_id: userId },
+            });
+        }
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -121,6 +147,129 @@ export default function Show({ auth, project, tasks }) {
                         <p className="text-gray-400 whitespace-pre-wrap">{project.description}</p>
                     </div>
                 )}
+
+                {/* Участники проекта */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-medium text-white">Участники проекта ({1 + (project.members?.filter(member => member.user_id !== project.owner_id).length || 0)})</h3>
+                        <button
+                            onClick={() => setShowAddMember(!showAddMember)}
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                            {showAddMember ? 'Отмена' : 'Добавить участника'}
+                        </button>
+                    </div>
+
+                    {/* Форма добавления участника */}
+                    {showAddMember && (
+                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4">
+                            <form onSubmit={handleAddMember} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Email пользователя
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        placeholder="Введите email пользователя..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+                                        required
+                                    />
+                                    {errors.email && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Роль
+                                    </label>
+                                    <select
+                                        value={data.role}
+                                        onChange={(e) => setData('role', e.target.value)}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
+                                    >
+                                        <option value="member">Участник</option>
+                                        <option value="admin">Администратор</option>
+                                    </select>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                                    >
+                                        {processing ? 'Добавление...' : 'Добавить'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowAddMember(false);
+                                            reset();
+                                        }}
+                                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    >
+                                        Отмена
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Список участников */}
+                    <div className="space-y-3">
+                        {/* Владелец проекта */}
+                        <div className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg p-4">
+                            <div className="flex items-center">
+                                <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-medium">
+                                    {project.owner?.name?.charAt(0) || 'U'}
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-white font-medium">{project.owner?.name || 'Неизвестно'}</p>
+                                    <p className="text-gray-400 text-sm">{project.owner?.email || 'email@example.com'}</p>
+                                </div>
+                            </div>
+                            <span className="px-2 py-1 bg-green-500 bg-opacity-20 text-green-400 rounded-full text-xs font-medium">
+                                Владелец
+                            </span>
+                        </div>
+
+                        {/* Участники (исключая владельца) */}
+                        {project.members?.filter(member => member.user_id !== project.owner_id).map((member) => (
+                            <div key={member.id} className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-medium">
+                                        {member.user?.name?.charAt(0) || 'U'}
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-white font-medium">{member.user?.name || 'Неизвестно'}</p>
+                                        <p className="text-gray-400 text-sm">{member.user?.email || 'email@example.com'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <span className="px-2 py-1 bg-blue-500 bg-opacity-20 text-blue-400 rounded-full text-xs font-medium">
+                                        {member.role === 'admin' ? 'Администратор' : 'Участник'}
+                                    </span>
+                                    <button
+                                        onClick={() => handleRemoveMember(member.user_id)}
+                                        className="text-red-400 hover:text-red-300 transition-colors"
+                                        title="Удалить участника"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+
+                        {(!project.members || project.members.filter(member => member.user_id !== project.owner_id).length === 0) && (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500">Нет дополнительных участников</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 {/* Документы */}
                 {project.docs && project.docs.length > 0 && (

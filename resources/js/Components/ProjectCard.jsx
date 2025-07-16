@@ -32,7 +32,7 @@ export default function ProjectCard({ project }) {
     };
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors">
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h3 className="text-lg font-medium text-green-400 mb-2">

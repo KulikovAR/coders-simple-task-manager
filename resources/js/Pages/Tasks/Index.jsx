@@ -41,7 +41,7 @@ export default function Index({ auth, tasks, filters, projects }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-green-400 leading-tight">Задачи</h2>}
+            header={<h2 className="font-semibold text-xl text-white leading-tight">Задачи</h2>}
         >
             <Head title="Задачи" />
 
@@ -49,14 +49,14 @@ export default function Index({ auth, tasks, filters, projects }) {
                 {/* Заголовок и кнопка создания */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold text-blue-400">Задачи</h1>
+                        <h1 className="text-2xl font-bold text-white">Задачи</h1>
                         <p className="text-gray-400 mt-1">Управление задачами и их выполнением</p>
                     </div>
                     <Link
                         href={route('tasks.create')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors inline-flex items-center"
                     >
-                        <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                         Новая задача
@@ -76,7 +76,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Название задачи..."
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
                                 />
                             </div>
                             <div>
@@ -86,13 +86,15 @@ export default function Index({ auth, tasks, filters, projects }) {
                                 <select
                                     value={status}
                                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
                                 >
                                     <option value="">Все статусы</option>
-                                    <option value="todo">К выполнению</option>
-                                    <option value="in_progress">В работе</option>
-                                    <option value="review">На проверке</option>
-                                    <option value="done">Завершена</option>
+                                    <option value="To Do">К выполнению</option>
+                                    <option value="In Progress">В работе</option>
+                                    <option value="Review">На проверке</option>
+                                    <option value="Testing">Тестирование</option>
+                                    <option value="Ready for Release">Готов к релизу</option>
+                                    <option value="Done">Завершена</option>
                                 </select>
                             </div>
                             <div>
@@ -102,7 +104,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                                 <select
                                     value={priority}
                                     onChange={(e) => handleFilterChange('priority', e.target.value)}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
                                 >
                                     <option value="">Все приоритеты</option>
                                     <option value="low">Низкий</option>
@@ -117,7 +119,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                                 <select
                                     value={projectId}
                                     onChange={(e) => handleFilterChange('project_id', e.target.value)}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
                                 >
                                     <option value="">Все проекты</option>
                                     {projects.map((project) => (
@@ -130,7 +132,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                             <div className="flex items-end space-x-2">
                                 <button
                                     type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                                 >
                                     Поиск
                                 </button>
@@ -165,7 +167,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                         {!search && !status && !priority && !projectId && (
                             <Link
                                 href={route('tasks.create')}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                             >
                                 Создать задачу
                             </Link>
@@ -183,9 +185,9 @@ export default function Index({ auth, tasks, filters, projects }) {
                                     href={link.url}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                         link.active
-                                            ? 'bg-blue-600 text-white'
+                                            ? 'bg-gray-600 text-white'
                                             : link.url
-                                            ? 'bg-gray-800 text-blue-400 hover:bg-gray-700'
+                                            ? 'bg-gray-800 text-white hover:bg-gray-700'
                                             : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                     }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
