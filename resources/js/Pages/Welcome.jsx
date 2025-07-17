@@ -18,7 +18,7 @@ export default function Welcome({ auth }) {
                                         href={route('dashboard')}
                                         className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 rounded text-sm sm:text-base transition-colors"
                                     >
-                                        dashboard
+                                        дашборд
                                     </Link>
                                 ) : (
                                     <>
@@ -26,19 +26,19 @@ export default function Welcome({ auth }) {
                                             href={route('login')}
                                             className="px-3 py-1.5 sm:px-4 sm:py-2 text-white hover:text-gray-300 transition-colors text-sm sm:text-base"
                                         >
-                                            login
+                                            вход
                                         </Link>
                                         <Link
                                             href={route('register')}
                                             className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 rounded text-sm sm:text-base transition-colors"
                                         >
-                                            register
+                                            регистрация
                                         </Link>
                                     </>
                                 )}
                             </div>
-                            </nav>
-                        </header>
+                        </nav>
+                    </header>
 
                     {/* Main Content */}
                     <main className="text-center max-w-2xl mx-auto w-full px-4">
@@ -47,27 +47,27 @@ export default function Welcome({ auth }) {
                                 379-task-manager
                             </h1>
                             <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
-                                task management system for developers
+                                система управления задачами для разработчиков
                             </p>
-                                    </div>
+                        </div>
 
                         {/* Features */}
                         <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-12 text-left">
                             <div className="border border-gray-700 p-3 sm:p-4 rounded">
-                                <div className="text-white font-bold text-sm sm:text-base">$ projects</div>
-                                <div className="text-gray-400 text-xs sm:text-sm">create, manage, track</div>
-                                            </div>
-
-                            <div className="border border-gray-700 p-3 sm:p-4 rounded">
-                                <div className="text-white font-bold text-sm sm:text-base">$ sprints</div>
-                                <div className="text-gray-400 text-xs sm:text-sm">plan, organize, execute</div>
+                                <div className="text-white font-bold text-sm sm:text-base">$ проекты</div>
+                                <div className="text-gray-400 text-xs sm:text-sm">создание, управление, отслеживание</div>
                             </div>
                             
                             <div className="border border-gray-700 p-3 sm:p-4 rounded">
-                                <div className="text-white font-bold text-sm sm:text-base">$ tasks</div>
-                                <div className="text-gray-400 text-xs sm:text-sm">assign, comment, complete</div>
-                                            </div>
-                                        </div>
+                                <div className="text-white font-bold text-sm sm:text-base">$ спринты</div>
+                                <div className="text-gray-400 text-xs sm:text-sm">планирование, организация, выполнение</div>
+                            </div>
+                            
+                            <div className="border border-gray-700 p-3 sm:p-4 rounded">
+                                <div className="text-white font-bold text-sm sm:text-base">$ задачи</div>
+                                <div className="text-gray-400 text-xs sm:text-sm">назначение, комментарии, завершение</div>
+                            </div>
+                        </div>
 
                         {/* CTA */}
                         <div className="space-y-4">
@@ -77,13 +77,13 @@ export default function Welcome({ auth }) {
                                         href={route('register')}
                                         className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 rounded font-bold transition-colors text-sm sm:text-base"
                                     >
-                                        start
+                                        начать
                                     </Link>
                                     <Link
                                         href={route('login')}
                                         className="px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-600 text-white hover:bg-gray-800 rounded transition-colors text-sm sm:text-base"
                                     >
-                                        login
+                                        вход
                                     </Link>
                                 </div>
                             ) : (
@@ -91,16 +91,16 @@ export default function Welcome({ auth }) {
                                     href={route('dashboard')}
                                     className="inline-block px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 rounded font-bold transition-colors text-sm sm:text-base"
                                 >
-                                    enter
+                                    войти
                                 </Link>
                             )}
                         </div>
 
                         {/* Footer */}
                         <div className="mt-12 sm:mt-16 text-gray-400 text-xs sm:text-sm">
-                            <p>built for developers</p>
-                            </div>
-                        </main>
+                            <p>создано для разработчиков</p>
+                        </div>
+                    </main>
                 </div>
             </div>
         </>
