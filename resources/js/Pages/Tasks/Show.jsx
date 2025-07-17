@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
 
 export default function Show({ auth, task }) {
     const [showCommentForm, setShowCommentForm] = useState(false);
@@ -10,82 +11,8 @@ export default function Show({ auth, task }) {
         type: 'comment',
     });
 
-    const getStatusClass = (status) => {
-        switch (status) {
-            case 'todo':
-                return 'status-todo';
-            case 'in_progress':
-                return 'status-in-progress';
-            case 'review':
-                return 'status-review';
-            case 'done':
-                return 'status-done';
-            default:
-                return 'status-todo';
-        }
-    };
-
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'todo':
-                return 'К выполнению';
-            case 'in_progress':
-                return 'В работе';
-            case 'review':
-                return 'На проверке';
-            case 'done':
-                return 'Завершена';
-            default:
-                return status;
-        }
-    };
-
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'low':
-                return 'text-accent-green';
-            case 'medium':
-                return 'text-accent-yellow';
-            case 'high':
-                return 'text-accent-red';
-            default:
-                return 'text-text-secondary';
-        }
-    };
-
     const getPriorityText = (priority) => {
-        switch (priority) {
-            case 'low':
-                return 'Низкий';
-            case 'medium':
-                return 'Средний';
-            case 'high':
-                return 'Высокий';
-            default:
-                return priority;
-        }
-    };
-
-    const getCommentTypeClass = (type) => {
-        switch (type) {
-            case 'comment':
-                return 'status-in-progress';
-            case 'status':
-                return 'status-review';
-            default:
-                return 'status-todo';
-        }
-    };
-
-    const getCommentTypeText = (type) => {
-        switch (type) {
-            case 'comment':
-                return 'Комментарий';
-            case 'status':
-                return 'Изменение статуса';
-            default:
-                return type;
-        }
+        return getPriorityLabel(priority);
     };
 
     const handleCommentSubmit = (e) => {
@@ -111,8 +38,8 @@ export default function Show({ auth, task }) {
                     <div>
                         <h1 className="text-3xl font-bold text-text-primary mb-2">{task.title}</h1>
                         <div className="flex items-center space-x-4 text-sm text-text-secondary">
-                            <span className={`status-badge ${getStatusClass(task.status)}`}>
-                                {getStatusText(task.status)}
+                            <span className={`status-badge ${getStatusClass(task.status?.name)}`}>
+                                {getStatusLabel(task.status?.name)}
                             </span>
                             {task.priority && (
                                 <span className={getPriorityColor(task.priority)}>
@@ -128,16 +55,16 @@ export default function Show({ auth, task }) {
                     <div className="flex space-x-3">
                         <Link
                             href={route('tasks.edit', task.id)}
-                            className="btn btn-primary"
+                            className="btn btn-secondary"
                         >
                             Редактировать
                         </Link>
-                        <button
-                            onClick={() => setShowCommentForm(!showCommentForm)}
-                            className="btn btn-success"
+                        <Link
+                            href={route('tasks.index')}
+                            className="btn btn-primary"
                         >
-                            Добавить комментарий
-                        </button>
+                            К списку
+                        </Link>
                     </div>
                 </div>
 
@@ -147,58 +74,65 @@ export default function Show({ auth, task }) {
                         {/* Описание */}
                         {task.description && (
                             <div className="card">
-                                <h3 className="card-title mb-3">Описание</h3>
-                                <p className="text-text-secondary whitespace-pre-wrap">{task.description}</p>
+                                <h3 className="card-title mb-4">Описание</h3>
+                                <p className="text-text-secondary whitespace-pre-wrap">
+                                    {task.description}
+                                </p>
                             </div>
                         )}
 
                         {/* Результат */}
                         {task.result && (
                             <div className="card">
-                                <h3 className="card-title mb-3">Результат</h3>
-                                <p className="text-text-secondary whitespace-pre-wrap">{task.result}</p>
+                                <h3 className="card-title mb-4">Результат выполнения</h3>
+                                <p className="text-text-secondary whitespace-pre-wrap">
+                                    {task.result}
+                                </p>
                             </div>
                         )}
 
                         {/* Комментарии */}
                         <div className="card">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="card-title">Комментарии ({task.comments.length})</h3>
+                            <div className="card-header">
+                                <h3 className="card-title">Комментарии</h3>
+                                <button
+                                    onClick={() => setShowCommentForm(!showCommentForm)}
+                                    className="btn btn-primary btn-sm"
+                                >
+                                    {showCommentForm ? 'Отмена' : 'Добавить комментарий'}
+                                </button>
                             </div>
 
-                            {/* Форма комментария */}
                             {showCommentForm && (
-                                <div className="mb-6 p-4 bg-secondary-bg border border-border-color rounded-lg">
-                                    <form onSubmit={handleCommentSubmit}>
-                                        <div className="mb-4">
-                                            <label className="form-label">
-                                                Тип комментария
-                                            </label>
-                                            <select
-                                                value={data.type}
-                                                onChange={(e) => setData('type', e.target.value)}
-                                                className="form-select"
-                                            >
-                                                <option value="comment">Комментарий</option>
-                                                <option value="status">Изменение статуса</option>
-                                            </select>
-                                        </div>
-                                        <div className="mb-4">
-                                            <label className="form-label">
-                                                Содержание
+                                <form onSubmit={handleCommentSubmit} className="mb-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label htmlFor="content" className="form-label">
+                                                Комментарий
                                             </label>
                                             <textarea
+                                                id="content"
                                                 value={data.content}
                                                 onChange={(e) => setData('content', e.target.value)}
                                                 rows={3}
-                                                className="form-input"
+                                                className={`form-input ${
+                                                    errors.content ? 'border-accent-red focus:ring-accent-red' : ''
+                                                }`}
                                                 placeholder="Введите комментарий..."
+                                                required
                                             />
                                             {errors.content && (
                                                 <p className="mt-1 text-sm text-accent-red">{errors.content}</p>
                                             )}
                                         </div>
-                                        <div className="flex justify-end space-x-3">
+                                        <div className="flex space-x-3">
+                                            <button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="btn btn-primary"
+                                            >
+                                                {processing ? 'Отправка...' : 'Отправить'}
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setShowCommentForm(false)}
@@ -206,84 +140,119 @@ export default function Show({ auth, task }) {
                                             >
                                                 Отмена
                                             </button>
-                                            <button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="btn btn-success"
-                                            >
-                                                {processing ? 'Отправка...' : 'Отправить'}
-                                            </button>
                                         </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                </form>
                             )}
 
-                            {/* Список комментариев */}
-                            {task.comments.length > 0 ? (
-                                <div className="space-y-4">
-                                    {task.comments.map((comment) => (
-                                        <div key={comment.id} className="bg-secondary-bg border border-border-color rounded-lg p-4">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex items-center space-x-2">
-                                                    <span className={`status-badge ${getCommentTypeClass(comment.type)}`}>
-                                                        {getCommentTypeText(comment.type)}
-                                                    </span>
-                                                    <span className="text-sm text-text-secondary">
-                                                        {comment.user.name}
-                                                    </span>
-                                                </div>
-                                                <span className="text-sm text-text-muted">
+                            <div className="space-y-4">
+                                {task.comments && task.comments.length > 0 ? (
+                                    task.comments.map((comment) => (
+                                        <div key={comment.id} className="border border-border-color rounded-lg p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-text-primary">
+                                                    {comment.user.name}
+                                                </span>
+                                                <span className="text-xs text-text-muted">
                                                     {new Date(comment.created_at).toLocaleString('ru-RU')}
                                                 </span>
                                             </div>
-                                            <p className="text-text-primary whitespace-pre-wrap">{comment.content}</p>
+                                            <p className="text-text-secondary text-sm whitespace-pre-wrap">
+                                                {comment.content}
+                                            </p>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                    <h3 className="text-lg font-medium text-text-secondary mb-2">Комментарии отсутствуют</h3>
-                                    <p className="text-text-muted">Добавьте первый комментарий к задаче</p>
-                                </div>
-                            )}
+                                    ))
+                                ) : (
+                                    <p className="text-text-muted text-center py-4">
+                                        Комментариев пока нет
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
 
                     {/* Боковая панель */}
                     <div className="space-y-6">
-                        {/* Проект */}
-                        {task.project && (
-                            <div className="card">
-                                <h3 className="card-title mb-3">Проект</h3>
-                                <Link
-                                    href={route('projects.show', task.project.id)}
-                                    className="text-accent-green hover:text-green-300 font-medium transition-colors"
-                                >
-                                    {task.project.name}
-                                </Link>
-                            </div>
-                        )}
-
-                        {/* Ссылки */}
+                        {/* Детали задачи */}
                         <div className="card">
-                            <h3 className="card-title mb-3">Ссылки</h3>
-                            <div className="space-y-2">
-                                {task.merge_request && (
-                                    <a
-                                        href={task.merge_request}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center text-accent-blue hover:text-blue-300 transition-colors"
-                                    >
-                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        Merge Request
-                                    </a>
+                            <h3 className="card-title mb-4">Детали задачи</h3>
+                            <div className="space-y-3">
+                                {/* Проект */}
+                                {task.project && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-text-muted">Проект:</span>
+                                        <Link
+                                            href={route('projects.show', task.project.id)}
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors"
+                                        >
+                                            {task.project.name}
+                                        </Link>
+                                    </div>
                                 )}
+
+                                {/* Спринт */}
+                                {task.sprint && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-text-muted">Спринт:</span>
+                                        <span className="text-sm text-text-primary font-medium">
+                                            {task.sprint.name}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Исполнитель */}
+                                {task.assignee && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-text-muted">Исполнитель:</span>
+                                        <span className="text-sm text-text-primary font-medium">
+                                            {task.assignee.name}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Автор */}
+                                {task.reporter && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-text-muted">Автор:</span>
+                                        <span className="text-sm text-text-primary font-medium">
+                                            {task.reporter.name}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Merge Request */}
+                                {task.merge_request && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-text-muted">MR:</span>
+                                        <a
+                                            href={task.merge_request}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors truncate ml-2"
+                                        >
+                                            Ссылка
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Статистика */}
+                        <div className="card">
+                            <h3 className="card-title mb-4">Статистика</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-text-muted">Комментариев:</span>
+                                    <span className="text-sm text-text-primary font-medium">
+                                        {task.comments?.length || 0}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-text-muted">Обновлена:</span>
+                                    <span className="text-sm text-text-primary font-medium">
+                                        {new Date(task.updated_at).toLocaleDateString('ru-RU')}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
