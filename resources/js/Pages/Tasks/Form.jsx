@@ -7,13 +7,17 @@ export default function Form({ auth, task = null, projects = [], selectedProject
     const isEditing = !!task;
     const [availableSprints, setAvailableSprints] = useState(sprints);
 
+    // Приводим selectedProjectId к числу для корректного сравнения
+    const defaultProjectId = selectedProjectId ? parseInt(selectedProjectId) : null;
+    const defaultSprintId = selectedSprintId ? parseInt(selectedSprintId) : null;
+
     const { data, setData, post, put, processing, errors: formErrors } = useForm({
         title: task?.title || '',
         description: task?.description || '',
         status: task?.status?.name || 'To Do',
         priority: task?.priority || '',
-        project_id: task?.project_id || selectedProjectId || '',
-        sprint_id: task?.sprint_id || selectedSprintId || '',
+        project_id: task?.project_id || defaultProjectId || '',
+        sprint_id: task?.sprint_id || defaultSprintId || '',
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
@@ -40,6 +44,13 @@ export default function Form({ auth, task = null, projects = [], selectedProject
             setData('sprint_id', '');
         }
     }, [data.project_id]);
+
+    // Устанавливаем проект по умолчанию при первой загрузке
+    useEffect(() => {
+        if (!isEditing && defaultProjectId && !data.project_id) {
+            setData('project_id', defaultProjectId);
+        }
+    }, [defaultProjectId, isEditing]);
 
     const handleSubmit = (e) => {
         e.preventDefault();

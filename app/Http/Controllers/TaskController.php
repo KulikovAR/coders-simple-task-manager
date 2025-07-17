@@ -33,8 +33,8 @@ class TaskController extends Controller
     public function create(Request $request)
     {
         $projects = $this->projectService->getUserProjectsList(Auth::user());
-        $selectedProjectId = $request->get('project_id');
-        $selectedSprintId = $request->get('sprint_id');
+        $selectedProjectId = $request->get('project_id') ? (int) $request->get('project_id') : null;
+        $selectedSprintId = $request->get('sprint_id') ? (int) $request->get('sprint_id') : null;
         
         // Получаем спринты для выбранного проекта
         $sprints = collect();
