@@ -45,13 +45,6 @@ export default function Form({ auth, task = null, projects = [], selectedProject
         }
     }, [data.project_id]);
 
-    // Устанавливаем проект по умолчанию при первой загрузке
-    useEffect(() => {
-        if (!isEditing && defaultProjectId && !data.project_id) {
-            setData('project_id', defaultProjectId);
-        }
-    }, [defaultProjectId, isEditing]);
-
     const handleSubmit = (e) => {
         e.preventDefault();
         

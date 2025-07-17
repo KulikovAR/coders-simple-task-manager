@@ -38,7 +38,12 @@ class ProjectService
 
     public function getUserProjectsList(User $user): Collection
     {
-        return $user->projects()->orderBy('name')->get();
+        return Project::where('owner_id', $user->id)
+            ->orWhereHas('members', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderBy('name')
+            ->get();
     }
 
     public function createProject(array $data, User $user): Project
