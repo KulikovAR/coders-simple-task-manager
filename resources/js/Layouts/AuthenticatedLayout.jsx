@@ -8,6 +8,11 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
+    // Проверяем, что user существует
+    if (!user) {
+        return null; // или можно показать загрузку
+    }
+
     return (
         <div className="min-h-screen bg-primary-bg text-text-primary">
             <nav className="border-b border-border-color bg-card-bg">
