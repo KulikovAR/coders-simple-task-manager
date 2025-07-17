@@ -26,19 +26,9 @@ export default function UpdateProfileInformation({
 
     return (
         <section className={className}>
-            <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Profile Information
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Update your account's profile information and email address.
-                </p>
-            </header>
-
-            <form onSubmit={submit} className="mt-6 space-y-6">
+            <form onSubmit={submit} className="space-y-6">
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Имя" />
 
                     <TextInput
                         id="name"
@@ -70,30 +60,31 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
-                    <div>
-                        <p className="mt-2 text-sm text-gray-800">
-                            Your email address is unverified.
+                    <div className="p-4 bg-accent-yellow/10 border border-accent-yellow/20 rounded-lg">
+                        <p className="text-sm text-text-secondary">
+                            Ваш email не подтвержден.
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="ml-1 text-accent-blue hover:text-accent-green underline focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:ring-offset-2 focus:ring-offset-card-bg rounded"
                             >
-                                Click here to re-send the verification email.
+                                Нажмите здесь, чтобы отправить письмо подтверждения.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600">
-                                A new verification link has been sent to your
-                                email address.
+                            <div className="mt-2 text-sm font-medium text-accent-green">
+                                Новое письмо подтверждения отправлено на ваш email.
                             </div>
                         )}
                     </div>
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>
+                        {processing ? 'Сохранение...' : 'Сохранить'}
+                    </PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -102,8 +93,11 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">
-                            Saved.
+                        <p className="text-sm text-accent-green flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Сохранено
                         </p>
                     </Transition>
                 </div>
