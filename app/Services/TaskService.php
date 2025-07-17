@@ -48,7 +48,7 @@ class TaskService
     public function getProjectTasks(Project $project): Collection
     {
         return $project->tasks()
-            ->with(['assignee', 'reporter', 'status', 'sprint'])
+            ->with(['assignee', 'reporter', 'status', 'sprint', 'project'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -84,19 +84,19 @@ class TaskService
             'priority' => $data['priority'] ?? $task->priority,
         ]);
 
-        return $task->load(['assignee', 'reporter', 'status', 'sprint']);
+        return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
 
     public function updateTaskStatus(Task $task, TaskStatus $status): Task
     {
         $task->update(['status_id' => $status->id]);
-        return $task->load(['assignee', 'reporter', 'status', 'sprint']);
+        return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
 
     public function assignTask(Task $task, User $assignee): Task
     {
         $task->update(['assignee_id' => $assignee->id]);
-        return $task->load(['assignee', 'reporter', 'status', 'sprint']);
+        return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
 
     public function deleteTask(Task $task): bool
@@ -108,7 +108,7 @@ class TaskService
     {
         $statuses = $project->taskStatuses()
             ->with(['tasks' => function ($query) {
-                $query->with(['assignee', 'reporter', 'sprint'])
+                $query->with(['assignee', 'reporter', 'sprint', 'project'])
                     ->orderBy('created_at', 'desc');
             }])
             ->orderBy('order')
