@@ -135,7 +135,60 @@ body {
     .status-done {
         @apply bg-green-500/20 text-green-400;
     }
+
+    /* Комментарии */
+    .comment-badge {
+        @apply inline-flex items-center px-2 py-1 rounded-md text-xs font-medium;
+    }
     
+    .comment-general {
+        @apply bg-gray-500/20 text-gray-400 border border-gray-500/30;
+    }
+    
+    .comment-testing {
+        @apply bg-purple-500/20 text-purple-400 border border-purple-500/30;
+    }
+    
+    .comment-review {
+        @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+    }
+    
+    .comment-bug {
+        @apply bg-red-500/20 text-red-400 border border-red-500/30;
+    }
+    
+    .comment-feature {
+        @apply bg-green-500/20 text-green-400 border border-green-500/30;
+    }
+
+    .comment-card {
+        @apply border border-border-color rounded-lg p-4 transition-all duration-200;
+    }
+    
+    .comment-card:hover {
+        @apply border-border-color bg-secondary-bg;
+    }
+    
+    .comment-card-special {
+        @apply border-l-4;
+    }
+    
+    .comment-card-testing {
+        @apply border-l-purple-500 bg-purple-500/5;
+    }
+    
+    .comment-card-bug {
+        @apply border-l-red-500 bg-red-500/5;
+    }
+    
+    .comment-card-feature {
+        @apply border-l-green-500 bg-green-500/5;
+    }
+    
+    .comment-card-review {
+        @apply border-l-yellow-500 bg-yellow-500/5;
+    }
+
     /* Навигация */
     .nav-link {
         @apply inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200;

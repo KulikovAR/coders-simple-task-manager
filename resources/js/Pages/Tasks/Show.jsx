@@ -2,13 +2,23 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
+import { 
+    getCommentTypeLabel, 
+    getCommentTypeIcon, 
+    getCommentTypeClass, 
+    getCommentTemplate,
+    getBasicCommentTypeOptions,
+    getSpecialCommentTypeOptions,
+    COMMENT_TYPES
+} from '@/utils/commentUtils';
 
 export default function Show({ auth, task }) {
     const [showCommentForm, setShowCommentForm] = useState(false);
+    const [commentType, setCommentType] = useState(COMMENT_TYPES.GENERAL);
     
     const { data, setData, post, processing, errors } = useForm({
         content: '',
-        type: 'comment',
+        type: COMMENT_TYPES.GENERAL,
     });
 
     const getPriorityText = (priority) => {
@@ -20,9 +30,31 @@ export default function Show({ auth, task }) {
         post(route('tasks.comments.store', task.id), {
             onSuccess: () => {
                 setData('content', '');
+                setData('type', COMMENT_TYPES.GENERAL);
+                setCommentType(COMMENT_TYPES.GENERAL);
                 setShowCommentForm(false);
             },
         });
+    };
+
+    const handleCommentTypeChange = (newType) => {
+        setCommentType(newType);
+        setData('type', newType);
+        
+        const template = getCommentTemplate(newType);
+        if (template) {
+            setData('content', template);
+        } else {
+            setData('content', '');
+        }
+    };
+
+    const getCommentCardClass = (commentType) => {
+        const baseClass = 'comment-card';
+        const specialClass = commentType !== COMMENT_TYPES.GENERAL ? 'comment-card-special' : '';
+        const typeClass = `comment-card-${commentType.replace('_', '-')}`;
+        
+        return `${baseClass} ${specialClass} ${typeClass}`;
     };
 
     return (
@@ -106,15 +138,65 @@ export default function Show({ auth, task }) {
                             {showCommentForm && (
                                 <form onSubmit={handleCommentSubmit} className="mb-6">
                                     <div className="space-y-4">
+                                        {/* Тип комментария */}
+                                        <div>
+                                            <label className="form-label">Тип комментария</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {/* Основные типы */}
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Основные</h4>
+                                                    <div className="space-y-2">
+                                                        {getBasicCommentTypeOptions().map((option) => (
+                                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="commentType"
+                                                                    value={option.value}
+                                                                    checked={commentType === option.value}
+                                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
+                                                                    className="form-radio"
+                                                                />
+                                                                <span className="text-sm">{option.icon} {option.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Специальные типы */}
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Специальные</h4>
+                                                    <div className="space-y-2">
+                                                        {getSpecialCommentTypeOptions().map((option) => (
+                                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="commentType"
+                                                                    value={option.value}
+                                                                    checked={commentType === option.value}
+                                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
+                                                                    className="form-radio"
+                                                                />
+                                                                <span className="text-sm">{option.icon} {option.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {errors.type && (
+                                                <p className="mt-1 text-sm text-accent-red">{errors.type}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Содержание комментария */}
                                         <div>
                                             <label htmlFor="content" className="form-label">
-                                                Комментарий
+                                                Содержание
                                             </label>
                                             <textarea
                                                 id="content"
                                                 value={data.content}
                                                 onChange={(e) => setData('content', e.target.value)}
-                                                rows={3}
+                                                rows={commentType === COMMENT_TYPES.GENERAL ? 4 : 8}
                                                 className={`form-input ${
                                                     errors.content ? 'border-accent-red focus:ring-accent-red' : ''
                                                 }`}
@@ -125,6 +207,8 @@ export default function Show({ auth, task }) {
                                                 <p className="mt-1 text-sm text-accent-red">{errors.content}</p>
                                             )}
                                         </div>
+
+                                        {/* Кнопки */}
                                         <div className="flex space-x-3">
                                             <button
                                                 type="submit"
@@ -145,21 +229,27 @@ export default function Show({ auth, task }) {
                                 </form>
                             )}
 
+                            {/* Список комментариев */}
                             <div className="space-y-4">
                                 {task.comments && task.comments.length > 0 ? (
                                     task.comments.map((comment) => (
-                                        <div key={comment.id} className="border border-border-color rounded-lg p-4">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium text-text-primary">
-                                                    {comment.user.name}
-                                                </span>
+                                        <div key={comment.id} className={getCommentCardClass(comment.type)}>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center space-x-3">
+                                                    <span className={`comment-badge ${getCommentTypeClass(comment.type)}`}>
+                                                        {getCommentTypeIcon(comment.type)} {getCommentTypeLabel(comment.type)}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-text-primary">
+                                                        {comment.user.name}
+                                                    </span>
+                                                </div>
                                                 <span className="text-xs text-text-muted">
                                                     {new Date(comment.created_at).toLocaleString('ru-RU')}
                                                 </span>
                                             </div>
-                                            <p className="text-text-secondary text-sm whitespace-pre-wrap">
+                                            <div className="text-text-secondary text-sm whitespace-pre-wrap">
                                                 {comment.content}
-                                            </p>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (

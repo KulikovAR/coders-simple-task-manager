@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CommentType;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\User;
@@ -23,7 +24,7 @@ class TaskCommentService
             'task_id' => $task->id,
             'user_id' => $user->id,
             'content' => $data['content'],
-            'type' => $data['type'] ?? 'comment',
+            'type' => $data['type'] ?? CommentType::GENERAL,
         ]);
     }
 
