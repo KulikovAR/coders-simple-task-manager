@@ -47,7 +47,7 @@ export default function Form({ auth, project = null, errors = {} }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <h2 className="font-semibold text-xl text-green-400 leading-tight">
+                <h2 className="font-semibold text-xl text-text-primary leading-tight">
                     {isEditing ? 'Редактировать проект' : 'Новый проект'}
                 </h2>
             }
@@ -55,11 +55,11 @@ export default function Form({ auth, project = null, errors = {} }) {
             <Head title={isEditing ? 'Редактировать проект' : 'Новый проект'} />
 
             <div className="max-w-2xl mx-auto">
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <div className="card">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Название */}
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="name" className="form-label">
                                 Название проекта *
                             </label>
                             <input
@@ -67,19 +67,19 @@ export default function Form({ auth, project = null, errors = {} }) {
                                 type="text"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-green-400 placeholder-gray-500 focus:outline-none focus:border-green-500 ${
-                                    formErrors.name ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.name ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="Введите название проекта"
                             />
                             {formErrors.name && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.name}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.name}</p>
                             )}
                         </div>
 
                         {/* Описание */}
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="description" className="form-label">
                                 Описание
                             </label>
                             <textarea
@@ -87,27 +87,27 @@ export default function Form({ auth, project = null, errors = {} }) {
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
                                 rows={4}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-green-400 placeholder-gray-500 focus:outline-none focus:border-green-500 ${
-                                    formErrors.description ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.description ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="Опишите проект..."
                             />
                             {formErrors.description && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.description}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.description}</p>
                             )}
                         </div>
 
                         {/* Статус */}
                         <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="status" className="form-label">
                                 Статус
                             </label>
                             <select
                                 id="status"
                                 value={data.status}
                                 onChange={(e) => setData('status', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-green-400 focus:outline-none focus:border-green-500 ${
-                                    formErrors.status ? 'border-red-500' : 'border-gray-700'
+                                className={`form-select ${
+                                    formErrors.status ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             >
                                 <option value="active">Активный</option>
@@ -116,13 +116,13 @@ export default function Form({ auth, project = null, errors = {} }) {
                                 <option value="cancelled">Отменен</option>
                             </select>
                             {formErrors.status && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.status}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.status}</p>
                             )}
                         </div>
 
                         {/* Дедлайн */}
                         <div>
-                            <label htmlFor="deadline" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="deadline" className="form-label">
                                 Дедлайн
                             </label>
                             <input
@@ -130,18 +130,18 @@ export default function Form({ auth, project = null, errors = {} }) {
                                 type="date"
                                 value={data.deadline}
                                 onChange={(e) => setData('deadline', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-green-400 focus:outline-none focus:border-green-500 ${
-                                    formErrors.deadline ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.deadline ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             />
                             {formErrors.deadline && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.deadline}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.deadline}</p>
                             )}
                         </div>
 
                         {/* Документы */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                            <label className="form-label">
                                 Ссылки на документы
                             </label>
                             <div className="space-y-2">
@@ -152,13 +152,13 @@ export default function Form({ auth, project = null, errors = {} }) {
                                             value={doc}
                                             onChange={(e) => updateDoc(index, e.target.value)}
                                             placeholder="https://docs.google.com/..."
-                                            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-green-400 placeholder-gray-500 focus:outline-none focus:border-green-500"
+                                            className="flex-1 form-input"
                                         />
                                         {docs.length > 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => removeDoc(index)}
-                                                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                                className="btn btn-danger"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -170,7 +170,7 @@ export default function Form({ auth, project = null, errors = {} }) {
                                 <button
                                     type="button"
                                     onClick={addDoc}
-                                    className="text-green-400 hover:text-green-300 text-sm font-medium"
+                                    className="text-accent-blue hover:text-blue-300 text-sm font-medium transition-colors"
                                 >
                                     + Добавить документ
                                 </button>
@@ -178,17 +178,17 @@ export default function Form({ auth, project = null, errors = {} }) {
                         </div>
 
                         {/* Кнопки */}
-                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-800">
+                        <div className="flex justify-end space-x-3 pt-6 border-t border-border-color">
                             <a
                                 href={route('projects.index')}
-                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                className="btn btn-secondary"
                             >
                                 Отмена
                             </a>
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                                className="btn btn-success"
                             >
                                 {processing ? 'Сохранение...' : isEditing ? 'Обновить' : 'Создать'}
                             </button>

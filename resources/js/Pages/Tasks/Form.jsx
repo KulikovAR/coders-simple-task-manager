@@ -30,7 +30,7 @@ export default function Form({ auth, task = null, projects = [], selectedProject
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <h2 className="font-semibold text-xl text-green-400 leading-tight">
+                <h2 className="font-semibold text-xl text-text-primary leading-tight">
                     {isEditing ? 'Редактировать задачу' : 'Новая задача'}
                 </h2>
             }
@@ -38,11 +38,11 @@ export default function Form({ auth, task = null, projects = [], selectedProject
             <Head title={isEditing ? 'Редактировать задачу' : 'Новая задача'} />
 
             <div className="max-w-2xl mx-auto">
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <div className="card">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Название */}
                         <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="title" className="form-label">
                                 Название задачи *
                             </label>
                             <input
@@ -50,19 +50,19 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 type="text"
                                 value={data.title}
                                 onChange={(e) => setData('title', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.title ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.title ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="Введите название задачи"
                             />
                             {formErrors.title && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.title}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.title}</p>
                             )}
                         </div>
 
                         {/* Описание */}
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="description" className="form-label">
                                 Описание
                             </label>
                             <textarea
@@ -70,27 +70,27 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
                                 rows={4}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.description ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.description ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="Опишите задачу..."
                             />
                             {formErrors.description && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.description}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.description}</p>
                             )}
                         </div>
 
                         {/* Проект */}
                         <div>
-                            <label htmlFor="project_id" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="project_id" className="form-label">
                                 Проект *
                             </label>
                             <select
                                 id="project_id"
                                 value={data.project_id}
                                 onChange={(e) => setData('project_id', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.project_id ? 'border-red-500' : 'border-gray-700'
+                                className={`form-select ${
+                                    formErrors.project_id ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             >
                                 <option value="">Выберите проект</option>
@@ -101,21 +101,21 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 ))}
                             </select>
                             {formErrors.project_id && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.project_id}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.project_id}</p>
                             )}
                         </div>
 
                         {/* Статус */}
                         <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="status" className="form-label">
                                 Статус
                             </label>
                             <select
                                 id="status"
                                 value={data.status}
                                 onChange={(e) => setData('status', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.status ? 'border-red-500' : 'border-gray-700'
+                                className={`form-select ${
+                                    formErrors.status ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             >
                                 <option value="todo">К выполнению</option>
@@ -124,21 +124,21 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 <option value="done">Завершена</option>
                             </select>
                             {formErrors.status && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.status}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.status}</p>
                             )}
                         </div>
 
                         {/* Приоритет */}
                         <div>
-                            <label htmlFor="priority" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="priority" className="form-label">
                                 Приоритет
                             </label>
                             <select
                                 id="priority"
                                 value={data.priority}
                                 onChange={(e) => setData('priority', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.priority ? 'border-red-500' : 'border-gray-700'
+                                className={`form-select ${
+                                    formErrors.priority ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             >
                                 <option value="">Не указан</option>
@@ -147,13 +147,13 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 <option value="high">Высокий</option>
                             </select>
                             {formErrors.priority && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.priority}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.priority}</p>
                             )}
                         </div>
 
                         {/* Дедлайн */}
                         <div>
-                            <label htmlFor="deadline" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="deadline" className="form-label">
                                 Дедлайн
                             </label>
                             <input
@@ -161,18 +161,18 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 type="date"
                                 value={data.deadline}
                                 onChange={(e) => setData('deadline', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.deadline ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.deadline ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                             />
                             {formErrors.deadline && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.deadline}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.deadline}</p>
                             )}
                         </div>
 
                         {/* Результат */}
                         <div>
-                            <label htmlFor="result" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="result" className="form-label">
                                 Результат
                             </label>
                             <textarea
@@ -180,19 +180,19 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 value={data.result}
                                 onChange={(e) => setData('result', e.target.value)}
                                 rows={3}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.result ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.result ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="Опишите результат выполнения задачи..."
                             />
                             {formErrors.result && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.result}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.result}</p>
                             )}
                         </div>
 
                         {/* Merge Request */}
                         <div>
-                            <label htmlFor="merge_request" className="block text-sm font-medium text-gray-400 mb-2">
+                            <label htmlFor="merge_request" className="form-label">
                                 Ссылка на Merge Request
                             </label>
                             <input
@@ -200,28 +200,28 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                 type="url"
                                 value={data.merge_request}
                                 onChange={(e) => setData('merge_request', e.target.value)}
-                                className={`w-full bg-gray-800 border rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-                                    formErrors.merge_request ? 'border-red-500' : 'border-gray-700'
+                                className={`form-input ${
+                                    formErrors.merge_request ? 'border-accent-red focus:ring-accent-red' : ''
                                 }`}
                                 placeholder="https://github.com/..."
                             />
                             {formErrors.merge_request && (
-                                <p className="mt-1 text-sm text-red-400">{formErrors.merge_request}</p>
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.merge_request}</p>
                             )}
                         </div>
 
                         {/* Кнопки */}
-                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-800">
+                        <div className="flex justify-end space-x-3 pt-6 border-t border-border-color">
                             <a
                                 href={route('tasks.index')}
-                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                className="btn btn-secondary"
                             >
                                 Отмена
                             </a>
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                                className="btn btn-primary"
                             >
                                 {processing ? 'Сохранение...' : isEditing ? 'Обновить' : 'Создать'}
                             </button>

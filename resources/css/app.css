@@ -2,115 +2,270 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== БАЗОВЫЕ СТИЛИ ===== */
+:root {
+    --primary-bg: #0a0a0a;
+    --secondary-bg: #111111;
+    --card-bg: #1a1a1a;
+    --border-color: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --accent-green: #10b981;
+    --accent-blue: #3b82f6;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+}
+
 body {
-    font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    background: #000 !important;
-    color: #fff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--primary-bg) !important;
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
 * {
-    border-radius: 0 !important;
     font-family: inherit;
 }
 
-input, select, textarea, button {
-    border-radius: 0 !important;
-    font-family: inherit;
-    background: #111 !important;
-    color: #fff !important;
-    border: 1px solid #222 !important;
+/* ===== КОМПОНЕНТЫ ===== */
+@layer components {
+    /* Кнопки */
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900;
+    }
+    
+    .btn-primary {
+        @apply bg-gray-700 text-white hover:bg-gray-600 focus:ring-gray-500;
+    }
+    
+    .btn-secondary {
+        @apply bg-gray-800 text-white hover:bg-gray-700 focus:ring-gray-600;
+    }
+    
+    .btn-success {
+        @apply bg-green-600 text-white hover:bg-green-500 focus:ring-green-500;
+    }
+    
+    .btn-danger {
+        @apply bg-red-600 text-white hover:bg-red-500 focus:ring-red-500;
+    }
+    
+    .btn-sm {
+        @apply px-3 py-1.5 text-xs;
+    }
+    
+    .btn-lg {
+        @apply px-6 py-3 text-base;
+    }
+    
+    /* Карточки */
+    .card {
+        @apply bg-card-bg border border-border-color rounded-lg p-6;
+    }
+    
+    .card-header {
+        @apply flex items-center justify-between mb-4;
+    }
+    
+    .card-title {
+        @apply text-lg font-semibold text-text-primary;
+    }
+    
+    .card-subtitle {
+        @apply text-sm text-text-secondary mt-1;
+    }
+    
+    /* Формы */
+    .form-input {
+        @apply w-full bg-secondary-bg border border-border-color rounded-md px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+    }
+    
+    .form-select {
+        @apply w-full bg-secondary-bg border border-border-color rounded-md px-3 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+    }
+    
+    .form-label {
+        @apply block text-sm font-medium text-text-secondary mb-2;
+    }
+    
+    /* Статусы */
+    .status-badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+    
+    .status-active {
+        @apply bg-green-500/20 text-green-400;
+    }
+    
+    .status-completed {
+        @apply bg-blue-500/20 text-blue-400;
+    }
+    
+    .status-on-hold {
+        @apply bg-yellow-500/20 text-yellow-400;
+    }
+    
+    .status-cancelled {
+        @apply bg-red-500/20 text-red-400;
+    }
+    
+    .status-todo {
+        @apply bg-gray-500/20 text-gray-400;
+    }
+    
+    .status-in-progress {
+        @apply bg-blue-500/20 text-blue-400;
+    }
+    
+    .status-review {
+        @apply bg-yellow-500/20 text-yellow-400;
+    }
+    
+    .status-testing {
+        @apply bg-purple-500/20 text-purple-400;
+    }
+    
+    .status-ready {
+        @apply bg-pink-500/20 text-pink-400;
+    }
+    
+    .status-done {
+        @apply bg-green-500/20 text-green-400;
+    }
+    
+    /* Навигация */
+    .nav-link {
+        @apply inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200;
+    }
+    
+    .nav-link-default {
+        @apply border-transparent text-text-secondary hover:text-text-primary hover:border-text-secondary;
+    }
+    
+    .nav-link-active {
+        @apply border-blue-500 text-text-primary;
+    }
+    
+    /* Сетка */
+    .grid-cards {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+    }
+    
+    .grid-stats {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+    }
+    
+    /* Утилиты */
+    .text-gradient {
+        @apply bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+    }
+    
+    .shadow-glow {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+    }
 }
 
-input:focus, select:focus, textarea:focus, button:focus {
-    outline: none;
-    border-color: #444 !important;
-    box-shadow: none;
+/* ===== ПЕРЕОПРЕДЕЛЕНИЯ TAILWIND ===== */
+.bg-gray-900, .bg-gray-800, .bg-gray-700, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-white {
+    background: var(--primary-bg) !important;
 }
 
-input::placeholder, textarea::placeholder {
-    color: #7a8599 !important;
-    opacity: 1 !important;
+.bg-card-bg {
+    background: var(--card-bg) !important;
 }
 
-.bg-gray-900, .bg-gray-800, .bg-gray-700 {
-    background: #000 !important;
-}
-
-/* Дополнительно для всех серых фонов */
-.bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600 {
-    background: #000 !important;
-}
-
-/* Белый фон тоже делаем черным */
-.bg-white {
-    background: #000 !important;
+.bg-secondary-bg {
+    background: var(--secondary-bg) !important;
 }
 
 .border, .border-gray-800, .border-gray-700 {
-    border-color: #222 !important;
-}
-
-button, .button, .btn, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-    border-radius: 0 !important;
-    font-family: inherit;
-    background: #111 !important;
-    color: #fff !important;
-    border: 1px solid #222 !important;
-    box-shadow: none !important;
-    transition: background 0.2s, color 0.2s;
-}
-
-button:hover, .button:hover, .btn:hover, .bg-gray-700:hover, .bg-gray-800:hover, .bg-gray-900:hover {
-    background: #222 !important;
-    color: #fff !important;
-}
-
-.rounded, .rounded-lg, .rounded-md, .rounded-full, .rounded-sm {
-    border-radius: 0 !important;
+    border-color: var(--border-color) !important;
 }
 
 .text-white {
-    color: #fff !important;
+    color: var(--text-primary) !important;
 }
 
 .text-gray-400 {
-    color: #b0b8c1 !important;
+    color: var(--text-secondary) !important;
 }
 
 .text-gray-500 {
-    color: #7a8599 !important;
+    color: var(--text-muted) !important;
 }
 
-.text-blue-400, .text-blue-500, .text-blue-600, .text-green-400, .text-green-500, .text-yellow-400, .text-yellow-500, .text-pink-400, .text-pink-500, .text-purple-400, .text-purple-500 {
-    color: #b0b8c1 !important;
+/* Цвета акцентов */
+.text-green-400, .text-green-500 {
+    color: var(--accent-green) !important;
 }
 
-.bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-green-500, .bg-green-400, .bg-yellow-500, .bg-yellow-400, .bg-pink-500, .bg-pink-400, .bg-purple-500, .bg-purple-400 {
-    background: #111 !important;
+.text-blue-400, .text-blue-500 {
+    color: var(--accent-blue) !important;
 }
 
-.bg-opacity-20, .bg-opacity-30, .bg-opacity-40, .bg-opacity-50 {
-    opacity: 1 !important;
+.text-yellow-400, .text-yellow-500 {
+    color: var(--accent-yellow) !important;
 }
 
+.text-red-400, .text-red-500 {
+    color: var(--accent-red) !important;
+}
+
+.text-purple-400, .text-purple-500 {
+    color: var(--accent-purple) !important;
+}
+
+.text-pink-400, .text-pink-500 {
+    color: var(--accent-pink) !important;
+}
+
+/* Убираем тени */
 .shadow, .shadow-md, .shadow-lg, .shadow-sm, .shadow-xl, .shadow-inner, .shadow-none {
     box-shadow: none !important;
 }
 
-/* NavLink стили */
-.nav-link {
-    color: #7a8599 !important;
-    border-bottom: 2px solid transparent;
-    background: transparent !important;
-    font-family: inherit;
-    font-weight: 500;
-    transition: color 0.2s, border-bottom 0.2s;
+/* Убираем скругления */
+.rounded, .rounded-lg, .rounded-md, .rounded-full, .rounded-sm {
+    border-radius: 0.375rem !important;
 }
-.nav-link.active, .nav-link[aria-current="page"] {
-    color: #fff !important;
-    border-bottom: 2px solid #fff !important;
-    background: transparent !important;
+
+/* Фокус для всех элементов */
+input:focus, select:focus, textarea:focus, button:focus {
+    outline: none;
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
-.nav-link:hover {
-    color: #fff !important;
+
+/* Плейсхолдеры */
+input::placeholder, textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+    .card {
+        @apply p-4;
+    }
+    
+    .btn {
+        @apply px-3 py-2 text-sm;
+    }
+    
+    .grid-cards {
+        @apply grid-cols-1;
+    }
 }

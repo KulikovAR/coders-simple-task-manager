@@ -10,18 +10,18 @@ export default function Show({ auth, task }) {
         type: 'comment',
     });
 
-    const getStatusColor = (status) => {
+    const getStatusClass = (status) => {
         switch (status) {
             case 'todo':
-                return 'bg-gray-500 bg-opacity-20 text-gray-400';
+                return 'status-todo';
             case 'in_progress':
-                return 'bg-blue-500 bg-opacity-20 text-blue-400';
+                return 'status-in-progress';
             case 'review':
-                return 'bg-yellow-500 bg-opacity-20 text-yellow-400';
+                return 'status-review';
             case 'done':
-                return 'bg-green-500 bg-opacity-20 text-green-400';
+                return 'status-done';
             default:
-                return 'bg-gray-500 bg-opacity-20 text-gray-400';
+                return 'status-todo';
         }
     };
 
@@ -43,13 +43,13 @@ export default function Show({ auth, task }) {
     const getPriorityColor = (priority) => {
         switch (priority) {
             case 'low':
-                return 'text-green-400';
+                return 'text-accent-green';
             case 'medium':
-                return 'text-yellow-400';
+                return 'text-accent-yellow';
             case 'high':
-                return 'text-red-400';
+                return 'text-accent-red';
             default:
-                return 'text-gray-400';
+                return 'text-text-secondary';
         }
     };
 
@@ -66,14 +66,14 @@ export default function Show({ auth, task }) {
         }
     };
 
-    const getCommentTypeColor = (type) => {
+    const getCommentTypeClass = (type) => {
         switch (type) {
             case 'comment':
-                return 'bg-blue-500 bg-opacity-20 text-blue-400';
+                return 'status-in-progress';
             case 'status':
-                return 'bg-yellow-500 bg-opacity-20 text-yellow-400';
+                return 'status-review';
             default:
-                return 'bg-gray-500 bg-opacity-20 text-gray-400';
+                return 'status-todo';
         }
     };
 
@@ -101,7 +101,7 @@ export default function Show({ auth, task }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-green-400 leading-tight">Задача</h2>}
+            header={<h2 className="font-semibold text-xl text-text-primary leading-tight">Задача</h2>}
         >
             <Head title={task.title} />
 
@@ -109,9 +109,9 @@ export default function Show({ auth, task }) {
                 {/* Заголовок и действия */}
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-bold text-blue-400 mb-2">{task.title}</h1>
-                        <div className="flex items-center space-x-4 text-sm text-gray-400">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                        <h1 className="text-3xl font-bold text-text-primary mb-2">{task.title}</h1>
+                        <div className="flex items-center space-x-4 text-sm text-text-secondary">
+                            <span className={`status-badge ${getStatusClass(task.status)}`}>
                                 {getStatusText(task.status)}
                             </span>
                             {task.priority && (
@@ -128,13 +128,13 @@ export default function Show({ auth, task }) {
                     <div className="flex space-x-3">
                         <Link
                             href={route('tasks.edit', task.id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="btn btn-primary"
                         >
                             Редактировать
                         </Link>
                         <button
                             onClick={() => setShowCommentForm(!showCommentForm)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="btn btn-success"
                         >
                             Добавить комментарий
                         </button>
@@ -146,70 +146,70 @@ export default function Show({ auth, task }) {
                     <div className="lg:col-span-2 space-y-6">
                         {/* Описание */}
                         {task.description && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                                <h3 className="text-lg font-medium text-blue-400 mb-3">Описание</h3>
-                                <p className="text-gray-400 whitespace-pre-wrap">{task.description}</p>
+                            <div className="card">
+                                <h3 className="card-title mb-3">Описание</h3>
+                                <p className="text-text-secondary whitespace-pre-wrap">{task.description}</p>
                             </div>
                         )}
 
                         {/* Результат */}
                         {task.result && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                                <h3 className="text-lg font-medium text-green-400 mb-3">Результат</h3>
-                                <p className="text-gray-400 whitespace-pre-wrap">{task.result}</p>
+                            <div className="card">
+                                <h3 className="card-title mb-3">Результат</h3>
+                                <p className="text-text-secondary whitespace-pre-wrap">{task.result}</p>
                             </div>
                         )}
 
                         {/* Комментарии */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                        <div className="card">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-medium text-blue-400">Комментарии ({task.comments.length})</h3>
+                                <h3 className="card-title">Комментарии ({task.comments.length})</h3>
                             </div>
 
                             {/* Форма комментария */}
                             {showCommentForm && (
-                                <div className="mb-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+                                <div className="mb-6 p-4 bg-secondary-bg border border-border-color rounded-lg">
                                     <form onSubmit={handleCommentSubmit}>
                                         <div className="mb-4">
-                                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                                            <label className="form-label">
                                                 Тип комментария
                                             </label>
                                             <select
                                                 value={data.type}
                                                 onChange={(e) => setData('type', e.target.value)}
-                                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-blue-400 focus:outline-none focus:border-blue-500"
+                                                className="form-select"
                                             >
                                                 <option value="comment">Комментарий</option>
                                                 <option value="status">Изменение статуса</option>
                                             </select>
                                         </div>
                                         <div className="mb-4">
-                                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                                            <label className="form-label">
                                                 Содержание
                                             </label>
                                             <textarea
                                                 value={data.content}
                                                 onChange={(e) => setData('content', e.target.value)}
                                                 rows={3}
-                                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-blue-400 placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                                                className="form-input"
                                                 placeholder="Введите комментарий..."
                                             />
                                             {errors.content && (
-                                                <p className="mt-1 text-sm text-red-400">{errors.content}</p>
+                                                <p className="mt-1 text-sm text-accent-red">{errors.content}</p>
                                             )}
                                         </div>
                                         <div className="flex justify-end space-x-3">
                                             <button
                                                 type="button"
                                                 onClick={() => setShowCommentForm(false)}
-                                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                                className="btn btn-secondary"
                                             >
                                                 Отмена
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={processing}
-                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                                                className="btn btn-success"
                                             >
                                                 {processing ? 'Отправка...' : 'Отправить'}
                                             </button>
@@ -222,31 +222,31 @@ export default function Show({ auth, task }) {
                             {task.comments.length > 0 ? (
                                 <div className="space-y-4">
                                     {task.comments.map((comment) => (
-                                        <div key={comment.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                                        <div key={comment.id} className="bg-secondary-bg border border-border-color rounded-lg p-4">
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex items-center space-x-2">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCommentTypeColor(comment.type)}`}>
+                                                    <span className={`status-badge ${getCommentTypeClass(comment.type)}`}>
                                                         {getCommentTypeText(comment.type)}
                                                     </span>
-                                                    <span className="text-sm text-gray-400">
+                                                    <span className="text-sm text-text-secondary">
                                                         {comment.user.name}
                                                     </span>
                                                 </div>
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-text-muted">
                                                     {new Date(comment.created_at).toLocaleString('ru-RU')}
                                                 </span>
                                             </div>
-                                            <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+                                            <p className="text-text-primary whitespace-pre-wrap">{comment.content}</p>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
-                                    <h3 className="text-lg font-medium text-gray-400 mb-2">Комментарии отсутствуют</h3>
-                                    <p className="text-gray-500">Добавьте первый комментарий к задаче</p>
+                                    <h3 className="text-lg font-medium text-text-secondary mb-2">Комментарии отсутствуют</h3>
+                                    <p className="text-text-muted">Добавьте первый комментарий к задаче</p>
                                 </div>
                             )}
                         </div>
@@ -256,11 +256,11 @@ export default function Show({ auth, task }) {
                     <div className="space-y-6">
                         {/* Проект */}
                         {task.project && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                                <h3 className="text-lg font-medium text-green-400 mb-3">Проект</h3>
+                            <div className="card">
+                                <h3 className="card-title mb-3">Проект</h3>
                                 <Link
                                     href={route('projects.show', task.project.id)}
-                                    className="text-green-400 hover:text-green-300 font-medium"
+                                    className="text-accent-green hover:text-green-300 font-medium transition-colors"
                                 >
                                     {task.project.name}
                                 </Link>
@@ -268,15 +268,15 @@ export default function Show({ auth, task }) {
                         )}
 
                         {/* Ссылки */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                            <h3 className="text-lg font-medium text-blue-400 mb-3">Ссылки</h3>
+                        <div className="card">
+                            <h3 className="card-title mb-3">Ссылки</h3>
                             <div className="space-y-2">
                                 {task.merge_request && (
                                     <a
                                         href={task.merge_request}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+                                        className="flex items-center text-accent-blue hover:text-blue-300 transition-colors"
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

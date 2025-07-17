@@ -35,7 +35,7 @@ export default function Index({ auth, projects, filters }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-white leading-tight">Проекты</h2>}
+            header={<h2 className="font-semibold text-xl text-text-primary leading-tight">Проекты</h2>}
         >
             <Head title="Проекты" />
 
@@ -43,12 +43,12 @@ export default function Index({ auth, projects, filters }) {
                 {/* Заголовок и кнопка создания */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Проекты</h1>
-                        <p className="text-gray-400 mt-1">Управление проектами и задачами</p>
+                        <h1 className="text-2xl font-bold text-text-primary">Проекты</h1>
+                        <p className="text-text-secondary mt-1">Управление проектами и задачами</p>
                     </div>
                     <Link
                         href={route('projects.create')}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors inline-flex items-center"
+                        className="btn btn-primary inline-flex items-center"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -58,11 +58,11 @@ export default function Index({ auth, projects, filters }) {
                 </div>
 
                 {/* Фильтры */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <div className="card">
                     <form onSubmit={handleSearch} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                <label className="form-label">
                                     Поиск
                                 </label>
                                 <input
@@ -70,17 +70,17 @@ export default function Index({ auth, projects, filters }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Название проекта..."
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+                                    className="form-input"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                <label className="form-label">
                                     Статус
                                 </label>
                                 <select
                                     value={status}
                                     onChange={handleStatusChange}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gray-500"
+                                    className="form-select"
                                 >
                                     <option value="">Все статусы</option>
                                     <option value="active">Активный</option>
@@ -92,14 +92,14 @@ export default function Index({ auth, projects, filters }) {
                             <div className="flex items-end space-x-2">
                                 <button
                                     type="submit"
-                                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    className="btn btn-primary"
                                 >
                                     Поиск
                                 </button>
                                 <button
                                     type="button"
                                     onClick={clearFilters}
-                                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    className="btn btn-secondary"
                                 >
                                     Сброс
                                 </button>
@@ -110,64 +110,24 @@ export default function Index({ auth, projects, filters }) {
 
                 {/* Список проектов */}
                 {projects.data.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid-cards">
                         {projects.data.map((project) => (
-                            <div key={project.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-medium text-white mb-2">{project.name}</h3>
-                                        <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                                            {project.description || 'Описание отсутствует'}
-                                        </p>
-                                    </div>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ml-2 ${
-                                        project.status === 'active' ? 'bg-green-500 bg-opacity-20 text-green-400' :
-                                        project.status === 'completed' ? 'bg-blue-500 bg-opacity-20 text-blue-400' :
-                                        project.status === 'on_hold' ? 'bg-yellow-500 bg-opacity-20 text-yellow-400' :
-                                        'bg-gray-500 bg-opacity-20 text-gray-400'
-                                    }`}>
-                                        {project.status === 'active' ? 'Активный' :
-                                         project.status === 'completed' ? 'Завершен' :
-                                         project.status === 'on_hold' ? 'Приостановлен' :
-                                         project.status === 'cancelled' ? 'Отменен' : project.status}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                    <span>{project.tasks_count || 0} задач</span>
-                                    <span>{project.members_count || 0} участников</span>
-                                </div>
-
-                                <div className="flex space-x-2">
-                                    <Link
-                                        href={route('projects.board', project.id)}
-                                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center"
-                                    >
-                                        Доска
-                                    </Link>
-                                    <Link
-                                        href={route('projects.show', project.id)}
-                                        className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center"
-                                    >
-                                        Детали
-                                    </Link>
-                                </div>
-                            </div>
+                            <ProjectCard key={project.id} project={project} />
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
-                        <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="card text-center">
+                        <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        <h3 className="text-lg font-medium text-gray-400 mb-2">Проекты не найдены</h3>
-                        <p className="text-gray-500 mb-4">
+                        <h3 className="text-lg font-medium text-text-secondary mb-2">Проекты не найдены</h3>
+                        <p className="text-text-muted mb-4">
                             {search || status ? 'Попробуйте изменить параметры поиска' : 'Создайте первый проект для начала работы'}
                         </p>
                         {!search && !status && (
                             <Link
                                 href={route('projects.create')}
-                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                className="btn btn-primary"
                             >
                                 Создать проект
                             </Link>
@@ -185,10 +145,10 @@ export default function Index({ auth, projects, filters }) {
                                     href={link.url}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                         link.active
-                                            ? 'bg-gray-600 text-white'
+                                            ? 'bg-secondary-bg text-text-primary'
                                             : link.url
-                                            ? 'bg-gray-800 text-white hover:bg-gray-700'
-                                            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                            ? 'bg-card-bg text-text-primary hover:bg-secondary-bg'
+                                            : 'bg-card-bg text-text-muted cursor-not-allowed'
                                     }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />

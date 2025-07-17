@@ -9,14 +9,14 @@ export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-black text-white font-[Consolas,monospace]">
-            <nav className="border-b border-[#232b3a]">
+        <div className="min-h-screen bg-primary-bg text-text-primary">
+            <nav className="border-b border-border-color bg-card-bg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href="/dashboard">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-white" />
+                                <Link href="/dashboard" className="hover:opacity-80 transition-opacity">
+                                    <ApplicationLogo className="block h-9 w-auto fill-current text-text-primary" />
                                 </Link>
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
@@ -38,8 +38,7 @@ export default function Authenticated({ user, header, children }) {
                                         <span className="inline-flex">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium text-white hover:text-gray-300 focus:outline-none transition ease-in-out duration-150 bg-transparent"
-                                                style={{ borderRadius: 0, fontFamily: 'Consolas, monospace' }}
+                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium text-text-primary hover:text-text-secondary focus:outline-none transition ease-in-out duration-150 bg-transparent"
                                             >
                                                 {user.name}
                                                 <svg
@@ -69,8 +68,7 @@ export default function Authenticated({ user, header, children }) {
                         <div className="-mr-2 flex items-center sm:hidden">
                             <button
                                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                                className="inline-flex items-center justify-center p-2 text-white hover:text-gray-300 hover:bg-[#232b3a] focus:outline-none focus:bg-[#232b3a] focus:text-gray-300 transition duration-150 ease-in-out"
-                                style={{ borderRadius: 0 }}
+                                className="inline-flex items-center justify-center p-2 text-text-primary hover:text-text-secondary hover:bg-secondary-bg focus:outline-none focus:bg-secondary-bg focus:text-text-secondary transition duration-150 ease-in-out"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
@@ -104,10 +102,10 @@ export default function Authenticated({ user, header, children }) {
                             Задачи
                         </ResponsiveNavLink>
                     </div>
-                    <div className="pt-4 pb-1 border-t border-[#232b3a]">
+                    <div className="pt-4 pb-1 border-t border-border-color">
                         <div className="px-4">
-                            <div className="font-medium text-base text-white">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                            <div className="font-medium text-base text-text-primary">{user.name}</div>
+                            <div className="font-medium text-sm text-text-muted">{user.email}</div>
                         </div>
                         <div className="mt-3 space-y-1">
                             <ResponsiveNavLink href={route('profile.edit')}>Профиль</ResponsiveNavLink>
@@ -119,7 +117,7 @@ export default function Authenticated({ user, header, children }) {
                 </div>
             </nav>
             {header && (
-                <header className="border-b border-[#232b3a]">
+                <header className="border-b border-border-color bg-card-bg">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {header}
                     </div>
@@ -127,7 +125,9 @@ export default function Authenticated({ user, header, children }) {
             )}
             <main className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {children}
+                    <div className="animate-fade-in">
+                        {children}
+                    </div>
                 </div>
             </main>
         </div>
