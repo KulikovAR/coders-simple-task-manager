@@ -284,9 +284,12 @@ export default function Show({ auth, task }) {
                                 {task.sprint && (
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm text-text-muted">Спринт:</span>
-                                        <span className="text-sm text-text-primary font-medium">
+                                        <Link
+                                            href={route('sprints.show', [task.project.id, task.sprint.id])}
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors"
+                                        >
                                             {task.sprint.name}
-                                        </span>
+                                        </Link>
                                     </div>
                                 )}
 

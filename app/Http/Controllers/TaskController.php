@@ -34,10 +34,22 @@ class TaskController extends Controller
     {
         $projects = $this->projectService->getUserProjectsList(Auth::user());
         $selectedProjectId = $request->get('project_id');
+        $selectedSprintId = $request->get('sprint_id');
+        
+        // Получаем спринты для выбранного проекта
+        $sprints = collect();
+        if ($selectedProjectId) {
+            $project = Project::find($selectedProjectId);
+            if ($project && $this->projectService->canUserAccessProject(Auth::user(), $project)) {
+                $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+            }
+        }
 
         return Inertia::render('Tasks/Form', [
             'projects' => $projects,
             'selectedProjectId' => $selectedProjectId,
+            'selectedSprintId' => $selectedSprintId,
+            'sprints' => $sprints,
         ]);
     }
 
@@ -76,9 +88,16 @@ class TaskController extends Controller
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
         
+        // Получаем спринты для проекта задачи
+        $sprints = collect();
+        if ($task->project) {
+            $sprints = $task->project->sprints()->orderBy('start_date', 'desc')->get();
+        }
+        
         return Inertia::render('Tasks/Form', [
             'task' => $task,
             'projects' => $projects,
+            'sprints' => $sprints,
         ]);
     }
 
@@ -125,5 +144,16 @@ class TaskController extends Controller
         }
 
         return redirect()->back()->with('success', 'Статус задачи успешно обновлен.');
+    }
+
+    public function getProjectSprints(Request $request, Project $project)
+    {
+        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+        
+        return response()->json($sprints);
     }
 } 

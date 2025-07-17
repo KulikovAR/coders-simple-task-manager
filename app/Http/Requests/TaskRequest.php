@@ -16,7 +16,7 @@ class TaskRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:todo,in_progress,review,done',
+            'status' => 'required|in:To Do,In Progress,Review,Testing,Ready for Release,Done',
             'priority' => 'nullable|in:low,medium,high',
             'project_id' => 'required|exists:projects,id',
             'sprint_id' => 'nullable|exists:sprints,id',

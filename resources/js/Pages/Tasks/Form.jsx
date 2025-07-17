@@ -1,9 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
+import { useState, useEffect } from 'react';
 
-export default function Form({ auth, task = null, projects = [], selectedProjectId = null, errors = {} }) {
+export default function Form({ auth, task = null, projects = [], selectedProjectId = null, selectedSprintId = null, sprints = [], errors = {} }) {
     const isEditing = !!task;
+    const [availableSprints, setAvailableSprints] = useState(sprints);
 
     const { data, setData, post, put, processing, errors: formErrors } = useForm({
         title: task?.title || '',
@@ -11,11 +13,33 @@ export default function Form({ auth, task = null, projects = [], selectedProject
         status: task?.status?.name || 'To Do',
         priority: task?.priority || '',
         project_id: task?.project_id || selectedProjectId || '',
-        sprint_id: task?.sprint_id || '',
+        sprint_id: task?.sprint_id || selectedSprintId || '',
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
     });
+
+    // Загружаем спринты при изменении проекта
+    useEffect(() => {
+        if (data.project_id) {
+            fetch(route('tasks.project.sprints', data.project_id))
+                .then(response => response.json())
+                .then(sprints => {
+                    setAvailableSprints(sprints);
+                    // Сбрасываем выбранный спринт, если он не принадлежит новому проекту
+                    if (data.sprint_id && !sprints.find(s => s.id == data.sprint_id)) {
+                        setData('sprint_id', '');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки спринтов:', error);
+                    setAvailableSprints([]);
+                });
+        } else {
+            setAvailableSprints([]);
+            setData('sprint_id', '');
+        }
+    }, [data.project_id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -200,6 +224,31 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                         </select>
                                         {formErrors.project_id && (
                                             <p className="mt-1 text-sm text-accent-red">{formErrors.project_id}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Спринт */}
+                                    <div>
+                                        <label htmlFor="sprint_id" className="form-label">
+                                            Спринт
+                                        </label>
+                                        <select
+                                            id="sprint_id"
+                                            value={data.sprint_id}
+                                            onChange={(e) => setData('sprint_id', e.target.value)}
+                                            className={`form-select ${
+                                                formErrors.sprint_id ? 'border-accent-red focus:ring-accent-red' : ''
+                                            }`}
+                                        >
+                                            <option value="">Без спринта</option>
+                                            {availableSprints.map((sprint) => (
+                                                <option key={sprint.id} value={sprint.id}>
+                                                    {sprint.name} ({new Date(sprint.start_date).toLocaleDateString('ru-RU')} - {new Date(sprint.end_date).toLocaleDateString('ru-RU')})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.sprint_id && (
+                                            <p className="mt-1 text-sm text-accent-red">{formErrors.sprint_id}</p>
                                         )}
                                     </div>
 

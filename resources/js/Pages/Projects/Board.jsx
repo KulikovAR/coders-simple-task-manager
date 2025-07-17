@@ -1,9 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { getSprintStatusLabel, getSprintStatusClass, getSprintStatusIcon, formatSprintDates } from '@/utils/sprintUtils';
 
-export default function Board({ auth, project, tasks, taskStatuses }) {
+export default function Board({ auth, project, tasks, taskStatuses, sprints = [] }) {
     const [draggedTask, setDraggedTask] = useState(null);
+    const [selectedSprintId, setSelectedSprintId] = useState('all');
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -90,6 +92,15 @@ export default function Board({ auth, project, tasks, taskStatuses }) {
         setDraggedTask(null);
     };
 
+    // Фильтрация задач по спринту
+    const filteredTasks = selectedSprintId === 'all' 
+        ? tasks 
+        : tasks.filter(task => task.sprint_id == selectedSprintId);
+
+    const getFilteredStatusTasks = (statusId) => {
+        return filteredTasks.filter(task => task.status_id === statusId);
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -136,10 +147,60 @@ export default function Board({ auth, project, tasks, taskStatuses }) {
                     </div>
                 )}
 
+                {/* Фильтр по спринтам */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium text-white">Фильтр по спринтам</h3>
+                        <Link
+                            href={route('sprints.create', project.id)}
+                            className="text-white hover:text-gray-300 text-sm font-medium"
+                        >
+                            + Создать спринт
+                        </Link>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            onClick={() => setSelectedSprintId('all')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                selectedSprintId === 'all'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            }`}
+                        >
+                            Все задачи
+                        </button>
+                        {sprints.map((sprint) => (
+                            <button
+                                key={sprint.id}
+                                onClick={() => setSelectedSprintId(sprint.id)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
+                                    selectedSprintId == sprint.id
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`}
+                            >
+                                <span>{getSprintStatusIcon(sprint.status)}</span>
+                                <span>{sprint.name}</span>
+                                <span className="text-xs opacity-75">
+                                    ({formatSprintDates(sprint)})
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Kanban доска */}
                 <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-medium text-white">Доска задач</h3>
+                        <h3 className="text-lg font-medium text-white">
+                            Доска задач
+                            {selectedSprintId !== 'all' && (
+                                <span className="text-sm text-gray-400 ml-2">
+                                    (фильтр: {sprints.find(s => s.id == selectedSprintId)?.name})
+                                </span>
+                            )}
+                        </h3>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
                             className="text-white hover:text-gray-300 text-sm font-medium"
@@ -150,7 +211,7 @@ export default function Board({ auth, project, tasks, taskStatuses }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {taskStatuses.map((status) => {
-                            const statusTasks = tasks.filter(task => task.status_id === status.id);
+                            const statusTasks = getFilteredStatusTasks(status.id);
                             
                             return (
                                 <div
@@ -203,6 +264,22 @@ export default function Board({ auth, project, tasks, taskStatuses }) {
                                                         </span>
                                                     )}
                                                 </div>
+                                                
+                                                {/* Информация о спринте */}
+                                                {task.sprint && (
+                                                    <div className="mt-2 pt-2 border-t border-gray-600">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                            <span className="text-gray-400">Спринт:</span>
+                                                            <Link
+                                                                href={route('sprints.show', [project.id, task.sprint.id])}
+                                                                className="text-blue-400 hover:text-blue-300 transition-colors"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {task.sprint.name}
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

@@ -120,20 +120,26 @@ export default function Show({ auth, project, tasks }) {
                     </div>
                     <div className="flex space-x-3">
                         <Link
+                            href={route('sprints.index', project.id)}
+                            className="btn btn-primary"
+                        >
+                            Спринты
+                        </Link>
+                        <Link
                             href={route('projects.board', project.id)}
-                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="btn btn-secondary"
                         >
                             Доска
                         </Link>
                         <Link
                             href={route('projects.edit', project.id)}
-                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="btn btn-secondary"
                         >
                             Редактировать
                         </Link>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
-                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            className="btn btn-secondary"
                         >
                             Добавить задачу
                         </Link>

@@ -60,13 +60,15 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status']);
+        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.sprint']);
         $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+        $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         
         return Inertia::render('Projects/Board', [
             'project' => $project,
             'tasks' => $project->tasks,
             'taskStatuses' => $taskStatuses,
+            'sprints' => $sprints,
         ]);
     }
 
