@@ -69,6 +69,9 @@ export default function Show({ auth, task }) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-3xl font-bold text-text-primary mb-2">{task.title}</h1>
+                        {task.code && (
+                            <div className="text-xs font-mono text-accent-blue mb-2">{task.code}</div>
+                        )}
                         <div className="flex items-center space-x-4 text-sm text-text-secondary">
                             <span className={`status-badge ${getStatusClass(task.status?.name)}`}>
                                 {getStatusLabel(task.status?.name)}

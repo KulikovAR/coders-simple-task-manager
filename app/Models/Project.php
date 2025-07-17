@@ -15,6 +15,7 @@ class Project extends Model
         'name',
         'description',
         'owner_id',
+        'status',
         'docs',
     ];
 

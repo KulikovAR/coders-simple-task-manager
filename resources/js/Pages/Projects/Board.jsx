@@ -236,6 +236,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 onDragStart={(e) => handleDragStart(e, task)}
                                                 onDragEnd={handleDragEnd}
                                             >
+                                                {task.code && (
+                                                    <div className="text-xs font-mono text-blue-400 mb-2 font-bold">{task.code}</div>
+                                                )}
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h5 className="text-white font-medium text-sm">
                                                         <Link 

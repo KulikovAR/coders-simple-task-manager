@@ -10,6 +10,9 @@ export default function TaskCard({ task }) {
         <div className="card hover:shadow-glow transition-all duration-200">
             <div className="card-header">
                 <div className="flex-1">
+                    {task.code && (
+                        <div className="text-xs font-mono text-accent-blue mb-2 font-bold">{task.code}</div>
+                    )}
                     <h3 className="card-title mb-2 line-clamp-2">
                         {task.title}
                     </h3>

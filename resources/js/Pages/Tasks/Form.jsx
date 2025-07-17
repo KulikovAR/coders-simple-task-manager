@@ -74,6 +74,9 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                             <h1 className="text-3xl font-bold text-text-primary mb-2">
                                 {isEditing ? 'Редактирование задачи' : 'Создание новой задачи'}
                             </h1>
+                            {isEditing && task?.code && (
+                                <div className="text-xs font-mono text-accent-blue mb-2">{task.code}</div>
+                            )}
                             <p className="text-text-secondary">
                                 {isEditing ? 'Обновите информацию о задаче' : 'Заполните основную информацию о задаче'}
                             </p>

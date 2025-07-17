@@ -58,4 +58,16 @@ class Task extends Model
     {
         return $this->hasMany(TaskComment::class);
     }
+
+    public function getCodeAttribute(): string
+    {
+        $project = $this->project;
+        if (!$project) return (string)$this->id;
+        $name = $project->name;
+        // Простая транслитерация (можно заменить на более сложную при необходимости)
+        $translit = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
+        $translit = preg_replace('/[^A-Za-z0-9]/', '', $translit);
+        $translit = strtoupper($translit);
+        return $translit . '-' . $this->id;
+    }
 }
