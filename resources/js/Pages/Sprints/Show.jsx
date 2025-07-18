@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { 
     getSprintStatusLabel, 
     getSprintStatusClass, 
@@ -12,8 +13,17 @@ import {
 import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
 
 export default function Show({ auth, project, sprint }) {
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const getPriorityText = (priority) => {
         return getPriorityLabel(priority);
+    };
+
+    // Удаление спринта
+    const handleDelete = () => {
+        router.delete(route('sprints.destroy', [project.id, sprint.id]), {
+            onSuccess: () => router.visit(route('sprints.index', project.id)),
+        });
     };
 
     return (
@@ -47,6 +57,13 @@ export default function Show({ auth, project, sprint }) {
                         >
                             Редактировать
                         </Link>
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            Удалить
+                        </button>
                         <Link
                             href={route('sprints.index', project.id)}
                             className="btn btn-primary"
@@ -281,6 +298,30 @@ export default function Show({ auth, project, sprint }) {
                     </div>
                 </div>
             </div>
+
+            {/* Модальное окно подтверждения удаления */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md shadow-lg">
+                        <h2 className="text-lg font-bold mb-4">Удалить спринт?</h2>
+                        <p className="mb-6">Вы уверены, что хотите удалить этот спринт? Это действие необратимо. Все задачи спринта останутся в проекте.</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                className="btn btn-danger"
+                                onClick={handleDelete}
+                            >
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 } 

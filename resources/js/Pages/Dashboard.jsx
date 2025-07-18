@@ -36,11 +36,11 @@ export default function Dashboard({ auth, stats, projects }) {
                         Добро пожаловать в Task Manager
                     </p>
                     <p className="text-text-muted text-sm mt-1">
-                        Сегодня {new Date().toLocaleDateString('ru-RU', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                        Сегодня {new Date().toLocaleDateString('ru-RU', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
                         })}
                     </p>
                 </div>
@@ -69,6 +69,75 @@ export default function Dashboard({ auth, stats, projects }) {
                                 </svg>
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {/* Доски проектов */}
+                {projects && projects.length > 0 ? (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-semibold text-text-primary">Доски проектов</h3>
+                            <Link
+                                href={route('projects.index')}
+                                className="text-sm text-accent-blue hover:text-accent-green transition-colors"
+                            >
+                                Посмотреть все →
+                            </Link>
+                        </div>
+                        <div className="grid-cards">
+                            {projects.map((project) => (
+                                <Link
+                                    key={project.id}
+                                    href={route('projects.board', project.id)}
+                                    className="card group hover:shadow-glow transition-all duration-200"
+                                >
+                                    <div className="card-header">
+                                        <h4 className="card-title">
+                                            {project.name}
+                                        </h4>
+                                        <svg className="w-5 h-5 text-text-muted group-hover:text-text-secondary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-text-secondary text-sm mb-4 line-clamp-2">
+                                        {project.description || 'Описание отсутствует'}
+                                    </p>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-text-muted">
+                                            {project.tasks_count || 0} задач
+                                        </span>
+                                        <span className={`status-badge ${
+                                            project.status === 'active' ? 'status-active' :
+                                                project.status === 'completed' ? 'status-completed' :
+                                                    project.status === 'on_hold' ? 'status-on-hold' :
+                                                        'status-todo'
+                                        }`}>
+                                            {project.status === 'active' ? 'Активный' :
+                                                project.status === 'completed' ? 'Завершен' :
+                                                    project.status === 'on_hold' ? 'Приостановлен' :
+                                                        project.status === 'cancelled' ? 'Отменен' : project.status}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="card text-center">
+                        <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <h3 className="text-lg font-medium text-text-secondary mb-2">Нет проектов</h3>
+                        <p className="text-text-muted mb-4">Создайте первый проект для начала работы</p>
+                        <Link
+                            href={route('projects.create')}
+                            className="btn btn-primary inline-flex items-center"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Создать проект
+                        </Link>
                     </div>
                 )}
 
@@ -126,6 +195,8 @@ export default function Dashboard({ auth, stats, projects }) {
                     </div>
                 </div>
 
+
+
                 {/* Быстрые действия */}
                 <div className="card">
                     <h3 className="card-title mb-4">Быстрые действия</h3>
@@ -176,75 +247,6 @@ export default function Dashboard({ auth, stats, projects }) {
                         </Link>
                     </div>
                 </div>
-
-                {/* Доски проектов */}
-                {projects && projects.length > 0 ? (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-semibold text-text-primary">Доски проектов</h3>
-                            <Link
-                                href={route('projects.index')}
-                                className="text-sm text-accent-blue hover:text-accent-green transition-colors"
-                            >
-                                Посмотреть все →
-                            </Link>
-                        </div>
-                        <div className="grid-cards">
-                            {projects.map((project) => (
-                                <Link
-                                    key={project.id}
-                                    href={route('projects.board', project.id)}
-                                    className="card group hover:shadow-glow transition-all duration-200"
-                                >
-                                    <div className="card-header">
-                                        <h4 className="card-title">
-                                            {project.name}
-                                        </h4>
-                                        <svg className="w-5 h-5 text-text-muted group-hover:text-text-secondary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                    <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                                        {project.description || 'Описание отсутствует'}
-                                    </p>
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-text-muted">
-                                            {project.tasks_count || 0} задач
-                                        </span>
-                                        <span className={`status-badge ${
-                                            project.status === 'active' ? 'status-active' :
-                                            project.status === 'completed' ? 'status-completed' :
-                                            project.status === 'on_hold' ? 'status-on-hold' :
-                                            'status-todo'
-                                        }`}>
-                                            {project.status === 'active' ? 'Активный' :
-                                             project.status === 'completed' ? 'Завершен' :
-                                             project.status === 'on_hold' ? 'Приостановлен' :
-                                             project.status === 'cancelled' ? 'Отменен' : project.status}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="card text-center">
-                        <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-text-secondary mb-2">Нет проектов</h3>
-                        <p className="text-text-muted mb-4">Создайте первый проект для начала работы</p>
-                        <Link
-                            href={route('projects.create')}
-                            className="btn btn-primary inline-flex items-center"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Создать проект
-                        </Link>
-                    </div>
-                )}
             </div>
         </AuthenticatedLayout>
     );

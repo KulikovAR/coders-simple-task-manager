@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 export default function Show({ auth, project, tasks }) {
     const [showAddMember, setShowAddMember] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -96,6 +97,13 @@ export default function Show({ auth, project, tasks }) {
         }
     };
 
+    // Удаление проекта
+    const handleDelete = () => {
+        router.delete(route('projects.destroy', project.id), {
+            onSuccess: () => router.visit(route('projects.index')),
+        });
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -137,6 +145,13 @@ export default function Show({ auth, project, tasks }) {
                         >
                             Редактировать
                         </Link>
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            Удалить
+                        </button>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
                             className="btn btn-secondary"
@@ -375,6 +390,30 @@ export default function Show({ auth, project, tasks }) {
                     )}
                 </div>
             </div>
+
+            {/* Модальное окно подтверждения удаления */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md shadow-lg">
+                        <h2 className="text-lg font-bold mb-4">Удалить проект?</h2>
+                        <p className="mb-6">Вы уверены, что хотите удалить этот проект? Это действие необратимо. Все задачи и спринты будут удалены.</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                className="btn btn-danger"
+                                onClick={handleDelete}
+                            >
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 } 

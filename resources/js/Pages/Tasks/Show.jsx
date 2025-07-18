@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
 import { 
@@ -15,6 +15,7 @@ import {
 export default function Show({ auth, task }) {
     const [showCommentForm, setShowCommentForm] = useState(false);
     const [commentType, setCommentType] = useState(COMMENT_TYPES.GENERAL);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     
     const { data, setData, post, processing, errors } = useForm({
         content: '',
@@ -57,6 +58,13 @@ export default function Show({ auth, task }) {
         return `${baseClass} ${specialClass} ${typeClass}`;
     };
 
+    // Удаление задачи
+    const handleDelete = () => {
+        router.delete(route('tasks.destroy', task.id), {
+            onSuccess: () => router.visit(route('tasks.index')),
+        });
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -94,6 +102,13 @@ export default function Show({ auth, task }) {
                         >
                             Редактировать
                         </Link>
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            Удалить
+                        </button>
                         <Link
                             href={route('tasks.index')}
                             className="btn btn-primary"
@@ -354,6 +369,30 @@ export default function Show({ auth, task }) {
                     </div>
                 </div>
             </div>
+
+            {/* Модальное окно подтверждения удаления */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md shadow-lg">
+                        <h2 className="text-lg font-bold mb-4">Удалить задачу?</h2>
+                        <p className="mb-6">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                className="btn btn-danger"
+                                onClick={handleDelete}
+                            >
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 } 
