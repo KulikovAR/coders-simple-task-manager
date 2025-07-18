@@ -5,7 +5,7 @@ export default function ApplicationLogo(props) {
             className="text-xl font-bold text-white"
             style={{ fontFamily: 'Consolas, monospace' }}
         >
-            379-task-manager
+            379ТМ
         </div>
     );
 }

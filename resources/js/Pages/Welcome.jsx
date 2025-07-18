@@ -3,14 +3,14 @@ import { Head, Link } from '@inertiajs/react';
 export default function Welcome({ auth }) {
     return (
         <>
-            <Head title="379-task-manager" />
+            <Head title="379ТМ" />
             <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Consolas, monospace' }}>
                 <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-6 sm:p-6">
                     {/* Header */}
                     <header className="absolute top-0 left-0 right-0 p-4 sm:p-6">
                         <nav className="flex justify-between items-center max-w-7xl mx-auto">
                             <div className="text-lg sm:text-xl font-bold text-white">
-                                379-task-manager
+                                379ТМ
                             </div>
                             <div className="flex space-x-2 sm:space-x-4">
                                 {auth.user ? (
@@ -44,7 +44,7 @@ export default function Welcome({ auth }) {
                     <main className="text-center max-w-2xl mx-auto w-full px-4">
                         <div className="mb-8 sm:mb-12">
                             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
-                                379-task-manager
+                                379ТМ
                             </h1>
                             <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8">
                                 система управления задачами для разработчиков
