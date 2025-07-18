@@ -87,7 +87,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project', 'sprint', 'comments.user']);
+        $task->load(['project', 'sprint', 'status', 'comments.user']);
         
         return Inertia::render('Tasks/Show', [
             'task' => $task,
@@ -99,6 +99,9 @@ class TaskController extends Controller
         if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
+
+        // Загружаем задачу со связями
+        $task->load(['status', 'project']);
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
         // Получаем спринты и участников для проекта задачи

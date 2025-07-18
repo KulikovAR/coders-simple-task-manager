@@ -70,7 +70,7 @@ class TaskService
         // Получаем первый статус (To Do) как статус по умолчанию
         $defaultStatus = $project->taskStatuses()->orderBy('order')->first();
 
-        return Task::create([
+        $task = Task::create([
             'project_id' => $project->id,
             'sprint_id' => $data['sprint_id'] ?? null,
             'title' => $data['title'],
@@ -82,11 +82,13 @@ class TaskService
             'priority' => $data['priority'] ?? 'medium',
             'status_id' => $defaultStatus->id,
         ]);
+
+        return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
 
     public function updateTask(Task $task, array $data): Task
     {
-        $task->update([
+        $updateData = [
             'sprint_id' => $data['sprint_id'] ?? $task->sprint_id,
             'title' => $data['title'] ?? $task->title,
             'description' => $data['description'] ?? $task->description,
@@ -94,7 +96,17 @@ class TaskService
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
             'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,
-        ]);
+        ];
+
+        // Если передан статус, обновляем его
+        if (isset($data['status'])) {
+            $status = $task->project->taskStatuses()->where('name', $data['status'])->first();
+            if ($status) {
+                $updateData['status_id'] = $status->id;
+            }
+        }
+
+        $task->update($updateData);
 
         return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
@@ -120,7 +132,7 @@ class TaskService
     {
         $statuses = $project->taskStatuses()
             ->with(['tasks' => function ($query) {
-                $query->with(['assignee', 'reporter', 'sprint', 'project'])
+                $query->with(['assignee', 'reporter', 'sprint', 'project', 'status'])
                     ->orderBy('created_at', 'desc');
             }])
             ->orderBy('order')

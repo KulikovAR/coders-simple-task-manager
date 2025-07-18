@@ -3,9 +3,11 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { getSprintStatusLabel, getSprintStatusClass, getSprintStatusIcon, formatSprintDates } from '@/utils/sprintUtils';
 
-export default function Board({ auth, project, tasks, taskStatuses, sprints = [] }) {
+export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [] }) {
     const [draggedTask, setDraggedTask] = useState(null);
     const [selectedSprintId, setSelectedSprintId] = useState('all');
+    const [assigneeId, setAssigneeId] = useState('');
+    const [myTasks, setMyTasks] = useState(false);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -92,10 +94,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setDraggedTask(null);
     };
 
-    // Фильтрация задач по спринту
-    const filteredTasks = selectedSprintId === 'all' 
-        ? tasks 
-        : tasks.filter(task => task.sprint_id == selectedSprintId);
+    // Фильтрация задач по спринту и исполнителю
+    const filteredTasks = tasks.filter(task => {
+        const sprintOk = selectedSprintId === 'all' || task.sprint_id == selectedSprintId;
+        const assigneeOk = assigneeId ? String(task.assignee_id) === String(assigneeId) : true;
+        const myOk = myTasks ? String(task.assignee_id) === String(auth.user.id) : true;
+        return sprintOk && assigneeOk && myOk;
+    });
 
     const getFilteredStatusTasks = (statusId) => {
         return filteredTasks.filter(task => task.status_id === statusId);
@@ -187,6 +192,35 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 </span>
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Фильтры по исполнителю и мои задачи */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                    <div className="flex flex-wrap gap-4 mb-6">
+                        <div>
+                            <label className="form-label text-white">Исполнитель</label>
+                            <select
+                                value={assigneeId}
+                                onChange={e => setAssigneeId(e.target.value)}
+                                className="form-select"
+                            >
+                                <option value="">Все исполнители</option>
+                                {members.map(user => (
+                                    <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-center space-x-2 mt-6">
+                            <input
+                                type="checkbox"
+                                id="my_tasks"
+                                checked={myTasks}
+                                onChange={e => setMyTasks(e.target.checked)}
+                                className="form-checkbox"
+                            />
+                            <label htmlFor="my_tasks" className="text-sm text-white">Мои задачи</label>
+                        </div>
                     </div>
                 </div>
 
