@@ -129,6 +129,15 @@ class TaskController extends Controller
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
+        // Для AJAX-запросов возвращаем JSON
+        if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Задача успешно обновлена.',
+                'task' => $task->load(['status', 'assignee', 'reporter', 'sprint', 'project'])
+            ]);
+        }
+
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Задача успешно обновлена.');
     }

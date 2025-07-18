@@ -1,13 +1,89 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { getSprintStatusLabel, getSprintStatusClass, getSprintStatusIcon, formatSprintDates } from '@/utils/sprintUtils';
+import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [] }) {
     const [draggedTask, setDraggedTask] = useState(null);
     const [selectedSprintId, setSelectedSprintId] = useState('all');
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
+    const [showTaskModal, setShowTaskModal] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+
+    // Форма для редактирования задачи
+    const { data, setData, put, processing, errors, reset } = useForm({
+        title: '',
+        description: '',
+        result: '',
+        merge_request: '',
+        priority: '',
+        assignee_id: '',
+        deadline: '',
+        sprint_id: '',
+    });
+
+    // Открытие модального окна с задачей
+    const openTaskModal = (task) => {
+        setSelectedTask(task);
+        setData({
+            title: task.title || '',
+            description: task.description || '',
+            result: task.result || '',
+            merge_request: task.merge_request || '',
+            priority: task.priority || '',
+            assignee_id: task.assignee_id || '',
+            deadline: task.deadline ? task.deadline.split('T')[0] : '',
+            sprint_id: task.sprint_id || '',
+        });
+        setShowTaskModal(true);
+    };
+
+    // Закрытие модального окна
+    const closeTaskModal = () => {
+        setShowTaskModal(false);
+        setSelectedTask(null);
+        reset();
+    };
+
+    // Сохранение изменений задачи
+    const handleTaskUpdate = (e) => {
+        e.preventDefault();
+        
+        // Получаем CSRF-токен
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value ||
+                         window.csrf_token;
+        
+        fetch(route('tasks.update', selectedTask.id), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Обновляем задачу в списке без перезагрузки страницы
+                if (result.task) {
+                    const updatedTask = result.task;
+                    // Находим и обновляем задачу в списке
+                    const taskIndex = tasks.findIndex(t => t.id === updatedTask.id);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex] = { ...tasks[taskIndex], ...updatedTask };
+                    }
+                }
+                closeTaskModal();
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка сохранения:', error);
+        });
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -147,21 +223,22 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         >
             <Head title={`${project.name} - Доска`} />
 
-            {/* Шапка доски: структурированная, всё по центру */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 flex flex-col items-center justify-center mb-6 shadow-lg">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-widest text-center" style={{ letterSpacing: '0.2em' }}>
-                    {project.name}
-                </h1>
-                {project.description && (
-                    <p className="text-gray-300 text-base font-normal mt-2 mb-0 whitespace-pre-wrap max-w-xl text-center">{project.description}</p>
-                )}
-                <div className="flex flex-wrap justify-center items-center gap-4 text-base text-gray-400 font-medium mt-3 mb-0">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>{getStatusText(project.status)}</span>
-                    {project.deadline && (
-                        <span>Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
+            <div className="space-y-6">
+                {/* Шапка доски: структурированная, всё по центру */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 flex flex-col items-center justify-center mb-6 shadow-lg">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-widest text-center" style={{ letterSpacing: '0.2em' }}>
+                        {project.name}
+                    </h1>
+                    {project.description && (
+                        <p className="text-gray-300 text-base font-normal mt-2 mb-0 whitespace-pre-wrap max-w-xl text-center">{project.description}</p>
                     )}
+                    <div className="flex flex-wrap justify-center items-center gap-4 text-base text-gray-400 font-medium mt-3 mb-0">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>{getStatusText(project.status)}</span>
+                        {project.deadline && (
+                            <span>Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
+                        )}
+                    </div>
                 </div>
-            </div>
 
                 {/* Фильтр по спринтам */}
                 <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
@@ -284,6 +361,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task)}
                                                 onDragEnd={handleDragEnd}
+                                                onClick={() => openTaskModal(task)}
                                             >
                                                 {/* Код задачи */}
                                                 {task.code && (
@@ -374,6 +452,196 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         })}
                     </div>
                 </div>
+            </div>
+
+            {/* Модальное окно для просмотра и редактирования задачи */}
+            {showTaskModal && selectedTask && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                    <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white mb-2">Редактирование задачи</h2>
+                                    {selectedTask.code && (
+                                        <div className="text-sm font-mono text-blue-400">{selectedTask.code}</div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={closeTaskModal}
+                                    className="text-gray-400 hover:text-white text-2xl font-bold"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleTaskUpdate} className="space-y-6">
+                                {/* Название */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Название задачи *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.title}
+                                        onChange={(e) => setData('title', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                        placeholder="Введите название задачи"
+                                        required
+                                    />
+                                    {errors.title && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.title}</p>
+                                    )}
+                                </div>
+
+                                {/* Описание */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Описание
+                                    </label>
+                                    <textarea
+                                        value={data.description}
+                                        onChange={(e) => setData('description', e.target.value)}
+                                        rows={4}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                        placeholder="Опишите задачу..."
+                                    />
+                                    {errors.description && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.description}</p>
+                                    )}
+                                </div>
+
+                                {/* Результат */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Результат выполнения
+                                    </label>
+                                    <textarea
+                                        value={data.result}
+                                        onChange={(e) => setData('result', e.target.value)}
+                                        rows={3}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                        placeholder="Опишите результат выполнения задачи..."
+                                    />
+                                    {errors.result && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.result}</p>
+                                    )}
+                                </div>
+
+                                {/* Ссылка на Merge Request */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Ссылка на Merge Request
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={data.merge_request}
+                                        onChange={(e) => setData('merge_request', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                        placeholder="https://github.com/..."
+                                    />
+                                    {errors.merge_request && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.merge_request}</p>
+                                    )}
+                                </div>
+
+                                {/* Приоритет */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Приоритет
+                                    </label>
+                                    <select
+                                        value={data.priority}
+                                        onChange={(e) => setData('priority', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                    >
+                                        <option value="">Выберите приоритет</option>
+                                        {getTaskPriorityOptions().map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                    {errors.priority && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.priority}</p>
+                                    )}
+                                </div>
+
+                                {/* Исполнитель */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Исполнитель
+                                    </label>
+                                    <select
+                                        value={data.assignee_id}
+                                        onChange={(e) => setData('assignee_id', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                    >
+                                        <option value="">Выберите исполнителя</option>
+                                        {members.map(user => (
+                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
+                                        ))}
+                                    </select>
+                                    {errors.assignee_id && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.assignee_id}</p>
+                                    )}
+                                </div>
+
+                                {/* Дедлайн */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Дедлайн
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={data.deadline}
+                                        onChange={(e) => setData('deadline', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                    />
+                                    {errors.deadline && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.deadline}</p>
+                                    )}
+                                </div>
+
+                                {/* Спринт */}
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-2">
+                                        Спринт
+                                    </label>
+                                    <select
+                                        value={data.sprint_id}
+                                        onChange={(e) => setData('sprint_id', e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
+                                    >
+                                        <option value="">Выберите спринт</option>
+                                        {sprints.map(sprint => (
+                                            <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.sprint_id && (
+                                        <p className="mt-1 text-sm text-red-400">{errors.sprint_id}</p>
+                                    )}
+                                </div>
+
+                                {/* Кнопки */}
+                                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+                                    <button
+                                        type="button"
+                                        onClick={closeTaskModal}
+                                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    >
+                                        Отмена
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                                    >
+                                        {processing ? 'Сохранение...' : 'Сохранить'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }
