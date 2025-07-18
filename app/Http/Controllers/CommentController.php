@@ -11,7 +11,7 @@ class CommentController extends Controller
 {
     public function store(CommentRequest $request, Task $task)
     {
-        $comment = $task->comments()->create([
+        $task->comments()->create([
             'content' => $request->content,
             'type' => $request->type,
             'user_id' => auth()->id(),
@@ -37,4 +37,4 @@ class CommentController extends Controller
 
         return back()->with('success', 'Комментарий удален.');
     }
-} 
+}

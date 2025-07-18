@@ -3,7 +3,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import { useState, useEffect } from 'react';
 
-export default function Form({ auth, task = null, projects = [], selectedProjectId = null, selectedSprintId = null, sprints = [], errors = {} }) {
+export default function Form({ auth, task = null, projects = [], selectedProjectId = null, selectedSprintId = null, sprints = [], errors = {}, members = [] }) {
     const isEditing = !!task;
     const [availableSprints, setAvailableSprints] = useState(sprints);
 
@@ -18,6 +18,7 @@ export default function Form({ auth, task = null, projects = [], selectedProject
         priority: task?.priority || '',
         project_id: task?.project_id || defaultProjectId || '',
         sprint_id: task?.sprint_id || defaultSprintId || '',
+        assignee_id: task?.assignee_id || '',
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
@@ -304,6 +305,29 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                                         </select>
                                         {formErrors.priority && (
                                             <p className="mt-1 text-sm text-accent-red">{formErrors.priority}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Исполнитель */}
+                                    <div>
+                                        <label htmlFor="assignee_id" className="form-label">
+                                            Исполнитель
+                                        </label>
+                                        <select
+                                            id="assignee_id"
+                                            value={data.assignee_id}
+                                            onChange={(e) => setData('assignee_id', e.target.value)}
+                                            className={`form-select ${formErrors.assignee_id ? 'border-accent-red focus:ring-accent-red' : ''}`}
+                                        >
+                                            <option value="">Не назначен</option>
+                                            {members.map((user) => (
+                                                <option key={user.id} value={user.id}>
+                                                    {user.name} {user.email ? `(${user.email})` : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.assignee_id && (
+                                            <p className="mt-1 text-sm text-accent-red">{formErrors.assignee_id}</p>
                                         )}
                                     </div>
 

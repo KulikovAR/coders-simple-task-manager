@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\TranslitHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Task extends Model
 {
     use HasFactory;
+
+    protected $appends = ['code'];
 
     protected $fillable = [
         'project_id',
@@ -56,18 +59,18 @@ class Task extends Model
 
     public function comments(): HasMany
     {
-        return $this->hasMany(TaskComment::class);
+        return $this->hasMany(TaskComment::class)->orderBy('id', 'desc');
     }
 
     public function getCodeAttribute(): string
     {
         $project = $this->project;
         if (!$project) return (string)$this->id;
+
         $name = $project->name;
-        // Простая транслитерация (можно заменить на более сложную при необходимости)
-        $translit = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
-        $translit = preg_replace('/[^A-Za-z0-9]/', '', $translit);
-        $translit = strtoupper($translit);
+
+        $translit = TranslitHelper::translit($name);
+
         return $translit . '-' . $this->id;
     }
 }

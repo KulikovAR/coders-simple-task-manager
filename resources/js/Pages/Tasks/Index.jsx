@@ -4,25 +4,43 @@ import { useState } from 'react';
 import TaskCard from '@/Components/TaskCard';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
-export default function Index({ auth, tasks, filters, projects }) {
+export default function Index({ auth, tasks, filters, projects, users = [] }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [priority, setPriority] = useState(filters.priority || '');
     const [projectId, setProjectId] = useState(filters.project_id || '');
-    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id));
+    const [assigneeId, setAssigneeId] = useState(filters.assignee_id || '');
+    const [reporterId, setReporterId] = useState(filters.reporter_id || '');
+    const [myTasks, setMyTasks] = useState(filters.my_tasks === '1');
+    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route('tasks.index'), { search, status, priority, project_id: projectId }, {
+        router.get(route('tasks.index'), {
+            search,
+            status,
+            priority,
+            project_id: projectId,
+            assignee_id: assigneeId,
+            reporter_id: reporterId,
+            my_tasks: myTasks ? '1' : '',
+        }, {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
     const handleFilterChange = (filter, value) => {
-        const newFilters = { search, status, priority, project_id: projectId };
+        const newFilters = {
+            search,
+            status,
+            priority,
+            project_id: projectId,
+            assignee_id: assigneeId,
+            reporter_id: reporterId,
+            my_tasks: myTasks ? '1' : '',
+        };
         newFilters[filter] = value;
-        
         router.get(route('tasks.index'), newFilters, {
             preserveState: true,
             preserveScroll: true,
@@ -34,6 +52,9 @@ export default function Index({ auth, tasks, filters, projects }) {
         setStatus('');
         setPriority('');
         setProjectId('');
+        setAssigneeId('');
+        setReporterId('');
+        setMyTasks(false);
         setShowFilters(false);
         router.get(route('tasks.index'), {}, {
             preserveState: true,
@@ -207,6 +228,45 @@ export default function Index({ auth, tasks, filters, projects }) {
                                         ))}
                                     </select>
                                 </div>
+                                {/* Исполнитель */}
+                                <div>
+                                    <label className="form-label">Исполнитель</label>
+                                    <select
+                                        value={assigneeId}
+                                        onChange={e => handleFilterChange('assignee_id', e.target.value)}
+                                        className="form-select"
+                                    >
+                                        <option value="">Все исполнители</option>
+                                        {users.map(user => (
+                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* Создатель */}
+                                <div>
+                                    <label className="form-label">Создатель</label>
+                                    <select
+                                        value={reporterId}
+                                        onChange={e => handleFilterChange('reporter_id', e.target.value)}
+                                        className="form-select"
+                                    >
+                                        <option value="">Все создатели</option>
+                                        {users.map(user => (
+                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* Мои задачи */}
+                                <div className="flex items-center space-x-2 mt-2">
+                                    <input
+                                        type="checkbox"
+                                        id="my_tasks"
+                                        checked={myTasks}
+                                        onChange={e => handleFilterChange('my_tasks', e.target.checked ? '1' : '')}
+                                        className="form-checkbox"
+                                    />
+                                    <label htmlFor="my_tasks" className="text-sm">Мои задачи</label>
+                                </div>
                                 <div className="flex items-end space-x-2">
                                     <button
                                         type="submit"
@@ -224,7 +284,7 @@ export default function Index({ auth, tasks, filters, projects }) {
                 )}
 
                 {/* Подсказка по поиску */}
-                {(search || status || priority || projectId) && tasks.data.length === 0 && (
+                {(search || status || priority || projectId || assigneeId || reporterId || myTasks) && tasks.data.length === 0 && (
                     <div className="card bg-gradient-to-r from-accent-yellow/10 to-accent-orange/10 border-accent-yellow/20">
                         <div className="flex items-start space-x-3">
                             <div className="text-accent-yellow text-xl">💡</div>
@@ -268,6 +328,9 @@ export default function Index({ auth, tasks, filters, projects }) {
                                 {status && ` • Статус: ${getStatusLabel(status)}`}
                                 {priority && ` • Приоритет: ${getPriorityLabel(priority)}`}
                                 {projectId && ` • Проект: ${projects.find(p => p.id == projectId)?.name}`}
+                                {assigneeId && ` • Исполнитель: ${users.find(u => u.id == assigneeId)?.name}`}
+                                {reporterId && ` • Создатель: ${users.find(u => u.id == reporterId)?.name}`}
+                                {myTasks && ' • Мои задачи'}
                             </div>
                         </div>
                         <div className="grid-cards">
@@ -282,15 +345,15 @@ export default function Index({ auth, tasks, filters, projects }) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                         <h3 className="text-lg font-medium text-text-secondary mb-2">
-                            {search || status || priority || projectId ? 'Задачи не найдены' : 'Задачи отсутствуют'}
+                            {search || status || priority || projectId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
                         </h3>
                         <p className="text-text-muted mb-4">
-                            {search || status || priority || projectId 
-                                ? 'Попробуйте изменить параметры поиска или очистить фильтры' 
+                            {search || status || priority || projectId || assigneeId || reporterId || myTasks
+                                ? 'Попробуйте изменить параметры поиска или очистить фильтры'
                                 : 'Создайте первую задачу для начала работы'
                             }
                         </p>
-                        {!search && !status && !priority && !projectId && (
+                        {!search && !status && !priority && !projectId && !assigneeId && !reporterId && !myTasks && (
                             <Link
                                 href={route('tasks.create')}
                                 className="btn btn-primary inline-flex items-center"

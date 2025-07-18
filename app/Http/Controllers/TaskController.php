@@ -21,13 +21,22 @@ class TaskController extends Controller
 
     public function index(Request $request)
     {
-        $tasks = $this->taskService->getUserTasks(Auth::user(), $request->only(['search', 'status', 'priority', 'project_id']));
+        $filters = $request->only(['search', 'status', 'priority', 'project_id', 'assignee_id', 'reporter_id', 'my_tasks']);
+        $tasks = $this->taskService->getUserTasks(Auth::user(), $filters);
         $projects = $this->projectService->getUserProjectsList(Auth::user());
+
+        // Для фильтров по исполнителю и создателю — получаем всех пользователей из проектов пользователя
+        $users = collect();
+        foreach ($projects as $project) {
+            $users = $users->merge([$project->owner])->merge($project->users);
+        }
+        $users = $users->unique('id')->values();
 
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
             'projects' => $projects,
-            'filters' => $request->only(['search', 'status', 'priority', 'project_id']),
+            'users' => $users,
+            'filters' => $filters,
         ]);
     }
 
@@ -37,12 +46,15 @@ class TaskController extends Controller
         $selectedProjectId = $request->get('project_id') ? (int) $request->get('project_id') : null;
         $selectedSprintId = $request->get('sprint_id') ? (int) $request->get('sprint_id') : null;
         
-        // Получаем спринты для выбранного проекта
+        // Получаем спринты и участников для выбранного проекта
         $sprints = collect();
+        $members = collect();
         if ($selectedProjectId) {
-            $project = Project::find($selectedProjectId);
+            $project = Project::with(['owner', 'users'])->find($selectedProjectId);
             if ($project && $this->projectService->canUserAccessProject(Auth::user(), $project)) {
                 $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+                // owner + users (members)
+                $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
             }
         }
 
@@ -51,6 +63,7 @@ class TaskController extends Controller
             'selectedProjectId' => $selectedProjectId,
             'selectedSprintId' => $selectedSprintId,
             'sprints' => $sprints,
+            'members' => $members,
         ]);
     }
 
@@ -88,17 +101,20 @@ class TaskController extends Controller
         }
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
-        
-        // Получаем спринты для проекта задачи
+        // Получаем спринты и участников для проекта задачи
         $sprints = collect();
+        $members = collect();
         if ($task->project) {
-            $sprints = $task->project->sprints()->orderBy('start_date', 'desc')->get();
+            $project = Project::with(['owner', 'users'])->find($task->project_id);
+            $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+            $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
         }
-        
+
         return Inertia::render('Tasks/Form', [
             'task' => $task,
             'projects' => $projects,
             'sprints' => $sprints,
+            'members' => $members,
         ]);
     }
 

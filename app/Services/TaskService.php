@@ -13,7 +13,7 @@ class TaskService
 {
     public function getUserTasks(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Task::with(['project', 'sprint', 'status'])->withCount('comments')
+        $query = Task::with(['project', 'sprint', 'status', 'assignee', 'reporter'])->withCount('comments')
             ->whereHas('project', function($q) use ($user) {
                 $q->where('owner_id', $user->id)
                   ->orWhereHas('members', function($memberQuery) use ($user) {
@@ -40,6 +40,18 @@ class TaskService
 
         if (!empty($filters['project_id'])) {
             $query->where('project_id', $filters['project_id']);
+        }
+
+        if (!empty($filters['assignee_id'])) {
+            $query->where('assignee_id', $filters['assignee_id']);
+        }
+
+        if (!empty($filters['reporter_id'])) {
+            $query->where('reporter_id', $filters['reporter_id']);
+        }
+
+        if (!empty($filters['my_tasks']) && $filters['my_tasks'] == '1') {
+            $query->where('assignee_id', $user->id);
         }
 
         return $query->orderBy('created_at', 'desc')->paginate(12);

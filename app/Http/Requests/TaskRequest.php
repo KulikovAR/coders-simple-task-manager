@@ -20,6 +20,7 @@ class TaskRequest extends FormRequest
             'priority' => 'nullable|in:low,medium,high',
             'project_id' => 'required|exists:projects,id',
             'sprint_id' => 'nullable|exists:sprints,id',
+            'assignee_id' => 'nullable|exists:users,id',
             'deadline' => 'nullable|date|after:today',
             'result' => 'nullable|string',
             'merge_request' => 'nullable|url',
