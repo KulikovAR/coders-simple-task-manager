@@ -243,14 +243,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {/* Горизонтальный скролл для колонок */}
+                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
                         {taskStatuses.map((status) => {
                             const statusTasks = getFilteredStatusTasks(status.id);
-                            
                             return (
                                 <div
                                     key={status.id}
-                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4"
+                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-72 md:w-80 lg:w-96 min-h-[300px] max-h-full"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
@@ -260,7 +260,6 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             {statusTasks.length}
                                         </span>
                                     </div>
-                                    
                                     <div className="space-y-3">
                                         {statusTasks.map((task) => (
                                             <div
@@ -284,13 +283,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                         </Link>
                                                     </h5>
                                                 </div>
-                                                
                                                 {task.description && (
                                                     <p className="text-gray-400 text-xs mb-2 line-clamp-2">
                                                         {task.description}
                                                     </p>
                                                 )}
-                                                
                                                 <div className="flex items-center justify-between text-xs">
                                                     <span className={`${getPriorityColor(task.priority)}`}>
                                                         {getPriorityText(task.priority)}
@@ -301,7 +298,6 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                         </span>
                                                     )}
                                                 </div>
-                                                
                                                 {/* Информация о спринте */}
                                                 {task.sprint && (
                                                     <div className="mt-2 pt-2 border-t border-gray-600">
