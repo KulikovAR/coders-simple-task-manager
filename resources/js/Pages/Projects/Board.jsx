@@ -77,7 +77,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     const handleDrop = (e, statusId) => {
         e.preventDefault();
-        
+
         if (draggedTask && draggedTask.status_id !== statusId) {
             router.put(route('tasks.status.update', draggedTask.id), {
                 status_id: statusId
@@ -163,7 +163,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             + Создать спринт
                         </Link>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-3">
                         <button
                             onClick={() => setSelectedSprintId('all')}
@@ -250,7 +250,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             return (
                                 <div
                                     key={status.id}
-                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-72 md:w-80 lg:w-96 min-h-[300px] max-h-full"
+                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-72 md:w-80 lg:w-65 min-h-[300px] max-h-full"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
@@ -274,8 +274,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 )}
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h5 className="text-white font-medium text-sm">
-                                                        <Link 
-                                                            href={route('tasks.show', task.id)} 
+                                                        <Link
+                                                            href={route('tasks.show', task.id)}
                                                             className="hover:text-gray-300"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
@@ -324,4 +324,4 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             </div>
         </AuthenticatedLayout>
     );
-} 
+}
