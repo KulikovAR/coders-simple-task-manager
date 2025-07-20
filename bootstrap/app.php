@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ai.agent' => \App\Http\Middleware\AiAgentMiddleware::class,
         ]);
+
+        // Исключаем маршруты ИИ из CSRF проверки
+        $middleware->validateCsrfTokens(except: [
+            'ai-agent/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
