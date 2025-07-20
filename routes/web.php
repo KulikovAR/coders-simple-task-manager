@@ -59,6 +59,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/comments/{comment}/edit', [App\Http\Controllers\TaskCommentController::class, 'edit'])->name('comments.edit');
     Route::put('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'destroy'])->name('comments.destroy');
+
+    // ИИ-агент
+    Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
+    Route::post('/ai-agent/process', [App\Http\Controllers\AiAgentController::class, 'processRequest'])
+        ->name('ai-agent.process')
+        ->middleware('ai.agent');
+    Route::get('/ai-agent/commands', [App\Http\Controllers\AiAgentController::class, 'getCommands'])
+        ->name('ai-agent.commands')
+        ->middleware('ai.agent');
 });
 
 require __DIR__.'/auth.php';

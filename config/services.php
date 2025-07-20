@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'ai' => [
+        'url' => env('AI_SERVICE_URL', 'https://oneai-proxy.ru/api/v1/ai'),
+        'token' => env('AI_SERVICE_TOKEN'),
+        'model' => env('AI_MODEL', 'gpt-3.5-turbo'),
+    ],
+
 ];

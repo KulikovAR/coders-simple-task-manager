@@ -200,7 +200,7 @@ export default function Dashboard({ auth, stats, projects }) {
                 {/* Быстрые действия */}
                 <div className="card">
                     <h3 className="card-title mb-4">Быстрые действия</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <Link
                             href={route('projects.create')}
                             className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-blue/10 transition-colors group"
@@ -243,6 +243,21 @@ export default function Dashboard({ auth, stats, projects }) {
                             <div className="ml-3">
                                 <p className="font-medium text-text-primary">Все проекты</p>
                                 <p className="text-sm text-text-secondary">Просмотр всех проектов</p>
+                            </div>
+                        </Link>
+
+                        <Link
+                            href={route('ai-agent.index')}
+                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-purple/10 transition-colors group"
+                        >
+                            <div className="p-2 bg-accent-purple/20 rounded-lg group-hover:bg-accent-purple/30 transition-colors">
+                                <svg className="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="font-medium text-text-primary">ИИ-Ассистент</p>
+                                <p className="text-sm text-text-secondary">Управление через ИИ</p>
                             </div>
                         </Link>
                     </div>
