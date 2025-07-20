@@ -8,6 +8,7 @@ use App\Services\ProjectService;
 use App\Services\SprintService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SprintController extends Controller
@@ -19,11 +20,28 @@ class SprintController extends Controller
 
     public function index(Project $project)
     {
+        Log::info('SprintController index called', [
+            'project_id' => $project->id,
+            'project_name' => $project->name,
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()?->name,
+        ]);
+
         if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            Log::warning('Access denied to project in SprintController', [
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+            ]);
             abort(403, 'Доступ запрещен');
         }
 
         $sprints = $this->sprintService->getProjectSprints($project);
+        
+        Log::info('Sprints loaded in SprintController', [
+            'project_id' => $project->id,
+            'sprints_count' => $sprints->count(),
+            'sprints' => $sprints->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
+        ]);
         
         return Inertia::render('Sprints/Index', [
             'project' => $project,

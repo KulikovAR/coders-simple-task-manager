@@ -177,12 +177,35 @@ class TaskController extends Controller
 
     public function getProjectSprints(Request $request, Project $project)
     {
+        Log::info('getProjectSprints called', [
+            'project_id' => $project->id,
+            'project_name' => $project->name,
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()?->name,
+        ]);
+
         if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            Log::warning('Access denied to project', [
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+            ]);
             abort(403, 'Доступ запрещен');
         }
 
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         
-        return response()->json($sprints);
+        Log::info('Sprints loaded', [
+            'project_id' => $project->id,
+            'sprints_count' => $sprints->count(),
+            'sprints' => $sprints->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
+        ]);
+        
+        // Для AJAX запросов возвращаем JSON
+        if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
+            return response()->json($sprints);
+        }
+        
+        // Для обычных запросов возвращаем данные для Inertia
+        return response()->json(['sprints' => $sprints]);
     }
 } 

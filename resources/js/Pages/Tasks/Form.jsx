@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import { useState, useEffect } from 'react';
 
@@ -27,9 +27,16 @@ export default function Form({ auth, task = null, projects = [], selectedProject
     // Загружаем спринты при изменении проекта
     useEffect(() => {
         if (data.project_id) {
-            fetch(route('tasks.project.sprints', data.project_id))
+            fetch(route('tasks.project.sprints', data.project_id), {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
                 .then(response => response.json())
-                .then(sprints => {
+                .then(data => {
+                    const sprints = Array.isArray(data) ? data : data.sprints || [];
                     setAvailableSprints(sprints);
                     // Сбрасываем выбранный спринт, если он не принадлежит новому проекту
                     if (data.sprint_id && !sprints.find(s => s.id == data.sprint_id)) {
