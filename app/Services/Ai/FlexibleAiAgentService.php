@@ -73,18 +73,21 @@ class FlexibleAiAgentService
         RateLimiter::hit($key, 60);
 
         try {
+            // Проверяем, является ли это подтверждением
+            $isConfirmation = $this->isConfirmation($userInput);
+            
             // Шаг 1: Получаем команды от ИИ
-            $commandsResponse = $this->getCommandsFromAi($userInput, $user, $sessionId);
+            $commandsResponse = $this->getCommandsFromAi($userInput, $user, $sessionId, $isConfirmation);
             $sessionId = $commandsResponse['session_id'] ?? $sessionId;
             
-            // Шаг 2: Выполняем команды
+            // Шаг 2: Выполняем команды (автоматически для подтверждений)
             $commandResults = [];
             if (!empty($commandsResponse['commands'])) {
                 $commandResults = $this->executeCommands($commandsResponse['commands'], $user);
             }
             
             // Шаг 3: Генерируем финальный ответ на основе результатов
-            $finalResponse = $this->generateNaturalResponse($userInput, $commandResults, $user, $sessionId);
+            $finalResponse = $this->generateNaturalResponse($userInput, $commandResults, $user, $sessionId, $isConfirmation);
             
             $processingTime = microtime(true) - $startTime;
             
@@ -161,14 +164,31 @@ class FlexibleAiAgentService
     }
 
     /**
+     * Проверить, является ли запрос подтверждением
+     */
+    private function isConfirmation(string $userInput): bool
+    {
+        $input = mb_strtolower(trim($userInput));
+        $confirmations = ['да', 'давай', 'сделай', 'выполни', 'ок', 'окей', 'хорошо', 'согласен', 'подтверждаю', 'да, сделай', 'да, выполни'];
+        
+        foreach ($confirmations as $confirmation) {
+            if (strpos($input, $confirmation) === 0) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
      * Шаг 1: Получить команды от ИИ
      */
-    private function getCommandsFromAi(string $userInput, User $user, ?string $sessionId): array
+    private function getCommandsFromAi(string $userInput, User $user, ?string $sessionId, bool $isConfirmation = false): array
     {
         $context = $this->buildContext($user);
         $commands = $this->commandRegistry->getCommandsForAi();
         
-        $prompt = $this->buildCommandsPrompt($userInput, $context, $commands);
+        $prompt = $this->buildCommandsPrompt($userInput, $context, $commands, $isConfirmation);
         
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->aiServiceToken,
@@ -218,7 +238,7 @@ class FlexibleAiAgentService
     /**
      * Шаг 3: Генерировать естественный ответ на основе результатов команд
      */
-    private function generateNaturalResponse(string $userInput, array $commandResults, User $user, ?string $sessionId): array
+    private function generateNaturalResponse(string $userInput, array $commandResults, User $user, ?string $sessionId, bool $isConfirmation = false): array
     {
         $context = $this->buildContext($user);
         
@@ -257,13 +277,28 @@ class FlexibleAiAgentService
     /**
      * Построить промпт для получения команд
      */
-    private function buildCommandsPrompt(string $userInput, array $context, array $commands): string
+    private function buildCommandsPrompt(string $userInput, array $context, array $commands, bool $isConfirmation = false): string
     {
         $prompt = "Ты - ИИ-ассистент для системы управления задачами. Анализируй запрос пользователя и определяй, какие команды нужно выполнить.\n\n";
         $prompt .= "Запрос пользователя: {$userInput}\n\n";
         
         $prompt .= "Контекст пользователя:\n";
         $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
+        
+        // Добавляем информацию о enum'ах
+        if (isset($context['enums'])) {
+            $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ЗАДАЧ:\n";
+            foreach ($context['enums']['task_statuses'] as $status) {
+                $prompt .= "- {$status['name']} ({$status['key']}): {$status['description']}\n";
+            }
+            $prompt .= "\n";
+            
+            $prompt .= "ТИПЫ КОММЕНТАРИЕВ:\n";
+            foreach ($context['enums']['comment_types'] as $type) {
+                $prompt .= "- {$type['name']} ({$type['key']}): {$type['label']} {$type['icon']}\n";
+            }
+            $prompt .= "\n";
+        }
         
         $prompt .= "Доступные команды:\n";
         foreach ($commands as $command) {
@@ -280,7 +315,13 @@ class FlexibleAiAgentService
         $prompt .= "3. Для создания используй CREATE команды\n";
         $prompt .= "4. Используй project_name вместо project_id\n";
         $prompt .= "5. Для назначения на себя используй assign_to_me: true\n";
-        $prompt .= "6. Возвращай ТОЛЬКО JSON\n\n";
+        $prompt .= "6. ВАЖНО: Если пользователь просит что-то сделать - выполняй команды сразу, не спрашивай подтверждения\n";
+        $prompt .= "7. Если пользователь говорит 'переведи задачи в статус выполнено' - используй BULK_UPDATE_TASK_STATUS\n";
+        $prompt .= "8. Если пользователь подтверждает действие (да, сделай, ок) - выполняй предыдущие команды\n";
+        $prompt .= "9. Для массового обновления статуса используй BULK_UPDATE_TASK_STATUS с параметрами project_name и current_status\n";
+        $prompt .= "10. ВАЖНО: Используй точные названия статусов из enum'ов\n";
+        $prompt .= "11. Статусы задач: 'To Do', 'In Progress', 'Review', 'Testing', 'Ready for Release', 'Done'\n";
+        $prompt .= "12. Возвращай ТОЛЬКО JSON\n\n";
         
         $prompt .= "Формат ответа:\n";
         $prompt .= '{"commands": [{"name": "COMMAND_NAME", "parameters": {"param1": "value1"}}]}';
@@ -448,7 +489,7 @@ class FlexibleAiAgentService
                 [
                     'name' => 'LIST_TASKS',
                     'parameters' => [
-                        'status' => 'к выполнению'
+                        'status' => 'To Do'
                     ]
                 ]
             ];
@@ -460,7 +501,7 @@ class FlexibleAiAgentService
                 [
                     'name' => 'LIST_TASKS',
                     'parameters' => [
-                        'status' => 'в работе'
+                        'status' => 'In Progress'
                     ]
                 ]
             ];
@@ -472,7 +513,7 @@ class FlexibleAiAgentService
                 [
                     'name' => 'LIST_TASKS',
                     'parameters' => [
-                        'status' => 'готово'
+                        'status' => 'Done'
                     ]
                 ]
             ];
@@ -486,6 +527,35 @@ class FlexibleAiAgentService
                     'parameters' => []
                 ]
             ];
+        }
+        
+        // Массовое обновление статуса задач
+        if (preg_match('/(переведи|перевести|обнови|обновить).*?(задач|задачи).*?(статус|статус).*?(выполнено|готово|done)/', $input)) {
+            $parameters = ['new_status' => 'Done'];
+            
+            // Проверяем разные варианты статуса "выполнено"
+            if (preg_match('/(?:в статус|на статус)\s+(выполнено|готово|done)/i', $input, $matches)) {
+                $status = strtolower($matches[1]);
+                if ($status === 'done' || $status === 'выполнено' || $status === 'готово') {
+                    $parameters['new_status'] = 'Done';
+                } else {
+                    $parameters['new_status'] = $status;
+                }
+            }
+            
+            // Ищем название проекта
+            if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            }
+            
+            // Ищем текущий статус
+            if (preg_match('/(?:которые|что).*?(?:в|на).*?(тестировании|тестирование)/', $input)) {
+                $parameters['current_status'] = 'Testing';
+            }
+            
+            return [['name' => 'BULK_UPDATE_TASK_STATUS', 'parameters' => $parameters]];
         }
         
         // Проекты

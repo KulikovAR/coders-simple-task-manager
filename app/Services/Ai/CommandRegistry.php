@@ -11,6 +11,7 @@ use App\Services\Ai\Commands\CreateMultipleTasksCommand;
 use App\Services\Ai\Commands\UpdateTaskCommand;
 use App\Services\Ai\Commands\ListTasksCommand;
 use App\Services\Ai\Commands\UpdateTaskStatusCommand;
+use App\Services\Ai\Commands\BulkUpdateTaskStatusCommand;
 use App\Services\Ai\Commands\AssignTaskCommand;
 use App\Services\Ai\Commands\ErrorCommand;
 use App\Services\ProjectService;
@@ -53,6 +54,7 @@ class CommandRegistry
         $this->register(new UpdateTaskCommand($taskService));
         $this->register(new ListTasksCommand($taskService));
         $this->register(new UpdateTaskStatusCommand($taskService));
+        $this->register(new BulkUpdateTaskStatusCommand($taskService, $projectService));
         $this->register(new AssignTaskCommand($taskService));
         
         // Команды ошибок

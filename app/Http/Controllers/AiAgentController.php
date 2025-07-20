@@ -8,6 +8,7 @@ use App\Services\Ai\CommandRegistry;
 use App\Services\Ai\ContextProviders\UserContextProvider;
 use App\Services\Ai\ContextProviders\ProjectContextProvider;
 use App\Services\Ai\ContextProviders\UsersContextProvider;
+use App\Services\Ai\ContextProviders\EnumsContextProvider;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\SprintService;
@@ -169,6 +170,7 @@ class AiAgentController extends Controller
             new UserContextProvider(),
             new ProjectContextProvider(app(ProjectService::class)),
             new UsersContextProvider(),
+            new EnumsContextProvider(),
         ];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
