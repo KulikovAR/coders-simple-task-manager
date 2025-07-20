@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import AiMessageRenderer from '@/Components/AiMessageRenderer';
 
 export default function AiAgentIndex({ auth, conversations, stats }) {
     const [messages, setMessages] = useState([]);
@@ -285,54 +286,26 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
                 className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
             >
                 <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
                         isUser
                             ? 'bg-accent-blue text-white'
                             : message.success !== false
-                            ? 'bg-secondary-bg text-text-primary'
+                            ? 'bg-secondary-bg text-text-primary shadow-sm'
                             : 'bg-red-100 text-red-800'
                     }`}
                 >
-                    <div className="text-sm">{message.content}</div>
-                    
-                    {message.type === 'ai' && message.results && message.results.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-gray-200">
-                            <div className="text-xs text-text-muted mb-1">
-                                Выполнено команд: {message.commandsExecuted}
-                            </div>
-                            {message.results.map((result, index) => (
-                                <div key={index} className="text-xs">
-                                    {result.links && Object.keys(result.links).length > 0 && (
-                                        <div className="mt-1">
-                                            {Object.entries(result.links).map(([key, url]) => (
-                                                <a
-                                                    key={key}
-                                                    href={url}
-                                                    className="text-accent-blue hover:text-accent-green mr-2"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    {key === 'project' ? 'Проект' :
-                                                     key === 'task' ? 'Задача' :
-                                                     key === 'sprint' ? 'Спринт' : key}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                    {isUser ? (
+                        // Простое отображение для сообщений пользователя
+                        <div className="text-sm">{message.content}</div>
+                    ) : (
+                        // Красивое отображение для сообщений ИИ
+                        <AiMessageRenderer
+                            content={message.content}
+                            results={message.results}
+                            commandsExecuted={message.commandsExecuted}
+                            timestamp={message.timestamp}
+                        />
                     )}
-                    
-                    <div className="text-xs text-text-muted mt-1">
-                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        }) : new Date().toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        })}
-                    </div>
                 </div>
             </div>
         );
