@@ -34,10 +34,26 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                 },
                 credentials: 'same-origin'
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    const sprints = Array.isArray(data) ? data : data.sprints || [];
+                    // Убеждаемся, что data - это массив или объект с массивом sprints
+                    let sprints = [];
+                    if (Array.isArray(data)) {
+                        sprints = data;
+                    } else if (data && typeof data === 'object' && Array.isArray(data.sprints)) {
+                        sprints = data.sprints;
+                    } else if (data && typeof data === 'object' && data.sprints) {
+                        sprints = Array.isArray(data.sprints) ? data.sprints : [];
+                    }
+                    
+                    console.log('Loaded sprints:', sprints); // Для отладки
                     setAvailableSprints(sprints);
+                    
                     // Сбрасываем выбранный спринт, если он не принадлежит новому проекту
                     if (data.sprint_id && !sprints.find(s => s.id == data.sprint_id)) {
                         setData('sprint_id', '');

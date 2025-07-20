@@ -202,10 +202,10 @@ class TaskController extends Controller
         
         // Для AJAX запросов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
-            return response()->json($sprints);
+            return response()->json($sprints->toArray());
         }
         
         // Для обычных запросов возвращаем данные для Inertia
-        return response()->json(['sprints' => $sprints]);
+        return response()->json(['sprints' => $sprints->toArray()]);
     }
 } 
