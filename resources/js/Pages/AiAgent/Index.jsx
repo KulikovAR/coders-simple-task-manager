@@ -11,6 +11,7 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
     const [showHistory, setShowHistory] = useState(false);
     const [historyConversations, setHistoryConversations] = useState(conversations?.data || []);
     const [historyStats, setHistoryStats] = useState(stats || {});
+    const [sessionId, setSessionId] = useState(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -57,10 +58,18 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 },
-                body: JSON.stringify({ message: inputMessage }),
+                body: JSON.stringify({ 
+                    message: inputMessage,
+                    session_id: sessionId 
+                }),
             });
 
             const result = await response.json();
+
+            // Сохраняем session_id для поддержания контекста
+            if (result.session_id) {
+                setSessionId(result.session_id);
+            }
 
             const aiMessage = {
                 id: Date.now() + 1,

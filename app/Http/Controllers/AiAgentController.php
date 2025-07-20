@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Ai\AiAgentService;
+use App\Services\Ai\FlexibleAiAgentService;
 use App\Services\Ai\CommandRegistry;
 use App\Services\Ai\ContextProviders\UserContextProvider;
 use App\Services\Ai\ContextProviders\ProjectContextProvider;
@@ -18,11 +19,11 @@ use Inertia\Inertia;
 
 class AiAgentController extends Controller
 {
-    private AiAgentService $aiAgentService;
+    private FlexibleAiAgentService $aiAgentService;
 
     public function __construct()
     {
-        $this->aiAgentService = $this->createAiAgentService();
+        $this->aiAgentService = $this->createFlexibleAiAgentService();
     }
 
     /**
@@ -47,12 +48,14 @@ class AiAgentController extends Controller
     {
         $request->validate([
             'message' => 'required|string|max:1000',
+            'session_id' => 'nullable|string',
         ]);
 
         $user = Auth::user();
         $message = $request->input('message');
+        $sessionId = $request->input('session_id');
 
-        $result = $this->aiAgentService->processRequest($message, $user);
+        $result = $this->aiAgentService->processRequest($message, $user, $sessionId);
 
         return response()->json($result);
     }
@@ -156,9 +159,9 @@ class AiAgentController extends Controller
     }
 
     /**
-     * Создать экземпляр ИИ-агента
+     * Создать экземпляр гибкого ИИ-агента
      */
-    private function createAiAgentService(): AiAgentService
+    private function createFlexibleAiAgentService(): FlexibleAiAgentService
     {
         $commandRegistry = $this->createCommandRegistry();
         
@@ -168,7 +171,7 @@ class AiAgentController extends Controller
             new UsersContextProvider(),
         ];
 
-        return new AiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
+        return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
     }
 
     /**
