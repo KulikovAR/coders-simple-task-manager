@@ -30,13 +30,15 @@ abstract class AbstractCommand implements CommandInterface
     /**
      * Форматировать ответ с ссылками
      */
-    protected function formatResponse(array $data, string $message = null): array
+    protected function formatResponse(array $data, string $message = null, array $customLinks = []): array
     {
+        $links = array_merge($this->generateLinks($data), $customLinks);
+        
         return [
             'success' => true,
             'message' => $message,
             'data' => $data,
-            'links' => $this->generateLinks($data),
+            'links' => $links,
         ];
     }
 

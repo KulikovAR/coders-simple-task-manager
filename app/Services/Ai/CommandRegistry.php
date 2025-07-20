@@ -7,10 +7,12 @@ use App\Services\Ai\Commands\CreateProjectCommand;
 use App\Services\Ai\Commands\UpdateProjectCommand;
 use App\Services\Ai\Commands\ListProjectsCommand;
 use App\Services\Ai\Commands\CreateTaskCommand;
+use App\Services\Ai\Commands\CreateMultipleTasksCommand;
 use App\Services\Ai\Commands\UpdateTaskCommand;
 use App\Services\Ai\Commands\ListTasksCommand;
 use App\Services\Ai\Commands\UpdateTaskStatusCommand;
 use App\Services\Ai\Commands\AssignTaskCommand;
+use App\Services\Ai\Commands\ErrorCommand;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\SprintService;
@@ -47,10 +49,14 @@ class CommandRegistry
 
         // Команды задач
         $this->register(new CreateTaskCommand($taskService, $projectService));
+        $this->register(new CreateMultipleTasksCommand($taskService, $projectService));
         $this->register(new UpdateTaskCommand($taskService));
         $this->register(new ListTasksCommand($taskService));
         $this->register(new UpdateTaskStatusCommand($taskService));
         $this->register(new AssignTaskCommand($taskService));
+        
+        // Команды ошибок
+        $this->register(new ErrorCommand());
     }
 
     /**

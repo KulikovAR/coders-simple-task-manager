@@ -9,21 +9,25 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Services\AiConversationService;
 
 class AiAgentService
 {
     private CommandRegistry $commandRegistry;
     private array $contextProviders;
+    private ?AiConversationService $conversationService;
     private string $aiServiceUrl;
     private string $aiServiceToken;
     private string $aiModel;
 
     public function __construct(
         CommandRegistry $commandRegistry,
-        array $contextProviders = []
+        array $contextProviders = [],
+        AiConversationService $conversationService = null
     ) {
         $this->commandRegistry = $commandRegistry;
         $this->contextProviders = $contextProviders;
+        $this->conversationService = $conversationService;
         $this->aiServiceUrl = config('services.ai.url', 'https://oneai-proxy.ru/api/v1/ai');
         $this->aiServiceToken = config('services.ai.token');
         $this->aiModel = config('services.ai.model', 'gpt-3.5-turbo');
@@ -34,6 +38,8 @@ class AiAgentService
      */
     public function processRequest(string $userInput, User $user): array
     {
+        $startTime = microtime(true);
+        
         // Валидация входных данных
         $userInput = trim($userInput);
         if (empty($userInput)) {
@@ -86,12 +92,29 @@ class AiAgentService
             // Формируем финальный ответ
             $finalResponse = $this->generateFinalResponse($userInput, $results, $user);
             
+            $processingTime = microtime(true) - $startTime;
+            
+            // Сохраняем в историю, если сервис доступен
+            if ($this->conversationService) {
+                $conversation = $this->conversationService->getOrCreateActiveSession($user);
+                $this->conversationService->addUserMessage($conversation, $userInput);
+                $this->conversationService->addAiMessage(
+                    $conversation,
+                    $finalResponse,
+                    true,
+                    count($aiResponse['commands']),
+                    $results,
+                    $processingTime
+                );
+            }
+            
             // Логируем успешные операции
             Log::info('AI Agent Success', [
                 'user_id' => $user->id,
                 'user_input' => $userInput,
                 'commands_executed' => count($aiResponse['commands']),
                 'commands' => $aiResponse['commands'],
+                'processing_time' => $processingTime,
             ]);
             
             return [
@@ -99,13 +122,38 @@ class AiAgentService
                 'message' => $finalResponse,
                 'results' => $results,
                 'commands_executed' => count($aiResponse['commands']),
+                'processing_time' => $processingTime,
             ];
         } catch (\Exception $e) {
+            $processingTime = isset($startTime) ? microtime(true) - $startTime : 0;
+            
+            // Сохраняем ошибку в историю, если сервис доступен
+            if ($this->conversationService) {
+                try {
+                    $conversation = $this->conversationService->getOrCreateActiveSession($user);
+                    $this->conversationService->addUserMessage($conversation, $userInput);
+                    $this->conversationService->addAiMessage(
+                        $conversation,
+                        'Произошла ошибка при обработке запроса: ' . $e->getMessage(),
+                        false,
+                        0,
+                        [],
+                        $processingTime
+                    );
+                } catch (\Exception $historyError) {
+                    Log::error('Failed to save conversation history', [
+                        'error' => $historyError->getMessage(),
+                        'original_error' => $e->getMessage(),
+                    ]);
+                }
+            }
+            
             Log::error('AI Agent Error', [
                 'error' => $e->getMessage(),
                 'user_input' => $userInput,
                 'user_id' => $user->id,
                 'trace' => $e->getTraceAsString(),
+                'processing_time' => $processingTime,
             ]);
             
             return [
@@ -113,6 +161,7 @@ class AiAgentService
                 'message' => 'Произошла ошибка при обработке запроса: ' . $e->getMessage(),
                 'results' => [],
                 'commands_executed' => 0,
+                'processing_time' => $processingTime,
             ];
         }
     }
@@ -209,16 +258,25 @@ class AiAgentService
             }
         }
         
-        $prompt .= "\nПРАВИЛА:\n";
+        $prompt .= "\nВАЖНЫЕ ПРАВИЛА:\n";
         $prompt .= "1. Анализируй запрос пользователя и определяй, какие команды нужно выполнить\n";
         $prompt .= "2. Если пользователь спрашивает о своих задачах - используй LIST_TASKS с параметром my_tasks: true\n";
         $prompt .= "3. Если пользователь спрашивает о задачах вообще - используй LIST_TASKS\n";
-        $prompt .= "4. Если пользователь хочет создать что-то - используй соответствующую CREATE команду\n";
-        $prompt .= "5. Для назначения исполнителей используй assignee_id или assignee_name из контекста пользователей\n";
-        $prompt .= "6. Если пользователь говорит 'на меня', 'мне', 'себе' - используй assign_to_me: true\n";
-        $prompt .= "7. Для назначения на конкретного пользователя используй assignee_name с именем\n";
-        $prompt .= "8. ВАЖНО: Возвращай ТОЛЬКО JSON, без дополнительного текста\n";
-        $prompt .= "9. Если не можешь определить команду - возвращай пустой массив команд\n\n";
+        $prompt .= "4. Если пользователь спрашивает о задачах 'к выполнению' - используй LIST_TASKS с параметром status: 'к выполнению'\n";
+        $prompt .= "5. Если пользователь спрашивает о задачах 'в работе' - используй LIST_TASKS с параметром status: 'в работе'\n";
+        $prompt .= "6. Если пользователь спрашивает о задачах 'готово' - используй LIST_TASKS с параметром status: 'готово'\n";
+        $prompt .= "7. Если пользователь хочет создать что-то - используй соответствующую CREATE команду\n";
+        $prompt .= "8. Для создания задач используй project_name вместо project_id, если пользователь указывает название проекта\n";
+        $prompt .= "9. Для назначения исполнителей используй assignee_id или assignee_name из контекста пользователей\n";
+        $prompt .= "10. Если пользователь говорит 'на меня', 'мне', 'себе' - используй assign_to_me: true\n";
+        $prompt .= "11. Для назначения на конкретного пользователя используй assignee_name с именем\n";
+        $prompt .= "12. Если команда требует удаления сущности, но у пользователя нет прав - используй команду с параметром \"error\": \"У вас нет прав для удаления этой сущности\"\n";
+        $prompt .= "13. Всегда включай ссылки в результат команды через поле \"links\"\n";
+        $prompt .= "14. Для списков задач/проектов/спринтов всегда добавляй ссылку на общий список\n";
+        $prompt .= "15. Для отдельных сущностей добавляй прямые ссылки на них\n";
+        $prompt .= "16. ВАЖНО: Возвращай ТОЛЬКО JSON, без дополнительного текста\n";
+        $prompt .= "17. Если не можешь определить команду - возвращай пустой массив команд\n";
+        $prompt .= "18. При создании задач проверяй доступные проекты в контексте и используй точное название\n\n";
         
         $prompt .= "Формат ответа (только JSON):\n";
         $prompt .= '{"commands": [{"name": "COMMAND_NAME", "parameters": {"param1": "value1"}}]}';
@@ -306,44 +364,62 @@ class AiAgentService
         $successfulResults = array_filter($results, fn($r) => $r['success'] ?? false);
         $failedResults = array_filter($results, fn($r) => !($r['success'] ?? false));
         
-        $prompt = "Пользователь запросил: {$userInput}\n\n";
-        $prompt .= "Результаты выполнения команд:\n";
+        $response = '';
         
+        // Обрабатываем успешные результаты
         foreach ($successfulResults as $result) {
-            $prompt .= "- Успешно: {$result['message']}\n";
-        }
-        
-        foreach ($failedResults as $result) {
-            $prompt .= "- Ошибка: {$result['message']}\n";
-        }
-        
-        $prompt .= "\nСформируй краткий и понятный ответ пользователю на русском языке. ";
-        $prompt .= "Если были созданы объекты, укажи ссылки на них. ";
-        $prompt .= "Если были ошибки, объясни их простыми словами.";
-        
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->aiServiceToken,
-            'Content-Type' => 'application/json',
-        ])->post($this->aiServiceUrl, [
-            'model' => $this->aiModel,
-            'input' => $prompt,
-            'session_id' => 'ai-agent-session',
-            'new_session' => false,
-        ]);
-
-        if ($response->successful()) {
-            $aiResponse = $response->json();
+            $response .= $result['message'] . "\n";
             
-            // Проверяем формат OpenAI API
-            if (isset($aiResponse['choices']) && is_array($aiResponse['choices'])) {
-                return $aiResponse['choices'][0]['message']['content'] ?? 'Операция выполнена успешно.';
+            // Добавляем ссылки, если они есть
+            if (isset($result['links']) && is_array($result['links']) && !empty($result['links'])) {
+                $linkTexts = [];
+                foreach ($result['links'] as $key => $url) {
+                    $label = match($key) {
+                        'project' => 'Проект',
+                        'task' => 'Задача',
+                        'sprint' => 'Спринт',
+                        'projects' => 'Список проектов',
+                        'tasks' => 'Список задач',
+                        'project_board' => 'Доска проекта',
+                        'tasks_list' => 'Список задач',
+                        default => ucfirst($key)
+                    };
+                    $linkTexts[] = "[{$label}]({$url})";
+                }
+                if (!empty($linkTexts)) {
+                    $response .= "Ссылки: " . implode(', ', $linkTexts) . "\n";
+                }
             }
-            
-            // Fallback для других форматов
-            return $aiResponse['output'] ?? $aiResponse['response'] ?? 'Операция выполнена успешно.';
         }
         
-        return 'Операция выполнена успешно.';
+        // Обрабатываем ошибки
+        foreach ($failedResults as $result) {
+            $response .= "❌ " . $result['message'] . "\n";
+            
+            // Добавляем ссылки для ошибок, если они есть
+            if (isset($result['links']) && is_array($result['links']) && !empty($result['links'])) {
+                $linkTexts = [];
+                foreach ($result['links'] as $key => $url) {
+                    $label = match($key) {
+                        'project' => 'Проект',
+                        'task' => 'Задача',
+                        'sprint' => 'Спринт',
+                        default => ucfirst($key)
+                    };
+                    $linkTexts[] = "[{$label}]({$url})";
+                }
+                if (!empty($linkTexts)) {
+                    $response .= "Ссылки: " . implode(', ', $linkTexts) . "\n";
+                }
+            }
+        }
+        
+        // Если нет результатов, возвращаем стандартное сообщение
+        if (empty($successfulResults) && empty($failedResults)) {
+            $response = 'Команда выполнена, но результаты не получены.';
+        }
+        
+        return trim($response);
     }
 
     /**
@@ -360,6 +436,42 @@ class AiAgentService
                     'name' => 'LIST_TASKS',
                     'parameters' => [
                         'my_tasks' => true
+                    ]
+                ]
+            ];
+        }
+        
+        // Задачи к выполнению
+        if (preg_match('/(к выполнению|к выполнению|готовые к выполнению|новые задачи|не начатые)/', $input)) {
+            return [
+                [
+                    'name' => 'LIST_TASKS',
+                    'parameters' => [
+                        'status' => 'к выполнению'
+                    ]
+                ]
+            ];
+        }
+        
+        // Задачи в работе
+        if (preg_match('/(в работе|выполняются|активные задачи|текущие)/', $input)) {
+            return [
+                [
+                    'name' => 'LIST_TASKS',
+                    'parameters' => [
+                        'status' => 'в работе'
+                    ]
+                ]
+            ];
+        }
+        
+        // Готовые задачи
+        if (preg_match('/(готово|завершено|выполнено|готовые|завершенные)/', $input)) {
+            return [
+                [
+                    'name' => 'LIST_TASKS',
+                    'parameters' => [
+                        'status' => 'готово'
                     ]
                 ]
             ];
@@ -406,8 +518,40 @@ class AiAgentService
             ];
         }
         
+        // Проверяем создание нескольких задач
+        if (preg_match('/(создай|создать)\s+(\d+)\s+задач/', $input, $matches)) {
+            $count = (int) $matches[2];
+            $parameters = ['count' => $count];
+            
+            // Извлекаем название задачи
+            if (preg_match('/(?:создай|создать)\s+\d+\s+задач\s+(?:на|для)\s+(.+)/', $input, $matches)) {
+                $parameters['title'] = trim($matches[1]);
+            } else {
+                $parameters['title'] = 'Задача';
+            }
+            
+            // Ищем название проекта в запросе
+            if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            }
+            
+            // Проверяем назначение на себя
+            if (preg_match('/(на меня|мне|себе|исполнителя меня)/', $input)) {
+                $parameters['assign_to_me'] = true;
+            }
+            
+            // Проверяем назначение на конкретного пользователя
+            if (preg_match('/(?:на|для)\s+([а-яё\s]+)/', $input, $matches)) {
+                $parameters['assignee_name'] = trim($matches[1]);
+            }
+            
+            return [['name' => 'CREATE_MULTIPLE_TASKS', 'parameters' => $parameters]];
+        }
+        
         if (preg_match('/(создай|создать) задачу/', $input)) {
-            $parameters = ['project_id' => 1]; // По умолчанию первый проект
+            $parameters = [];
             
             // Извлекаем название задачи
             if (preg_match('/(?:создай|создать) задачу\s+(.+)/', $input, $matches)) {
@@ -416,8 +560,15 @@ class AiAgentService
                 $parameters['title'] = 'Новая задача';
             }
             
+            // Ищем название проекта в запросе
+            if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            }
+            
             // Проверяем назначение на себя
-            if (preg_match('/(на меня|мне|себе)/', $input)) {
+            if (preg_match('/(на меня|мне|себе|исполнителя меня)/', $input)) {
                 $parameters['assign_to_me'] = true;
             }
             

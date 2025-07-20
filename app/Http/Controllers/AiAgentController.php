@@ -11,6 +11,7 @@ use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\SprintService;
 use App\Services\CommentService;
+use App\Services\AiConversationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -29,8 +30,13 @@ class AiAgentController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        
         return Inertia::render('AiAgent/Index', [
-            'user' => Auth::user(),
+            'user' => $user,
+            'conversations' => $conversationService->getUserConversations($user, 5),
+            'stats' => $conversationService->getUserStats($user),
         ]);
     }
 
@@ -49,6 +55,91 @@ class AiAgentController extends Controller
         $result = $this->aiAgentService->processRequest($message, $user);
 
         return response()->json($result);
+    }
+
+    /**
+     * Получить историю диалогов пользователя
+     */
+    public function getConversations(Request $request)
+    {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        $perPage = $request->get('per_page', 10);
+        
+        return response()->json([
+            'success' => true,
+            'conversations' => $conversationService->getUserConversations($user, $perPage),
+        ]);
+    }
+
+    /**
+     * Получить сообщения конкретного диалога
+     */
+    public function getConversationMessages(Request $request, $conversationId)
+    {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        $perPage = $request->get('per_page', 20);
+        
+        $conversation = \App\Models\AiConversation::where('id', $conversationId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+        
+        return response()->json([
+            'success' => true,
+            'conversation' => $conversation,
+            'messages' => $conversationService->getConversationMessages($conversation, $perPage),
+        ]);
+    }
+
+    /**
+     * Создать новый диалог
+     */
+    public function createConversation()
+    {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        
+        $conversation = $conversationService->createNewConversation($user);
+        
+        return response()->json([
+            'success' => true,
+            'conversation' => $conversation,
+        ]);
+    }
+
+    /**
+     * Удалить диалог
+     */
+    public function deleteConversation($conversationId)
+    {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        
+        $conversation = \App\Models\AiConversation::where('id', $conversationId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+        
+        $conversationService->deleteConversation($conversation);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Диалог удален',
+        ]);
+    }
+
+    /**
+     * Получить статистику пользователя
+     */
+    public function getStats()
+    {
+        $user = Auth::user();
+        $conversationService = app(AiConversationService::class);
+        
+        return response()->json([
+            'success' => true,
+            'stats' => $conversationService->getUserStats($user),
+        ]);
     }
 
     /**
@@ -77,7 +168,7 @@ class AiAgentController extends Controller
             new UsersContextProvider(),
         ];
 
-        return new AiAgentService($commandRegistry, $contextProviders);
+        return new AiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
     }
 
     /**

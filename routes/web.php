@@ -68,6 +68,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/ai-agent/commands', [App\Http\Controllers\AiAgentController::class, 'getCommands'])
         ->name('ai-agent.commands')
         ->middleware('ai.agent');
+    
+    // История диалогов ИИ-агента
+    Route::get('/ai-agent/conversations', [App\Http\Controllers\AiAgentController::class, 'getConversations'])
+        ->name('ai-agent.conversations')
+        ->middleware('ai.agent');
+    Route::get('/ai-agent/conversations/{conversationId}/messages', [App\Http\Controllers\AiAgentController::class, 'getConversationMessages'])
+        ->name('ai-agent.conversation.messages')
+        ->middleware('ai.agent');
+    Route::post('/ai-agent/conversations', [App\Http\Controllers\AiAgentController::class, 'createConversation'])
+        ->name('ai-agent.conversations.create')
+        ->middleware('ai.agent');
+    Route::delete('/ai-agent/conversations/{conversationId}', [App\Http\Controllers\AiAgentController::class, 'deleteConversation'])
+        ->name('ai-agent.conversations.delete')
+        ->middleware('ai.agent');
+    Route::get('/ai-agent/stats', [App\Http\Controllers\AiAgentController::class, 'getStats'])
+        ->name('ai-agent.stats')
+        ->middleware('ai.agent');
 });
 
 require __DIR__.'/auth.php';

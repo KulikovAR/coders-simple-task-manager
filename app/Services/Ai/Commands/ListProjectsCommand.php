@@ -40,9 +40,15 @@ class ListProjectsCommand extends AbstractCommand
             
             $projects = $this->projectService->getUserProjects($user, $filters);
 
+            // Формируем ссылки
+            $customLinks = [
+                'projects' => route('projects.index'),
+            ];
+
             return $this->formatResponse(
                 ['projects' => $projects->toArray()],
-                "Найдено {$projects->total()} проектов"
+                "Найдено {$projects->total()} проектов",
+                $customLinks
             );
         } catch (\Exception $e) {
             return $this->handleError($e);

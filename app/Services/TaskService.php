@@ -24,13 +24,14 @@ class TaskService
         if (!empty($filters['search'])) {
             $query->where(function($q) use ($filters) {
                 $q->where('title', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+                  ->orWhere('description', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('code', 'like', '%' . $filters['search'] . '%');
             });
         }
 
         if (!empty($filters['status'])) {
             $query->whereHas('status', function($q) use ($filters) {
-                $q->where('name', $filters['status']);
+                $q->where('name', 'like', '%' . $filters['status'] . '%');
             });
         }
 
@@ -42,6 +43,10 @@ class TaskService
             $query->where('project_id', $filters['project_id']);
         }
 
+        if (!empty($filters['sprint_id'])) {
+            $query->where('sprint_id', $filters['sprint_id']);
+        }
+
         if (!empty($filters['assignee_id'])) {
             $query->where('assignee_id', $filters['assignee_id']);
         }
@@ -50,8 +55,16 @@ class TaskService
             $query->where('reporter_id', $filters['reporter_id']);
         }
 
-        if (!empty($filters['my_tasks']) && $filters['my_tasks'] == '1') {
+        // Фильтр "мои задачи"
+        if (!empty($filters['my_tasks']) && $filters['my_tasks'] === true) {
             $query->where('assignee_id', $user->id);
+        }
+
+        // Фильтр "задачи к выполнению" (статус To Do)
+        if (isset($filters['status']) && $filters['status'] === 'To Do') {
+            $query->whereHas('status', function($q) {
+                $q->where('name', 'To Do');
+            });
         }
 
         return $query->orderBy('created_at', 'desc')->paginate(12);

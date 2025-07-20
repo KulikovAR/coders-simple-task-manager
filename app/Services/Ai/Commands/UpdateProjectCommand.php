@@ -43,7 +43,18 @@ class UpdateProjectCommand extends AbstractCommand
             $project = Project::findOrFail($parameters['id']);
             
             if (!$this->projectService->canUserManageProject($user, $project)) {
-                throw new \Exception('У вас нет прав для редактирования этого проекта');
+                return [
+                    'success' => false,
+                    'message' => 'У вас нет прав для редактирования этого проекта',
+                    'data' => [
+                        'project_id' => $project->id,
+                        'project_name' => $project->name,
+                        'action' => 'update_project',
+                    ],
+                    'links' => [
+                        'project' => route('projects.show', $project->id),
+                    ],
+                ];
             }
 
             $project = $this->projectService->updateProject($project, $parameters);

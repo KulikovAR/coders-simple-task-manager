@@ -7,7 +7,7 @@ use App\Services\ProjectService;
 use App\Models\Project;
 use App\Models\User;
 
-class CreateTaskCommand extends AbstractCommand
+class CreateMultipleTasksCommand extends AbstractCommand
 {
     private TaskService $taskService;
     private ProjectService $projectService;
@@ -20,12 +20,12 @@ class CreateTaskCommand extends AbstractCommand
 
     public function getName(): string
     {
-        return 'CREATE_TASK';
+        return 'CREATE_MULTIPLE_TASKS';
     }
 
     public function getDescription(): string
     {
-        return 'Создать новую задачу';
+        return 'Создать несколько задач одновременно';
     }
 
     public function getParametersSchema(): array
@@ -33,9 +33,10 @@ class CreateTaskCommand extends AbstractCommand
         return [
             'project_id' => ['type' => 'integer', 'required' => false, 'description' => 'ID проекта'],
             'project_name' => ['type' => 'string', 'required' => false, 'description' => 'Название проекта (для поиска)'],
-            'sprint_id' => ['type' => 'integer', 'required' => false, 'description' => 'ID спринта'],
-            'title' => ['type' => 'string', 'required' => true, 'description' => 'Название задачи'],
-            'description' => ['type' => 'string', 'required' => false, 'description' => 'Описание задачи'],
+            'count' => ['type' => 'integer', 'required' => true, 'description' => 'Количество задач для создания'],
+            'title_prefix' => ['type' => 'string', 'required' => false, 'description' => 'Префикс названия задач'],
+            'title' => ['type' => 'string', 'required' => false, 'description' => 'Базовое название задачи'],
+            'description' => ['type' => 'string', 'required' => false, 'description' => 'Описание задач'],
             'assignee_id' => ['type' => 'integer', 'required' => false, 'description' => 'ID исполнителя'],
             'assignee_name' => ['type' => 'string', 'required' => false, 'description' => 'Имя исполнителя (для поиска)'],
             'assign_to_me' => ['type' => 'boolean', 'required' => false, 'description' => 'Назначить на себя'],
@@ -46,7 +47,7 @@ class CreateTaskCommand extends AbstractCommand
     public function execute(array $parameters, $user): array
     {
         try {
-            $this->validateParameters($parameters, ['title']);
+            $this->validateParameters($parameters, ['count']);
 
             // Определяем проект
             $project = null;
@@ -95,22 +96,51 @@ class CreateTaskCommand extends AbstractCommand
                 }
             }
 
-            $task = $this->taskService->createTask($parameters, $project, $user);
+            $count = (int) $parameters['count'];
+            $titlePrefix = $parameters['title_prefix'] ?? '';
+            $baseTitle = $parameters['title'] ?? 'Задача';
+            $description = $parameters['description'] ?? null;
+            
+            $createdTasks = [];
+            
+            for ($i = 1; $i <= $count; $i++) {
+                $taskTitle = $titlePrefix ? "{$titlePrefix} - {$baseTitle} {$i}" : "{$baseTitle} {$i}";
+                
+                $taskData = [
+                    'title' => $taskTitle,
+                    'description' => $description,
+                    'assignee_id' => $parameters['assignee_id'] ?? null,
+                    'priority' => $parameters['priority'] ?? 'medium',
+                ];
+                
+                $task = $this->taskService->createTask($taskData, $project, $user);
+                $createdTasks[] = $task;
+            }
 
             $assigneeInfo = '';
-            if ($task->assignee) {
-                $assigneeInfo = " и назначена на {$task->assignee->name}";
+            if (isset($parameters['assignee_id']) && $parameters['assignee_id']) {
+                $assignee = User::find($parameters['assignee_id']);
+                if ($assignee) {
+                    $assigneeInfo = " и назначены на {$assignee->name}";
+                }
+            } elseif (isset($parameters['assign_to_me']) && $parameters['assign_to_me']) {
+                $assigneeInfo = " и назначены на {$user->name}";
             }
 
             // Формируем дополнительные ссылки
             $customLinks = [
+                'project' => route('projects.show', $project->id),
                 'project_board' => route('projects.board', $project->id),
                 'tasks_list' => route('tasks.index'),
             ];
 
             return $this->formatResponse(
-                ['task' => $task->toArray(), 'project' => $project->toArray()],
-                "Задача '{$task->title}' успешно создана в проекте '{$project->name}'{$assigneeInfo}",
+                [
+                    'tasks' => collect($createdTasks)->map(fn($task) => $task->toArray())->toArray(),
+                    'project' => $project->toArray(),
+                    'count' => $count
+                ],
+                "Создано {$count} задач в проекте '{$project->name}'{$assigneeInfo}",
                 $customLinks
             );
         } catch (\Exception $e) {
