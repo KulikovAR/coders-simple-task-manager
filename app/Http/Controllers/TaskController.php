@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
-use App\Models\Project;
 use App\Http\Requests\TaskRequest;
-use App\Services\TaskService;
+use App\Models\Project;
+use App\Models\Task;
 use App\Services\ProjectService;
+use App\Services\TaskService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -15,9 +15,11 @@ use Inertia\Inertia;
 class TaskController extends Controller
 {
     public function __construct(
-        private TaskService $taskService,
+        private TaskService    $taskService,
         private ProjectService $projectService
-    ) {}
+    )
+    {
+    }
 
     public function index(Request $request)
     {
@@ -32,20 +34,15 @@ class TaskController extends Controller
         }
         $users = $users->unique('id')->values();
 
-        return Inertia::render('Tasks/Index', [
-            'tasks' => $tasks,
-            'projects' => $projects,
-            'users' => $users,
-            'filters' => $filters,
-        ]);
+        return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'filters'));
     }
 
     public function create(Request $request)
     {
         $projects = $this->projectService->getUserProjectsList(Auth::user());
-        $selectedProjectId = $request->get('project_id') ? (int) $request->get('project_id') : null;
-        $selectedSprintId = $request->get('sprint_id') ? (int) $request->get('sprint_id') : null;
-        
+        $selectedProjectId = $request->get('project_id') ? (int)$request->get('project_id') : null;
+        $selectedSprintId = $request->get('sprint_id') ? (int)$request->get('sprint_id') : null;
+
         // Получаем спринты и участников для выбранного проекта
         $sprints = collect();
         $members = collect();
@@ -58,19 +55,13 @@ class TaskController extends Controller
             }
         }
 
-        return Inertia::render('Tasks/Form', [
-            'projects' => $projects,
-            'selectedProjectId' => $selectedProjectId,
-            'selectedSprintId' => $selectedSprintId,
-            'sprints' => $sprints,
-            'members' => $members,
-        ]);
+        return Inertia::render('Tasks/Form', compact('projects', 'selectedProjectId', 'selectedSprintId', 'sprints', 'members'));
     }
 
     public function store(TaskRequest $request)
     {
         $project = Project::findOrFail($request->validated()['project_id']);
-        
+
         if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
@@ -88,7 +79,7 @@ class TaskController extends Controller
         }
 
         $task->load(['project', 'sprint', 'status', 'comments.user']);
-        
+
         return Inertia::render('Tasks/Show', [
             'task' => $task,
         ]);
@@ -193,19 +184,19 @@ class TaskController extends Controller
         }
 
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
-        
+
         Log::info('Sprints loaded', [
             'project_id' => $project->id,
             'sprints_count' => $sprints->count(),
             'sprints' => $sprints->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
         ]);
-        
+
         // Для AJAX запросов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
             return response()->json($sprints->toArray());
         }
-        
+
         // Для обычных запросов возвращаем данные для Inertia
         return response()->json(['sprints' => $sprints->toArray()]);
     }
-} 
+}

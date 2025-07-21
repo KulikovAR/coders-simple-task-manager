@@ -31,8 +31,13 @@ export default {
                 'accent-pink': 'var(--accent-pink)',
             },
             animation: {
-                'fade-in': 'fadeIn 0.3s ease-out',
-                'slide-up': 'slideUp 0.3s ease-out',
+                'fade-in': 'fadeIn 0.6s ease-out',
+                'slide-up': 'slideUp 0.8s ease-out',
+                'slide-down': 'slideDown 0.8s ease-out',
+                'scale-in': 'scaleIn 0.6s ease-out',
+                'blob': 'blob 7s infinite',
+                'float': 'float 3s ease-in-out infinite',
+                'glow': 'glow 2s ease-in-out infinite alternate',
             },
             keyframes: {
                 fadeIn: {
@@ -43,6 +48,42 @@ export default {
                     '0%': { opacity: '0', transform: 'translateY(20px)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
                 },
+                slideDown: {
+                    '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                scaleIn: {
+                    '0%': { opacity: '0', transform: 'scale(0.9)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
+                },
+                blob: {
+                    '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                    '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                    '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                    '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                },
+                float: {
+                    '0%, 100%': { transform: 'translateY(0px)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                },
+                glow: {
+                    '0%': { boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)' },
+                    '100%': { boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)' },
+                },
+            },
+            transitionDelay: {
+                '100': '100ms',
+                '200': '200ms',
+                '300': '300ms',
+                '400': '400ms',
+                '500': '500ms',
+                '600': '600ms',
+                '700': '700ms',
+                '800': '800ms',
+                '900': '900ms',
+                '1000': '1000ms',
+                '1100': '1100ms',
+                '1200': '1200ms',
             },
         },
     },

@@ -12,6 +12,16 @@ Route::get('/', function () {
     ]);
 });
 
+// Страница с информацией об ИИ-ассистенте
+Route::get('/ai-features', function () {
+    return Inertia::render('AiAgent/Features');
+})->name('ai-features');
+
+// Страница FAQ
+Route::get('/faq', function () {
+    return Inertia::render('Faq');
+})->name('faq');
+
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

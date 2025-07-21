@@ -1,2 +1,30 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Разрешаем индексацию всех страниц
+Allow: /login
+Allow: /register
+Allow: /dashboard
+Allow: /projects
+Allow: /tasks
+Allow: /sprints
+
+# Запрещаем индексацию API и служебных страниц
+Disallow: /api/
+Disallow: /admin/
+Disallow: /telescope/
+Disallow: /_debugbar/
+Disallow: /storage/
+Disallow: /vendor/
+
+# Запрещаем индексацию файлов
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*.txt$
+Disallow: /*.pdf$
+
+# Sitemap
+Sitemap: https://task-manager.pisateli-studio.ru/sitemap.xml
+
+# Crawl-delay для уважительного отношения к серверу
+Crawl-delay: 1
