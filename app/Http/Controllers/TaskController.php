@@ -104,12 +104,7 @@ class TaskController extends Controller
             $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
         }
 
-        return Inertia::render('Tasks/Form', [
-            'task' => $task,
-            'projects' => $projects,
-            'sprints' => $sprints,
-            'members' => $members,
-        ]);
+        return Inertia::render('Tasks/Form', compact('task', 'projects', 'sprints', 'members'));
     }
 
     public function update(TaskRequest $request, Task $task)
@@ -121,7 +116,7 @@ class TaskController extends Controller
         $task = $this->taskService->updateTask($task, $request->validated());
 
         // Для AJAX-запросов возвращаем JSON
-        if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
+        if ($request->header('Accept') === 'application/json') {
             return response()->json([
                 'success' => true,
                 'message' => 'Задача успешно обновлена.',

@@ -39,6 +39,7 @@ const Content = ({
     align = 'right',
     width = '48',
     contentClasses = 'py-1 bg-card-bg border border-border-color',
+    fillContainer = true,
     children,
 }) => {
     const { open, setOpen } = useContext(DropDownContext);
@@ -55,6 +56,9 @@ const Content = ({
 
     if (width === '48') {
         widthClasses = 'w-48';
+    }
+    if (fillContainer) {
+        widthClasses = 'w-full';
     }
 
     return (

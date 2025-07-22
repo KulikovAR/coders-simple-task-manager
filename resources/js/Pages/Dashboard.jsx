@@ -1,9 +1,20 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard({ auth, stats, projects }) {
-    const [showTips, setShowTips] = useState(true);
+    const [showTips, setShowTips] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('dashboardTipsHidden') !== '1';
+        }
+        return true;
+    });
+
+    useEffect(() => {
+        if (!showTips && typeof window !== 'undefined') {
+            localStorage.setItem('dashboardTipsHidden', '1');
+        }
+    }, [showTips]);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -45,32 +56,68 @@ export default function Dashboard({ auth, stats, projects }) {
                     </p>
                 </div>
 
-                {/* Подсказки */}
-                {showTips && (
-                    <div className="card bg-gradient-to-r from-accent-blue/10 to-accent-green/10 border-accent-blue/20">
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-text-primary mb-2 flex items-center">
-                                    💡 Полезные подсказки
-                                </h3>
-                                <div className="space-y-2 text-sm text-text-secondary">
-                                    <p>• Используйте <strong>доски проектов</strong> для визуального управления задачами</p>
-                                    <p>• Создавайте <strong>спринты</strong> для планирования работы на определенные периоды</p>
-                                    <p>• Добавляйте <strong>комментарии</strong> к задачам для лучшего взаимодействия</p>
-                                    <p>• Используйте <strong>фильтры по спринтам</strong> на доске для фокусировки на конкретных задачах</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setShowTips(false)}
-                                className="text-text-muted hover:text-text-secondary transition-colors ml-4"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                {/* Быстрые действия */}
+                <div className="card">
+                    <h3 className="card-title mb-4">Быстрые действия</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Link
+                            href={route('ai-agent.index')}
+                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-purple/10 transition-colors group"
+                        >
+                            <div className="p-2 bg-accent-purple/20 rounded-lg group-hover:bg-accent-purple/30 transition-colors">
+                                <svg className="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                 </svg>
-                            </button>
-                        </div>
+                            </div>
+                            <div className="ml-3">
+                                <p className="font-medium text-text-primary">ИИ-Ассистент</p>
+                                <p className="text-sm text-text-secondary">Управление через ИИ</p>
+                            </div>
+                        </Link>
+                        <Link
+                            href={route('projects.create')}
+                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-blue/10 transition-colors group"
+                        >
+                            <div className="p-2 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors">
+                                <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="font-medium text-text-primary">Создать проект</p>
+                                <p className="text-sm text-text-secondary">Новый проект для команды</p>
+                            </div>
+                        </Link>
+                        <Link
+                            href={route('tasks.create')}
+                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-green/10 transition-colors group"
+                        >
+                            <div className="p-2 bg-accent-green/20 rounded-lg group-hover:bg-accent-green/30 transition-colors">
+                                <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="font-medium text-text-primary">Создать задачу</p>
+                                <p className="text-sm text-text-secondary">Новая задача для работы</p>
+                            </div>
+                        </Link>
+                        <Link
+                            href={route('projects.index')}
+                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-yellow/10 transition-colors group"
+                        >
+                            <div className="p-2 bg-accent-yellow/20 rounded-lg group-hover:bg-accent-yellow/30 transition-colors">
+                                <svg className="w-6 h-6 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="font-medium text-text-primary">Все проекты</p>
+                                <p className="text-sm text-text-secondary">Просмотр всех проектов</p>
+                            </div>
+                        </Link>
                     </div>
-                )}
+                </div>
 
                 {/* Доски проектов */}
                 {projects && projects.length > 0 ? (
@@ -195,73 +242,32 @@ export default function Dashboard({ auth, stats, projects }) {
                     </div>
                 </div>
 
-
-
-                {/* Быстрые действия */}
-                <div className="card">
-                    <h3 className="card-title mb-4">Быстрые действия</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Link
-                            href={route('projects.create')}
-                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-blue/10 transition-colors group"
-                        >
-                            <div className="p-2 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors">
-                                <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                {/* Подсказки */}
+                {showTips && (
+                    <div className="card bg-gradient-to-r from-accent-blue/10 to-accent-green/10 border-accent-blue/20">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-text-primary mb-2 flex items-center">
+                                    💡 Полезные подсказки
+                                </h3>
+                                <div className="space-y-2 text-sm text-text-secondary">
+                                    <p>• Используйте <strong>доски проектов</strong> для визуального управления задачами</p>
+                                    <p>• Создавайте <strong>спринты</strong> для планирования работы на определенные периоды</p>
+                                    <p>• Добавляйте <strong>комментарии</strong> к задачам для лучшего взаимодействия</p>
+                                    <p>• Используйте <strong>фильтры по спринтам</strong> на доске для фокусировки на конкретных задачах</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowTips(false)}
+                                className="text-text-muted hover:text-text-secondary transition-colors ml-4"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="font-medium text-text-primary">Создать проект</p>
-                                <p className="text-sm text-text-secondary">Новый проект для команды</p>
-                            </div>
-                        </Link>
-
-                        <Link
-                            href={route('tasks.create')}
-                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-green/10 transition-colors group"
-                        >
-                            <div className="p-2 bg-accent-green/20 rounded-lg group-hover:bg-accent-green/30 transition-colors">
-                                <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="font-medium text-text-primary">Создать задачу</p>
-                                <p className="text-sm text-text-secondary">Новая задача для работы</p>
-                            </div>
-                        </Link>
-
-                        <Link
-                            href={route('projects.index')}
-                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-yellow/10 transition-colors group"
-                        >
-                            <div className="p-2 bg-accent-yellow/20 rounded-lg group-hover:bg-accent-yellow/30 transition-colors">
-                                <svg className="w-6 h-6 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="font-medium text-text-primary">Все проекты</p>
-                                <p className="text-sm text-text-secondary">Просмотр всех проектов</p>
-                            </div>
-                        </Link>
-
-                        <Link
-                            href={route('ai-agent.index')}
-                            className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-purple/10 transition-colors group"
-                        >
-                            <div className="p-2 bg-accent-purple/20 rounded-lg group-hover:bg-accent-purple/30 transition-colors">
-                                <svg className="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="font-medium text-text-primary">ИИ-Ассистент</p>
-                                <p className="text-sm text-text-secondary">Управление через ИИ</p>
-                            </div>
-                        </Link>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </AuthenticatedLayout>
     );

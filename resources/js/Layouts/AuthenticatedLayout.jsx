@@ -43,7 +43,7 @@ export default function Authenticated({ user, header, children }) {
                                         <span className="inline-flex">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium text-text-primary hover:text-text-secondary focus:outline-none transition ease-in-out duration-150 bg-transparent"
+                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium text-text-primary hover:text-text-secondary focus:outline-none transition ease-in-out duration-150 bg-transparent rounded-full"
                                             >
                                                 {user.name}
                                                 <svg
@@ -73,28 +73,14 @@ export default function Authenticated({ user, header, children }) {
                                                 <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!user.paid ? 'border-green-500 bg-green-900/20' : 'border-border-color'}`}
                                                     style={{ color: !user.paid ? '#fff' : '#aaa' }}>
                                                     <span className="font-bold">Базовый</span>
-                                                    <span className="ml-auto text-gray-400">0 ₽/мес</span>
-                                                    {!user.paid && (
-                                                        <>
-                                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
-                                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
-                                                            </span>
-                                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
-                                                        </>
-                                                    )}
+                                                    
+                                                   
                                                 </div>
                                                 <div className={`rounded px-3 py-3 flex items-center gap-3 border ${user.paid ? 'border-blue-500 bg-blue-900/20' : 'border-border-color'}`}
                                                     style={{ color: user.paid ? '#fff' : '#aaa' }}>
                                                     <span className="font-bold">ИИ-ассистент</span>
-                                                    <span className="ml-auto text-gray-400">2000 ₽/мес</span>
-                                                    {user.paid && (
-                                                        <>
-                                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
-                                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
-                                                            </span>
-                                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
-                                                        </>
-                                                    )}
+                            
+                                
                                                 </div>
                                             </div>
                                         </div>
