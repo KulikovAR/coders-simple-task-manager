@@ -94,4 +94,10 @@ Route::middleware(['auth', 'ai.agent'])->group(function () {
         ->name('ai-agent.stats');
 });
 
+// --- Оплата подписки ---
+Route::middleware(['auth'])->group(function () {
+    Route::post('/payment/start', [\App\Http\Controllers\PaymentController::class, 'start'])->name('payment.start');
+});
+Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
+
 require __DIR__.'/auth.php';

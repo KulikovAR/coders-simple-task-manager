@@ -143,4 +143,14 @@ class AiConversationService
             })->where('type', 'ai')->where('success', true)->sum('commands_executed'),
         ];
     }
+
+    /**
+     * Получить количество пользовательских сообщений к ИИ (для лимита бесплатных запросов)
+     */
+    public function getUserFreeAiRequestsCount(User $user): int
+    {
+        return AiConversationMessage::whereHas('conversation', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->where('type', 'user')->count();
+    }
 } 

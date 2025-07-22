@@ -38,7 +38,7 @@ export default function Authenticated({ user, header, children }) {
                         </div>
                         <div className="hidden sm:flex sm:items-center sm:ml-6">
                             <div className="ml-3 relative">
-                                <Dropdown align="right" width="48">
+                                <Dropdown align="right" width="64">
                                     <Dropdown.Trigger>
                                         <span className="inline-flex">
                                             <button
@@ -62,6 +62,42 @@ export default function Authenticated({ user, header, children }) {
                                         </span>
                                     </Dropdown.Trigger>
                                     <Dropdown.Content>
+                                        <div className="px-6 py-4 border-b border-border-color bg-[#181A20]">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M12 20.5a8.38 8.38 0 01-7.5-4.36c-.2-.36-.2-.8 0-1.16A8.38 8.38 0 0112 3.5a8.38 8.38 0 017.5 4.36c.2.36.2.8 0 1.16A8.38 8.38 0 0112 20.5z" />
+                                                </svg>
+                                                <span className="font-semibold text-base text-text-primary">Тариф</span>
+                                            </div>
+                                            <div className="flex flex-col gap-3 text-sm">
+                                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!user.paid ? 'border-green-500 bg-green-900/20' : 'border-border-color'}`}
+                                                    style={{ color: !user.paid ? '#fff' : '#aaa' }}>
+                                                    <span className="font-bold">Базовый</span>
+                                                    <span className="ml-auto text-gray-400">0 ₽/мес</span>
+                                                    {!user.paid && (
+                                                        <>
+                                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
+                                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
+                                                            </span>
+                                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${user.paid ? 'border-blue-500 bg-blue-900/20' : 'border-border-color'}`}
+                                                    style={{ color: user.paid ? '#fff' : '#aaa' }}>
+                                                    <span className="font-bold">ИИ-ассистент</span>
+                                                    <span className="ml-auto text-gray-400">2000 ₽/мес</span>
+                                                    {user.paid && (
+                                                        <>
+                                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
+                                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
+                                                            </span>
+                                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                         <Dropdown.Link href={route('profile.edit')}>Профиль</Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Выйти

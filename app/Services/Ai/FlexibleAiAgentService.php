@@ -72,6 +72,24 @@ class FlexibleAiAgentService
         }
         RateLimiter::hit($key, 60);
 
+        // Автоматически сбрасываем paid, если подписка истекла
+        if ($user->paid && $user->expires_at && now()->greaterThan($user->expires_at)) {
+            $user->update(['paid' => false]);
+        }
+
+        // Проверка лимита бесплатных запросов
+        if (!$user->paid && $this->conversationService) {
+            $freeRequests = $this->conversationService->getUserFreeAiRequestsCount($user);
+            $freeLimit = 10;
+            if ($freeRequests >= $freeLimit) {
+                return [
+                    'success' => false,
+                    'message' => "Бесплатный лимит в {$freeLimit} запросов исчерпан. Для продолжения оплатите подписку.",
+                    'session_id' => $sessionId,
+                ];
+            }
+        }
+
         try {
             // Проверяем, является ли это подтверждением
             $isConfirmation = $this->isConfirmation($userInput);

@@ -117,18 +117,18 @@ export default function Welcome({ auth }) {
                             назначайте задачи и отслеживайте прогресс. ИИ-ассистент помогает управлять всем через чат.
                         </p>
 
-                        <div className={`flex flex-col sm:flex-row gap-6 justify-center mb-16 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             {!auth.user ? (
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                        className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
                                     <Link
                                         href={route('ai-features')}
-                                        className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                                        className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Узнать больше
                                     </Link>
@@ -136,7 +136,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                    className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
@@ -260,18 +260,18 @@ export default function Welcome({ auth }) {
                         <p className={`text-xl text-gray-400 mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Присоединяйтесь к разработчикам, которые уже используют 379ТМ для управления проектами
                         </p>
-                        <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             {!auth.user ? (
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                        className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
                                     <Link
                                         href={route('login')}
-                                        className="border border-white/20 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                                        className="border-2 border-white text-white bg-transparent px-10 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Войти в систему
                                     </Link>
@@ -279,7 +279,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                    className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
