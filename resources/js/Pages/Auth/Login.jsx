@@ -95,6 +95,15 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+            <div className="mt-6 text-center">
+                <span className="text-sm text-text-secondary">Нет аккаунта?</span>{' '}
+                <Link
+                    href={route('register')}
+                    className="text-accent-blue hover:text-accent-green underline text-sm font-medium transition-colors"
+                >
+                    Зарегистрироваться
+                </Link>
+            </div>
         </GuestLayout>
     );
 }

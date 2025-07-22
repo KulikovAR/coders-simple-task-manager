@@ -51,22 +51,6 @@ export default function Authenticated({ user, header, children }) {
                         </div>
                         <div className="hidden sm:flex sm:items-center sm:ml-6">
                             <div className="ml-3 relative flex items-center gap-2">
-                                {/* Theme Switcher */}
-                                <button
-                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                    className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-secondary-bg border border-border-color hover:bg-accent-blue/10 transition-colors focus:outline-none"
-                                    title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
-                                >
-                                    {theme === 'dark' ? (
-                                        <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m8.66-8.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.95-7.07l-.71.71M7.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
-                                        </svg>
-                                    )}
-                                </button>
                                 {/* Профиль */}
                                 <Dropdown align="right" width="64">
                                     <Dropdown.Trigger>
@@ -103,14 +87,14 @@ export default function Authenticated({ user, header, children }) {
                                                 <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!user.paid ? 'border-green-500 bg-green-900/20' : 'border-border-color'}`}
                                                     style={{ color: !user.paid ? '#fff' : '#aaa' }}>
                                                     <span className="font-bold">Базовый</span>
-                                                    
-                                                   
+
+
                                                 </div>
                                                 <div className={`rounded px-3 py-3 flex items-center gap-3 border ${user.paid ? 'border-blue-500 bg-blue-900/20' : 'border-border-color'}`}
                                                     style={{ color: user.paid ? '#fff' : '#aaa' }}>
                                                     <span className="font-bold">ИИ-ассистент</span>
-                            
-                                
+
+
                                                 </div>
                                             </div>
                                         </div>
@@ -120,6 +104,23 @@ export default function Authenticated({ user, header, children }) {
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
+
+                                {/* Theme Switcher */}
+                                <button
+                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-bg border border-border-color hover:bg-accent-blue/10 transition-colors focus:outline-none"
+                                    title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+                                >
+                                    {theme === 'dark' ? (
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M3 12H4M12 3V4M20 12H21M12 20V21M5.6 5.6L6.3 6.3M18.4 5.6L17.7 6.3M17.7 17.7L18.4 18.4M6.3 17.7L5.6 18.4M8 12C8 13.0609 8.42143 14.0783 9.17157 14.8284C9.92172 15.5786 10.9391 16 12 16C13.0609 16 14.0783 15.5786 14.8284 14.8284C15.5786 14.0783 16 13.0609 16 12C16 10.9391 15.5786 9.92172 14.8284 9.17157C14.0783 8.42143 13.0609 8 12 8C10.9391 8 9.92172 8.42143 9.17157 9.17157C8.42143 9.92172 8 10.9391 8 12Z" stroke="#FCAC38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+                                        </svg>
+                                    )}
+                                </button>
                             </div>
                         </div>
                         <div className="-mr-2 flex items-center sm:hidden">

@@ -65,9 +65,19 @@ export default function Dashboard({ auth, stats, projects }) {
                             className="flex items-center p-4 bg-secondary-bg rounded-lg hover:bg-accent-purple/10 transition-colors group"
                         >
                             <div className="p-2 bg-accent-purple/20 rounded-lg group-hover:bg-accent-purple/30 transition-colors">
-                                <svg className="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.2353 21.6875C16.7882 16.8601 18.5042 15.1184 23 13.8125C18.5042 12.5066 16.7882 10.7649 15.2353 5.9375C13.6824 10.7649 11.9664 12.5066 7.47059 13.8125C11.9664 15.1184 13.6824 16.8601 15.2353 21.6875ZM4.88235 9.875C5.65882 7.46 6.51682 6.58981 8.76471 5.9375C6.51682 5.28519 5.65882 4.415 4.88235 2C4.10588 4.415 3.24788 5.28519 1 5.9375C3.24788 6.58981 4.10588 7.46 4.88235 9.875ZM6.82353 23C7.21176 21.7925 7.64012 21.3581 8.76471 21.0312C7.64012 20.7044 7.21176 20.27 6.82353 19.0625C6.43529 20.27 6.00694 20.7044 4.88235 21.0312C6.00694 21.3581 6.43529 21.7925 6.82353 23Z" stroke="url(#paint0_linear_2098_17627)" stroke-width="2" stroke-linejoin="round"/>
+                                    <defs>
+                                        <linearGradient id="paint0_linear_2098_17627" x1="19.7" y1="2" x2="3.629" y2="23.7242" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#306FDB"/>
+                                            <stop offset="1" stop-color="#7352D4"/>
+                                        </linearGradient>
+                                    </defs>
                                 </svg>
+
+
+
+
                             </div>
                             <div className="ml-3">
                                 <p className="font-medium text-text-primary">ИИ-Ассистент</p>

@@ -14,7 +14,7 @@
     --accent-green: #10b981;
     --accent-blue: #3b82f6;
     --accent-yellow: #f59e0b;
-    --accent-red: #ef4444;
+    --accent-red: #fca5a5; /* был #ef4444, стал мягче */
     --accent-purple: #8b5cf6;
     --accent-pink: #ec4899;
 }
@@ -30,7 +30,7 @@
     --accent-green: #22c55e;
     --accent-blue: #2563eb;
     --accent-yellow: #eab308;
-    --accent-red: #ef4444;
+    --accent-red: #fca5a5; /* тоже мягкий */
     --accent-purple: #8b5cf6;
     --accent-pink: #ec4899;
 }
@@ -52,6 +52,15 @@
 [data-theme='light'] .btn-secondary:hover, [data-theme='light'] .btn-secondary:focus {
     background-color: #e5e7eb !important;
     color: #18181b !important;
+}
+[data-theme='light'] .btn-danger {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+    border-color: #fca5a5 !important;
+}
+[data-theme='light'] .btn-danger:hover, [data-theme='light'] .btn-danger:focus {
+    background-color: #fecaca !important;
+    color: #991b1b !important;
 }
 
 body {
