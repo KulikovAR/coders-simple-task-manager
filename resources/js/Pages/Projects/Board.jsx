@@ -224,121 +224,93 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             <Head title={`${project.name} - Доска`} />
 
             <div className="space-y-6">
-                {/* Шапка доски: структурированная, всё по центру */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 flex flex-col items-center justify-center mb-6 shadow-lg">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-widest text-center" style={{ letterSpacing: '0.2em' }}>
-                        {project.name}
-                    </h1>
-                    {project.description && (
-                        <p className="text-gray-300 text-base font-normal mt-2 mb-0 whitespace-pre-wrap max-w-xl text-center">{project.description}</p>
-                    )}
-                    <div className="flex flex-wrap justify-center items-center gap-4 text-base text-gray-400 font-medium mt-3 mb-0">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>{getStatusText(project.status)}</span>
-                        {project.deadline && (
-                            <span>Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
-                        )}
+                {/* Новый заголовок и статус */}
+                <div className="mb-2">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <div>
+                      <h1 className="text-2xl font-bold text-white">
+                        Доска задач <span className="text-accent-blue">/ {project.name}</span>
+                      </h1>
+                      {project.description && (
+                        <p className="text-gray-400 text-sm mt-1">{project.description}</p>
+                      )}
                     </div>
+                    <div className="flex items-center gap-2 mt-2 md:mt-0">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>{getStatusText(project.status)}</span>
+                      {project.deadline && (
+                        <span className="text-xs text-gray-400 ml-2">Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Фильтр по спринтам */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-white">Фильтр по спринтам</h3>
-                        <Link
-                            href={route('sprints.create', project.id)}
-                            className="text-white hover:text-gray-300 text-sm font-medium"
-                        >
-                            + Создать спринт
-                        </Link>
-                    </div>
-
-                    <div className="flex flex-wrap gap-3">
-                        <button
-                            onClick={() => setSelectedSprintId('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                selectedSprintId === 'all'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                            }`}
-                        >
-                            Все задачи
-                        </button>
-                        {sprints.map((sprint) => (
-                            <button
-                                key={sprint.id}
-                                onClick={() => setSelectedSprintId(sprint.id)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
-                                    selectedSprintId == sprint.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                }`}
-                            >
-                                <span>{getSprintStatusIcon(sprint.status)}</span>
-                                <span>{sprint.name}</span>
-                                <span className="text-xs opacity-75">
-                                    ({formatSprintDates(sprint)})
-                                </span>
-                            </button>
-                        ))}
-                    </div>
+                {/* Компактный фильтр и кнопки */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-2">
+                  <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 justify-between">
+                    {/* Спринты */}
+                    <select
+                      value={selectedSprintId}
+                      onChange={e => setSelectedSprintId(e.target.value)}
+                      className="form-select min-w-[140px] max-w-[180px]"
+                    >
+                      <option value="all">Все спринты</option>
+                      {sprints.map(sprint => (
+                        <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
+                      ))}
+                    </select>
+                    {/* Исполнитель */}
+                    <select
+                      value={assigneeId}
+                      onChange={e => setAssigneeId(e.target.value)}
+                      className="form-select min-w-[140px] max-w-[180px]"
+                    >
+                      <option value="">Все исполнители</option>
+                      {members.map(user => (
+                        <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
+                      ))}
+                    </select>
+                    {/* Мои задачи */}
+                    <label className="flex items-center gap-2 text-sm text-white whitespace-nowrap select-none cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={myTasks}
+                        onChange={e => setMyTasks(e.target.checked)}
+                        className="form-checkbox h-5 w-5 text-accent-blue border-gray-400 focus:ring-2 focus:ring-accent-blue focus:ring-offset-0 rounded transition-all duration-150"
+                        style={{ accentColor: '#2563eb' }}
+                      />
+                      <span className="ml-1">Мои задачи</span>
+                    </label>
+                    {/* Кнопка создать спринт */}
+                    <Link
+                      href={route('sprints.create', project.id)}
+                      className="btn btn-secondary ml-auto"
+                    >
+                      + Спринт
+                    </Link>
+                    {/* Кнопка добавить задачу */}
+                    <Link
+                      href={route('tasks.create', { project_id: project.id })}
+                      className="btn btn-primary"
+                    >
+                      + Задача
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Фильтры по исполнителю и мои задачи */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                    <div className="flex flex-wrap gap-4 mb-6">
-                        <div>
-                            <label className="form-label text-white">Исполнитель</label>
-                            <select
-                                value={assigneeId}
-                                onChange={e => setAssigneeId(e.target.value)}
-                                className="form-select"
-                            >
-                                <option value="">Все исполнители</option>
-                                {members.map(user => (
-                                    <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-6">
-                            <input
-                                type="checkbox"
-                                id="my_tasks"
-                                checked={myTasks}
-                                onChange={e => setMyTasks(e.target.checked)}
-                                className="form-checkbox"
-                            />
-                            <label htmlFor="my_tasks" className="text-sm text-white">Мои задачи</label>
-                        </div>
+                {/* Kanban доска с ограничением по высоте */}
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <div /> {/* пустой div для выравнивания */}
                     </div>
-                </div>
-
-                {/* Kanban доска */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-medium text-white">
-                            Доска задач
-                            {selectedSprintId !== 'all' && (
-                                <span className="text-sm text-gray-400 ml-2">
-                                    (фильтр: {sprints.find(s => s.id == selectedSprintId)?.name})
-                                </span>
-                            )}
-                        </h3>
-                        <Link
-                            href={route('tasks.create', { project_id: project.id })}
-                            className="text-white hover:text-gray-300 text-sm font-medium"
-                        >
-                            + Добавить задачу
-                        </Link>
-                    </div>
-
-                    {/* Горизонтальный скролл для колонок */}
-                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+                    {/* Горизонтальный скролл для колонок, ограничение по высоте */}
+                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
+                         style={{ maxHeight: 'calc(100vh - 260px)', minHeight: '320px' }}>
                         {taskStatuses.map((status) => {
                             const statusTasks = getFilteredStatusTasks(status.id);
                             return (
                                 <div
                                     key={status.id}
-                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full"
+                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
                                     onDragOver={handleDragOver}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
