@@ -17,7 +17,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [dragOverStatusId, setDragOverStatusId] = useState(null);
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
+    const [scrollInterval, setScrollInterval] = useState(null);
+    const [priorityZonesPosition, setPriorityZonesPosition] = useState('top'); // 'top', 'center', 'bottom'
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
@@ -51,6 +52,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             setDraggedTask(null);
         }
     }, [localTasks, draggedTask]);
+
+    // Очистка интервала при размонтировании компонента
+    useEffect(() => {
+        return () => {
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+            }
+        };
+    }, [scrollInterval]);
 
     const openTaskModal = (task) => {
         setSelectedTask(task);
@@ -185,18 +195,83 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     const handleDragStart = (e, task) => {
         setDraggedTask(task);
-        setIsDragging(true);
         e.dataTransfer.effectAllowed = 'move';
+    };
+
+    // Функция для автоматической прокрутки
+    const startAutoScroll = (direction) => {
+        if (scrollInterval) return;
+        
+        const interval = setInterval(() => {
+            const container = document.querySelector('.board-container');
+            if (container) {
+                const scrollAmount = direction === 'up' ? -50 : 50;
+                container.scrollTop += scrollAmount;
+            }
+        }, 50);
+        
+        setScrollInterval(interval);
+    };
+
+    const stopAutoScroll = () => {
+        if (scrollInterval) {
+            clearInterval(scrollInterval);
+            setScrollInterval(null);
+        }
+    };
+
+    // Функция для определения позиции зон приоритетов
+    const calculatePriorityZonesPosition = (e, statusElement) => {
+        if (!statusElement) return 'top';
+        
+        const rect = statusElement.getBoundingClientRect();
+        const mouseY = e.clientY;
+        const statusHeight = rect.height;
+        const statusTop = rect.top;
+        const statusBottom = rect.bottom;
+        
+        // Определяем, в какой части статуса находится курсор
+        const relativeY = mouseY - statusTop;
+        const percentage = relativeY / statusHeight;
+        
+        if (percentage < 0.3) return 'top';
+        if (percentage > 0.7) return 'bottom';
+        return 'center';
     };
 
     const handleDragOver = (e, statusId) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         
+        // Останавливаем автоматическую прокрутку
+        stopAutoScroll();
+        
+        // Получаем элемент статуса
+        const statusElement = e.currentTarget;
+        const rect = statusElement.getBoundingClientRect();
+        const mouseY = e.clientY;
+        
+        // Проверяем, нужно ли автоматически прокручивать
+        const container = document.querySelector('.board-container');
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            const scrollThreshold = 100; // пиксели от края для начала прокрутки
+            
+            if (mouseY < containerRect.top + scrollThreshold) {
+                startAutoScroll('up');
+            } else if (mouseY > containerRect.bottom - scrollThreshold) {
+                startAutoScroll('down');
+            }
+        }
+        
         // Если перетаскиваем в том же статусе, показываем зоны приоритетов
         if (draggedTask && draggedTask.status_id === statusId) {
             setShowPriorityDropZones(true);
             setDragOverStatusId(statusId);
+            
+            // Определяем позицию зон приоритетов
+            const position = calculatePriorityZonesPosition(e, statusElement);
+            setPriorityZonesPosition(position);
         } else {
             setShowPriorityDropZones(false);
             setDragOverStatusId(statusId);
@@ -213,6 +288,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
             setDragOverStatusId(null);
             setShowPriorityDropZones(false);
+            stopAutoScroll();
         }
     };
 
@@ -301,7 +377,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setDragOverStatusId(null);
         setShowPriorityDropZones(false);
         setDragOverPriority(null);
-        setIsDragging(false);
+        stopAutoScroll();
     };
 
     // Фильтрация задач по спринту и исполнителю
@@ -415,14 +491,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         <div /> {/* пустой div для выравнивания */}
                     </div>
                     {/* Горизонтальный скролл для колонок, ограничение по высоте */}
-                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
+                    <div className="board-container flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
                          style={{ maxHeight: 'calc(100vh - 260px)', minHeight: '320px' }}>
                         {taskStatuses.map((status) => {
                             const statusTasks = getFilteredStatusTasks(status.id);
                             return (
                                 <div
                                     key={status.id}
-                                    className={`relative bg-gray-800 border rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 transition-all duration-200 ${
+                                    className={`bg-gray-800 border rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 transition-all duration-200 ${
                                         dragOverStatusId === status.id 
                                             ? 'border-accent-blue bg-accent-blue/10 shadow-lg shadow-accent-blue/20' 
                                             : 'border-gray-700'
@@ -442,67 +518,66 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         </span>
                                     </div>
 
-                                    {/* Зоны приоритетов при перетаскивании в том же статусе - абсолютное позиционирование */}
-                                    {isDragging && showPriorityDropZones && dragOverStatusId === status.id && draggedTask?.status_id === status.id && (
-                                        <div className="drop-zone-overlay absolute inset-0 top-16 bg-gray-800/95 backdrop-blur-sm z-10 rounded-lg border-2 border-accent-blue/50">
-                                            <div className="p-4 h-full flex flex-col justify-center">
-                                                <div className="text-xs text-gray-400 font-medium mb-4 text-center">Выберите приоритет:</div>
-                                                <div className="space-y-3">
-                                                    {[
-                                                        { 
-                                                            priority: 'high', 
-                                                            label: 'Высокий', 
-                                                            bgColor: 'bg-red-500/20', 
-                                                            borderColor: 'border-red-500/50',
-                                                            hoverBg: 'hover:bg-red-500/30',
-                                                            activeBg: 'bg-red-500/40',
-                                                            textColor: 'text-red-400'
-                                                        },
-                                                        { 
-                                                            priority: 'medium', 
-                                                            label: 'Средний', 
-                                                            bgColor: 'bg-yellow-500/20', 
-                                                            borderColor: 'border-yellow-500/50',
-                                                            hoverBg: 'hover:bg-yellow-500/30',
-                                                            activeBg: 'bg-yellow-500/40',
-                                                            textColor: 'text-yellow-400'
-                                                        },
-                                                        { 
-                                                            priority: 'low', 
-                                                            label: 'Низкий', 
-                                                            bgColor: 'bg-green-500/20', 
-                                                            borderColor: 'border-green-500/50',
-                                                            hoverBg: 'hover:bg-green-500/30',
-                                                            activeBg: 'bg-green-500/40',
-                                                            textColor: 'text-green-400'
-                                                        }
-                                                    ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor }) => (
-                                                        <div
-                                                            key={priority}
-                                                            className={`priority-zone border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
-                                                                dragOverPriority === priority 
-                                                                    ? `${activeBg} ${borderColor.replace('/50', '')} shadow-lg shadow-${priority === 'high' ? 'red' : priority === 'medium' ? 'yellow' : 'green'}-500/25 active` 
-                                                                    : `${bgColor} ${borderColor} ${hoverBg}`
-                                                            }`}
-                                                            onDragOver={(e) => handlePriorityDragOver(e, priority)}
-                                                            onDragLeave={handlePriorityDragLeave}
-                                                            onDrop={(e) => handlePriorityDrop(e, priority)}
-                                                        >
-                                                            <div className={`text-lg font-bold mb-2 ${textColor}`}>
-                                                                {priority === 'high' ? '🔥' : priority === 'medium' ? '⚡' : '🌱'}
-                                                            </div>
-                                                            <div className={`text-sm font-semibold ${textColor}`}>{label}</div>
-                                                            <div className="text-xs text-gray-400 mt-1">приоритет</div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
                                     <div className="space-y-3">
-                                        {isDragging && statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
-                                            <div className="empty-drop-zone border-2 border-dashed border-accent-blue/50 rounded-lg p-8 text-center min-h-[200px] flex flex-col justify-center">
+                                        {/* Зоны приоритетов при перетаскивании в том же статусе */}
+                                        {showPriorityDropZones && dragOverStatusId === status.id && draggedTask?.status_id === status.id && (
+                                            <div className={`space-y-2 mb-4 priority-zones-container ${
+                                                priorityZonesPosition === 'bottom' ? 'order-last' : 
+                                                priorityZonesPosition === 'center' ? 'order-none' : 'order-first'
+                                            }`}>
+                                                <div className="text-xs text-gray-400 font-medium mb-2 text-center">Выберите приоритет:</div>
+                                                {[
+                                                    { 
+                                                        priority: 'high', 
+                                                        label: 'Высокий', 
+                                                        bgColor: 'bg-red-500/20', 
+                                                        borderColor: 'border-red-500/50',
+                                                        hoverBg: 'hover:bg-red-500/30',
+                                                        activeBg: 'bg-red-500/40',
+                                                        textColor: 'text-red-400'
+                                                    },
+                                                    { 
+                                                        priority: 'medium', 
+                                                        label: 'Средний', 
+                                                        bgColor: 'bg-yellow-500/20', 
+                                                        borderColor: 'border-yellow-500/50',
+                                                        hoverBg: 'hover:bg-yellow-500/30',
+                                                        activeBg: 'bg-yellow-500/40',
+                                                        textColor: 'text-yellow-400'
+                                                    },
+                                                    { 
+                                                        priority: 'low', 
+                                                        label: 'Низкий', 
+                                                        bgColor: 'bg-green-500/20', 
+                                                        borderColor: 'border-green-500/50',
+                                                        hoverBg: 'hover:bg-green-500/30',
+                                                        activeBg: 'bg-green-500/40',
+                                                        textColor: 'text-green-400'
+                                                    }
+                                                ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor }) => (
+                                                    <div
+                                                        key={priority}
+                                                        className={`priority-zone border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                                                            dragOverPriority === priority 
+                                                                ? `${activeBg} ${borderColor.replace('/50', '')} shadow-lg shadow-${priority === 'high' ? 'red' : priority === 'medium' ? 'yellow' : 'green'}-500/25 active` 
+                                                                : `${bgColor} ${borderColor} ${hoverBg}`
+                                                        }`}
+                                                        onDragOver={(e) => handlePriorityDragOver(e, priority)}
+                                                        onDragLeave={handlePriorityDragLeave}
+                                                        onDrop={(e) => handlePriorityDrop(e, priority)}
+                                                    >
+                                                        <div className={`text-lg font-bold mb-2 ${textColor}`}>
+                                                            {priority === 'high' ? '🔥' : priority === 'medium' ? '⚡' : '🌱'}
+                                                        </div>
+                                                        <div className={`text-sm font-semibold ${textColor}`}>{label}</div>
+                                                        <div className="text-xs text-gray-400 mt-1">приоритет</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
+                                            <div className="border-2 border-dashed border-accent-blue/50 rounded-lg p-8 text-center">
                                                 <div className="text-accent-blue/70 text-4xl mb-2">📋</div>
                                                 <p className="text-accent-blue/70 text-sm font-medium">Отпустите задачу здесь</p>
                                             </div>
