@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Services\NotificationService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
@@ -170,22 +171,25 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
+        $request->validate([
+            'status_id' => 'required|exists:task_statuses,id',
+        ]);
+
         $oldStatus = $task->status->name;
-        $newStatus = $request->input('status');
+        $newStatus = TaskStatus::findOrFail($request->status_id);
 
         $task = $this->taskService->updateTaskStatus($task, $newStatus);
 
         // Уведомляем о перемещении задачи
-        if ($oldStatus !== $newStatus) {
-            $this->notificationService->taskMoved($task, $oldStatus, $newStatus, Auth::user());
+        if ($oldStatus !== $newStatus->name) {
+            $this->notificationService->taskMoved($task, $oldStatus, $newStatus->name, Auth::user());
         }
 
-        // Для Inertia лучше вернуть JSON, если запрос AJAX
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'task' => $task]);
-        }
-
-        return redirect()->back()->with('success', 'Статус задачи успешно обновлен.');
+        return response()->json([
+            'success' => true,
+            'task' => $task->load('status'),
+            'message' => 'Статус задачи обновлен'
+        ]);
     }
 
     public function getProjectSprints(Request $request, Project $project)
