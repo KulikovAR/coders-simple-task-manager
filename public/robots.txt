@@ -24,7 +24,7 @@ Disallow: /*.txt$
 Disallow: /*.pdf$
 
 # Sitemap
-Sitemap: https://task-manager.pisateli-studio.ru/sitemap.xml
+Sitemap: https://379tm.ru/sitemap.xml
 
 # Crawl-delay для уважительного отношения к серверу
 Crawl-delay: 1

@@ -6,7 +6,7 @@
 
     <!-- Главная страница -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/</loc>
+        <loc>https://379tm.ru/</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
     <!-- Страница входа -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/login</loc>
+        <loc>https://379tm.ru/login</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -22,7 +22,7 @@
 
     <!-- Страница регистрации -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/register</loc>
+        <loc>https://379tm.ru/register</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -30,7 +30,7 @@
 
     <!-- Дашборд (требует аутентификации) -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/dashboard</loc>
+        <loc>https://379tm.ru/dashboard</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
@@ -38,7 +38,7 @@
 
     <!-- Проекты -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/projects</loc>
+        <loc>https://379tm.ru/projects</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
@@ -46,7 +46,7 @@
 
     <!-- Задачи -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/tasks</loc>
+        <loc>https://379tm.ru/tasks</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
@@ -54,7 +54,7 @@
 
     <!-- Спринты -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/sprints</loc>
+        <loc>https://379tm.ru/sprints</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
@@ -62,7 +62,7 @@
 
     <!-- ИИ-ассистент -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/ai-agent</loc>
+        <loc>https://379tm.ru/ai-agent</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -70,7 +70,7 @@
 
     <!-- Страница с информацией об ИИ-ассистенте -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/ai-features</loc>
+        <loc>https://379tm.ru/ai-features</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
@@ -78,7 +78,7 @@
 
     <!-- FAQ -->
     <url>
-        <loc>https://task-manager.pisateli-studio.ru/faq</loc>
+        <loc>https://379tm.ru/faq</loc>
         <lastmod>2025-01-20</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

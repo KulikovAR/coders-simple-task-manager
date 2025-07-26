@@ -90,7 +90,7 @@
 
 ### 1. Sitemap.xml
 
-Расположен по адресу: `https://task-manager.pisateli-studio.ru/sitemap.xml`
+Расположен по адресу: `https://379tm.ru/sitemap.xml`
 
 Включает все основные страницы с приоритетами:
 - Главная страница: 1.0
@@ -100,7 +100,7 @@
 
 ### 2. Robots.txt
 
-Расположен по адресу: `https://task-manager.pisateli-studio.ru/robots.txt`
+Расположен по адресу: `https://379tm.ru/robots.txt`
 
 Содержит:
 - Разрешение индексации всех страниц
@@ -119,7 +119,7 @@
 
 Все страницы имеют canonical теги для предотвращения дублированного контента:
 ```html
-<link rel="canonical" href="https://task-manager.pisateli-studio.ru/current-page">
+<link rel="canonical" href="https://379tm.ru/current-page">
 ```
 
 ## Контентная стратегия
