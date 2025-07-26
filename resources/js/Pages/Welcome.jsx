@@ -307,7 +307,8 @@ export default function Welcome({ auth }) {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
                             <div className="text-gray-400 mb-4 md:mb-0">
-                                © 2025 379ТМ. Создано для разработчиков
+                                <div>© 2025 379ТМ. Создано для разработчиков</div>
+                                <div className="text-sm mt-1">ИНН 614014794226</div>
                             </div>
                             <div className="flex space-x-8">
                                 <Link href={route('faq')} className="text-gray-400 hover:text-white transition-colors duration-300">
