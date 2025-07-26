@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
+import { 
+    getNotificationText, 
+    getNotificationIcon, 
+    getNotificationColor, 
+    formatNotificationDate 
+} from '@/utils/notificationUtils';
 
 export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
@@ -91,21 +97,16 @@ export default function NotificationBell() {
                                         onClick={() => markAsRead(notification.id)}
                                     >
                                         <div className="flex items-start space-x-3">
-                                            <div className={`text-lg ${notification.getColor}`}>
-                                                {notification.getIcon}
+                                            <div className={`text-lg ${getNotificationColor(notification.type)}`}>
+                                                {getNotificationIcon(notification.type)}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm text-text-primary font-medium">
-                                                    {notification.getMessage}
+                                                    {getNotificationText(notification)}
                                                 </p>
                                                 <div className="flex items-center justify-between mt-2">
                                                     <p className="text-xs text-text-muted">
-                                                        {new Date(notification.created_at).toLocaleString('ru-RU', {
-                                                            day: '2-digit',
-                                                            month: '2-digit',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
+                                                        {formatNotificationDate(notification.created_at)}
                                                     </p>
                                                     {notification.from_user && (
                                                         <p className="text-xs text-text-secondary">

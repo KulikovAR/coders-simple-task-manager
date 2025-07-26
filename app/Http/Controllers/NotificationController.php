@@ -6,6 +6,7 @@ use App\Models\Notification;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class NotificationController extends Controller
@@ -37,6 +38,22 @@ class NotificationController extends Controller
         $user = Auth::user();
         $notifications = $this->notificationService->getUnreadNotifications($user, 10);
         $unreadCount = $this->notificationService->getUnreadCount($user);
+
+        // Добавляем отладочную информацию
+        Log::info('Уведомления для пользователя', [
+            'user_id' => $user->id,
+            'unread_count' => $unreadCount,
+            'notifications_count' => $notifications->count(),
+            'notifications' => $notifications->map(function($notification) {
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'data' => $notification->data,
+                    'read' => $notification->read,
+                    'created_at' => $notification->created_at,
+                ];
+            })
+        ]);
 
         return response()->json([
             'notifications' => $notifications,

@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
+import { 
+    getNotificationText, 
+    getNotificationIcon, 
+    getNotificationColor, 
+    getNotificationLink,
+    formatNotificationDateWithYear 
+} from '@/utils/notificationUtils';
 
 export default function NotificationsIndex({ auth, notifications, unreadCount }) {
     const [localNotifications, setLocalNotifications] = useState(notifications);
@@ -69,19 +76,6 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
         }
     };
 
-    const getNotificationLink = (notification) => {
-        if (notification.notifiable_type === 'App\\Models\\Task') {
-            return route('tasks.show', notification.notifiable_id);
-        } else if (notification.notifiable_type === 'App\\Models\\Project') {
-            return route('projects.show', notification.notifiable_id);
-        } else if (notification.notifiable_type === 'App\\Models\\Sprint') {
-            return route('sprints.show', notification.notifiable_id);
-        } else if (notification.notifiable_type === 'App\\Models\\TaskComment') {
-            return route('tasks.show', notification.notifiable.task_id);
-        }
-        return null;
-    };
-
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Уведомления" />
@@ -124,26 +118,20 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                     }`}
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className={`text-2xl ${notification.getColor}`}>
-                                            {notification.getIcon}
+                                        <div className={`text-2xl ${getNotificationColor(notification.type)}`}>
+                                            {getNotificationIcon(notification.type)}
                                         </div>
                                         
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex-1">
                                                     <p className="text-text-primary font-medium mb-1">
-                                                        {notification.getMessage}
+                                                        {getNotificationText(notification)}
                                                     </p>
                                                     
                                                     <div className="flex items-center gap-4 text-sm text-text-muted">
                                                         <span>
-                                                            {new Date(notification.created_at).toLocaleString('ru-RU', {
-                                                                day: '2-digit',
-                                                                month: '2-digit',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
+                                                            {formatNotificationDateWithYear(notification.created_at)}
                                                         </span>
                                                         
                                                         {notification.from_user && (
