@@ -17,14 +17,17 @@ class NotificationService
      */
     public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
     {
+        // Загружаем связанные данные
+        $task->load(['project']);
+
         $this->createNotification(
             type: Notification::TYPE_TASK_ASSIGNED,
             userId: $assignee->id,
             fromUserId: $fromUser?->id ?? Auth::id(),
             notifiable: $task,
             data: [
-                'task_title' => $task->title,
-                'project_name' => $task->project?->name,
+                'task_title' => $task->title ?? 'Неизвестная задача',
+                'project_name' => $task->project?->name ?? 'Неизвестный проект',
             ]
         );
     }
@@ -34,6 +37,9 @@ class NotificationService
      */
     public function taskMoved(Task $task, string $oldStatus, string $newStatus, ?User $fromUser = null): void
     {
+        // Загружаем связанные данные
+        $task->load(['assignee', 'reporter', 'project']);
+
         // Уведомляем исполнителя задачи
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $this->createNotification(
@@ -42,7 +48,7 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'status' => $newStatus,
                     'old_status' => $oldStatus,
                 ]
@@ -57,7 +63,7 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'status' => $newStatus,
                     'old_status' => $oldStatus,
                 ]
@@ -70,8 +76,11 @@ class NotificationService
      */
     public function taskCreated(Task $task, ?User $fromUser = null): void
     {
+        // Загружаем связанные данные
+        $task->load(['project.users']);
+
         // Уведомляем всех участников проекта
-        $projectMembers = $task->project->members;
+        $projectMembers = $task->project->users ?? collect();
         
         foreach ($projectMembers as $member) {
             if ($member->id !== Auth::id()) {
@@ -81,8 +90,8 @@ class NotificationService
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $task,
                     data: [
-                        'task_title' => $task->title,
-                        'project_name' => $task->project->name,
+                        'task_title' => $task->title ?? 'Неизвестная задача',
+                        'project_name' => $task->project?->name ?? 'Неизвестный проект',
                     ]
                 );
             }
@@ -94,6 +103,9 @@ class NotificationService
      */
     public function commentAdded(TaskComment $comment, ?User $fromUser = null): void
     {
+        // Загружаем связанные данные
+        $comment->load(['task.assignee', 'task.reporter']);
+        
         $task = $comment->task;
         
         // Уведомляем исполнителя задачи
@@ -104,7 +116,7 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $comment,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'comment_preview' => substr($comment->content, 0, 50) . '...',
                 ]
             );
@@ -118,7 +130,7 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $comment,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'comment_preview' => substr($comment->content, 0, 50) . '...',
                 ]
             );
@@ -130,7 +142,10 @@ class NotificationService
      */
     public function sprintStarted(Sprint $sprint, ?User $fromUser = null): void
     {
-        $projectMembers = $sprint->project->members;
+        // Загружаем связанные данные
+        $sprint->load(['project.users']);
+        
+        $projectMembers = $sprint->project->users ?? collect();
         
         foreach ($projectMembers as $member) {
             if ($member->id !== Auth::id()) {
@@ -140,8 +155,8 @@ class NotificationService
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
                     data: [
-                        'sprint_name' => $sprint->name,
-                        'project_name' => $sprint->project->name,
+                        'sprint_name' => $sprint->name ?? 'Неизвестный спринт',
+                        'project_name' => $sprint->project?->name ?? 'Неизвестный проект',
                     ]
                 );
             }
@@ -153,7 +168,10 @@ class NotificationService
      */
     public function sprintEnded(Sprint $sprint, ?User $fromUser = null): void
     {
-        $projectMembers = $sprint->project->members;
+        // Загружаем связанные данные
+        $sprint->load(['project.users']);
+        
+        $projectMembers = $sprint->project->users ?? collect();
         
         foreach ($projectMembers as $member) {
             if ($member->id !== Auth::id()) {
@@ -163,8 +181,8 @@ class NotificationService
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
                     data: [
-                        'sprint_name' => $sprint->name,
-                        'project_name' => $sprint->project->name,
+                        'sprint_name' => $sprint->name ?? 'Неизвестный спринт',
+                        'project_name' => $sprint->project?->name ?? 'Неизвестный проект',
                     ]
                 );
             }
@@ -199,7 +217,7 @@ class NotificationService
                 fromUserId: null,
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'deadline' => $task->deadline,
                 ]
             );
@@ -218,7 +236,7 @@ class NotificationService
                 fromUserId: null,
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title,
+                    'task_title' => $task->title ?? 'Неизвестная задача',
                     'deadline' => $task->deadline,
                 ]
             );

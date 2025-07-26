@@ -42,6 +42,9 @@ class TaskCommentController extends Controller
 
         $comment = $this->taskCommentService->createComment($request->validated(), $task, Auth::user());
 
+        // Загружаем связанные данные для уведомлений
+        $comment->load(['task.assignee', 'task.reporter']);
+
         // Уведомляем о новом комментарии
         $this->notificationService->commentAdded($comment, Auth::user());
 

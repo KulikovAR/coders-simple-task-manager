@@ -70,6 +70,9 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
+        // Загружаем связанные данные для уведомлений
+        $task->load(['assignee', 'project.users']);
+
         // Создаем уведомления о новой задаче
         $this->notificationService->taskCreated($task, Auth::user());
 
@@ -124,6 +127,9 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
+        // Загружаем связанные данные
+        $task->load(['assignee', 'project']);
+
         $oldAssigneeId = $task->assignee_id;
         $oldData = $task->toArray();
 
@@ -175,6 +181,9 @@ class TaskController extends Controller
             'status_id' => 'required|exists:task_statuses,id',
         ]);
 
+        // Загружаем связанные данные
+        $task->load(['status', 'assignee', 'reporter', 'project']);
+
         $oldStatus = $task->status->name;
         $newStatus = TaskStatus::findOrFail($request->status_id);
 
@@ -185,11 +194,11 @@ class TaskController extends Controller
             $this->notificationService->taskMoved($task, $oldStatus, $newStatus->name, Auth::user());
         }
 
-        return response()->json([
-            'success' => true,
-            'task' => $task->load('status'),
-            'message' => 'Статус задачи обновлен'
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'task' => $task]);
+        }
+
+        return redirect()->back()->with('success', 'Статус задачи успешно обновлен.');
     }
 
     public function getProjectSprints(Request $request, Project $project)
