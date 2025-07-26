@@ -76,6 +76,11 @@ class User extends Authenticatable
         return $this->hasMany(TaskComment::class);
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'project_members')

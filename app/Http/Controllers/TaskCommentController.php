@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Http\Requests\TaskCommentRequest;
+use App\Services\NotificationService;
 use App\Services\TaskCommentService;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class TaskCommentController extends Controller
 {
     public function __construct(
         private TaskCommentService $taskCommentService,
-        private TaskService $taskService
+        private TaskService $taskService,
+        private NotificationService $notificationService
     ) {}
 
     public function index(Task $task)
@@ -39,6 +41,9 @@ class TaskCommentController extends Controller
         }
 
         $comment = $this->taskCommentService->createComment($request->validated(), $task, Auth::user());
+
+        // Уведомляем о новом комментарии
+        $this->notificationService->commentAdded($comment, Auth::user());
 
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Комментарий успешно добавлен.');

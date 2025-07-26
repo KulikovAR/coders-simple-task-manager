@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\NotificationService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
@@ -15,10 +16,10 @@ use Inertia\Inertia;
 class TaskController extends Controller
 {
     public function __construct(
-        private TaskService    $taskService,
-        private ProjectService $projectService
-    )
-    {
+        private TaskService $taskService,
+        private ProjectService $projectService,
+        private NotificationService $notificationService
+    ) {
     }
 
     public function index(Request $request)
@@ -68,6 +69,15 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
+        // Создаем уведомления о новой задаче
+        $this->notificationService->taskCreated($task, Auth::user());
+
+        // Если назначен исполнитель, уведомляем его
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $assignee = $task->assignee;
+            $this->notificationService->taskAssigned($task, $assignee, Auth::user());
+        }
+
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Задача успешно создана.');
     }
@@ -113,7 +123,21 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
+        $oldAssigneeId = $task->assignee_id;
+        $oldData = $task->toArray();
+
         $task = $this->taskService->updateTask($task, $request->validated());
+
+        // Уведомляем о назначении задачи, если изменился исполнитель
+        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId && $task->assignee_id !== Auth::id()) {
+            $assignee = $task->assignee;
+            $this->notificationService->taskAssigned($task, $assignee, Auth::user());
+        }
+
+        // Уведомляем о создании задачи, если это новая задача
+        if ($oldAssigneeId === null && $task->assignee_id) {
+            $this->notificationService->taskCreated($task, Auth::user());
+        }
 
         // Для AJAX-запросов возвращаем JSON
         if ($request->header('Accept') === 'application/json') {
@@ -146,12 +170,15 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $request->validate([
-            'status_id' => 'required|exists:task_statuses,id',
-        ]);
+        $oldStatus = $task->status->name;
+        $newStatus = $request->input('status');
 
-        $status = \App\Models\TaskStatus::findOrFail($request->status_id);
-        $task = $this->taskService->updateTaskStatus($task, $status);
+        $task = $this->taskService->updateTaskStatus($task, $newStatus);
+
+        // Уведомляем о перемещении задачи
+        if ($oldStatus !== $newStatus) {
+            $this->notificationService->taskMoved($task, $oldStatus, $newStatus, Auth::user());
+        }
 
         // Для Inertia лучше вернуть JSON, если запрос AJAX
         if ($request->wantsJson()) {
