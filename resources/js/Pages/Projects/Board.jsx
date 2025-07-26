@@ -41,6 +41,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         };
     }, [showTaskModal]);
 
+    // Дополнительная проверка состояния при изменении задач
+    useEffect(() => {
+        // Если draggedTask больше не существует в задачах, сбрасываем его
+        if (draggedTask && !localTasks.find(task => task.id === draggedTask.id)) {
+            setDraggedTask(null);
+        }
+    }, [localTasks, draggedTask]);
+
     const openTaskModal = (task) => {
         setSelectedTask(task);
         setShowTaskModal(true);
@@ -175,8 +183,6 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const handleDragStart = (e, task) => {
         setDraggedTask(task);
         e.dataTransfer.effectAllowed = 'move';
-        // Добавляем класс для перетаскиваемого элемента
-        e.target.style.opacity = '0.5';
     };
 
     const handleDragOver = (e, statusId) => {
@@ -215,20 +221,26 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 : task
                         )
                     );
+                },
+                onError: (errors) => {
+                    // В случае ошибки также сбрасываем состояние
+                    console.error('Ошибка обновления статуса задачи:', errors);
+                },
+                onFinish: () => {
+                    // Всегда сбрасываем draggedTask в конце
                     setDraggedTask(null);
                 }
             });
+        } else {
+            // Если задача не изменила статус, все равно сбрасываем состояние
+            setDraggedTask(null);
         }
     };
 
     const handleDragEnd = () => {
+        // Всегда сбрасываем состояния при окончании перетаскивания
         setDraggedTask(null);
         setDragOverStatusId(null);
-        // Убираем класс с перетаскиваемого элемента
-        const draggedElement = document.querySelector('.dragging');
-        if (draggedElement) {
-            draggedElement.style.opacity = '1';
-        }
     };
 
     // Фильтрация задач по спринту и исполнителю
