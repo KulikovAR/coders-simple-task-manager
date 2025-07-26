@@ -1,8 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { getSprintStatusLabel, getSprintStatusClass, getSprintStatusIcon, formatSprintDates } from '@/utils/sprintUtils';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
+import TaskForm from '@/Components/TaskForm';
 
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [] }) {
     const [draggedTask, setDraggedTask] = useState(null);
@@ -11,77 +11,74 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [myTasks, setMyTasks] = useState(false);
     const [showTaskModal, setShowTaskModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [localTasks, setLocalTasks] = useState(tasks);
+    const [dragOverStatusId, setDragOverStatusId] = useState(null);
 
-    // Форма для редактирования задачи
-    const { data, setData, put, processing, errors, reset } = useForm({
-        title: '',
-        description: '',
-        result: '',
-        merge_request: '',
-        priority: '',
-        assignee_id: '',
-        deadline: '',
-        sprint_id: '',
-    });
+    // Обновляем локальные задачи при изменении props
+    useEffect(() => {
+        setLocalTasks(tasks);
+    }, [tasks]);
 
-    // Открытие модального окна с задачей
+    // Обработка клавиши Escape для закрытия модалки
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && showTaskModal) {
+                closeTaskModal();
+            }
+        };
+
+        if (showTaskModal) {
+            document.addEventListener('keydown', handleEscape);
+            // Блокируем прокрутку body при открытой модалке
+            document.body.style.overflow = 'hidden';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = 'unset';
+        };
+    }, [showTaskModal]);
+
     const openTaskModal = (task) => {
         setSelectedTask(task);
-        setData({
-            title: task.title || '',
-            description: task.description || '',
-            result: task.result || '',
-            merge_request: task.merge_request || '',
-            priority: task.priority || '',
-            assignee_id: task.assignee_id || '',
-            deadline: task.deadline ? task.deadline.split('T')[0] : '',
-            sprint_id: task.sprint_id || '',
-        });
         setShowTaskModal(true);
+        setErrors({});
     };
 
-    // Закрытие модального окна
     const closeTaskModal = () => {
         setShowTaskModal(false);
         setSelectedTask(null);
-        reset();
+        setErrors({});
     };
 
-    // Сохранение изменений задачи
-    const handleTaskUpdate = (e) => {
-        e.preventDefault();
-        
-        // Получаем CSRF-токен
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         document.querySelector('input[name="_token"]')?.value ||
-                         window.csrf_token;
-        
-        fetch(route('tasks.update', selectedTask.id), {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                // Обновляем задачу в списке без перезагрузки страницы
-                if (result.task) {
-                    const updatedTask = result.task;
-                    // Находим и обновляем задачу в списке
-                    const taskIndex = tasks.findIndex(t => t.id === updatedTask.id);
-                    if (taskIndex !== -1) {
-                        tasks[taskIndex] = { ...tasks[taskIndex], ...updatedTask };
-                    }
-                }
+    const handleTaskUpdate = (data) => {
+        setProcessing(true);
+        setErrors({});
+
+        router.put(route('tasks.update', selectedTask.id), data, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: (page) => {
+                // Обновляем задачу в локальном состоянии
+                setLocalTasks(prevTasks => 
+                    prevTasks.map(task => 
+                        task.id === selectedTask.id 
+                            ? { ...task, ...data }
+                            : task
+                    )
+                );
                 closeTaskModal();
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка сохранения:', error);
+                setProcessing(false);
+            },
+            onError: (errors) => {
+                setErrors(errors);
+                setProcessing(false);
+            },
+            onFinish: () => {
+                setProcessing(false);
+            },
         });
     };
 
@@ -178,22 +175,46 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const handleDragStart = (e, task) => {
         setDraggedTask(task);
         e.dataTransfer.effectAllowed = 'move';
+        // Добавляем класс для перетаскиваемого элемента
+        e.target.style.opacity = '0.5';
     };
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e, statusId) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
+        setDragOverStatusId(statusId);
+    };
+
+    const handleDragLeave = (e, statusId) => {
+        e.preventDefault();
+        // Проверяем, что мы действительно покидаем область, а не переходим к дочернему элементу
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+            setDragOverStatusId(null);
+        }
     };
 
     const handleDrop = (e, statusId) => {
         e.preventDefault();
+        setDragOverStatusId(null);
 
         if (draggedTask && draggedTask.status_id !== statusId) {
             router.put(route('tasks.status.update', draggedTask.id), {
                 status_id: statusId
             }, {
                 preserveScroll: true,
-                onSuccess: () => {
+                onSuccess: (page) => {
+                    // Обновляем задачу в локальном состоянии
+                    setLocalTasks(prevTasks => 
+                        prevTasks.map(task => 
+                            task.id === draggedTask.id 
+                                ? { ...task, status_id: statusId }
+                                : task
+                        )
+                    );
                     setDraggedTask(null);
                 }
             });
@@ -202,10 +223,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     const handleDragEnd = () => {
         setDraggedTask(null);
+        setDragOverStatusId(null);
+        // Убираем класс с перетаскиваемого элемента
+        const draggedElement = document.querySelector('.dragging');
+        if (draggedElement) {
+            draggedElement.style.opacity = '1';
+        }
     };
 
     // Фильтрация задач по спринту и исполнителю
-    const filteredTasks = tasks.filter(task => {
+    const filteredTasks = localTasks.filter(task => {
         const sprintOk = selectedSprintId === 'all' || task.sprint_id == selectedSprintId;
         const assigneeOk = assigneeId ? String(task.assignee_id) === String(assigneeId) : true;
         const myOk = myTasks ? String(task.assignee_id) === String(auth.user.id) : true;
@@ -310,8 +337,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             return (
                                 <div
                                     key={status.id}
-                                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
-                                    onDragOver={handleDragOver}
+                                    className={`bg-gray-800 border rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 transition-all duration-200 ${
+                                        dragOverStatusId === status.id 
+                                            ? 'border-accent-blue bg-accent-blue/10 shadow-lg shadow-accent-blue/20' 
+                                            : 'border-gray-700'
+                                    }`}
+                                    onDragOver={(e) => handleDragOver(e, status.id)}
+                                    onDragLeave={(e) => handleDragLeave(e, status.id)}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
                                     {/* Заголовок колонки с индикатором */}
@@ -326,10 +358,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     </div>
 
                                     <div className="space-y-3">
+                                        {statusTasks.length === 0 && dragOverStatusId === status.id && (
+                                            <div className="border-2 border-dashed border-accent-blue/50 rounded-lg p-8 text-center">
+                                                <div className="text-accent-blue/70 text-4xl mb-2">📋</div>
+                                                <p className="text-accent-blue/70 text-sm font-medium">Отпустите задачу здесь</p>
+                                            </div>
+                                        )}
                                         {statusTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className="bg-gray-700 border border-gray-600 rounded-lg p-3 cursor-move hover:bg-gray-600 hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                                                className={`bg-gray-700 border rounded-lg p-3 cursor-move hover:bg-gray-600 hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md ${
+                                                    draggedTask?.id === task.id ? 'opacity-50 scale-95' : ''
+                                                }`}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task)}
                                                 onDragEnd={handleDragEnd}
@@ -428,8 +468,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Модальное окно для просмотра и редактирования задачи */}
             {showTaskModal && selectedTask && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                    onClick={closeTaskModal}
+                >
+                    <div 
+                        className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="p-6">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
@@ -446,170 +492,17 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 </button>
                             </div>
 
-                            <form onSubmit={handleTaskUpdate} className="space-y-6">
-                                {/* Название */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Название задачи *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={data.title}
-                                        onChange={(e) => setData('title', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                        placeholder="Введите название задачи"
-                                        required
-                                    />
-                                    {errors.title && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.title}</p>
-                                    )}
-                                </div>
-
-                                {/* Описание */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Описание
-                                    </label>
-                                    <textarea
-                                        value={data.description}
-                                        onChange={(e) => setData('description', e.target.value)}
-                                        rows={4}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                        placeholder="Опишите задачу..."
-                                    />
-                                    {errors.description && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.description}</p>
-                                    )}
-                                </div>
-
-                                {/* Результат */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Результат выполнения
-                                    </label>
-                                    <textarea
-                                        value={data.result}
-                                        onChange={(e) => setData('result', e.target.value)}
-                                        rows={3}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                        placeholder="Опишите результат выполнения задачи..."
-                                    />
-                                    {errors.result && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.result}</p>
-                                    )}
-                                </div>
-
-                                {/* Ссылка на Merge Request */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Ссылка на Merge Request
-                                    </label>
-                                    <input
-                                        type="url"
-                                        value={data.merge_request}
-                                        onChange={(e) => setData('merge_request', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                        placeholder="https://github.com/..."
-                                    />
-                                    {errors.merge_request && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.merge_request}</p>
-                                    )}
-                                </div>
-
-                                {/* Приоритет */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Приоритет
-                                    </label>
-                                    <select
-                                        value={data.priority}
-                                        onChange={(e) => setData('priority', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                    >
-                                        <option value="">Выберите приоритет</option>
-                                        {getTaskPriorityOptions().map(option => (
-                                            <option key={option.value} value={option.value}>{option.label}</option>
-                                        ))}
-                                    </select>
-                                    {errors.priority && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.priority}</p>
-                                    )}
-                                </div>
-
-                                {/* Исполнитель */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Исполнитель
-                                    </label>
-                                    <select
-                                        value={data.assignee_id}
-                                        onChange={(e) => setData('assignee_id', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                    >
-                                        <option value="">Выберите исполнителя</option>
-                                        {members.map(user => (
-                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
-                                        ))}
-                                    </select>
-                                    {errors.assignee_id && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.assignee_id}</p>
-                                    )}
-                                </div>
-
-                                {/* Дедлайн */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Дедлайн
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={data.deadline}
-                                        onChange={(e) => setData('deadline', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                    />
-                                    {errors.deadline && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.deadline}</p>
-                                    )}
-                                </div>
-
-                                {/* Спринт */}
-                                <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Спринт
-                                    </label>
-                                    <select
-                                        value={data.sprint_id}
-                                        onChange={(e) => setData('sprint_id', e.target.value)}
-                                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gray-500"
-                                    >
-                                        <option value="">Выберите спринт</option>
-                                        {sprints.map(sprint => (
-                                            <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
-                                        ))}
-                                    </select>
-                                    {errors.sprint_id && (
-                                        <p className="mt-1 text-sm text-red-400">{errors.sprint_id}</p>
-                                    )}
-                                </div>
-
-                                {/* Кнопки */}
-                                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
-                                    <button
-                                        type="button"
-                                        onClick={closeTaskModal}
-                                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                                    >
-                                        Отмена
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                                    >
-                                        {processing ? 'Сохранение...' : 'Сохранить'}
-                                    </button>
-                                </div>
-                            </form>
+                            <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                members={members}
+                                errors={errors}
+                                onSubmit={handleTaskUpdate}
+                                onCancel={closeTaskModal}
+                                isModal={true}
+                                processing={processing}
+                            />
                         </div>
                     </div>
                 </div>
