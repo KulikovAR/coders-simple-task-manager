@@ -373,16 +373,16 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                         <nav className="flex space-x-2">
                             {tasks.links.map((link, index) =>
                                 link.url ? (
-                                    <Link
-                                        key={index}
-                                        href={link.url}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            link.active
-                                                ? 'bg-secondary-bg text-text-primary'
+                                <Link
+                                    key={index}
+                                    href={link.url}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                        link.active
+                                            ? 'bg-secondary-bg text-text-primary'
                                                 : 'bg-card-bg text-text-primary hover:bg-secondary-bg'
-                                        }`}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
+                                    }`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
                                 ) : (
                                     <span
                                         key={index}

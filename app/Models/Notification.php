@@ -33,6 +33,7 @@ class Notification extends Model
     const TYPE_TASK_MOVED = 'task_moved';
     const TYPE_TASK_CREATED = 'task_created';
     const TYPE_TASK_UPDATED = 'task_updated';
+    const TYPE_TASK_PRIORITY_CHANGED = 'task_priority_changed';
     const TYPE_COMMENT_ADDED = 'comment_added';
     const TYPE_SPRINT_STARTED = 'sprint_started';
     const TYPE_SPRINT_ENDED = 'sprint_ended';
@@ -87,6 +88,7 @@ class Notification extends Model
             self::TYPE_TASK_MOVED => 'Задача ":task_title" перемещена в статус ":status"',
             self::TYPE_TASK_CREATED => 'Создана новая задача: :task_title',
             self::TYPE_TASK_UPDATED => 'Задача ":task_title" обновлена',
+            self::TYPE_TASK_PRIORITY_CHANGED => 'Приоритет задачи ":task_title" изменен на ":priority"',
             self::TYPE_COMMENT_ADDED => 'Добавлен комментарий к задаче ":task_title"',
             self::TYPE_SPRINT_STARTED => 'Спринт ":sprint_name" начался',
             self::TYPE_SPRINT_ENDED => 'Спринт ":sprint_name" завершён',

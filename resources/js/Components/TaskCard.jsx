@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { getStatusClass, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
+import { getStatusClass, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
 
 export default function TaskCard({ task }) {
     const getPriorityText = (priority) => {
@@ -38,8 +38,9 @@ export default function TaskCard({ task }) {
                 {/* Приоритет */}
                 <div className="flex items-center justify-between">
                     <span className="text-sm text-text-muted">Приоритет:</span>
-                    <span className={`text-sm font-medium ${getPriorityColor(task.priority)}`}>
-                        {getPriorityText(task.priority)}
+                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                        <span>{getPriorityIcon(task.priority)}</span>
+                        <span>{getPriorityText(task.priority)}</span>
                     </span>
                 </div>
 

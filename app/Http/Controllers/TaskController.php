@@ -201,6 +201,36 @@ class TaskController extends Controller
         return redirect()->back()->with('success', 'Статус задачи успешно обновлен.');
     }
 
+    public function updatePriority(Request $request, Task $task)
+    {
+        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $request->validate([
+            'priority' => 'required|in:low,medium,high',
+        ]);
+
+        // Загружаем связанные данные
+        $task->load(['status', 'assignee', 'reporter', 'project']);
+
+        $oldPriority = $task->priority;
+        $newPriority = $request->priority;
+
+        $task = $this->taskService->updateTaskPriority($task, $newPriority);
+
+        // Уведомляем об изменении приоритета
+        if ($oldPriority !== $newPriority) {
+            $this->notificationService->taskPriorityChanged($task, $oldPriority, $newPriority, Auth::user());
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'task' => $task]);
+        }
+
+        return redirect()->back()->with('success', 'Приоритет задачи успешно обновлен.');
+    }
+
     public function getProjectSprints(Request $request, Project $project)
     {
         Log::info('getProjectSprints called', [

@@ -50,9 +50,9 @@ export const TASK_PRIORITY_LABELS = {
 };
 
 export const TASK_PRIORITY_COLORS = {
-    [TASK_PRIORITIES.LOW]: 'text-accent-green',
-    [TASK_PRIORITIES.MEDIUM]: 'text-accent-yellow',
-    [TASK_PRIORITIES.HIGH]: 'text-accent-red',
+    [TASK_PRIORITIES.LOW]: 'bg-accent-green/20 text-accent-green border-accent-green/30',
+    [TASK_PRIORITIES.MEDIUM]: 'bg-accent-yellow/20 text-accent-yellow border-accent-yellow/30',
+    [TASK_PRIORITIES.HIGH]: 'bg-accent-red/20 text-accent-red border-accent-red/30',
 };
 
 // Функции для работы со статусами
@@ -73,7 +73,20 @@ export function getPriorityLabel(priority) {
 }
 
 export function getPriorityColor(priority) {
-    return TASK_PRIORITY_COLORS[priority] || 'text-text-secondary';
+    return TASK_PRIORITY_COLORS[priority] || 'bg-text-secondary/20 text-text-secondary border-text-secondary/30';
+}
+
+export function getPriorityIcon(priority) {
+    switch (priority) {
+        case TASK_PRIORITIES.LOW:
+            return '🌱';
+        case TASK_PRIORITIES.MEDIUM:
+            return '⚡';
+        case TASK_PRIORITIES.HIGH:
+            return '🔥';
+        default:
+            return '•';
+    }
 }
 
 // Получить все статусы для селекта

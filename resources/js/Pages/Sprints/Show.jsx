@@ -10,7 +10,7 @@ import {
     isSprintActive,
     isSprintCompleted
 } from '@/utils/sprintUtils';
-import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
+import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
 
 export default function Show({ auth, project, sprint }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -165,8 +165,9 @@ export default function Show({ auth, project, sprint }) {
 
                                                     <div className="flex items-center space-x-4 text-sm text-text-muted">
                                                         {task.priority && (
-                                                            <span className={getPriorityColor(task.priority)}>
-                                                                Приоритет: {getPriorityText(task.priority)}
+                                                            <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                                                                <span>{getPriorityIcon(task.priority)}</span>
+                                                                <span>Приоритет: {getPriorityText(task.priority)}</span>
                                                             </span>
                                                         )}
                                                         {task.assignee && (

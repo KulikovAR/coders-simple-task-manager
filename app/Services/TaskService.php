@@ -130,6 +130,12 @@ class TaskService
         return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
     }
 
+    public function updateTaskPriority(Task $task, string $priority): Task
+    {
+        $task->update(['priority' => $priority]);
+        return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
+    }
+
     public function assignTask(Task $task, User $assignee): Task
     {
         $task->update(['assignee_id' => $assignee->id]);

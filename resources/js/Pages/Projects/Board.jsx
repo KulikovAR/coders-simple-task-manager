@@ -15,6 +15,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [errors, setErrors] = useState({});
     const [localTasks, setLocalTasks] = useState(tasks);
     const [dragOverStatusId, setDragOverStatusId] = useState(null);
+    const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
+    const [dragOverPriority, setDragOverPriority] = useState(null);
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
@@ -120,17 +122,17 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         }
     };
 
-    // Улучшенные цвета приоритетов с индикаторами
+    // Улучшенные цвета приоритетов с цветными фонами
     const getPriorityColor = (priority) => {
         switch (priority) {
             case 'low':
-                return 'text-green-400 border-green-400 bg-green-400/10';
+                return 'bg-green-500/20 text-green-400 border-green-500/30';
             case 'medium':
-                return 'text-yellow-400 border-yellow-400 bg-yellow-400/10';
+                return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
             case 'high':
-                return 'text-red-400 border-red-400 bg-red-400/10';
+                return 'bg-red-500/20 text-red-400 border-red-500/30';
             default:
-                return 'text-gray-400 border-gray-400 bg-gray-400/10';
+                return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
         }
     };
 
@@ -150,11 +152,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const getPriorityIcon = (priority) => {
         switch (priority) {
             case 'low':
-                return '⬇️';
+                return '🌱';
             case 'medium':
-                return '➡️';
+                return '⚡';
             case 'high':
-                return '⬆️';
+                return '🔥';
             default:
                 return '•';
         }
@@ -188,7 +190,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const handleDragOver = (e, statusId) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        setDragOverStatusId(statusId);
+        
+        // Если перетаскиваем в том же статусе, показываем зоны приоритетов
+        if (draggedTask && draggedTask.status_id === statusId) {
+            setShowPriorityDropZones(true);
+            setDragOverStatusId(statusId);
+        } else {
+            setShowPriorityDropZones(false);
+            setDragOverStatusId(statusId);
+        }
     };
 
     const handleDragLeave = (e, statusId) => {
@@ -200,12 +210,58 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         
         if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
             setDragOverStatusId(null);
+            setShowPriorityDropZones(false);
+        }
+    };
+
+    const handlePriorityDragOver = (e, priority) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverPriority(priority);
+    };
+
+    const handlePriorityDragLeave = (e) => {
+        e.preventDefault();
+        setDragOverPriority(null);
+    };
+
+    const handlePriorityDrop = (e, priority) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverPriority(null);
+        setShowPriorityDropZones(false);
+
+        if (draggedTask && draggedTask.priority !== priority) {
+            router.put(route('tasks.priority.update', draggedTask.id), {
+                priority: priority
+            }, {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    // Обновляем задачу в локальном состоянии
+                    setLocalTasks(prevTasks => 
+                        prevTasks.map(task => 
+                            task.id === draggedTask.id 
+                                ? { ...task, priority: priority }
+                                : task
+                        )
+                    );
+                },
+                onError: (errors) => {
+                    console.error('Ошибка обновления приоритета задачи:', errors);
+                },
+                onFinish: () => {
+                    setDraggedTask(null);
+                }
+            });
+        } else {
+            setDraggedTask(null);
         }
     };
 
     const handleDrop = (e, statusId) => {
         e.preventDefault();
         setDragOverStatusId(null);
+        setShowPriorityDropZones(false);
 
         if (draggedTask && draggedTask.status_id !== statusId) {
             router.put(route('tasks.status.update', draggedTask.id), {
@@ -241,6 +297,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         // Всегда сбрасываем состояния при окончании перетаскивания
         setDraggedTask(null);
         setDragOverStatusId(null);
+        setShowPriorityDropZones(false);
+        setDragOverPriority(null);
     };
 
     // Фильтрация задач по спринту и исполнителю
@@ -251,8 +309,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         return sprintOk && assigneeOk && myOk;
     });
 
+    // Функция для получения порядка приоритетов
+    const getPriorityOrder = (priority) => {
+        const order = { 'high': 1, 'medium': 2, 'low': 3 };
+        return order[priority] || 4; // Задачи без приоритета идут последними
+    };
+
     const getFilteredStatusTasks = (statusId) => {
-        return filteredTasks.filter(task => task.status_id === statusId);
+        const tasks = filteredTasks.filter(task => task.status_id === statusId);
+        // Сортируем по приоритету: высокий -> средний -> низкий -> без приоритета
+        return tasks.sort((a, b) => {
+            const priorityA = getPriorityOrder(a.priority);
+            const priorityB = getPriorityOrder(b.priority);
+            return priorityA - priorityB;
+        });
     };
 
     return (
@@ -370,7 +440,61 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     </div>
 
                                     <div className="space-y-3">
-                                        {statusTasks.length === 0 && dragOverStatusId === status.id && (
+                                        {/* Зоны приоритетов при перетаскивании в том же статусе */}
+                                        {showPriorityDropZones && dragOverStatusId === status.id && draggedTask?.status_id === status.id && (
+                                            <div className="space-y-2 mb-4">
+                                                <div className="text-xs text-gray-400 font-medium mb-2 text-center">Выберите приоритет:</div>
+                                                {[
+                                                    { 
+                                                        priority: 'high', 
+                                                        label: 'Высокий', 
+                                                        bgColor: 'bg-red-500/20', 
+                                                        borderColor: 'border-red-500/50',
+                                                        hoverBg: 'hover:bg-red-500/30',
+                                                        activeBg: 'bg-red-500/40',
+                                                        textColor: 'text-red-400'
+                                                    },
+                                                    { 
+                                                        priority: 'medium', 
+                                                        label: 'Средний', 
+                                                        bgColor: 'bg-yellow-500/20', 
+                                                        borderColor: 'border-yellow-500/50',
+                                                        hoverBg: 'hover:bg-yellow-500/30',
+                                                        activeBg: 'bg-yellow-500/40',
+                                                        textColor: 'text-yellow-400'
+                                                    },
+                                                    { 
+                                                        priority: 'low', 
+                                                        label: 'Низкий', 
+                                                        bgColor: 'bg-green-500/20', 
+                                                        borderColor: 'border-green-500/50',
+                                                        hoverBg: 'hover:bg-green-500/30',
+                                                        activeBg: 'bg-green-500/40',
+                                                        textColor: 'text-green-400'
+                                                    }
+                                                ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor }) => (
+                                                    <div
+                                                        key={priority}
+                                                        className={`priority-zone border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                                                            dragOverPriority === priority 
+                                                                ? `${activeBg} ${borderColor.replace('/50', '')} shadow-lg shadow-${priority === 'high' ? 'red' : priority === 'medium' ? 'yellow' : 'green'}-500/25 active` 
+                                                                : `${bgColor} ${borderColor} ${hoverBg}`
+                                                        }`}
+                                                        onDragOver={(e) => handlePriorityDragOver(e, priority)}
+                                                        onDragLeave={handlePriorityDragLeave}
+                                                        onDrop={(e) => handlePriorityDrop(e, priority)}
+                                                    >
+                                                        <div className={`text-lg font-bold mb-2 ${textColor}`}>
+                                                            {priority === 'high' ? '🔥' : priority === 'medium' ? '⚡' : '🌱'}
+                                                        </div>
+                                                        <div className={`text-sm font-semibold ${textColor}`}>{label}</div>
+                                                        <div className="text-xs text-gray-400 mt-1">приоритет</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
                                             <div className="border-2 border-dashed border-accent-blue/50 rounded-lg p-8 text-center">
                                                 <div className="text-accent-blue/70 text-4xl mb-2">📋</div>
                                                 <p className="text-accent-blue/70 text-sm font-medium">Отпустите задачу здесь</p>
@@ -379,8 +503,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         {statusTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className={`bg-gray-700 border rounded-lg p-3 cursor-move hover:bg-gray-600 hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md ${
-                                                    draggedTask?.id === task.id ? 'opacity-50 scale-95' : ''
+                                                className={`task-card bg-gray-700 border rounded-lg p-3 cursor-move hover:bg-gray-600 hover:border-gray-500 shadow-sm hover:shadow-md ${
+                                                    draggedTask?.id === task.id ? 'dragging' : ''
                                                 }`}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task)}
@@ -417,10 +541,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                 {/* Мета-информация */}
                                                 <div className="space-y-2">
-                                                    {/* Приоритет с иконкой */}
+                                                    {/* Приоритет с цветным фоном */}
                                                     {task.priority && (
-                                                        <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getPriorityColor(task.priority)}`}>
-                                                            <span>{getPriorityIcon(task.priority)}</span>
+                                                        <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                                                            task.priority === 'high' 
+                                                                ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                                                                : task.priority === 'medium' 
+                                                                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                                                                    : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                        }`}>
+                                                            <span className="text-xs">
+                                                                {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
+                                                            </span>
                                                             <span>{getPriorityText(task.priority)}</span>
                                                         </div>
                                                     )}

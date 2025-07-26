@@ -319,6 +319,61 @@ body {
     color: var(--accent-pink) !important;
 }
 
+/* Цветные фоны для приоритетов */
+.bg-green-500\/20 {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.bg-yellow-500\/20 {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.bg-red-500\/20 {
+    background-color: rgba(252, 165, 165, 0.2) !important;
+}
+
+.border-green-500\/30 {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.border-yellow-500\/30 {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.border-red-500\/30 {
+    border-color: rgba(252, 165, 165, 0.3) !important;
+}
+
+/* Анимации для зон приоритетов */
+.priority-zone {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.priority-zone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.priority-zone.active {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Анимации для карточек задач */
+.task-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95) rotate(2deg);
+}
+
 /* Убираем тени */
 .shadow, .shadow-md, .shadow-lg, .shadow-sm, .shadow-xl, .shadow-inner, .shadow-none {
     box-shadow: none !important;

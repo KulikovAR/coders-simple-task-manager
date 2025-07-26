@@ -99,6 +99,45 @@ class NotificationService
     }
 
     /**
+     * Создать уведомление об изменении приоритета задачи
+     */
+    public function taskPriorityChanged(Task $task, string $oldPriority, string $newPriority, ?User $fromUser = null): void
+    {
+        // Загружаем связанные данные
+        $task->load(['assignee', 'reporter', 'project']);
+
+        // Уведомляем исполнителя задачи
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_PRIORITY_CHANGED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'priority' => $newPriority,
+                    'old_priority' => $oldPriority,
+                ]
+            );
+        }
+
+        // Уведомляем создателя задачи, если он не исполнитель
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_PRIORITY_CHANGED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'priority' => $newPriority,
+                    'old_priority' => $oldPriority,
+                ]
+            );
+        }
+    }
+
+    /**
      * Создать уведомление о добавлении комментария
      */
     public function commentAdded(TaskComment $comment, ?User $fromUser = null): void

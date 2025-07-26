@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel } from '@/utils/statusUtils';
+import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
 import { 
     getCommentTypeLabel, 
     getCommentTypeIcon, 
@@ -85,8 +85,9 @@ export default function Show({ auth, task }) {
                                 {getStatusLabel(task.status?.name)}
                             </span>
                             {task.priority && (
-                                <span className={getPriorityColor(task.priority)}>
-                                    Приоритет: {getPriorityText(task.priority)}
+                                <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                                    <span>{getPriorityIcon(task.priority)}</span>
+                                    <span>Приоритет: {getPriorityText(task.priority)}</span>
                                 </span>
                             )}
                             <span>Создана: {new Date(task.created_at).toLocaleDateString('ru-RU')}</span>
