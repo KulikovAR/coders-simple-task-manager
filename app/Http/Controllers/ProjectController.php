@@ -151,4 +151,15 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Пользователь успешно удален из проекта.');
     }
+
+    public function getMembers(Project $project)
+    {
+        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
+
+        return response()->json($members);
+    }
 } 

@@ -28,11 +28,25 @@ export default function TaskForm({
         merge_request: task?.merge_request || '',
     });
 
-    const [availableSprints, setAvailableSprints] = useState(sprints);
+    // Устанавливаем значения по умолчанию для project_id и sprint_id при создании
+    useEffect(() => {
+        if (!isEditing && task) {
+            if (task.project_id) {
+                setData('project_id', task.project_id);
+            }
+            if (task.sprint_id) {
+                setData('sprint_id', task.sprint_id);
+            }
+        }
+    }, [task, isEditing]);
 
-    // Загружаем спринты при изменении проекта
+    const [availableSprints, setAvailableSprints] = useState(sprints);
+    const [availableMembers, setAvailableMembers] = useState(members);
+
+    // Загружаем спринты и участников при изменении проекта
     useEffect(() => {
         if (data.project_id) {
+            // Загружаем спринты
             fetch(route('tasks.project.sprints', data.project_id), {
                 headers: {
                     'Accept': 'application/json',
@@ -67,9 +81,47 @@ export default function TaskForm({
                     console.error('Ошибка загрузки спринтов:', error);
                     setAvailableSprints([]);
                 });
+
+            // Загружаем участников проекта
+            fetch(route('projects.members', data.project_id), {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let members = [];
+                    if (Array.isArray(data)) {
+                        members = data;
+                    } else if (data && typeof data === 'object' && Array.isArray(data.members)) {
+                        members = data.members;
+                    } else if (data && typeof data === 'object' && data.members) {
+                        members = Array.isArray(data.members) ? data.members : [];
+                    }
+                    
+                    setAvailableMembers(members);
+                    
+                    // Сбрасываем выбранного исполнителя, если он не принадлежит новому проекту
+                    if (data.assignee_id && !members.find(m => m.id == data.assignee_id)) {
+                        setData('assignee_id', '');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки участников:', error);
+                    setAvailableMembers([]);
+                });
         } else {
             setAvailableSprints([]);
+            setAvailableMembers([]);
             setData('sprint_id', '');
+            setData('assignee_id', '');
         }
     }, [data.project_id]);
 
@@ -259,7 +311,7 @@ export default function TaskForm({
                             {renderField('assignee_id', 'Исполнитель', 'select', {
                                 options: [
                                     { value: '', label: 'Не назначен' },
-                                    ...members.map((user) => ({
+                                    ...availableMembers.map((user) => ({
                                         value: user.id,
                                         label: `${user.name} ${user.email ? `(${user.email})` : ''}`
                                     }))

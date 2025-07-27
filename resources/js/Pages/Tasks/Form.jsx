@@ -14,10 +14,10 @@ export default function Form({ auth, task = null, projects = [], selectedProject
         ...task,
         project_id: task.project_id || defaultProjectId,
         sprint_id: task.sprint_id || defaultSprintId,
-    } : {
+    } : (defaultProjectId || defaultSprintId) ? {
         project_id: defaultProjectId,
         sprint_id: defaultSprintId,
-    };
+    } : null;
 
     const handleSubmit = (data) => {
         if (isEditing) {
