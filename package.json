@@ -23,6 +23,11 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@react-spring/parallax": "^10.0.1",
+        "@react-spring/web": "^10.0.1",
+        "framer-motion": "^12.23.9",
+        "gsap": "^3.13.0",
+        "lucide-react": "^0.526.0",
         "react-markdown": "^10.1.0",
         "remark-gfm": "^4.0.1"
     }

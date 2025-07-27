@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
+import Waves from '@/Components/Waves';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -28,7 +29,22 @@ export default function Authenticated({ user, header, children }) {
     }
 
     return (
-        <div className="min-h-screen bg-primary-bg text-text-primary">
+        <div className="min-h-screen bg-primary-bg text-text-primary relative">
+            {/* Waves Background */}
+            <Waves
+                lineColor="rgba(255, 255, 255, 0.1)"
+                backgroundColor="transparent"
+                waveSpeedX={0.015}
+                waveSpeedY={0.008}
+                waveAmpX={25}
+                waveAmpY={12}
+                friction={0.92}
+                tension={0.008}
+                maxCursorMove={60}
+                xGap={20}
+                yGap={50}
+            />
+            <div className="relative z-10">
             <nav className="border-b border-border-color bg-card-bg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
@@ -189,6 +205,7 @@ export default function Authenticated({ user, header, children }) {
                     </div>
                 </div>
             </main>
+            </div>
         </div>
     );
 }
