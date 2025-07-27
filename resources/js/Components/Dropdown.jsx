@@ -1,6 +1,7 @@
 import { Transition } from '@headlessui/react';
 import { Link } from '@inertiajs/react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const DropDownContext = createContext();
 
@@ -20,17 +21,11 @@ const Dropdown = ({ children }) => {
 
 const Trigger = ({ children }) => {
     const { open, setOpen, toggleOpen } = useContext(DropDownContext);
+    const triggerRef = useRef(null);
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
-
-            {open && (
-                <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setOpen(false)}
-                ></div>
-            )}
+            <div ref={triggerRef} data-dropdown-trigger onClick={toggleOpen}>{children}</div>
         </>
     );
 };
@@ -43,25 +38,45 @@ const Content = ({
     children,
 }) => {
     const { open, setOpen } = useContext(DropDownContext);
+    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
-    let alignmentClasses = 'origin-top';
+    useEffect(() => {
+        if (open) {
+            // Находим триггер в DOM
+            const triggerElement = document.querySelector('[data-dropdown-trigger]');
+            if (triggerElement) {
+                const rect = triggerElement.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
-    if (align === 'left') {
-        alignmentClasses = 'ltr:origin-top-left rtl:origin-top-right start-0';
-    } else if (align === 'right') {
-        alignmentClasses = 'ltr:origin-top-right rtl:origin-top-left end-0';
-    }
+                let left = rect.left + scrollLeft;
+                if (align === 'right') {
+                    const dropdownWidth = width === '48' ? 192 : width === '64' ? 256 : rect.width;
+                    left = rect.right + scrollLeft - dropdownWidth;
+                }
+
+                setPosition({
+                    top: rect.bottom + scrollTop + 8,
+                    left: left,
+                    width: width === '48' ? 192 : width === '64' ? 256 : rect.width
+                });
+            }
+        }
+    }, [open, align, width]);
 
     let widthClasses = '';
-
     if (width === '48') {
         widthClasses = 'w-48';
+    } else if (width === '64') {
+        widthClasses = 'w-64';
     }
     if (fillContainer) {
         widthClasses = 'w-full';
     }
 
-    return (
+    if (!open) return null;
+
+    const dropdownContent = (
         <>
             <Transition
                 show={open}
@@ -73,7 +88,13 @@ const Content = ({
                 leaveTo="opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-51 mt-2 rounded-lg shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    className={`fixed rounded-lg shadow-lg ${widthClasses}`}
+                    style={{
+                        top: position.top,
+                        left: position.left,
+                        width: position.width,
+                        zIndex: 9999
+                    }}
                     onClick={() => setOpen(false)}
                 >
                     <div
@@ -86,8 +107,17 @@ const Content = ({
                     </div>
                 </div>
             </Transition>
+            
+            {/* Overlay */}
+            <div
+                className="fixed inset-0"
+                style={{ zIndex: 9998 }}
+                onClick={() => setOpen(false)}
+            />
         </>
     );
+
+    return createPortal(dropdownContent, document.body);
 };
 
 const DropdownLink = ({ className = '', children, ...props }) => {

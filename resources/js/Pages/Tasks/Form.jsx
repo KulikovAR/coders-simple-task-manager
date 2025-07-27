@@ -60,7 +60,7 @@ export default function Form({ auth, task = null, projects = [], selectedProject
 
                 {/* Форма задачи */}
                 <TaskForm
-                    task={taskData}
+                    task={isEditing ? taskData : null}
                     projects={projects}
                     sprints={sprints}
                     members={members}
