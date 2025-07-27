@@ -92,6 +92,12 @@ const Waves = ({
 
   useEffect(() => {
     configRef.current = { lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap };
+    
+    // Устанавливаем цвет курсора в зависимости от цвета линий
+    const cursorColor = lineColor.includes('255, 255, 255') ? '#160000' : '#ffffff';
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--cursor-color', cursorColor);
+    }
   }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap]);
 
   useEffect(() => {
@@ -229,6 +235,11 @@ const Waves = ({
 
     setSize();
     setLines();
+    
+    // Устанавливаем цвет курсора
+    const cursorColor = lineColor.includes('255, 255, 255') ? '#160000' : '#ffffff';
+    container.style.setProperty('--cursor-color', cursorColor);
+    
     frameIdRef.current = requestAnimationFrame(tick);
     window.addEventListener("resize", onResize);
     window.addEventListener("mousemove", onMouseMove);

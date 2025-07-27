@@ -234,20 +234,30 @@ export default function Index({ auth, projects, filters }) {
                 {projects.data.length > 0 && projects.links && projects.links.length > 3 && (
                     <div className="flex justify-center">
                         <nav className="flex space-x-2">
-                            {projects.links.map((link, index) => (
-                                <Link
-                                    key={index}
-                                    href={link.url}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        link.active
-                                            ? 'bg-secondary-bg text-text-primary'
-                                            : link.url
-                                            ? 'bg-card-bg text-text-primary hover:bg-secondary-bg'
-                                            : 'bg-card-bg text-text-muted cursor-not-allowed'
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
+                            {projects.links.map((link, index) => {
+                                // Заменяем английские тексты на русские
+                                let label = link.label;
+                                if (label.includes('Previous')) {
+                                    label = label.replace('Previous', 'Предыдущая');
+                                } else if (label.includes('Next')) {
+                                    label = label.replace('Next', 'Следующая');
+                                }
+                                
+                                return (
+                                    <Link
+                                        key={index}
+                                        href={link.url}
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                            link.active
+                                                ? 'bg-secondary-bg text-text-primary'
+                                                : link.url
+                                                ? 'bg-card-bg text-text-primary hover:bg-secondary-bg'
+                                                : 'bg-card-bg text-text-muted cursor-not-allowed'
+                                        }`}
+                                        dangerouslySetInnerHTML={{ __html: label }}
+                                    />
+                                );
+                            })}
                         </nav>
                     </div>
                 )}

@@ -70,7 +70,7 @@ export default function NotificationBell() {
             </button>
 
             {showDropdown && (
-                <div className="absolute right-0 mt-2 w-80 bg-card-bg border border-border-color rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-80 bg-card-bg border border-border-color rounded-lg shadow-lg z-[9999]">
                     <div className="p-4 border-b border-border-color">
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold text-text-primary">Уведомления</h3>
@@ -85,7 +85,7 @@ export default function NotificationBell() {
                         </div>
                     </div>
 
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent">
                         {notifications.length > 0 ? (
                             <div className="divide-y divide-border-color">
                                 {notifications.map((notification) => (

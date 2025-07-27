@@ -95,15 +95,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const getStatusColor = (status) => {
         switch (status) {
             case 'active':
-                return 'bg-gray-600 text-white';
+                return 'bg-accent-green text-white';
             case 'completed':
-                return 'bg-gray-700 text-white';
+                return 'bg-accent-blue text-white';
             case 'on_hold':
-                return 'bg-gray-500 text-white';
+                return 'bg-accent-yellow text-white';
             case 'cancelled':
-                return 'bg-gray-800 text-white';
+                return 'bg-accent-red text-white';
             default:
-                return 'bg-gray-500 text-white';
+                return 'bg-accent-slate text-white';
         }
     };
 
@@ -126,13 +126,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const getPriorityColor = (priority) => {
         switch (priority) {
             case 'low':
-                return 'bg-green-500/20 text-green-400 border-green-500/30';
+                return 'bg-accent-green/20 text-accent-green border-accent-green/30';
             case 'medium':
-                return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+                return 'bg-accent-yellow/20 text-accent-yellow border-accent-yellow/30';
             case 'high':
-                return 'bg-red-500/20 text-red-400 border-red-500/30';
+                return 'bg-accent-red/20 text-accent-red border-accent-red/30';
             default:
-                return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+                return 'bg-accent-slate/20 text-accent-slate border-accent-slate/30';
         }
     };
 
@@ -166,19 +166,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const getStatusIndicatorColor = (statusName) => {
         switch (statusName) {
             case 'To Do':
-                return 'bg-gray-500';
+                return 'bg-accent-slate';
             case 'In Progress':
-                return 'bg-blue-500';
+                return 'bg-accent-blue';
             case 'Review':
-                return 'bg-yellow-500';
+                return 'bg-accent-yellow';
             case 'Testing':
-                return 'bg-purple-500';
+                return 'bg-accent-purple';
             case 'Ready for Release':
-                return 'bg-pink-500';
+                return 'bg-accent-pink';
             case 'Done':
-                return 'bg-green-500';
+                return 'bg-accent-green';
             default:
-                return 'bg-gray-500';
+                return 'bg-accent-slate';
         }
     };
 
@@ -337,24 +337,26 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 <div className="mb-2">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                     <div>
-                      <h1 className="text-2xl font-bold text-white">
-                        Доска задач <span className="text-accent-blue">/ {project.name}</span>
+                      <h1 className="text-heading-2 text-text-primary">
+                        Доска задач <span className="text-gradient">/ {project.name}</span>
                       </h1>
                       {project.description && (
-                        <p className="text-gray-400 text-sm mt-1">{project.description}</p>
+                        <p className="text-body-small text-text-secondary mt-2">{project.description}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-2 md:mt-0">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>{getStatusText(project.status)}</span>
+                    <div className="flex items-center gap-3 mt-2 md:mt-0">
+                      <span className={`px-3 py-1.5 rounded-full text-caption font-medium shadow-sm ${getStatusColor(project.status)}`}>
+                          {getStatusText(project.status)}
+                      </span>
                       {project.deadline && (
-                        <span className="text-xs text-gray-400 ml-2">Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
+                        <span className="text-caption text-text-muted">Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Компактный фильтр и кнопки */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-2">
+                <div className="card">
                   <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 justify-between">
                     {/* Спринты */}
                     <select
@@ -379,13 +381,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       ))}
                     </select>
                     {/* Мои задачи */}
-                    <label className="flex items-center gap-2 text-sm text-white whitespace-nowrap select-none cursor-pointer">
+                    <label className="flex items-center gap-2 text-body-small text-text-primary whitespace-nowrap select-none cursor-pointer">
                       <input
                         type="checkbox"
                         checked={myTasks}
                         onChange={e => setMyTasks(e.target.checked)}
-                        className="form-checkbox h-5 w-5 text-accent-blue border-gray-400 focus:ring-2 focus:ring-accent-blue focus:ring-offset-0 rounded transition-all duration-150"
-                        style={{ accentColor: '#2563eb' }}
+                        className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200"
                       />
                       <span className="ml-1">Мои задачи</span>
                     </label>
@@ -407,104 +408,107 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 </div>
 
                 {/* Kanban доска с ограничением по высоте */}
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-4">
+                <div className="card">
+                    <div className="flex justify-between items-center mb-6">
                         <div /> {/* пустой div для выравнивания */}
                     </div>
                     {/* Горизонтальный скролл для колонок, ограничение по высоте */}
-                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
+                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
                          style={{ maxHeight: 'calc(100vh - 260px)', minHeight: '320px' }}>
                         {taskStatuses.map((status) => {
                             const statusTasks = getFilteredStatusTasks(status.id);
                             return (
                                 <div
                                     key={status.id}
-                                    className={`bg-gray-800 border rounded-lg p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full flex flex-col transition-all duration-200 ${
+                                    className={`bg-secondary-bg border rounded-xl p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full flex flex-col transition-all duration-300 ${
                                         dragOverStatusId === status.id 
-                                            ? 'border-accent-blue bg-accent-blue/10 shadow-lg shadow-accent-blue/20' 
-                                            : 'border-gray-700'
+                                            ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue' 
+                                            : 'border-border-color'
                                     }`}
                                     onDragOver={(e) => handleDragOver(e, status.id)}
                                     onDragLeave={(e) => handleDragLeave(e, status.id)}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
                                     {/* Заголовок колонки с индикатором */}
-                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-700">
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-3 h-3 rounded-full ${getStatusIndicatorColor(status.name)}`}></div>
-                                            <h4 className="text-white font-medium">{status.name}</h4>
+                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-color">
+                                        <div className="flex items-center space-x-3">
+                                            <div className={`w-3 h-3 rounded-full ${getStatusIndicatorColor(status.name)} shadow-sm`}></div>
+                                            <h4 className="text-text-primary font-semibold">{status.name}</h4>
                                         </div>
-                                        <span className="bg-gray-700 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                        <span className="bg-card-bg text-text-primary text-caption px-2.5 py-1 rounded-full font-medium shadow-sm">
                                             {statusTasks.length}
                                         </span>
                                     </div>
 
                                     {/* Фиксированные зоны приоритетов при перетаскивании в том же статусе */}
                                     {showPriorityDropZones && dragOverStatusId === status.id && draggedTask?.status_id === status.id && (
-                                        <div className="space-y-2 mb-4 flex-shrink-0">
-                                            <div className="text-xs text-gray-400 font-medium mb-2 text-center">Выберите приоритет:</div>
+                                        <div className="space-y-3 mb-4 flex-shrink-0">
+                                            <div className="text-caption text-text-muted font-medium mb-3 text-center">Выберите приоритет:</div>
                                             {[
                                                 { 
                                                     priority: 'high', 
                                                     label: 'Высокий', 
-                                                    bgColor: 'bg-red-500/20', 
-                                                    borderColor: 'border-red-500/50',
-                                                    hoverBg: 'hover:bg-red-500/30',
-                                                    activeBg: 'bg-red-500/40',
-                                                    textColor: 'text-red-400'
+                                                    bgColor: 'bg-accent-red/10', 
+                                                    borderColor: 'border-accent-red/50',
+                                                    hoverBg: 'hover:bg-accent-red/20',
+                                                    activeBg: 'bg-accent-red/20',
+                                                    textColor: 'text-accent-red',
+                                                    shadowColor: 'shadow-glow-red'
                                                 },
                                                 { 
                                                     priority: 'medium', 
                                                     label: 'Средний', 
-                                                    bgColor: 'bg-yellow-500/20', 
-                                                    borderColor: 'border-yellow-500/50',
-                                                    hoverBg: 'hover:bg-yellow-500/30',
-                                                    activeBg: 'bg-yellow-500/40',
-                                                    textColor: 'text-yellow-400'
+                                                    bgColor: 'bg-accent-yellow/10', 
+                                                    borderColor: 'border-accent-yellow/50',
+                                                    hoverBg: 'hover:bg-accent-yellow/20',
+                                                    activeBg: 'bg-accent-yellow/20',
+                                                    textColor: 'text-accent-yellow',
+                                                    shadowColor: 'shadow-glow-yellow'
                                                 },
                                                 { 
                                                     priority: 'low', 
                                                     label: 'Низкий', 
-                                                    bgColor: 'bg-green-500/20', 
-                                                    borderColor: 'border-green-500/50',
-                                                    hoverBg: 'hover:bg-green-500/30',
-                                                    activeBg: 'bg-green-500/40',
-                                                    textColor: 'text-green-400'
+                                                    bgColor: 'bg-accent-green/10', 
+                                                    borderColor: 'border-accent-green/50',
+                                                    hoverBg: 'hover:bg-accent-green/20',
+                                                    activeBg: 'bg-accent-green/20',
+                                                    textColor: 'text-accent-green',
+                                                    shadowColor: 'shadow-glow-green'
                                                 }
-                                            ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor }) => (
+                                            ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor, shadowColor }) => (
                                                 <div
                                                     key={priority}
-                                                    className={`priority-zone border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${
+                                                    className={`priority-zone border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 ${
                                                         dragOverPriority === priority 
-                                                            ? `${activeBg} ${borderColor.replace('/50', '')} shadow-lg shadow-${priority === 'high' ? 'red' : priority === 'medium' ? 'yellow' : 'green'}-500/25 active` 
+                                                            ? `${activeBg} ${borderColor.replace('/50', '')} ${shadowColor} active` 
                                                             : `${bgColor} ${borderColor} ${hoverBg}`
                                                     }`}
                                                     onDragOver={(e) => handlePriorityDragOver(e, priority)}
                                                     onDragLeave={handlePriorityDragLeave}
                                                     onDrop={(e) => handlePriorityDrop(e, priority)}
                                                 >
-                                                    <div className={`text-lg font-bold mb-2 ${textColor}`}>
+                                                    <div className={`text-xl font-bold mb-2 ${textColor}`}>
                                                         {priority === 'high' ? '🔥' : priority === 'medium' ? '⚡' : '🌱'}
                                                     </div>
-                                                    <div className={`text-sm font-semibold ${textColor}`}>{label}</div>
-                                                    <div className="text-xs text-gray-400 mt-1">приоритет</div>
+                                                    <div className={`text-body-small font-semibold ${textColor}`}>{label}</div>
+                                                    <div className="text-caption text-text-muted mt-1">приоритет</div>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
 
                                     {/* Скроллируемая область с задачами */}
-                                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 space-y-3">
+                                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-3">
                                         {statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
-                                            <div className="border-2 border-dashed border-accent-blue/50 rounded-lg p-8 text-center">
-                                                <div className="text-accent-blue/70 text-4xl mb-2">📋</div>
-                                                <p className="text-accent-blue/70 text-sm font-medium">Отпустите задачу здесь</p>
+                                            <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5">
+                                                <div className="text-accent-blue/50 text-4xl mb-3">📋</div>
+                                                <p className="text-accent-blue/50 text-body-small font-medium">Отпустите задачу здесь</p>
                                             </div>
                                         )}
                                         {statusTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className={`task-card bg-gray-700 border rounded-lg p-3 cursor-move hover:bg-gray-600 hover:border-gray-500 shadow-sm hover:shadow-md ${
+                                                className={`task-card bg-card-bg border rounded-xl p-4 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-300 ${
                                                     draggedTask?.id === task.id ? 'dragging' : ''
                                                 }`}
                                                 draggable
@@ -514,18 +518,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             >
                                                 {/* Код задачи */}
                                                 {task.code && (
-                                                    <div className="text-xs font-mono text-blue-400 mb-2 font-bold flex items-center">
-                                                        <span className="mr-1">🔗</span>
+                                                    <div className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center">
+                                                        <span className="mr-2">🔗</span>
                                                         {task.code}
                                                     </div>
                                                 )}
 
                                                 {/* Заголовок задачи */}
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h5 className="text-white font-medium text-sm leading-tight">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <h5 className="text-text-primary font-semibold text-body-small leading-tight">
                                                         <Link
                                                             href={route('tasks.show', task.id)}
-                                                            className="hover:text-blue-300 transition-colors"
+                                                            className="hover:text-accent-blue transition-colors duration-200"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             {task.title}
@@ -535,23 +539,23 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                 {/* Описание */}
                                                 {task.description && (
-                                                    <p className="text-gray-400 text-xs mb-3 line-clamp-2 leading-relaxed">
+                                                    <p className="text-text-secondary text-caption mb-4 line-clamp-2 leading-relaxed">
                                                         {task.description}
                                                     </p>
                                                 )}
 
                                                 {/* Мета-информация */}
-                                                <div className="space-y-2">
+                                                <div className="space-y-3">
                                                     {/* Приоритет с цветным фоном */}
                                                     {task.priority && (
-                                                        <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                                                        <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-sm ${
                                                             task.priority === 'high' 
-                                                                ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                                                                ? 'bg-accent-red/20 text-accent-red border border-accent-red/30' 
                                                                 : task.priority === 'medium' 
-                                                                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                                                                    : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                                    ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30' 
+                                                                    : 'bg-accent-green/20 text-accent-green border border-accent-green/30'
                                                         }`}>
-                                                            <span className="text-xs">
+                                                            <span className="text-sm">
                                                                 {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
                                                             </span>
                                                             <span>{getPriorityText(task.priority)}</span>
@@ -560,22 +564,24 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                     {/* Исполнитель */}
                                                     {task.assignee && (
-                                                        <div className="flex items-center space-x-2 text-xs text-gray-400">
-                                                            <span className="w-4 h-4 bg-gray-600 rounded-full flex items-center justify-center text-xs font-medium">
-                                                                {task.assignee.name.charAt(0)}
-                                                            </span>
+                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary">
+                                                            <div className="w-5 h-5 bg-accent-blue/20 rounded-lg flex items-center justify-center">
+                                                                <span className="text-caption font-semibold text-accent-blue">
+                                                                    {task.assignee.name.charAt(0).toUpperCase()}
+                                                                </span>
+                                                            </div>
                                                             <span>{task.assignee.name}</span>
                                                         </div>
                                                     )}
 
                                                     {/* Дедлайн с предупреждением */}
                                                     {task.deadline && (
-                                                        <div className="flex items-center space-x-1 text-xs">
-                                                            <span className="text-gray-400">📅</span>
+                                                        <div className="flex items-center space-x-2 text-caption">
+                                                            <span className="text-text-secondary">📅</span>
                                                             <span className={`${
                                                                 new Date(task.deadline) < new Date()
-                                                                    ? 'text-red-400 font-medium'
-                                                                    : 'text-gray-400'
+                                                                    ? 'text-accent-red font-medium'
+                                                                    : 'text-text-secondary'
                                                             }`}>
                                                                 {new Date(task.deadline).toLocaleDateString('ru-RU')}
                                                             </span>
@@ -585,15 +591,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                 {/* Информация о спринте */}
                                                 {task.sprint && (
-                                                    <div className="mt-3 pt-2 border-t border-gray-600">
-                                                        <div className="flex items-center justify-between text-xs">
-                                                            <span className="text-gray-400 flex items-center">
-                                                                <span className="mr-1">🏃</span>
+                                                    <div className="mt-4 pt-3 border-t border-border-color">
+                                                        <div className="flex items-center justify-between text-caption">
+                                                            <span className="text-text-secondary flex items-center">
+                                                                <span className="mr-2">🏃</span>
                                                                 Спринт:
                                                             </span>
                                                             <Link
                                                                 href={route('sprints.show', [project.id, task.sprint.id])}
-                                                                className="text-blue-400 hover:text-blue-300 transition-colors"
+                                                                className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {task.sprint.name}
@@ -614,24 +620,24 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             {/* Модальное окно для просмотра и редактирования задачи */}
             {showTaskModal && selectedTask && (
                 <div 
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
                     onClick={closeTaskModal}
                 >
                     <div 
-                        className="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                        className="bg-card-bg border border-border-color rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-6">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white mb-2">Редактирование задачи</h2>
+                                    <h2 className="text-heading-3 text-text-primary mb-2">Редактирование задачи</h2>
                                     {selectedTask.code && (
-                                        <div className="text-sm font-mono text-blue-400">{selectedTask.code}</div>
+                                        <div className="text-body-small font-mono text-accent-blue">{selectedTask.code}</div>
                                     )}
                                 </div>
                                 <button
                                     onClick={closeTaskModal}
-                                    className="text-gray-400 hover:text-white text-2xl font-bold"
+                                    className="text-text-muted hover:text-text-primary text-2xl font-bold transition-colors duration-200"
                                 >
                                     ×
                                 </button>

@@ -16,7 +16,7 @@
   left: 0;
   width: 0.5rem;
   height: 0.5rem;
-  background: #160000;
+  background: var(--cursor-color, #160000);
   border-radius: 50%;
   transform: translate3d(calc(var(--x, 0px) - 50%), calc(var(--y, 0px) - 50%), 0);
   will-change: transform;

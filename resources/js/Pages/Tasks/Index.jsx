@@ -371,26 +371,34 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                 {tasks.data.length > 0 && tasks.links && tasks.links.length > 3 && (
                     <div className="flex justify-center">
                         <nav className="flex space-x-2">
-                            {tasks.links.map((link, index) =>
-                                link.url ? (
-                                <Link
-                                    key={index}
-                                    href={link.url}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        link.active
-                                            ? 'bg-secondary-bg text-text-primary'
+                            {tasks.links.map((link, index) => {
+                                // Заменяем английские тексты на русские
+                                let label = link.label;
+                                if (label.includes('Previous')) {
+                                    label = label.replace('Previous', 'Предыдущая');
+                                } else if (label.includes('Next')) {
+                                    label = label.replace('Next', 'Следующая');
+                                }
+                                
+                                return link.url ? (
+                                    <Link
+                                        key={index}
+                                        href={link.url}
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                            link.active
+                                                ? 'bg-secondary-bg text-text-primary'
                                                 : 'bg-card-bg text-text-primary hover:bg-secondary-bg'
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
+                                        }`}
+                                        dangerouslySetInnerHTML={{ __html: label }}
+                                    />
                                 ) : (
                                     <span
                                         key={index}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-card-bg text-text-muted cursor-not-allowed`}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        dangerouslySetInnerHTML={{ __html: label }}
                                     />
-                                )
-                            )}
+                                );
+                            })}
                         </nav>
                     </div>
                 )}

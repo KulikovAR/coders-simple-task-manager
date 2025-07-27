@@ -373,8 +373,8 @@ export default function Show({ auth, task }) {
 
             {/* Модальное окно подтверждения удаления */}
             {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md shadow-lg">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-card-bg border border-border-color rounded-xl p-6 w-full max-w-md shadow-2xl">
                         <h2 className="text-lg font-bold mb-4">Удалить задачу?</h2>
                         <p className="mb-6">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p>
                         <div className="flex justify-end space-x-3">

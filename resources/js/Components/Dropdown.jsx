@@ -73,7 +73,7 @@ const Content = ({
                 leaveTo="opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-50 mt-2 rounded-lg shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    className={`absolute z-51 mt-2 rounded-lg shadow-lg ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
                 >
                     <div

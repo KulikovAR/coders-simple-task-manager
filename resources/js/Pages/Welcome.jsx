@@ -279,7 +279,7 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="bg-white text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
@@ -293,7 +293,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                    className="bg-white text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
