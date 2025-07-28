@@ -142,7 +142,7 @@ export default function Welcome({ auth }) {
                 {/* Main Content */}
                 <main className="pt-24 relative z-10">
                     {/* Hero Section */}
-                    <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+                    <section className="max-w-4xl mx-auto px-6 py-20 pb-32 text-center">
                         <div className={`mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <span className="inline-block bg-accent-blue/20 text-accent-blue px-4 py-2 rounded-full text-sm font-medium mb-6 animate-pulse">
                                 ИИ-ассистент включен
@@ -187,7 +187,7 @@ export default function Welcome({ auth }) {
                         </div>
 
                         {/* Stats */}
-                        <div className={`grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto transition-all duration-1000 delay-1100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <div className={`grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto mb-16 transition-all duration-1000 delay-1100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             {[
                                 { number: "10,000+", label: "Активных пользователей" },
                                 { number: "50,000+", label: "Выполненных задач" },
@@ -206,7 +206,7 @@ export default function Welcome({ auth }) {
                     </section>
 
                     {/* Features Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-20">
+                    <section className="max-w-6xl mx-auto px-6 py-32">
                         <div className={`text-center mb-16 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Возможности платформы
@@ -253,7 +253,7 @@ export default function Welcome({ auth }) {
                     </section>
 
                     {/* Teams Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-20">
+                    <section className="max-w-6xl mx-auto px-6 py-32">
                         <div className={`text-center mb-16 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Для любых команд
@@ -297,10 +297,11 @@ export default function Welcome({ auth }) {
                                 </div>
                             ))}
                         </div>
+                        <div className="mb-16"></div>
                     </section>
 
                     {/* AI Assistant Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-20">
+                    <section className="max-w-6xl mx-auto px-6 py-32">
                         <div className={`bg-secondary-bg/50 rounded-3xl p-12 md:p-16 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <div className="text-center mb-12">
                                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -343,7 +344,7 @@ export default function Welcome({ auth }) {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+                    <section className="max-w-4xl mx-auto px-6 py-32 text-center">
                         <h2 className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Готовы начать?
                         </h2>
