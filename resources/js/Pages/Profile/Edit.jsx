@@ -4,30 +4,18 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import UpdateEmailNotificationsForm from './Partials/UpdateEmailNotificationsForm';
+import PaymentModal from '@/Components/PaymentModal';
 import { useState } from 'react';
-import axios from 'axios';
 
 export default function Edit({ auth, mustVerifyEmail, status, user }) {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [confirmationUrl, setConfirmationUrl] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-    const handlePay = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await axios.post('/payment/start');
-            if (res.data && res.data.confirmation_url) {
-                setConfirmationUrl(res.data.confirmation_url);
-                window.location.href = res.data.confirmation_url;
-            } else {
-                setError('Ошибка получения ссылки на оплату');
-            }
-        } catch (e) {
-            setError('Ошибка оплаты');
-        } finally {
-            setLoading(false);
-        }
+    const handlePay = () => {
+        setShowPaymentModal(true);
+    };
+
+    const closePaymentModal = () => {
+        setShowPaymentModal(false);
     };
 
     const isPaid = user?.paid && (!user?.expires_at || new Date(user.expires_at) > new Date());
@@ -118,14 +106,12 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                                     <span className="text-red-400 font-bold">Неактивна</span>
                                 )}
                             </div>
-                            {error && <div className="text-red-500 mb-2">{error}</div>}
                             {!isPaid && (
                                 <button
                                     className="btn btn-primary"
                                     onClick={handlePay}
-                                    disabled={loading}
                                 >
-                                    {loading ? 'Перенаправление...' : 'Оплатить подписку'}
+                                    Оплатить подписку
                                 </button>
                             )}
                             {isPaid && expiresAt && (
@@ -189,6 +175,12 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                     </div>
                 </div>
             </div>
+
+            {/* Модалка оплаты подписки */}
+            <PaymentModal 
+                isOpen={showPaymentModal} 
+                onClose={closePaymentModal} 
+            />
         </AuthenticatedLayout>
     );
 }

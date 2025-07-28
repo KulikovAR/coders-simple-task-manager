@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import TaskForm from '@/Components/TaskForm';
+import PaymentModal from '@/Components/PaymentModal';
 
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [] }) {
     const [draggedTask, setDraggedTask] = useState(null);
@@ -17,6 +18,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [dragOverStatusId, setDragOverStatusId] = useState(null);
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
@@ -61,6 +63,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
+    };
+
+    const openPaymentModal = () => {
+        setShowPaymentModal(true);
+    };
+
+    const closePaymentModal = () => {
+        setShowPaymentModal(false);
     };
 
     const handleTaskUpdate = (data) => {
@@ -397,10 +407,25 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     >
                       + Спринт
                     </Link>
+                    {/* Кнопка добавить задачу с ИИ */}
+                    <button
+                      onClick={() => {
+                        // Проверяем, есть ли у пользователя активная подписка
+                        const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
+                        if (!isPaid) {
+                          openPaymentModal();
+                        } else {
+                          router.visit(route('ai-agent.index'));
+                        }
+                      }}
+                      className="btn btn-secondary ml-2"
+                    >
+                      + Задача с ИИ
+                    </button>
                     {/* Кнопка добавить задачу */}
                     <Link
                       href={route('tasks.create', { project_id: project.id })}
-                      className="btn btn-primary"
+                      className="btn btn-primary ml-2"
                     >
                       + Задача
                     </Link>
@@ -658,6 +683,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     </div>
                 </div>
             )}
+
+            {/* Модалка оплаты подписки */}
+            <PaymentModal 
+                isOpen={showPaymentModal} 
+                onClose={closePaymentModal} 
+            />
         </AuthenticatedLayout>
     );
 }

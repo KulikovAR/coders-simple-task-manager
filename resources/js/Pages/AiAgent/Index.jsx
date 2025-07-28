@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import AiMessageRenderer from '@/Components/AiMessageRenderer';
+import PaymentModal from '@/Components/PaymentModal';
 
 export default function AiAgentIndex({ auth, conversations, stats }) {
     const [messages, setMessages] = useState([]);
@@ -13,10 +14,19 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
     const [historyConversations, setHistoryConversations] = useState(conversations?.data || []);
     const [historyStats, setHistoryStats] = useState(stats || {});
     const [sessionId, setSessionId] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const openPaymentModal = () => {
+        setShowPaymentModal(true);
+    };
+
+    const closePaymentModal = () => {
+        setShowPaymentModal(false);
     };
 
     useEffect(() => {
@@ -83,6 +93,11 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
             };
 
             setMessages(prev => [...prev, aiMessage]);
+            
+            // Проверяем, не исчерпан ли лимит бесплатных запросов
+            if (!result.success && result.message && result.message.includes('Бесплатный лимит в 10 запросов исчерпан')) {
+                openPaymentModal();
+            }
             
             // Обновляем статистику в реальном времени
             setHistoryStats(prev => ({
@@ -532,6 +547,12 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
                     </div>
                 </div>
             </div>
+
+            {/* Модалка оплаты подписки */}
+            <PaymentModal 
+                isOpen={showPaymentModal} 
+                onClose={closePaymentModal} 
+            />
         </AuthenticatedLayout>
     );
 } 
