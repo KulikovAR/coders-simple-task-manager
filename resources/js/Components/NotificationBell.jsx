@@ -89,7 +89,7 @@ export default function NotificationBell() {
             <button
                 ref={buttonRef}
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-secondary-bg border border-border-color hover:bg-accent-blue/10 transition-colors focus:outline-none"
+                className="relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-secondary-bg border border-border-color hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:ring-offset-2 focus:ring-offset-card-bg shadow-sm hover:shadow-md"
                 title="Уведомления"
             >
                 <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
