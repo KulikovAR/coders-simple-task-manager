@@ -6,7 +6,19 @@ export default function Welcome({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
+        // Принудительно устанавливаем темную тему для лендинга
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        
+        // Устанавливаем атрибут data-page для CSS правил
+        document.body.setAttribute('data-page', 'Welcome');
+        
         setIsLoaded(true);
+        
+        // Очищаем атрибут при размонтировании компонента
+        return () => {
+            document.body.removeAttribute('data-page');
+        };
     }, []);
 
     return (
@@ -60,10 +72,10 @@ export default function Welcome({ auth }) {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-black text-white relative overflow-hidden">
+            <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-hidden">
                 {/* Waves Background */}
                 <Waves
-                    lineColor="rgba(255, 255, 255, 0.1)"
+                    lineColor="rgba(59, 130, 246, 0.1)"
                     backgroundColor="transparent"
                     waveSpeedX={0.008}
                     waveSpeedY={0.004}
@@ -78,10 +90,10 @@ export default function Welcome({ auth }) {
                 />
 
                 {/* Header */}
-                <header className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                <header className={`fixed top-0 left-0 right-0 z-50 bg-primary-bg/80 backdrop-blur-xl border-b border-border-color transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
                         <div className="flex justify-between items-center">
-                            <div className="text-2xl font-semibold text-white flex items-center gap-2">
+                            <div className="text-2xl font-semibold text-text-primary flex items-center gap-2">
                                 <span>379ТМ</span>
                                 <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium">
                                     beta
@@ -92,7 +104,7 @@ export default function Welcome({ auth }) {
                                     href="https://t.me/itteam379manager"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-gray-400 hover:text-white transition-colors duration-300 flex items-center gap-1 text-sm"
+                                    className="text-text-secondary hover:text-text-primary transition-colors duration-300 flex items-center gap-1 text-sm"
                                 >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
@@ -102,7 +114,7 @@ export default function Welcome({ auth }) {
                                 {auth.user ? (
                                     <Link
                                         href={route('dashboard')}
-                                        className="text-white hover:text-gray-300 transition-colors font-medium"
+                                        className="text-text-primary hover:text-text-secondary transition-colors font-medium"
                                     >
                                         Дашборд
                                     </Link>
@@ -110,13 +122,13 @@ export default function Welcome({ auth }) {
                                     <>
                                         <Link
                                             href={route('login')}
-                                            className="text-white hover:text-gray-300 transition-colors font-medium"
+                                            className="text-text-primary hover:text-text-secondary transition-colors font-medium"
                                         >
                                             Вход
                                         </Link>
                                         <Link
                                             href={route('register')}
-                                            className="bg-white text-white px-6 py-2 rounded-full font-medium hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                            className="bg-accent-blue text-white px-6 py-2 rounded-full font-medium hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105"
                                         >
                                             Регистрация
                                         </Link>
@@ -132,7 +144,7 @@ export default function Welcome({ auth }) {
                     {/* Hero Section */}
                     <section className="max-w-4xl mx-auto px-6 py-20 text-center">
                         <div className={`mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            <span className="inline-block bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium mb-6 animate-pulse">
+                            <span className="inline-block bg-accent-blue/20 text-accent-blue px-4 py-2 rounded-full text-sm font-medium mb-6 animate-pulse">
                                 ИИ-ассистент включен
                             </span>
                         </div>
@@ -140,10 +152,10 @@ export default function Welcome({ auth }) {
                         <h1 className={`text-6xl md:text-8xl font-bold mb-8 leading-tight tracking-tight transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                             Управление задачами
                             <br />
-                            <span className="text-gray-400">с ИИ-ассистентом</span>
+                            <span className="text-text-secondary">с ИИ-ассистентом</span>
                         </h1>
 
-                        <p className={`text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <p className={`text-xl md:text-2xl text-text-secondary mb-12 max-w-3xl mx-auto leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Система управления задачами для любых команд. Создавайте проекты, планируйте спринты,
                             назначайте задачи и отслеживайте прогресс. ИИ-ассистент помогает управлять всем через чат.
                         </p>
@@ -153,13 +165,13 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="bg-accent-blue text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
                                     <Link
                                         href={route('ai-features')}
-                                        className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="border border-border-color text-text-primary px-8 py-4 rounded-full font-semibold text-lg hover:bg-secondary-bg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Узнать больше
                                     </Link>
@@ -167,7 +179,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                    className="bg-accent-blue text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
@@ -182,10 +194,10 @@ export default function Welcome({ auth }) {
                                 { number: "24/7", label: "Доступность системы" }
                             ].map((stat, index) => (
                                 <div key={index} className="text-center group">
-                                    <div className="text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                                    <div className="text-4xl font-bold text-text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
                                         {stat.number}
                                     </div>
-                                    <div className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
+                                    <div className="text-text-secondary text-sm group-hover:text-text-primary transition-colors duration-300">
                                         {stat.label}
                                     </div>
                                 </div>
@@ -199,7 +211,7 @@ export default function Welcome({ auth }) {
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Возможности платформы
                             </h2>
-                            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                            <p className="text-xl text-text-secondary max-w-2xl mx-auto">
                                 Все инструменты для управления проектами в одном месте
                             </p>
                         </div>
@@ -228,13 +240,13 @@ export default function Welcome({ auth }) {
                                 }
                             ].map((feature, index) => (
                                 <div key={index} className={`text-center group transition-all duration-1000 delay-${500 + index * 100} ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                                        <svg className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="w-16 h-16 bg-accent-blue/20 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-accent-blue/30 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                        <svg className="w-8 h-8 text-accent-blue transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={feature.icon} />
                                         </svg>
                                     </div>
-                                    <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-gray-200 transition-colors duration-300">{feature.title}</h3>
-                                    <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">{feature.description}</p>
+                                    <h3 className="text-xl font-semibold text-text-primary mb-4 group-hover:text-text-secondary transition-colors duration-300">{feature.title}</h3>
+                                    <p className="text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">{feature.description}</p>
                                 </div>
                             ))}
                         </div>
@@ -246,7 +258,7 @@ export default function Welcome({ auth }) {
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Для любых команд
                             </h2>
-                            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
                                 379ТМ подходит для команд любого размера и специализации
                             </p>
                         </div>
@@ -275,13 +287,13 @@ export default function Welcome({ auth }) {
                                 }
                             ].map((team, index) => (
                                 <div key={index} className={`text-center group transition-all duration-1000 delay-${500 + index * 100} ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                                        <svg className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="w-16 h-16 bg-accent-blue/20 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-accent-blue/30 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                        <svg className="w-8 h-8 text-accent-blue transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={team.icon} />
                                         </svg>
                                     </div>
-                                    <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-gray-200 transition-colors duration-300">{team.title}</h3>
-                                    <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">{team.description}</p>
+                                    <h3 className="text-xl font-semibold text-text-primary mb-4 group-hover:text-text-secondary transition-colors duration-300">{team.title}</h3>
+                                    <p className="text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">{team.description}</p>
                                 </div>
                             ))}
                         </div>
@@ -289,12 +301,12 @@ export default function Welcome({ auth }) {
 
                     {/* AI Assistant Section */}
                     <section className="max-w-6xl mx-auto px-6 py-20">
-                        <div className={`bg-white/5 rounded-3xl p-12 md:p-16 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <div className={`bg-secondary-bg/50 rounded-3xl p-12 md:p-16 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <div className="text-center mb-12">
                                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                     ИИ-ассистент
                                 </h2>
-                                <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                                <p className="text-xl text-text-secondary max-w-3xl mx-auto">
                                     Управляйте проектами через чат. Пишите команды на русском языке,
                                     и система автоматически создаст проекты, задачи и этапы работы.
                                 </p>
@@ -308,16 +320,16 @@ export default function Welcome({ auth }) {
                                 'Покажи статистику по проектам',
                                 'Создай спринт на следующую неделю'
                             ].map((command, index) => (
-                                        <div key={index} className={`bg-black/50 border border-white/10 p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-black/70 hover:border-white/20 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                                            <div className="text-white text-sm mb-2">{command}</div>
-                                            <div className="text-gray-400 text-sm">ИИ-ассистент выполнит команду автоматически</div>
+                                        <div key={index} className={`bg-card-bg/50 border border-border-color p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-card-bg/70 hover:border-accent-blue/30 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
+                                            <div className="text-text-primary text-sm mb-2">{command}</div>
+                                            <div className="text-text-secondary text-sm">ИИ-ассистент выполнит команду автоматически</div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex items-center justify-center">
                                     <div className={`relative transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                                        <div className="w-40 h-40 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-                                            <svg className="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-40 h-40 bg-accent-blue/20 rounded-full flex items-center justify-center animate-pulse">
+                                            <svg className="w-20 h-20 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                             </svg>
                                         </div>
@@ -335,7 +347,7 @@ export default function Welcome({ auth }) {
                         <h2 className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Готовы начать?
                         </h2>
-                        <p className={`text-xl text-gray-400 mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <p className={`text-xl text-text-secondary mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Присоединяйтесь к командам, которые уже используют 379ТМ для управления проектами
                         </p>
                         <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -343,13 +355,13 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="bg-accent-blue text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
                                     <Link
                                         href={route('login')}
-                                        className="border-2 border-white text-white bg-transparent px-10 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="border-2 border-border-color text-text-primary bg-transparent px-10 py-4 rounded-full font-semibold text-lg hover:bg-secondary-bg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Войти в систему
                                     </Link>
@@ -357,7 +369,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                    className="bg-accent-blue text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
@@ -367,25 +379,25 @@ export default function Welcome({ auth }) {
                 </main>
 
                 {/* Footer */}
-                <footer className={`border-t border-white/10 py-12 transition-all duration-1000 delay-900 relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <footer className={`border-t border-border-color py-12 transition-all duration-1000 delay-900 relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-gray-400 mb-4 md:mb-0">
+                            <div className="text-text-secondary mb-4 md:mb-0">
                                 <div>© 2025 379ТМ. Создано для команд</div>
                                 <div className="text-sm mt-1">ИНН 614014794226</div>
                             </div>
                             <div className="flex space-x-8">
-                                <Link href={route('faq')} className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href={route('faq')} className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     FAQ
                                 </Link>
-                                <Link href={route('ai-features')} className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href={route('ai-features')} className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     ИИ-ассистент
                                 </Link>
                                 <a
                                     href="https://t.me/itteam379manager"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-gray-400 hover:text-white transition-colors duration-300 flex items-center gap-1"
+                                    className="text-text-secondary hover:text-text-primary transition-colors duration-300 flex items-center gap-1"
                                 >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>

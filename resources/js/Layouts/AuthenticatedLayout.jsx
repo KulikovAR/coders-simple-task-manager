@@ -18,10 +18,26 @@ export default function Authenticated({ user, header, children }) {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            // Удаляем атрибут data-page, если он был установлен на лендинге
+            document.body.removeAttribute('data-page');
+            
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         }
     }, [theme]);
+
+    // Дополнительный useEffect для инициализации при загрузке
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Удаляем атрибут data-page, если он был установлен на лендинге
+            document.body.removeAttribute('data-page');
+            
+            // Восстанавливаем сохраненную тему пользователя
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    }, []);
 
     // Проверяем, что user существует
     if (!user) {

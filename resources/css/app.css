@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 /* ===== БАЗОВЫЕ СТИЛИ ===== */
+/* Принудительная темная тема для лендинга */
+body[data-page="Welcome"] {
+    --primary-bg: #0a0a0a !important;
+    --secondary-bg: #1a1a1a !important;
+    --card-bg: #1f1f1f !important;
+    --border-color: #2a2a2a !important;
+    --text-primary: #ffffff !important;
+    --text-secondary: #b0b0b0 !important;
+    --text-muted: #808080 !important;
+}
+
 :root {
     --primary-bg: #0a0a0a;
     --secondary-bg: #1a1a1a;
