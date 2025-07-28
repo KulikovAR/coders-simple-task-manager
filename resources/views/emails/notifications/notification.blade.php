@@ -6,105 +6,75 @@
     <title>Новое уведомление в 379ТМ</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f8f9fa;
+            background-color: #f5f5f5;
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
-            padding: 30px 40px;
+            padding: 25px 30px;
             text-align: center;
+            border-radius: 8px 8px 0 0;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 500;
         }
-        .header .logo {
-            font-size: 32px;
-            margin-bottom: 10px;
+        .logo {
+            margin-bottom: 15px;
         }
         .content {
-            padding: 40px;
-        }
-        .notification-card {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
+            padding: 30px;
         }
         .notification-text {
             font-size: 16px;
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
-        .meta-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .meta {
             font-size: 14px;
             color: #666;
             margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
         }
-        .from-user {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .user-avatar {
-            width: 24px;
-            height: 24px;
-            background: #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .date {
-            color: #999;
+        .meta span {
+            display: block;
+            margin-bottom: 5px;
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
             text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 10px 10px 10px 0;
-            transition: all 0.3s ease;
-        }
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
         .button-secondary {
             background: #6c757d;
         }
-        .button-secondary:hover {
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
-        }
         .footer {
             background: #f8f9fa;
-            padding: 30px 40px;
+            padding: 20px 30px;
             text-align: center;
-            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 8px 8px;
+            border-top: 1px solid #eee;
         }
         .footer p {
             margin: 5px 0;
@@ -115,21 +85,12 @@
             color: #667eea;
             text-decoration: none;
         }
-        .footer a:hover {
-            text-decoration: underline;
-        }
         @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
             .container {
-                margin: 10px;
-                border-radius: 8px;
-            }
-            .header, .content, .footer {
-                padding: 20px;
-            }
-            .meta-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
+                margin: 0;
             }
         }
     </style>
@@ -138,34 +99,24 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <svg width="80" height="32" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="80" height="32" rx="6" fill="white"/>
-                    <text x="40" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#667eea">379ТМ</text>
+                <svg width="60" height="24" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="24" rx="4" fill="white"/>
+                    <text x="30" y="16" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#667eea">379ТМ</text>
                 </svg>
             </div>
-            <h1>Новое уведомление в 379ТМ</h1>
+            <h1>Новое уведомление</h1>
         </div>
         
         <div class="content">
-            <div class="notification-card">
-                <div class="notification-text">
-                    {{ $notificationText }}
-                </div>
-                
-                <div class="meta-info">
-                    @if($notification->from_user)
-                    <div class="from-user">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr($notification->from_user->name, 0, 1)) }}
-                        </div>
-                        <span><strong>От:</strong> {{ $notification->from_user->name }}</span>
-                    </div>
-                    @endif
-                    
-                    <div class="date">
-                        <strong>Дата:</strong> {{ $notification->created_at ? $notification->created_at->format('d.m.Y H:i') : now()->format('d.m.Y H:i') }}
-                    </div>
-                </div>
+            <div class="notification-text">
+                {{ $notificationText }}
+            </div>
+            
+            <div class="meta">
+                @if($notification->from_user)
+                <span><strong>От:</strong> {{ $notification->from_user->name }}</span>
+                @endif
+                <span><strong>Дата:</strong> {{ $notification->created_at ? $notification->created_at->format('d.m.Y H:i') : now()->format('d.m.Y H:i') }}</span>
             </div>
             
             @if($actionUrl)
@@ -175,17 +126,14 @@
             @endif
             
             <a href="{{ route('notifications.index') }}" class="button button-secondary">
-                Посмотреть все уведомления
+                Все уведомления
             </a>
         </div>
         
         <div class="footer">
-            <p><strong>С уважением,</strong></p>
-            <p>{{ config('app.name') }}</p>
-            <hr style="border: none; border-top: 1px solid #e9ecef; margin: 20px 0;">
+            <p><strong>{{ config('app.name') }}</strong></p>
             <p style="font-size: 12px; color: #999;">
-                Если вы не хотите получать email уведомления, вы можете 
-                <a href="{{ route('profile.edit') }}">отключить их в настройках профиля</a>.
+                <a href="{{ route('profile.edit') }}">Отключить уведомления</a>
             </p>
         </div>
     </div>
