@@ -35,6 +35,11 @@ class NotificationMail extends Mailable
     {
         return new Envelope(
             subject: 'Новое уведомление в 379ТМ',
+            tags: ['notification', '379tm'],
+            metadata: [
+                'notification_id' => $this->notification->id,
+                'user_id' => $this->notification->user_id,
+            ],
         );
     }
 

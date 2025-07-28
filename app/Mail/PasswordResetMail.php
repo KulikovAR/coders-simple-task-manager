@@ -30,6 +30,10 @@ class PasswordResetMail extends Mailable
     {
         return new Envelope(
             subject: 'Восстановление пароля в 379ТМ',
+            tags: ['password-reset', '379tm'],
+            metadata: [
+                'type' => 'password_reset',
+            ],
         );
     }
 
