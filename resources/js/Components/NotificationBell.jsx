@@ -6,6 +6,7 @@ import {
     getNotificationText, 
     getNotificationIcon, 
     getNotificationColor, 
+    getNotificationLink,
     formatNotificationDate 
 } from '@/utils/notificationUtils';
 
@@ -55,6 +56,22 @@ export default function NotificationBell() {
         } catch (error) {
             console.error('Ошибка пометки уведомления:', error);
         }
+    };
+
+    const handleNotificationClick = async (notification) => {
+        // Сначала помечаем как прочитанное
+        if (!notification.read) {
+            await markAsRead(notification.id);
+        }
+        
+        // Затем переходим по ссылке, если она есть
+        const link = getNotificationLink(notification);
+        if (link) {
+            window.location.href = link;
+        }
+        
+        // Закрываем дропдаун
+        setShowDropdown(false);
     };
 
     const markAllAsRead = async () => {
@@ -119,7 +136,7 @@ export default function NotificationBell() {
                                             className={`p-4 hover:bg-secondary-bg transition-colors cursor-pointer ${
                                                 !notification.read ? 'bg-accent-blue/5' : ''
                                             }`}
-                                            onClick={() => markAsRead(notification.id)}
+                                            onClick={() => handleNotificationClick(notification)}
                                         >
                                             <div className="flex items-start space-x-3">
                                                 <div className={`text-lg ${getNotificationColor(notification.type)}`}>
@@ -133,11 +150,18 @@ export default function NotificationBell() {
                                                         <p className="text-xs text-text-muted">
                                                             {formatNotificationDate(notification.created_at)}
                                                         </p>
-                                                        {notification.from_user && (
-                                                            <p className="text-xs text-text-secondary">
-                                                                от {notification.from_user.name}
-                                                            </p>
-                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            {notification.from_user && (
+                                                                <p className="text-xs text-text-secondary">
+                                                                    от {notification.from_user.name}
+                                                                </p>
+                                                            )}
+                                                            {getNotificationLink(notification) && (
+                                                                <span className="text-xs text-accent-blue">
+                                                                    Перейти →
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {!notification.read && (

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import Waves from '@/Components/Waves';
 
 export default function Welcome({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -11,15 +12,15 @@ export default function Welcome({ auth }) {
     return (
         <>
             <Head>
-                <title>379ТМ - Управление задачами с ИИ-ассистентом для разработчиков</title>
-                <meta name="description" content="Система управления задачами для разработчиков. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
-                <meta name="keywords" content="управление задачами, таск менеджер, ИИ ассистент, управление проектами, спринты, разработка, команда, продуктивность" />
+                <title>379ТМ - Управление задачами с ИИ-ассистентом для команд</title>
+                <meta name="description" content="Система управления задачами для любых команд. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
+                <meta name="keywords" content="управление задачами, таск менеджер, ИИ ассистент, управление проектами, спринты, команда, продуктивность, бизнес, маркетинг, дизайн" />
                 <meta name="author" content="379ТМ" />
                 <meta name="robots" content="index, follow" />
 
                 {/* Open Graph */}
                 <meta property="og:title" content="379ТМ - Управление задачами с ИИ-ассистентом" />
-                <meta property="og:description" content="Система управления задачами для разработчиков. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
+                <meta property="og:description" content="Система управления задачами для любых команд. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={window.location.href} />
                 <meta property="og:image" content="/og-image.jpg" />
@@ -28,7 +29,7 @@ export default function Welcome({ auth }) {
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="379ТМ - Управление задачами с ИИ-ассистентом" />
-                <meta name="twitter:description" content="Система управления задачами для разработчиков. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
+                <meta name="twitter:description" content="Система управления задачами для любых команд. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат." />
                 <meta name="twitter:image" content="/og-image.jpg" />
 
                 {/* Дополнительные SEO мета-теги */}
@@ -43,7 +44,7 @@ export default function Welcome({ auth }) {
                         "@context": "https://schema.org",
                         "@type": "SoftwareApplication",
                         "name": "379ТМ",
-                        "description": "Система управления задачами для разработчиков. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат.",
+                        "description": "Система управления задачами для любых команд. Создавайте проекты, планируйте спринты, назначайте задачи. ИИ-ассистент помогает управлять всем через чат.",
                         "applicationCategory": "BusinessApplication",
                         "operatingSystem": "Web",
                         "offers": {
@@ -59,7 +60,23 @@ export default function Welcome({ auth }) {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-black text-white">
+            <div className="min-h-screen bg-black text-white relative overflow-hidden">
+                {/* Waves Background */}
+                <Waves
+                    lineColor="rgba(255, 255, 255, 0.1)"
+                    backgroundColor="transparent"
+                    waveSpeedX={0.008}
+                    waveSpeedY={0.004}
+                    waveAmpX={20}
+                    waveAmpY={10}
+                    xGap={15}
+                    yGap={40}
+                    friction={0.95}
+                    tension={0.003}
+                    maxCursorMove={80}
+                    style={{ zIndex: 1 }}
+                />
+
                 {/* Header */}
                 <header className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
@@ -71,9 +88,9 @@ export default function Welcome({ auth }) {
                                 </span>
                             </div>
                             <div className="flex space-x-8 items-center">
-                                <a 
-                                    href="https://t.me/itteam379manager" 
-                                    target="_blank" 
+                                <a
+                                    href="https://t.me/itteam379manager"
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-gray-400 hover:text-white transition-colors duration-300 flex items-center gap-1 text-sm"
                                 >
@@ -99,7 +116,7 @@ export default function Welcome({ auth }) {
                                         </Link>
                                         <Link
                                             href={route('register')}
-                                            className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                            className="bg-white text-white px-6 py-2 rounded-full font-medium hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
                                         >
                                             Регистрация
                                         </Link>
@@ -111,7 +128,7 @@ export default function Welcome({ auth }) {
                 </header>
 
                 {/* Main Content */}
-                <main className="pt-24">
+                <main className="pt-24 relative z-10">
                     {/* Hero Section */}
                     <section className="max-w-4xl mx-auto px-6 py-20 text-center">
                         <div className={`mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -127,7 +144,7 @@ export default function Welcome({ auth }) {
                         </h1>
 
                         <p className={`text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            Система управления задачами для разработчиков. Создавайте проекты, планируйте спринты,
+                            Система управления задачами для любых команд. Создавайте проекты, планируйте спринты,
                             назначайте задачи и отслеживайте прогресс. ИИ-ассистент помогает управлять всем через чат.
                         </p>
 
@@ -136,7 +153,7 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('register')}
-                                        className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                        className="bg-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
                                         Начать бесплатно
                                     </Link>
@@ -150,7 +167,7 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <Link
                                     href={route('dashboard')}
-                                    className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
+                                    className="bg-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                 >
                                     Перейти в дашборд
                                 </Link>
@@ -201,12 +218,12 @@ export default function Welcome({ auth }) {
                                 },
                                 {
                                     icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-                                    title: "Agile спринты",
-                                    description: "Планируйте спринты и отслеживайте их выполнение"
+                                    title: "Планирование",
+                                    description: "Планируйте спринты, этапы и отслеживайте их выполнение"
                                 },
                                 {
                                     icon: "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
-                                    title: "Детальные задачи",
+                                    title: "Управление задачами",
                                     description: "Создавайте задачи, назначайте исполнителей и добавляйте комментарии"
                                 }
                             ].map((feature, index) => (
@@ -223,6 +240,53 @@ export default function Welcome({ auth }) {
                         </div>
                     </section>
 
+                    {/* Teams Section */}
+                    <section className="max-w-6xl mx-auto px-6 py-20">
+                        <div className={`text-center mb-16 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                                Для любых команд
+                            </h2>
+                            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                                379ТМ подходит для команд любого размера и специализации
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {[
+                                {
+                                    icon: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
+                                    title: "Разработка",
+                                    description: "Управление проектами, спринты, баг-трекинг"
+                                },
+                                {
+                                    icon: "M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
+                                    title: "Маркетинг",
+                                    description: "Кампании, контент-планы, аналитика"
+                                },
+                                {
+                                    icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17v.01",
+                                    title: "Дизайн",
+                                    description: "Проекты, макеты, этапы разработки"
+                                },
+                                {
+                                    icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+                                    title: "Бизнес",
+                                    description: "Стратегии, процессы, управление"
+                                }
+                            ].map((team, index) => (
+                                <div key={index} className={`text-center group transition-all duration-1000 delay-${500 + index * 100} ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                        <svg className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={team.icon} />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-gray-200 transition-colors duration-300">{team.title}</h3>
+                                    <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">{team.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
                     {/* AI Assistant Section */}
                     <section className="max-w-6xl mx-auto px-6 py-20">
                         <div className={`bg-white/5 rounded-3xl p-12 md:p-16 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -232,18 +296,18 @@ export default function Welcome({ auth }) {
                                 </h2>
                                 <p className="text-xl text-gray-400 max-w-3xl mx-auto">
                                     Управляйте проектами через чат. Пишите команды на русском языке,
-                                    и система автоматически создаст проекты, задачи и спринты.
+                                    и система автоматически создаст проекты, задачи и этапы работы.
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                                 <div className="space-y-6">
-                                    {[
-                                        'Создай новый проект "Веб-сайт"',
-                                        'Назначь задачу "Исправить баг" на меня',
-                                        'Покажи статистику по проектам',
-                                        'Создай спринт на следующую неделю'
-                                    ].map((command, index) => (
+                                                                {[
+                                'Создай новый проект "Маркетинговая кампания"',
+                                'Назначь задачу "Подготовить презентацию" на меня',
+                                'Покажи статистику по проектам',
+                                'Создай спринт на следующую неделю'
+                            ].map((command, index) => (
                                         <div key={index} className={`bg-black/50 border border-white/10 p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-black/70 hover:border-white/20 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
                                             <div className="text-white text-sm mb-2">{command}</div>
                                             <div className="text-gray-400 text-sm">ИИ-ассистент выполнит команду автоматически</div>
@@ -272,7 +336,7 @@ export default function Welcome({ auth }) {
                             Готовы начать?
                         </h2>
                         <p className={`text-xl text-gray-400 mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            Присоединяйтесь к разработчикам, которые уже используют 379ТМ для управления проектами
+                            Присоединяйтесь к командам, которые уже используют 379ТМ для управления проектами
                         </p>
                         <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             {!auth.user ? (
@@ -303,11 +367,11 @@ export default function Welcome({ auth }) {
                 </main>
 
                 {/* Footer */}
-                <footer className={`border-t border-white/10 py-12 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <footer className={`border-t border-white/10 py-12 transition-all duration-1000 delay-900 relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
                             <div className="text-gray-400 mb-4 md:mb-0">
-                                <div>© 2025 379ТМ. Создано для разработчиков</div>
+                                <div>© 2025 379ТМ. Создано для команд</div>
                                 <div className="text-sm mt-1">ИНН 614014794226</div>
                             </div>
                             <div className="flex space-x-8">
@@ -317,9 +381,9 @@ export default function Welcome({ auth }) {
                                 <Link href={route('ai-features')} className="text-gray-400 hover:text-white transition-colors duration-300">
                                     ИИ-ассистент
                                 </Link>
-                                <a 
-                                    href="https://t.me/itteam379manager" 
-                                    target="_blank" 
+                                <a
+                                    href="https://t.me/itteam379manager"
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-gray-400 hover:text-white transition-colors duration-300 flex items-center gap-1"
                                 >

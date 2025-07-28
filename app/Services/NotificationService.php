@@ -8,7 +8,10 @@ use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\TaskComment;
 use App\Models\User;
+use App\Mail\NotificationMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -156,6 +159,7 @@ class NotificationService
                 notifiable: $comment,
                 data: [
                     'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_id' => $task->id,
                     'comment_preview' => substr($comment->content, 0, 50) . '...',
                 ]
             );
@@ -170,6 +174,7 @@ class NotificationService
                 notifiable: $comment,
                 data: [
                     'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_id' => $task->id,
                     'comment_preview' => substr($comment->content, 0, 50) . '...',
                 ]
             );
@@ -303,7 +308,7 @@ class NotificationService
         ->first();
 
         if (!$recentNotification) {
-            Notification::create([
+            $notification = Notification::create([
                 'type' => $type,
                 'user_id' => $userId,
                 'from_user_id' => $fromUserId,
@@ -311,6 +316,74 @@ class NotificationService
                 'notifiable_id' => $notifiable->id,
                 'data' => $data,
             ]);
+
+            // Отправляем email уведомление
+            $this->sendEmailNotification($notification);
+        }
+    }
+
+    /**
+     * Отправить email уведомление
+     */
+    private function sendEmailNotification(Notification $notification): void
+    {
+        try {
+            $user = $notification->user;
+            
+            // Проверяем, включены ли email уведомления у пользователя
+            if (!$user->email_notifications) {
+                return;
+            }
+
+            // Получаем текст уведомления
+            $notificationText = $notification->getMessage();
+            
+            // Получаем ссылку на действие
+            $actionUrl = $this->getNotificationActionUrl($notification);
+
+            // Отправляем email
+            Mail::to($user->email)->send(new NotificationMail($notification, $notificationText, $actionUrl));
+            
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем выполнение
+            Log::error('Ошибка отправки email уведомления', [
+                'notification_id' => $notification->id,
+                'user_id' => $notification->user_id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Получить URL действия для уведомления
+     */
+    private function getNotificationActionUrl(Notification $notification): ?string
+    {
+        try {
+            $notifiable = $notification->notifiable;
+            
+            if (!$notifiable) {
+                return null;
+            }
+
+            switch ($notification->notifiable_type) {
+                case 'App\\Models\\Task':
+                    return route('tasks.show', $notifiable->id);
+                    
+                case 'App\\Models\\Project':
+                    return route('projects.show', $notifiable->id);
+                    
+                case 'App\\Models\\Sprint':
+                    return route('sprints.show', $notifiable->id);
+                    
+                case 'App\\Models\\TaskComment':
+                    return route('tasks.show', $notifiable->task_id);
+                    
+                default:
+                    return null;
+            }
+        } catch (\Exception $e) {
+            return null;
         }
     }
 

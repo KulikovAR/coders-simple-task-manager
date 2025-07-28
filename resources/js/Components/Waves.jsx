@@ -78,11 +78,10 @@ const Waves = ({
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
-  const boundingRef = useRef({ width: 0, height: 0, left: 0, top: 0 });
   const noiseRef = useRef(new Noise(Math.random()));
   const linesRef = useRef([]);
   const mouseRef = useRef({
-    x: -10, y: 0, lx: 0, ly: 0, sx: 0, sy: 0, v: 0, vs: 0, a: 0, set: false
+    x: 0, y: 0, lx: 0, ly: 0, sx: 0, sy: 0, v: 0, vs: 0, a: 0, set: false
   });
   const configRef = useRef({
     lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY,
@@ -92,7 +91,7 @@ const Waves = ({
 
   useEffect(() => {
     configRef.current = { lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap };
-    
+
     // Устанавливаем цвет курсора в зависимости от цвета линий
     const cursorColor = lineColor.includes('255, 255, 255') ? '#160000' : '#ffffff';
     if (containerRef.current) {
@@ -107,13 +106,16 @@ const Waves = ({
     ctxRef.current = canvas.getContext("2d");
 
     function setSize() {
-      boundingRef.current = container.getBoundingClientRect();
-      canvas.width = boundingRef.current.width;
-      canvas.height = boundingRef.current.height;
+      // Используем размеры всего окна
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     }
 
     function setLines() {
-      const { width, height } = boundingRef.current;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
       linesRef.current = [];
       const oWidth = width + 200, oHeight = height + 30;
       const { xGap, yGap } = configRef.current;
@@ -138,6 +140,7 @@ const Waves = ({
     function movePoints(time) {
       const lines = linesRef.current, mouse = mouseRef.current, noise = noiseRef.current;
       const { waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove } = configRef.current;
+      
       lines.forEach((pts) => {
         pts.forEach((p) => {
           const move = noise.perlin2(
@@ -175,7 +178,8 @@ const Waves = ({
     }
 
     function drawLines() {
-      const { width, height } = boundingRef.current;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
       const ctx = ctxRef.current;
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
@@ -217,29 +221,34 @@ const Waves = ({
       setSize();
       setLines();
     }
-    function onMouseMove(e) { updateMouse(e.clientX, e.clientY); }
+
+    function onMouseMove(e) { 
+      updateMouse(e.clientX, e.clientY); 
+    }
+
     function onTouchMove(e) {
       const touch = e.touches[0];
       updateMouse(touch.clientX, touch.clientY);
     }
+
     function updateMouse(x, y) {
-      const mouse = mouseRef.current, b = boundingRef.current;
-      mouse.x = x - b.left;
-      mouse.y = y - b.top;
+      const mouse = mouseRef.current;
+      mouse.x = x;
+      mouse.y = y;
       if (!mouse.set) {
-        mouse.sx = mouse.x; mouse.sy = mouse.y;
-        mouse.lx = mouse.x; mouse.ly = mouse.y;
+        mouse.sx = x; mouse.sy = y;
+        mouse.lx = x; mouse.ly = y;
         mouse.set = true;
       }
     }
 
     setSize();
     setLines();
-    
+
     // Устанавливаем цвет курсора
     const cursorColor = lineColor.includes('255, 255, 255') ? '#160000' : '#ffffff';
     container.style.setProperty('--cursor-color', cursorColor);
-    
+
     frameIdRef.current = requestAnimationFrame(tick);
     window.addEventListener("resize", onResize);
     window.addEventListener("mousemove", onMouseMove);
@@ -258,10 +267,11 @@ const Waves = ({
       ref={containerRef}
       className={`waves ${className}`}
       style={{
-        position: "absolute",
+        position: "fixed",
         top: 0, left: 0, margin: 0, padding: 0,
-        width: "100%", height: "100%", overflow: "hidden",
+        width: "100vw", height: "100vh", overflow: "hidden",
         backgroundColor,
+        pointerEvents: "none",
         ...style
       }}
     >
@@ -270,4 +280,4 @@ const Waves = ({
   );
 }
 
-export default Waves; 
+export default Waves;

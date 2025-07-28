@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'paid',
         'expires_at',
+        'email_notifications',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'paid' => 'boolean',
             'expires_at' => 'datetime',
+            'email_notifications' => 'boolean',
         ];
     }
 
