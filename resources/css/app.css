@@ -654,6 +654,11 @@ body {
     color: var(--accent-blue) !important;
 }
 
+/* Гарантируем белый текст в синих элементах */
+.bg-accent-blue {
+    color: white !important;
+}
+
 .text-yellow-400, .text-yellow-500 {
     color: var(--accent-yellow) !important;
 }
