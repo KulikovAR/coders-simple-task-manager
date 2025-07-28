@@ -15,18 +15,18 @@ export default function AiFeatures() {
                 <meta name="description" content="Управляйте проектами через чат. Пишите команды на русском языке, и система автоматически создаст проекты, задачи и спринты." />
                 <meta name="keywords" content="ИИ ассистент, искусственный интеллект, управление задачами, автоматизация, естественный язык" />
                 <meta name="robots" content="index, follow" />
-                
+
                 {/* Open Graph */}
                 <meta property="og:title" content="ИИ-ассистент - 379ТМ" />
                 <meta property="og:description" content="Управляйте проектами через чат. Пишите команды на русском языке, и система автоматически создаст проекты, задачи и спринты." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={window.location.href} />
-                
+
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="ИИ-ассистент - 379ТМ" />
                 <meta name="twitter:description" content="Управляйте проектами через чат. Пишите команды на русском языке, и система автоматически создаст проекты, задачи и спринты." />
-                
+
                 {/* Структурированные данные */}
                 <script type="application/ld+json">
                     {JSON.stringify({
@@ -48,7 +48,7 @@ export default function AiFeatures() {
                     })}
                 </script>
             </Head>
-            
+
             <div className="min-h-screen bg-black text-white">
                 {/* Header */}
                 <header className={`border-b border-white/10 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
@@ -74,7 +74,7 @@ export default function AiFeatures() {
                             ИИ-ассистент
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed font-light">
-                            Управляйте проектами через чат. Пишите команды на русском языке, 
+                            Управляйте проектами через чат. Пишите команды на русском языке,
                             и система автоматически создаст проекты, задачи и спринты.
                         </p>
                     </div>
@@ -130,7 +130,7 @@ export default function AiFeatures() {
                         <h2 className={`text-4xl md:text-5xl font-bold text-center mb-12 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Примеры команд
                         </h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                             <div className="space-y-6">
                                 <h3 className="text-2xl font-semibold text-white mb-8">Управление проектами</h3>
@@ -147,7 +147,7 @@ export default function AiFeatures() {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div className="space-y-6">
                                 <h3 className="text-2xl font-semibold text-white mb-8">Управление задачами</h3>
                                 {[
@@ -177,7 +177,7 @@ export default function AiFeatures() {
                         <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <Link
                                 href="/register"
-                                className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                className="bg-white text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
                             >
                                 Начать бесплатно
                             </Link>
@@ -212,4 +212,4 @@ export default function AiFeatures() {
             </div>
         </>
     );
-} 
+}

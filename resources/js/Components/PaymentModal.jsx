@@ -23,11 +23,11 @@ export default function PaymentModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={onClose}
         >
-            <div 
+            <div
                 className="bg-card-bg border border-border-color rounded-2xl p-8 max-w-md w-full shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -41,7 +41,7 @@ export default function PaymentModal({ isOpen, onClose }) {
                         Спасибо за тестирование!
                     </h3>
                                                 <p className="text-text-secondary text-sm">
-                                В вашем тарифе доступно 10 бесплатных запросов в месяц
+                                В вашем тарифе доступно 5 бесплатных запросов в месяц
                             </p>
                 </div>
 
@@ -49,7 +49,7 @@ export default function PaymentModal({ isOpen, onClose }) {
                     <p className="text-text-primary text-sm leading-relaxed">
                         Чтобы продолжить автоматизировать задачи без ограничений:
                     </p>
-                    
+
                     <div className="bg-secondary-bg border border-border-color rounded-xl p-4">
                         <div className="flex items-center justify-between">
                             <span className="text-text-primary font-medium">Напишите нашему менеджеру</span>
@@ -79,4 +79,4 @@ export default function PaymentModal({ isOpen, onClose }) {
             </div>
         </div>
     );
-} 
+}

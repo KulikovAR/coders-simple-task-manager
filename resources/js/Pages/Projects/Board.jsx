@@ -82,9 +82,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             preserveState: true,
             onSuccess: (page) => {
                 // Обновляем задачу в локальном состоянии
-                setLocalTasks(prevTasks => 
-                    prevTasks.map(task => 
-                        task.id === selectedTask.id 
+                setLocalTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === selectedTask.id
                             ? { ...task, ...data }
                             : task
                     )
@@ -200,7 +200,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const handleDragOver = (e, statusId) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        
+
         // Если перетаскиваем в том же статусе, показываем зоны приоритетов
         if (draggedTask && draggedTask.status_id === statusId) {
             setShowPriorityDropZones(true);
@@ -217,7 +217,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX;
         const y = e.clientY;
-        
+
         if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
             setDragOverStatusId(null);
             setShowPriorityDropZones(false);
@@ -248,9 +248,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 preserveScroll: true,
                 onSuccess: (page) => {
                     // Обновляем задачу в локальном состоянии
-                    setLocalTasks(prevTasks => 
-                        prevTasks.map(task => 
-                            task.id === draggedTask.id 
+                    setLocalTasks(prevTasks =>
+                        prevTasks.map(task =>
+                            task.id === draggedTask.id
                                 ? { ...task, priority: priority }
                                 : task
                         )
@@ -280,9 +280,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 preserveScroll: true,
                 onSuccess: (page) => {
                     // Обновляем задачу в локальном состоянии
-                    setLocalTasks(prevTasks => 
-                        prevTasks.map(task => 
-                            task.id === draggedTask.id 
+                    setLocalTasks(prevTasks =>
+                        prevTasks.map(task =>
+                            task.id === draggedTask.id
                                 ? { ...task, status_id: statusId }
                                 : task
                         )
@@ -418,8 +418,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           router.visit(route('ai-agent.index'));
                         }
                       }}
-                      className="btn btn-secondary ml-2"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ml-2 flex items-center gap-2 text-sm"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
                       + Задача с ИИ
                     </button>
                     {/* Кнопка добавить задачу */}
@@ -446,8 +449,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 <div
                                     key={status.id}
                                     className={`bg-secondary-bg border rounded-xl p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full flex flex-col transition-all duration-300 ${
-                                        dragOverStatusId === status.id 
-                                            ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue' 
+                                        dragOverStatusId === status.id
+                                            ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue'
                                             : 'border-border-color'
                                     }`}
                                     onDragOver={(e) => handleDragOver(e, status.id)}
@@ -470,30 +473,30 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         <div className="space-y-3 mb-4 flex-shrink-0">
                                             <div className="text-caption text-text-muted font-medium mb-3 text-center">Выберите приоритет:</div>
                                             {[
-                                                { 
-                                                    priority: 'high', 
-                                                    label: 'Высокий', 
-                                                    bgColor: 'bg-accent-red/10', 
+                                                {
+                                                    priority: 'high',
+                                                    label: 'Высокий',
+                                                    bgColor: 'bg-accent-red/10',
                                                     borderColor: 'border-accent-red/50',
                                                     hoverBg: 'hover:bg-accent-red/20',
                                                     activeBg: 'bg-accent-red/20',
                                                     textColor: 'text-accent-red',
                                                     shadowColor: 'shadow-glow-red'
                                                 },
-                                                { 
-                                                    priority: 'medium', 
-                                                    label: 'Средний', 
-                                                    bgColor: 'bg-accent-yellow/10', 
+                                                {
+                                                    priority: 'medium',
+                                                    label: 'Средний',
+                                                    bgColor: 'bg-accent-yellow/10',
                                                     borderColor: 'border-accent-yellow/50',
                                                     hoverBg: 'hover:bg-accent-yellow/20',
                                                     activeBg: 'bg-accent-yellow/20',
                                                     textColor: 'text-accent-yellow',
                                                     shadowColor: 'shadow-glow-yellow'
                                                 },
-                                                { 
-                                                    priority: 'low', 
-                                                    label: 'Низкий', 
-                                                    bgColor: 'bg-accent-green/10', 
+                                                {
+                                                    priority: 'low',
+                                                    label: 'Низкий',
+                                                    bgColor: 'bg-accent-green/10',
                                                     borderColor: 'border-accent-green/50',
                                                     hoverBg: 'hover:bg-accent-green/20',
                                                     activeBg: 'bg-accent-green/20',
@@ -504,8 +507,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 <div
                                                     key={priority}
                                                     className={`priority-zone border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 ${
-                                                        dragOverPriority === priority 
-                                                            ? `${activeBg} ${borderColor.replace('/50', '')} ${shadowColor} active` 
+                                                        dragOverPriority === priority
+                                                            ? `${activeBg} ${borderColor.replace('/50', '')} ${shadowColor} active`
                                                             : `${bgColor} ${borderColor} ${hoverBg}`
                                                     }`}
                                                     onDragOver={(e) => handlePriorityDragOver(e, priority)}
@@ -574,10 +577,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     {/* Приоритет с цветным фоном */}
                                                     {task.priority && (
                                                         <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-sm ${
-                                                            task.priority === 'high' 
-                                                                ? 'bg-accent-red/20 text-accent-red border border-accent-red/30' 
-                                                                : task.priority === 'medium' 
-                                                                    ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30' 
+                                                            task.priority === 'high'
+                                                                ? 'bg-accent-red/20 text-accent-red border border-accent-red/30'
+                                                                : task.priority === 'medium'
+                                                                    ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30'
                                                                     : 'bg-accent-green/20 text-accent-green border border-accent-green/30'
                                                         }`}>
                                                             <span className="text-sm">
@@ -644,11 +647,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Модальное окно для просмотра и редактирования задачи */}
             {showTaskModal && selectedTask && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
                     onClick={closeTaskModal}
                 >
-                    <div 
+                    <div
                         className="bg-card-bg border border-border-color rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -685,9 +688,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             )}
 
             {/* Модалка оплаты подписки */}
-            <PaymentModal 
-                isOpen={showPaymentModal} 
-                onClose={closePaymentModal} 
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={closePaymentModal}
             />
         </AuthenticatedLayout>
     );
