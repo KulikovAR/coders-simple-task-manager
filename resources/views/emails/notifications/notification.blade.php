@@ -7,7 +7,7 @@
 **От:** {{ $notification->from_user->name }}
 @endif
 
-**Дата:** {{ $notification->created_at->format('d.m.Y H:i') }}
+**Дата:** {{ $notification->created_at ? $notification->created_at->format('d.m.Y H:i') : now()->format('d.m.Y H:i') }}
 
 @if($actionUrl)
 @component('mail::button', ['url' => $actionUrl])

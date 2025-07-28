@@ -69,23 +69,36 @@ class TestMailCommand extends Command
      */
     private function testNotificationMail(string $email): void
     {
-        // Создаем тестовое уведомление
-        $user = User::first() ?? User::factory()->create();
+        // Создаем или находим пользователя с указанным email
+        $user = User::where('email', $email)->first();
         
-        $notification = new Notification([
-            'type' => 'task_assigned',
-            'user_id' => $user->id,
-            'data' => [
-                'task_title' => 'Тестовая задача',
-                'project_name' => 'Тестовый проект',
-            ],
-            'created_at' => now(),
-        ]);
+        if (!$user) {
+            $this->info("Создаем тестового пользователя с email: {$email}");
+            $user = User::factory()->create([
+                'email' => $email,
+                'email_notifications' => true,
+            ]);
+        }
 
-        $notification->setRelation('user', $user);
-        $notification->setRelation('fromUser', $user);
+        // Создаем тестовое уведомление через factory
+        $notification = \App\Models\Notification::factory()
+            ->taskAssigned()
+            ->unread()
+            ->create([
+                'user_id' => $user->id,
+                'from_user_id' => $user->id,
+                'data' => [
+                    'task_title' => 'Тестовая задача для проверки email',
+                    'project_name' => 'Тестовый проект',
+                ],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        $notificationText = "Вам назначена задача: Тестовая задача";
+        // Загружаем связи
+        $notification->load(['user', 'fromUser']);
+
+        $notificationText = "Вам назначена задача: Тестовая задача для проверки email";
         $actionUrl = route('dashboard');
 
         Mail::to($email)->send(new NotificationMail($notification, $notificationText, $actionUrl));
