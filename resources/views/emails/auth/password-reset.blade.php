@@ -3,157 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Восстановление пароля в 379ТМ</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 20px 0;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: #dc3545;
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-            border-radius: 8px 8px 0 0;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 500;
-        }
-        .logo {
-            margin-bottom: 15px;
-        }
-        .content {
-            padding: 30px;
-        }
-        .message {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-        .button {
-            display: inline-block;
-            background: #dc3545;
-            color: white;
-            text-decoration: none;
-            padding: 14px 24px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 16px;
-            margin: 20px 0;
-        }
-        .info {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #666;
-        }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #856404;
-        }
-        .url-box {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-            word-break: break-all;
-        }
-        .url-text {
-            color: #495057;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            margin: 0;
-        }
-        .footer {
-            background: #f8f9fa;
-            padding: 20px 30px;
-            text-align: center;
-            border-radius: 0 0 8px 8px;
-            border-top: 1px solid #eee;
-        }
-        .footer p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #666;
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                margin: 0;
-            }
-        }
-    </style>
+    <title>Восстановление пароля</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <svg width="60" height="24" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="60" height="24" rx="4" fill="white"/>
-                    <text x="30" y="16" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#dc3545">379ТМ</text>
-                </svg>
-            </div>
-            <h1>Восстановление пароля</h1>
-        </div>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333; background-color: #f5f5f5;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <tr>
+            <td style="background-color: #dc3545; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 18px; font-weight: normal;">Восстановление пароля</h1>
+            </td>
+        </tr>
         
-        <div class="content">
-            <div class="message">
-                Вы получили это письмо, потому что мы получили запрос на сброс пароля для вашей учетной записи.
-            </div>
-            
-            <div style="text-align: center;">
-                <a href="{{ $url }}" class="button">
-                    Сбросить пароль
-                </a>
-            </div>
-            
-            <div class="info">
-                <strong>Срок действия:</strong> {{ config('auth.passwords.users.expire') }} минут
-            </div>
-            
-            <div class="warning">
-                <strong>Важно:</strong> Если вы не запрашивали сброс пароля, никаких действий не требуется.
-            </div>
-            
-            <div class="url-box">
-                <p style="margin: 0 0 10px 0; font-weight: 500; color: #495057;">
-                    Если кнопка не работает, скопируйте ссылку:
+        <!-- Content -->
+        <tr>
+            <td style="padding: 30px;">
+                <p style="margin: 0 0 20px 0; font-size: 16px;">
+                    Вы получили это письмо, потому что мы получили запрос на сброс пароля для вашей учетной записи.
                 </p>
-                <p class="url-text">{{ $url }}</p>
-            </div>
-        </div>
+                
+                <table cellpadding="0" cellspacing="0" style="margin: 20px 0; width: 100%;">
+                    <tr>
+                        <td style="background-color: #dc3545; padding: 14px 24px; text-align: center;">
+                            <a href="{{ $url }}" style="color: white; text-decoration: none; font-weight: bold; font-size: 16px;">Сбросить пароль</a>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+                    <tr>
+                        <td style="padding: 15px; font-size: 14px; color: #666;">
+                            <strong>Срок действия:</strong> {{ config('auth.passwords.users.expire') }} минут
+                        </td>
+                    </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; background-color: #fff3cd; border: 1px solid #ffeaa7;">
+                    <tr>
+                        <td style="padding: 15px; font-size: 14px; color: #856404;">
+                            <strong>Важно:</strong> Если вы не запрашивали сброс пароля, никаких действий не требуется.
+                        </td>
+                    </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+                    <tr>
+                        <td style="padding: 15px;">
+                            <p style="margin: 0 0 10px 0; font-weight: bold; color: #495057;">
+                                Если кнопка не работает, скопируйте ссылку:
+                            </p>
+                            <p style="margin: 0; color: #495057; font-family: 'Courier New', monospace; font-size: 12px; word-break: break-all;">
+                                {{ $url }}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
         
-        <div class="footer">
-            <p><strong>{{ config('app.name') }}</strong></p>
-            <p style="font-size: 12px; color: #999;">
-                Это письмо отправлено автоматически
-            </p>
-        </div>
-    </div>
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                <p style="margin: 0 0 10px 0; font-weight: bold;">{{ config('app.name') }}</p>
+                <p style="margin: 0; font-size: 12px; color: #999;">
+                    Это письмо отправлено автоматически
+                </p>
+            </td>
+        </tr>
+    </table>
+    
 </body>
 </html> 

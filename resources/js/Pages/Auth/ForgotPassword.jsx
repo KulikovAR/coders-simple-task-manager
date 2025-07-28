@@ -25,7 +25,7 @@ export default function ForgotPassword({ status }) {
             </div>
 
             {status && (
-                <div className="mb-4 font-medium text-sm text-green-600">
+                <div className="mb-4 font-medium text-sm text-green-600 bg-green-50 border border-green-200 rounded-md p-3">
                     {status}
                 </div>
             )}
@@ -44,6 +44,11 @@ export default function ForgotPassword({ status }) {
                     />
 
                     <InputError message={errors.email} className="mt-2" />
+                    {errors.email && (
+                        <div className="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                            {errors.email}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-end mt-4">

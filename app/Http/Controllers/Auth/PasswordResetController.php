@@ -44,9 +44,11 @@ class PasswordResetController extends Controller
             }
         );
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with(['status' => __($status)])
-            : back()->withErrors(['email' => __($status)]);
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with(['status' => trans('auth.passwords.sent')]);
+        } else {
+            return back()->withErrors(['email' => trans('auth.passwords.' . $status)]);
+        }
     }
 
     /**
@@ -81,8 +83,10 @@ class PasswordResetController extends Controller
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', trans('auth.passwords.reset'));
+        } else {
+            return back()->withErrors(['email' => [trans('auth.passwords.' . $status)]]);
+        }
     }
 }

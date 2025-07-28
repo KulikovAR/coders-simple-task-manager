@@ -3,139 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новое уведомление в 379ТМ</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 20px 0;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: #667eea;
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-            border-radius: 8px 8px 0 0;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 500;
-        }
-        .logo {
-            margin-bottom: 15px;
-        }
-        .content {
-            padding: 30px;
-        }
-        .notification-text {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .meta {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .meta span {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .button {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-        .button-secondary {
-            background: #6c757d;
-        }
-        .footer {
-            background: #f8f9fa;
-            padding: 20px 30px;
-            text-align: center;
-            border-radius: 0 0 8px 8px;
-            border-top: 1px solid #eee;
-        }
-        .footer p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #666;
-        }
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                margin: 0;
-            }
-        }
-    </style>
+    <title>Новое уведомление</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <svg width="60" height="24" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="60" height="24" rx="4" fill="white"/>
-                    <text x="30" y="16" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#667eea">379ТМ</text>
-                </svg>
-            </div>
-            <h1>Новое уведомление</h1>
-        </div>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333; background-color: #f5f5f5;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <tr>
+            <td style="background-color: #667eea; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 18px; font-weight: normal;">Новое уведомление</h1>
+            </td>
+        </tr>
         
-        <div class="content">
-            <div class="notification-text">
-                {{ $notificationText }}
-            </div>
-            
-            <div class="meta">
-                @if($notification->from_user)
-                <span><strong>От:</strong> {{ $notification->from_user->name }}</span>
+        <!-- Content -->
+        <tr>
+            <td style="padding: 30px;">
+                <p style="margin: 0 0 20px 0; font-size: 16px;">
+                    {{ $notificationText }}
+                </p>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+                    @if($notification->from_user)
+                    <tr>
+                        <td style="padding: 5px 0; font-size: 14px; color: #666;">
+                            <strong>От:</strong> {{ $notification->from_user->name }}
+                        </td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td style="padding: 5px 0; font-size: 14px; color: #666;">
+                            <strong>Дата:</strong> {{ $notification->created_at ? $notification->created_at->format('d.m.Y H:i') : now()->format('d.m.Y H:i') }}
+                        </td>
+                    </tr>
+                </table>
+                
+                @if($actionUrl)
+                <table cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                    <tr>
+                        <td style="background-color: #667eea; padding: 12px 20px; text-align: center;">
+                            <a href="{{ $actionUrl }}" style="color: white; text-decoration: none; font-weight: bold;">Перейти к объекту</a>
+                        </td>
+                    </tr>
+                </table>
                 @endif
-                <span><strong>Дата:</strong> {{ $notification->created_at ? $notification->created_at->format('d.m.Y H:i') : now()->format('d.m.Y H:i') }}</span>
-            </div>
-            
-            @if($actionUrl)
-            <a href="{{ $actionUrl }}" class="button">
-                Перейти к объекту
-            </a>
-            @endif
-            
-            <a href="{{ route('notifications.index') }}" class="button button-secondary">
-                Все уведомления
-            </a>
-        </div>
+                
+                <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td style="background-color: #6c757d; padding: 12px 20px; text-align: center;">
+                            <a href="{{ route('notifications.index') }}" style="color: white; text-decoration: none; font-weight: bold;">Все уведомления</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
         
-        <div class="footer">
-            <p><strong>{{ config('app.name') }}</strong></p>
-            <p style="font-size: 12px; color: #999;">
-                <a href="{{ route('profile.edit') }}">Отключить уведомления</a>
-            </p>
-        </div>
-    </div>
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                <p style="margin: 0 0 10px 0; font-weight: bold;">{{ config('app.name') }}</p>
+                <p style="margin: 0; font-size: 12px; color: #999;">
+                    <a href="{{ route('profile.edit') }}" style="color: #667eea; text-decoration: none;">Отключить уведомления</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+    
 </body>
 </html> 
