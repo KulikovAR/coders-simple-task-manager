@@ -679,6 +679,15 @@ body {
     border-color: var(--accent-green) !important;
 }
 
+/* Гарантируем белый текст для всех статусов проектов в светлой теме */
+[data-theme='light'] .bg-accent-green,
+[data-theme='light'] .bg-accent-blue,
+[data-theme='light'] .bg-accent-yellow,
+[data-theme='light'] .bg-accent-red,
+[data-theme='light'] .bg-accent-slate {
+    color: white !important;
+}
+
 /* Гарантируем белый текст в градиентных кнопках ИИ */
 .bg-gradient-to-r.from-purple-500.to-pink-500 {
     color: white !important;
