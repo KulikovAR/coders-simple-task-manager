@@ -145,7 +145,7 @@ export default function Faq() {
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Link
                                 href="/register"
-                                className="bg-white text-black px-10 py-4 rounded-full font-semibold text-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                                className="bg-blue-500 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
                             >
                                 Попробовать бесплатно
                             </Link>
