@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
+
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
@@ -148,14 +149,19 @@ export default function Authenticated({ user, header, children }) {
                                                 Уведомления
                                             </div>
                                         </Dropdown.Link>
-                                        <Dropdown.Link href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer">
+                                        <a
+                                            href="https://t.me/itteam379manager"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block w-full px-4 py-2 text-start text-sm leading-5 text-text-primary transition duration-150 ease-in-out hover:bg-secondary-bg hover:rounded-lg focus:bg-secondary-bg focus:rounded-lg focus:outline-none"
+                                        >
                                             <div className="flex items-center">
                                                 <svg className="w-4 h-4 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
                                                 Поддержка
                                             </div>
-                                        </Dropdown.Link>
+                                        </a>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             <div className="flex items-center">
                                                 <svg className="w-4 h-4 mr-2 text-accent-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
