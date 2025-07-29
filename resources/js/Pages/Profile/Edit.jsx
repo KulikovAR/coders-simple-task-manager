@@ -63,13 +63,13 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                             className="max-w-xl"
                         />
                         {/* Статус подписки и кнопка оплаты */}
-                        <div className="mt-6 p-6 rounded-lg bg-[#181A20] border border-border-color text-sm">
+                        <div className="mt-6 p-6 rounded-lg bg-secondary-bg border border-border-color text-sm">
                             <div className="mb-4 font-semibold text-base text-text-primary flex items-center gap-2">
                                 <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M12 20.5a8.38 8.38 0 01-7.5-4.36c-.2-.36-.2-.8 0-1.16A8.38 8.38 0 0112 3.5a8.38 8.38 0 017.5 4.36c.2.36.2.8 0 1.16A8.38 8.38 0 0112 20.5z" /></svg>
                                 Тариф
                             </div>
                             <div className="flex flex-col gap-3 mb-4">
-                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!isPaid ? 'border-green-500 bg-green-900/20' : 'border-border-color'}`} style={{ color: !isPaid ? '#fff' : '#aaa' }}>
+                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!isPaid ? 'border-green-500 bg-green-500/10' : 'border-border-color'}`} style={{ color: !isPaid ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                                     <span className="font-bold">Базовый</span>
                                     <span className="ml-auto text-gray-400">0 ₽/мес</span>
                                     {!isPaid && (
@@ -81,7 +81,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                                         </>
                                     )}
                                 </div>
-                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${isPaid ? 'border-blue-500 bg-blue-900/20' : 'border-border-color'}`} style={{ color: isPaid ? '#fff' : '#aaa' }}>
+                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${isPaid ? 'border-blue-500 bg-blue-500/10' : 'border-border-color'}`} style={{ color: isPaid ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                                     <span className="font-bold">ИИ-ассистент</span>
                                     <span className="ml-auto text-gray-400">2000 ₽/мес</span>
                                     {isPaid && (

@@ -60,8 +60,8 @@ export default function Authenticated({ user, header, children }) {
                 xGap={20}
                 yGap={50}
             />
-            <div className="relative z-10">
-            <nav className="border-b border-border-color bg-card-bg/80 backdrop-blur-md shadow-lg">
+            <div className="relative z-9999">
+            <nav className="border-b border-border-color bg-card-bg/80 shadow-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex">
@@ -105,71 +105,56 @@ export default function Authenticated({ user, header, children }) {
                                 <NotificationBell />
 
                                 {/* Профиль */}
-                                <Dropdown align="right" width="64">
+                                <Dropdown align="right" width="48">
                                     <Dropdown.Trigger>
-                                        <span className="inline-flex">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center px-4 py-2 border border-border-color text-sm leading-4 font-medium text-text-primary hover:text-text-secondary hover:bg-secondary-bg focus:outline-none transition-all duration-200 bg-secondary-bg rounded-xl shadow-sm hover:shadow-md"
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center px-4 py-2 border border-border-color text-sm leading-4 font-medium text-text-primary hover:text-text-secondary hover:bg-secondary-bg focus:outline-none transition-all duration-200 bg-secondary-bg rounded-xl shadow-sm hover:shadow-md"
+                                        >
+                                            <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center mr-2">
+                                                <span className="text-xs font-semibold text-accent-blue">
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            {user.name}
+                                            <svg
+                                                className="ml-2 -mr-0.5 h-4 w-4"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
                                             >
-                                                <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center mr-2">
-                                                    <span className="text-xs font-semibold text-accent-blue">
-                                                        {user.name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                {user.name}
-                                                <svg
-                                                    className="ml-2 -mr-0.5 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
                                     </Dropdown.Trigger>
                                     <Dropdown.Content>
-                                        <div className="px-6 py-4 border-b border-border-color bg-card-bg/80 backdrop-blur-md">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-8 h-8 bg-accent-blue/20 rounded-lg flex items-center justify-center">
-                                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M12 20.5a8.38 8.38 0 01-7.5-4.36c-.2-.36-.2-.8 0-1.16A8.38 8.38 0 0112 3.5a8.38 8.38 0 017.5 4.36c.2.36.2.8 0 1.16A8.38 8.38 0 0112 20.5z" />
-                                                    </svg>
-                                                </div>
-                                                <span className="font-semibold text-base text-text-primary">Тариф</span>
+                                        <Dropdown.Link href={route('profile.edit')}>
+                                            <div className="flex items-center">
+                                                <svg className="w-4 h-4 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                                Профиль
                                             </div>
-                                            <div className="flex flex-col gap-3 text-sm">
-                                                <div className={`rounded-lg px-4 py-3 flex items-center gap-3 border transition-all duration-200 ${
-                                                    !user.paid 
-                                                        ? 'border-accent-green/50 bg-accent-green/10 shadow-glow-green' 
-                                                        : 'border-border-color bg-secondary-bg/50'
-                                                }`}
-                                                    style={{ color: !user.paid ? 'var(--accent-green)' : 'var(--text-secondary)' }}>
-                                                    <div className={`w-2 h-2 rounded-full ${!user.paid ? 'bg-accent-green' : 'bg-text-muted'}`}></div>
-                                                    <span className="font-semibold">Базовый</span>
-                                                </div>
-                                                <div className={`rounded-lg px-4 py-3 flex items-center gap-3 border transition-all duration-200 ${
-                                                    user.paid 
-                                                        ? 'border-accent-blue/50 bg-accent-blue/10 shadow-glow-blue' 
-                                                        : 'border-border-color bg-secondary-bg/50'
-                                                }`}
-                                                    style={{ color: user.paid ? 'var(--accent-blue)' : 'var(--text-secondary)' }}>
-                                                    <div className={`w-2 h-2 rounded-full ${user.paid ? 'bg-accent-blue' : 'bg-text-muted'}`}></div>
-                                                    <span className="font-semibold">ИИ-ассистент</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Dropdown.Link href={route('profile.edit')}>Профиль</Dropdown.Link>
+                                        </Dropdown.Link>
                                         <Dropdown.Link href={route('notifications.index')}>
-                                            Уведомления
+                                            <div className="flex items-center">
+                                                <svg className="w-4 h-4 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 004 6v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-1.81 1.19z" />
+                                                </svg>
+                                                Уведомления
+                                            </div>
                                         </Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Выйти
+                                            <div className="flex items-center">
+                                                <svg className="w-4 h-4 mr-2 text-accent-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                Выйти
+                                            </div>
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>

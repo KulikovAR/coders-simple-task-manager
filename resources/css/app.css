@@ -315,7 +315,15 @@ body {
     /* Карточки */
     .card {
         @apply bg-card-bg border border-border-color rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200;
-        backdrop-filter: blur(10px);
+        /* backdrop-filter: blur(10px); - убираем, чтобы не создавать stacking context
+           Stacking context создается элементами с:
+           - position: relative/absolute/fixed/sticky + z-index
+           - opacity < 1
+           - transform
+           - filter
+           - backdrop-filter
+           - isolation: isolate
+           Это может привести к проблемам с z-index дропдаунов */
     }
     
     .card-header {
@@ -661,6 +669,11 @@ body {
 
 /* Гарантируем белый текст в красных элементах */
 .bg-accent-red {
+    color: white !important;
+}
+
+/* Гарантируем белый текст в градиентных кнопках ИИ */
+.bg-gradient-to-r.from-purple-500.to-pink-500 {
     color: white !important;
 }
 
