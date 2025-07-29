@@ -672,6 +672,13 @@ body {
     color: white !important;
 }
 
+/* Гарантируем белый текст для статуса "Активный" в светлой теме */
+[data-theme='light'] .status-active {
+    color: white !important;
+    background-color: var(--accent-green) !important;
+    border-color: var(--accent-green) !important;
+}
+
 /* Гарантируем белый текст в градиентных кнопках ИИ */
 .bg-gradient-to-r.from-purple-500.to-pink-500 {
     color: white !important;
