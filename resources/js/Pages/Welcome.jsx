@@ -341,6 +341,7 @@ export default function Welcome({ auth }) {
                                 </div>
                             </div>
                         </div>
+                        <div className="mb-16"></div>
                     </section>
 
                     {/* CTA Section */}
@@ -376,6 +377,7 @@ export default function Welcome({ auth }) {
                                 </Link>
                             )}
                         </div>
+                        <div className="mb-16"></div>
                     </section>
                 </main>
 
