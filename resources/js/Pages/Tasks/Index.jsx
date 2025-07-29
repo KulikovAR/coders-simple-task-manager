@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import TaskCard from '@/Components/TaskCard';
+import PaymentModal from '@/Components/PaymentModal';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
 export default function Index({ auth, tasks, filters, projects, users = [] }) {
@@ -13,6 +14,7 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
     const [reporterId, setReporterId] = useState(filters.reporter_id || '');
     const [myTasks, setMyTasks] = useState(filters.my_tasks === '1');
     const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -62,6 +64,14 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
         });
     };
 
+    const openPaymentModal = () => {
+        setShowPaymentModal(true);
+    };
+
+    const closePaymentModal = () => {
+        setShowPaymentModal(false);
+    };
+
     // Статистика задач
     const getTaskStats = () => {
         const allTasks = tasks.data;
@@ -103,6 +113,24 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                             </svg>
                             Фильтры
+                        </button>
+                        <button
+                            onClick={() => {
+                                // Проверяем, есть ли у пользователя активная подписка
+                                const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
+                                if (!isPaid) {
+                                    openPaymentModal();
+                                } else {
+                                    router.visit(route('ai-agent.index'));
+                                }
+                            }}
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm"
+                            style={{ color: 'white' }}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Задача с ИИ
                         </button>
                         <Link
                             href={route('tasks.create')}
@@ -401,6 +429,15 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                             })}
                         </nav>
                     </div>
+                )}
+
+                {/* Модальное окно оплаты */}
+                {showPaymentModal && (
+                    <PaymentModal
+                        isOpen={showPaymentModal}
+                        onClose={closePaymentModal}
+                        user={auth.user}
+                    />
                 )}
             </div>
         </AuthenticatedLayout>
