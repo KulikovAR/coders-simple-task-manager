@@ -105,7 +105,7 @@ const DropdownLink = ({ className = '', children, ...props }) => {
             {...props}
             onClick={handleClick}
             className={
-                'block w-full px-4 py-2 text-start text-sm leading-5 text-text-primary transition duration-150 ease-in-out hover:bg-secondary-bg focus:bg-secondary-bg focus:outline-none ' +
+                'block w-full px-4 py-2 text-start text-sm leading-5 text-text-primary transition duration-150 ease-in-out hover:bg-secondary-bg hover:rounded-lg focus:bg-secondary-bg focus:rounded-lg focus:outline-none ' +
                 className
             }
         >
