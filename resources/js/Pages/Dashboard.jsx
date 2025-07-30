@@ -310,6 +310,22 @@ export default function Dashboard({ auth, stats, projects }) {
                         </div>
                     </div>
                 )}
+
+                {/* Информация о бета версии */}
+                <div className="text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
+                    <p className="text-text-muted" style={{ fontSize: '12px' }}>
+                        Наш проект пока находится в бета версии и мы активно поддерживаем своих клиентов.
+                        Если есть предложения, пишите нам в{' '}
+                        <a
+                            href="https://t.me/itteam379manager"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
+                        >
+                            Поддержку
+                        </a>
+                    </p>
+                </div>
             </div>
         </AuthenticatedLayout>
     );

@@ -63,7 +63,7 @@ export default function Authenticated({ user, header, children }) {
             />
             <div className="relative z-9999">
             <nav className="border-b border-border-color bg-card-bg/80 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
@@ -199,7 +199,7 @@ export default function Authenticated({ user, header, children }) {
                         </div>
                     </div>
                 </div>
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
+                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden w-full max-w-full overflow-hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
                             Dashboard
@@ -226,8 +226,8 @@ export default function Authenticated({ user, header, children }) {
                 </div>
             </nav>
             {/* header удалён по требованию пользователя */}
-            <main className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <main className="py-12 safe-area-inset-y">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
                         {children}
                     </div>
