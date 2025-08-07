@@ -44,7 +44,7 @@ export default function Dashboard({ auth, stats, projects }) {
                         {getGreeting()}, {auth.user.name}! {getGreetingEmoji()}
                     </h1>
                     <p className="text-body-large text-text-secondary mb-2">
-                        Добро пожаловать в Task Manager
+                        Добро пожаловать в 379 Task Manager
                     </p>
                     <p className="text-body-small text-text-muted">
                         Сегодня {new Date().toLocaleDateString('ru-RU', {
@@ -166,11 +166,11 @@ export default function Dashboard({ auth, stats, projects }) {
                                                 const num = project.tasks_count || 0;
                                                 const lastDigit = num % 10;
                                                 const lastTwoDigits = num % 100;
-                                                
+
                                                 if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
                                                     return `${num} задач`;
                                                 }
-                                                
+
                                                 if (lastDigit === 1) {
                                                     return `${num} задача`;
                                                 } else if (lastDigit >= 2 && lastDigit <= 4) {

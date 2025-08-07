@@ -16,10 +16,13 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $projects = Project::where('owner_id', $user->id)
-            ->orWhereHas('members', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+        $projects = Project::where(function($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', function($query) use ($user) {
+                      $query->where('user_id', $user->id);
+                  });
             })
+            ->where('status', 'active')
             ->withCount('tasks')
             ->orderBy('created_at', 'desc')
             ->limit(6)

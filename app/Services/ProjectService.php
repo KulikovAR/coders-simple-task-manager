@@ -38,6 +38,8 @@ class ProjectService
         }
 
         // Сохраняем параметры запроса в ссылках пагинации
+        // По умолчанию активные проекты первыми
+        $query->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END");
         return $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
     }
 
