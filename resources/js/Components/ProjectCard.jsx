@@ -51,7 +51,7 @@ export default function ProjectCard({ project }) {
     };
 
     return (
-        <div className="card hover:shadow-glow transition-all duration-200">
+        <div className="card hover:shadow-glow transition-all duration-200 h-full flex flex-col">
             <div className="card-header">
                 <div className="flex-1">
                     <h3 className="card-title mb-2">
@@ -95,7 +95,7 @@ export default function ProjectCard({ project }) {
                 )}
             </div>
 
-            <div className="pt-4 border-t border-border-color">
+            <div className="pt-4 border-t border-border-color mt-auto">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex space-x-2">
                         <Link
