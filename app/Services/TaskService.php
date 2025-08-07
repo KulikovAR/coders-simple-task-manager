@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\TaskStatusHelper;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
@@ -25,14 +26,25 @@ class TaskService
             $query->where(function($q) use ($filters) {
                 $q->where('title', 'like', '%' . $filters['search'] . '%')
                   ->orWhere('description', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('code', 'like', '%' . $filters['search'] . '%');
+                  ->orWhere('id', 'like', '%' . $filters['search'] . '%');
             });
         }
 
         if (!empty($filters['status'])) {
-            $query->whereHas('status', function($q) use ($filters) {
-                $q->where('name', 'like', '%' . $filters['status'] . '%');
-            });
+            $searchStatus = $filters['status'];
+            $statusMapping = TaskStatusHelper::getStatusMapping();
+            
+            // Если ищем русское название, добавляем поиск по английскому
+            if (isset($statusMapping[$searchStatus])) {
+                $query->whereHas('status', function($q) use ($searchStatus, $statusMapping) {
+                    $q->where('name', $searchStatus)
+                      ->orWhere('name', $statusMapping[$searchStatus]);
+                });
+            } else {
+                $query->whereHas('status', function($q) use ($filters) {
+                    $q->where('name', 'like', '%' . $filters['status'] . '%');
+                });
+            }
         }
 
         if (!empty($filters['priority'])) {
@@ -56,15 +68,8 @@ class TaskService
         }
 
         // Фильтр "мои задачи"
-        if (!empty($filters['my_tasks']) && $filters['my_tasks'] === true) {
+        if (!empty($filters['my_tasks']) && ($filters['my_tasks'] === true || $filters['my_tasks'] === '1')) {
             $query->where('assignee_id', $user->id);
-        }
-
-        // Фильтр "задачи к выполнению" (статус To Do)
-        if (isset($filters['status']) && $filters['status'] === 'To Do') {
-            $query->whereHas('status', function($q) {
-                $q->where('name', 'To Do');
-            });
         }
 
         return $query->orderBy('created_at', 'desc')->paginate(12);

@@ -1,11 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import TaskCard from '@/Components/TaskCard';
 import PaymentModal from '@/Components/PaymentModal';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
-export default function Index({ auth, tasks, filters, projects, users = [] }) {
+export default function Index({ auth, tasks, filters, projects, users = [], taskStatuses = [] }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [priority, setPriority] = useState(filters.priority || '');
@@ -15,34 +15,67 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
     const [myTasks, setMyTasks] = useState(filters.my_tasks === '1');
     const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        router.get(route('tasks.index'), {
-            search,
-            status,
-            priority,
-            project_id: projectId,
-            assignee_id: assigneeId,
-            reporter_id: reporterId,
-            my_tasks: myTasks ? '1' : '',
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+    // Debounced поиск
+    const debouncedSearch = useCallback(
+        (searchValue) => {
+            const newFilters = {
+                search: searchValue,
+                status,
+                priority,
+                project_id: projectId,
+                assignee_id: assigneeId,
+                reporter_id: reporterId,
+                my_tasks: myTasks ? '1' : '',
+            };
+            
+            router.get(route('tasks.index'), newFilters, {
+                preserveState: true,
+                preserveScroll: true,
+            });
+        },
+        [status, priority, projectId, assigneeId, reporterId, myTasks]
+    );
+
+    useEffect(() => {
+        if (search.length > 0) {
+            setIsSearching(true);
+        }
+        const timer = setTimeout(() => {
+            debouncedSearch(search);
+            setIsSearching(false);
+        }, 300);
+
+        return () => {
+            clearTimeout(timer);
+            setIsSearching(false);
+        };
+    }, [search, debouncedSearch]);
+
+    const handleSearchChange = (value) => {
+        setSearch(value);
     };
 
     const handleFilterChange = (filter, value) => {
+        // Обновляем локальное состояние
+        if (filter === 'status') setStatus(value);
+        if (filter === 'priority') setPriority(value);
+        if (filter === 'project_id') setProjectId(value);
+        if (filter === 'assignee_id') setAssigneeId(value);
+        if (filter === 'reporter_id') setReporterId(value);
+        if (filter === 'my_tasks') setMyTasks(value === '1');
+
         const newFilters = {
             search,
-            status,
-            priority,
-            project_id: projectId,
-            assignee_id: assigneeId,
-            reporter_id: reporterId,
-            my_tasks: myTasks ? '1' : '',
+            status: filter === 'status' ? value : status,
+            priority: filter === 'priority' ? value : priority,
+            project_id: filter === 'project_id' ? value : projectId,
+            assignee_id: filter === 'assignee_id' ? value : assigneeId,
+            reporter_id: filter === 'reporter_id' ? value : reporterId,
+            my_tasks: filter === 'my_tasks' ? value : (myTasks ? '1' : ''),
         };
-        newFilters[filter] = value;
+        
         router.get(route('tasks.index'), newFilters, {
             preserveState: true,
             preserveScroll: true,
@@ -75,17 +108,19 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
     // Статистика задач
     const getTaskStats = () => {
         const allTasks = tasks.data;
-        return {
+        const stats = {
             total: allTasks.length,
-            todo: allTasks.filter(t => t.status?.name === 'To Do').length,
-            inProgress: allTasks.filter(t => t.status?.name === 'In Progress').length,
-            review: allTasks.filter(t => t.status?.name === 'Review').length,
-            testing: allTasks.filter(t => t.status?.name === 'Testing').length,
-            readyForRelease: allTasks.filter(t => t.status?.name === 'Ready for Release').length,
-            done: allTasks.filter(t => t.status?.name === 'Done').length,
             highPriority: allTasks.filter(t => t.priority === 'high').length,
             overdue: allTasks.filter(t => t.deadline && new Date(t.deadline) < new Date()).length,
         };
+
+        // Динамическая статистика по статусам
+        taskStatuses.forEach(status => {
+            const statusKey = status.name.toLowerCase().replace(/\s+/g, '');
+            stats[statusKey] = allTasks.filter(t => t.status?.name === status.name).length;
+        });
+
+        return stats;
     };
 
     const stats = getTaskStats();
@@ -145,35 +180,22 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                 </div>
 
                 {/* Статистика */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     <div className="card text-center">
                         <div className="text-xl font-bold text-text-primary mb-1">{stats.total}</div>
                         <div className="text-xs text-text-secondary">Всего</div>
                     </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-yellow mb-1">{stats.todo}</div>
-                        <div className="text-xs text-text-secondary">К выполнению</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-blue mb-1">{stats.inProgress}</div>
-                        <div className="text-xs text-text-secondary">В работе</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-orange mb-1">{stats.review}</div>
-                        <div className="text-xs text-text-secondary">На проверке</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-purple mb-1">{stats.testing}</div>
-                        <div className="text-xs text-text-secondary">Тестирование</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-pink mb-1">{stats.readyForRelease}</div>
-                        <div className="text-xs text-text-secondary">К релизу</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-green mb-1">{stats.done}</div>
-                        <div className="text-xs text-text-secondary">Завершено</div>
-                    </div>
+                    {taskStatuses.slice(0, 4).map((status, index) => {
+                        const statusKey = status.name.toLowerCase().replace(/\s+/g, '');
+                        const colors = ['text-accent-yellow', 'text-accent-blue', 'text-accent-orange', 'text-accent-green'];
+                        const colorClass = colors[index] || 'text-text-primary';
+                        return (
+                            <div key={status.id} className="card text-center">
+                                <div className={`text-xl font-bold mb-1 ${colorClass}`}>{stats[statusKey] || 0}</div>
+                                <div className="text-xs text-text-secondary">{status.name}</div>
+                            </div>
+                        );
+                    })}
                     <div className="card text-center">
                         <div className="text-xl font-bold text-accent-red mb-1">{stats.overdue}</div>
                         <div className="text-xs text-text-secondary">Просрочено</div>
@@ -192,19 +214,29 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                                 Очистить все
                             </button>
                         </div>
-                        <form onSubmit={handleSearch} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
                                     <label className="form-label">
                                         Поиск по названию
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Введите название задачи..."
-                                        className="form-input"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={search}
+                                            onChange={(e) => handleSearchChange(e.target.value)}
+                                            placeholder="Введите название задачи..."
+                                            className="form-input pr-10"
+                                        />
+                                        {isSearching && (
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <svg className="animate-spin h-4 w-4 text-text-secondary" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="form-label">
@@ -216,12 +248,11 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                                         className="form-select"
                                     >
                                         <option value="">Все статусы</option>
-                                        <option value="To Do">К выполнению</option>
-                                        <option value="In Progress">В работе</option>
-                                        <option value="Review">На проверке</option>
-                                        <option value="Testing">Тестирование</option>
-                                        <option value="Ready for Release">Готов к релизу</option>
-                                        <option value="Done">Завершена</option>
+                                        {taskStatuses.map((taskStatus) => (
+                                            <option key={taskStatus.id} value={taskStatus.name}>
+                                                {taskStatus.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
@@ -284,30 +315,19 @@ export default function Index({ auth, tasks, filters, projects, users = [] }) {
                                         ))}
                                     </select>
                                 </div>
-                                {/* Мои задачи */}
-                                <div className="flex items-center space-x-2 mt-2">
-                                    <input
-                                        type="checkbox"
-                                        id="my_tasks"
-                                        checked={myTasks}
-                                        onChange={e => handleFilterChange('my_tasks', e.target.checked ? '1' : '')}
-                                        className="form-checkbox"
-                                    />
-                                    <label htmlFor="my_tasks" className="text-sm">Мои задачи</label>
-                                </div>
-                                <div className="flex items-end space-x-2">
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary flex-1"
-                                    >
-                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        Поиск
-                                    </button>
-                                </div>
                             </div>
-                        </form>
+                            {/* Мои задачи */}
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="my_tasks"
+                                    checked={myTasks}
+                                    onChange={e => handleFilterChange('my_tasks', e.target.checked ? '1' : '')}
+                                    className="form-checkbox"
+                                />
+                                <label htmlFor="my_tasks" className="text-sm">Мои задачи</label>
+                            </div>
+                        </div>
                     </div>
                 )}
 

@@ -15,7 +15,7 @@ export const TASK_STATUS_LABELS = {
     [TASK_STATUSES.IN_PROGRESS]: 'В работе',
     [TASK_STATUSES.REVIEW]: 'На проверке',
     [TASK_STATUSES.TESTING]: 'Тестирование',
-    [TASK_STATUSES.READY_FOR_RELEASE]: 'Готово к релизу',
+    [TASK_STATUSES.READY_FOR_RELEASE]: 'Готов к релизу',
     [TASK_STATUSES.DONE]: 'Завершена',
 };
 
