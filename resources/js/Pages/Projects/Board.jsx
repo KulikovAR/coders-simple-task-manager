@@ -408,7 +408,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       + Спринт
                     </Link>
                     {/* Кнопки создания задач */}
-                    <div className="flex space-x-3 flex-1">
+                    <div className="flex space-x-3">
                         <button
                             onClick={() => {
                                 // Проверяем, есть ли у пользователя активная подписка
@@ -419,17 +419,17 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     router.visit(route('ai-agent.index'));
                                 }
                             }}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm flex-1 justify-center"
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm justify-center min-w-[160px]"
                             style={{ color: 'white' }}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386л-.548-.547z" />
                             </svg>
                             Задача с ИИ
                         </button>
                         <Link
                             href={route('tasks.create', { project_id: project.id })}
-                            className="btn btn-primary flex-1 justify-center"
+                            className="btn btn-primary justify-center min-w-[120px]"
                         >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

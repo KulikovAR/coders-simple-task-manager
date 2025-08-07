@@ -202,7 +202,7 @@ export default function TaskForm({
             : "mt-1 text-sm text-accent-red",
         buttonContainer: isModal 
             ? "flex justify-end space-x-3 pt-4 border-t border-border-color"
-            : "flex space-x-3",
+            : "flex justify-end space-x-3 mb-6 pb-4 border-b border-border-color",
         cancelButton: isModal 
             ? "btn btn-secondary"
             : "btn btn-secondary",
@@ -270,6 +270,24 @@ export default function TaskForm({
 
     return (
         <form onSubmit={handleSubmit} className={modalStyles.container}>
+            {/* Кнопки действий */}
+            <div className={modalStyles.buttonContainer}>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className={modalStyles.cancelButton}
+                >
+                    Отмена
+                </button>
+                <button
+                    type="submit"
+                    disabled={processing}
+                    className={modalStyles.submitButton}
+                >
+                    {processing ? 'Сохранение...' : isEditing ? 'Обновить' : 'Создать'}
+                </button>
+            </div>
+
             {/* Основная информация */}
             <div className={isModal ? "space-y-4" : "grid grid-cols-1 lg:grid-cols-3 gap-6"}>
                 <div className={isModal ? "" : "lg:col-span-2 space-y-6"}>
@@ -385,24 +403,6 @@ export default function TaskForm({
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* Кнопки */}
-            <div className={modalStyles.buttonContainer}>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className={modalStyles.cancelButton}
-                >
-                    Отмена
-                </button>
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className={modalStyles.submitButton}
-                >
-                    {processing ? 'Сохранение...' : isEditing ? 'Обновить' : 'Создать'}
-                </button>
             </div>
         </form>
     );

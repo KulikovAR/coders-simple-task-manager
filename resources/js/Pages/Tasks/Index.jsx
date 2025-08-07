@@ -105,25 +105,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         setShowPaymentModal(false);
     };
 
-    // Статистика задач
-    const getTaskStats = () => {
-        const allTasks = tasks.data;
-        const stats = {
-            total: allTasks.length,
-            highPriority: allTasks.filter(t => t.priority === 'high').length,
-            overdue: allTasks.filter(t => t.deadline && new Date(t.deadline) < new Date()).length,
-        };
 
-        // Динамическая статистика по статусам
-        taskStatuses.forEach(status => {
-            const statusKey = status.name.toLowerCase().replace(/\s+/g, '');
-            stats[statusKey] = allTasks.filter(t => t.status?.name === status.name).length;
-        });
-
-        return stats;
-    };
-
-    const stats = getTaskStats();
 
     return (
         <AuthenticatedLayout
@@ -176,29 +158,6 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                             </svg>
                             Новая задача
                         </Link>
-                    </div>
-                </div>
-
-                {/* Статистика */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-text-primary mb-1">{stats.total}</div>
-                        <div className="text-xs text-text-secondary">Всего</div>
-                    </div>
-                    {taskStatuses.slice(0, 4).map((status, index) => {
-                        const statusKey = status.name.toLowerCase().replace(/\s+/g, '');
-                        const colors = ['text-accent-yellow', 'text-accent-blue', 'text-accent-orange', 'text-accent-green'];
-                        const colorClass = colors[index] || 'text-text-primary';
-                        return (
-                            <div key={status.id} className="card text-center">
-                                <div className={`text-xl font-bold mb-1 ${colorClass}`}>{stats[statusKey] || 0}</div>
-                                <div className="text-xs text-text-secondary">{status.name}</div>
-                            </div>
-                        );
-                    })}
-                    <div className="card text-center">
-                        <div className="text-xl font-bold text-accent-red mb-1">{stats.overdue}</div>
-                        <div className="text-xs text-text-secondary">Просрочено</div>
                     </div>
                 </div>
 
@@ -349,20 +308,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                     </div>
                 )}
 
-                {/* Предупреждение о просроченных задачах */}
-                {stats.overdue > 0 && (
-                    <div className="card bg-gradient-to-r from-accent-red/10 to-accent-orange/10 border-accent-red/20">
-                        <div className="flex items-start space-x-3">
-                            <div className="text-accent-red text-xl">⚠️</div>
-                            <div>
-                                <h3 className="font-medium text-text-primary mb-1">Внимание: просроченные задачи</h3>
-                                <p className="text-sm text-text-secondary">
-                                    У вас есть {stats.overdue} просроченных задач. Рекомендуем проверить их статус и обновить дедлайны.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Список задач */}
                 {tasks.data.length > 0 ? (
