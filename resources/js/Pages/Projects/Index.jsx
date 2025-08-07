@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProjectCard from '@/Components/ProjectCard';
 
 export default function Index({ auth, projects, filters }) {
@@ -8,20 +8,21 @@ export default function Index({ auth, projects, filters }) {
     const [status, setStatus] = useState(filters.status || '');
     const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status));
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        router.get(route('projects.index'), { search, status }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
+    // Поиск и фильтрация на лету с дебаунсом
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            router.get(route('projects.index'), { search, status }, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [search, status]);
 
     const handleStatusChange = (e) => {
         setStatus(e.target.value);
-        router.get(route('projects.index'), { search, status: e.target.value }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
     };
 
     const clearFilters = () => {
@@ -120,8 +121,8 @@ export default function Index({ auth, projects, filters }) {
                                 Очистить все
                             </button>
                         </div>
-                        <form onSubmit={handleSearch} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="form-label">
                                         Поиск по названию
@@ -150,19 +151,8 @@ export default function Index({ auth, projects, filters }) {
                                         <option value="cancelled">Отменен</option>
                                     </select>
                                 </div>
-                                <div className="flex items-end space-x-2">
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary flex-1"
-                                    >
-                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        Поиск
-                                    </button>
-                                </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 )}
 

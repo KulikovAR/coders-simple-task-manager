@@ -14,9 +14,13 @@ class ProjectService
 {
     public function getUserProjects(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Project::where('owner_id', $user->id)
-            ->orWhereHas('members', function($q) use ($user) {
-                $q->where('user_id', $user->id);
+        // Группируем условие принадлежности проекту, чтобы фильтры применялись ко всем найденным проектам
+        $query = Project::query()
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', function ($q2) use ($user) {
+                      $q2->where('user_id', $user->id);
+                  });
             })
             ->withCount('tasks')
             ->withCount('members')
@@ -33,7 +37,8 @@ class ProjectService
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(12);
+        // Сохраняем параметры запроса в ссылках пагинации
+        return $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
     }
 
     public function getUserProjectsList(User $user): Collection
