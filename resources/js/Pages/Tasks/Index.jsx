@@ -277,17 +277,16 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                                     </select>
                                 </div>
                             </div>
-                            {/* Мои задачи */}
-                            <div className="flex items-center space-x-2">
+                            {/* Мои задачи (как на доске) */}
+                            <label className="flex items-center gap-2 text-body-small text-text-primary whitespace-nowrap select-none cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    id="my_tasks"
                                     checked={myTasks}
                                     onChange={e => handleFilterChange('my_tasks', e.target.checked ? '1' : '')}
-                                    className="form-checkbox"
+                                    className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200"
                                 />
-                                <label htmlFor="my_tasks" className="text-sm">Мои задачи</label>
-                            </div>
+                                <span className="ml-1">Мои задачи</span>
+                            </label>
                         </div>
                     </div>
                 )}
