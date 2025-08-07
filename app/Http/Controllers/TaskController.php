@@ -45,19 +45,21 @@ class TaskController extends Controller
         $selectedProjectId = $request->get('project_id') ? (int)$request->get('project_id') : null;
         $selectedSprintId = $request->get('sprint_id') ? (int)$request->get('sprint_id') : null;
 
-        // Получаем спринты и участников для выбранного проекта
+        // Получаем спринты, участников и статусы для выбранного проекта
         $sprints = collect();
         $members = collect();
+        $taskStatuses = collect();
         if ($selectedProjectId) {
             $project = Project::with(['owner', 'users'])->find($selectedProjectId);
             if ($project && $this->projectService->canUserAccessProject(Auth::user(), $project)) {
                 $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+                $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
                 // owner + users (members)
                 $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
             }
         }
 
-        return Inertia::render('Tasks/Form', compact('projects', 'selectedProjectId', 'selectedSprintId', 'sprints', 'members'));
+        return Inertia::render('Tasks/Form', compact('projects', 'selectedProjectId', 'selectedSprintId', 'sprints', 'members', 'taskStatuses'));
     }
 
     public function store(TaskRequest $request)
@@ -109,16 +111,18 @@ class TaskController extends Controller
         $task->load(['status', 'project']);
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
-        // Получаем спринты и участников для проекта задачи
+        // Получаем спринты, участников и статусы для проекта задачи
         $sprints = collect();
         $members = collect();
+        $taskStatuses = collect();
         if ($task->project) {
             $project = Project::with(['owner', 'users'])->find($task->project_id);
             $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+            $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
             $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
         }
 
-        return Inertia::render('Tasks/Form', compact('task', 'projects', 'sprints', 'members'));
+        return Inertia::render('Tasks/Form', compact('task', 'projects', 'sprints', 'members', 'taskStatuses'));
     }
 
     public function update(TaskRequest $request, Task $task)
@@ -263,5 +267,39 @@ class TaskController extends Controller
 
         // Для обычных запросов возвращаем данные для Inertia
         return response()->json(['sprints' => $sprints->toArray()]);
+    }
+
+    public function getProjectStatuses(Request $request, Project $project)
+    {
+        Log::info('getProjectStatuses called', [
+            'project_id' => $project->id,
+            'project_name' => $project->name,
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()?->name,
+        ]);
+
+        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            Log::warning('Access denied to project', [
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+            ]);
+            abort(403, 'Доступ запрещен');
+        }
+
+        $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+
+        Log::info('Task statuses loaded', [
+            'project_id' => $project->id,
+            'statuses_count' => $taskStatuses->count(),
+            'statuses' => $taskStatuses->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
+        ]);
+
+        // Для AJAX запросов возвращаем JSON
+        if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
+            return response()->json($taskStatuses->toArray());
+        }
+
+        // Для обычных запросов возвращаем данные для Inertia
+        return response()->json(['taskStatuses' => $taskStatuses->toArray()]);
     }
 }

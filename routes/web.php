@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/tasks/{task}/status', [App\Http\Controllers\TaskController::class, 'updateStatus'])->name('tasks.status.update');
     Route::put('/tasks/{task}/priority', [App\Http\Controllers\TaskController::class, 'updatePriority'])->name('tasks.priority.update');
     Route::get('/projects/{project}/sprints-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectSprints'])->name('tasks.project.sprints');
+    Route::get('/projects/{project}/statuses-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectStatuses'])->name('tasks.project.statuses');
 
     // Комментарии к задачам
     Route::get('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'index'])->name('tasks.comments.index');

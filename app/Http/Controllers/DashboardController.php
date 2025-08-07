@@ -15,8 +15,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
-        // Получаем проекты пользователя
+
         $projects = Project::where('owner_id', $user->id)
             ->orWhereHas('members', function($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -26,18 +25,16 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        // Получаем статус "In Progress" для подсчета задач в работе
         $inProgressStatus = TaskStatus::where('name', 'In Progress')->first();
-        
-        // Подсчитываем статистику
+
         $userProjects = Project::where('owner_id', $user->id)
             ->orWhereHas('members', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
-        
+
         $stats = [
             'projects_count' => $userProjects->count(),
-            'tasks_in_progress' => $inProgressStatus ? 
+            'tasks_in_progress' => $inProgressStatus ?
                 Task::where('status_id', $inProgressStatus->id)
                     ->whereHas('project', function($query) use ($user) {
                         $query->where('owner_id', $user->id)
@@ -58,4 +55,4 @@ class DashboardController extends Controller
             'projects' => $projects,
         ]);
     }
-} 
+}

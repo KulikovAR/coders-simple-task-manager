@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import TaskForm from '@/Components/TaskForm';
 
-export default function Form({ auth, task = null, projects = [], selectedProjectId = null, selectedSprintId = null, sprints = [], errors = {}, members = [] }) {
+export default function Form({ auth, task = null, projects = [], selectedProjectId = null, selectedSprintId = null, sprints = [], taskStatuses = [], errors = {}, members = [] }) {
     const isEditing = !!task;
 
     // Приводим selectedProjectId к числу для корректного сравнения
@@ -63,6 +63,7 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                     task={isEditing ? taskData : null}
                     projects={projects}
                     sprints={sprints}
+                    taskStatuses={taskStatuses}
                     members={members}
                     errors={errors}
                     onSubmit={handleSubmit}

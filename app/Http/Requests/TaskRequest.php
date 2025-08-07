@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class TaskRequest extends FormRequest
 {
@@ -24,11 +25,14 @@ class TaskRequest extends FormRequest
             'merge_request' => 'nullable|url',
         ];
 
-        // project_id и status обязательны только при создании
+        // project_id обязателен только при создании
         if ($this->isMethod('POST')) {
             $rules['project_id'] = 'required|exists:projects,id';
-            $rules['status'] = 'required|in:To Do,In Progress,Review,Testing,Ready for Release,Done';
         }
+        
+        // Валидация статуса - проверяем либо status_id, либо status
+        $rules['status_id'] = 'nullable|exists:task_statuses,id';
+        $rules['status'] = 'nullable|string';
 
         return $rules;
     }
@@ -38,8 +42,7 @@ class TaskRequest extends FormRequest
         return [
             'title.required' => 'Название задачи обязательно для заполнения.',
             'title.max' => 'Название задачи не может быть длиннее 255 символов.',
-            'status.required' => 'Статус задачи обязателен для заполнения.',
-            'status.in' => 'Выбран недопустимый статус задачи.',
+            'status_id.exists' => 'Выбранный статус не существует.',
             'priority.in' => 'Выбран недопустимый приоритет задачи.',
             'project_id.required' => 'Проект обязателен для выбора.',
             'project_id.exists' => 'Выбранный проект не существует.',
@@ -48,5 +51,21 @@ class TaskRequest extends FormRequest
             'deadline.date' => 'Дедлайн должен быть корректной датой.',
             'merge_request.url' => 'Ссылка на merge request должна быть корректным URL.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            // Проверяем, что status_id принадлежит проекту задачи
+            if ($this->filled('status_id') && $this->filled('project_id')) {
+                $statusExists = \App\Models\TaskStatus::where('id', $this->status_id)
+                    ->where('project_id', $this->project_id)
+                    ->exists();
+                
+                if (!$statusExists) {
+                    $validator->errors()->add('status_id', 'Выбранный статус не принадлежит данному проекту.');
+                }
+            }
+        });
     }
 } 

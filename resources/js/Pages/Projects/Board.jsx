@@ -680,6 +680,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 task={selectedTask}
                                 projects={[project]}
                                 sprints={sprints}
+                                taskStatuses={taskStatuses}
                                 members={members}
                                 errors={errors}
                                 onSubmit={handleTaskUpdate}

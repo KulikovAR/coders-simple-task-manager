@@ -7,6 +7,7 @@ export default function TaskForm({
     projects = [], 
     sprints = [], 
     members = [], 
+    taskStatuses = [],
     errors = {}, 
     onSubmit, 
     onCancel, 
@@ -18,7 +19,7 @@ export default function TaskForm({
     const { data, setData, errors: formErrors } = useForm({
         title: task?.title || '',
         description: task?.description || '',
-        status: task?.status?.name || 'To Do',
+        status_id: task?.status_id || '',
         priority: task?.priority || '',
         project_id: task?.project_id || '',
         sprint_id: task?.sprint_id || '',
@@ -42,8 +43,9 @@ export default function TaskForm({
 
     const [availableSprints, setAvailableSprints] = useState(sprints);
     const [availableMembers, setAvailableMembers] = useState(members);
+    const [availableStatuses, setAvailableStatuses] = useState(taskStatuses);
 
-    // Загружаем спринты и участников при изменении проекта
+    // Загружаем спринты, участников и статусы при изменении проекта
     useEffect(() => {
         if (data.project_id) {
             // Загружаем спринты
@@ -80,6 +82,47 @@ export default function TaskForm({
                 .catch(error => {
                     console.error('Ошибка загрузки спринтов:', error);
                     setAvailableSprints([]);
+                });
+
+            // Загружаем статусы задач
+            fetch(route('tasks.project.statuses', data.project_id), {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let statuses = [];
+                    if (Array.isArray(data)) {
+                        statuses = data;
+                    } else if (data && typeof data === 'object' && Array.isArray(data.taskStatuses)) {
+                        statuses = data.taskStatuses;
+                    } else if (data && typeof data === 'object' && data.taskStatuses) {
+                        statuses = Array.isArray(data.taskStatuses) ? data.taskStatuses : [];
+                    }
+                    
+                    setAvailableStatuses(statuses);
+                    
+                    // Если нет выбранного статуса и это создание задачи, выбираем первый статус
+                    if (!isEditing && !data.status_id && statuses.length > 0) {
+                        setData('status_id', statuses[0].id);
+                    }
+                    // Сбрасываем выбранный статус, если он не принадлежит новому проекту
+                    else if (data.status_id && !statuses.find(s => s.id == data.status_id)) {
+                        const firstStatus = statuses.length > 0 ? statuses[0].id : '';
+                        setData('status_id', firstStatus);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки статусов:', error);
+                    setAvailableStatuses([]);
                 });
 
             // Загружаем участников проекта
@@ -120,8 +163,10 @@ export default function TaskForm({
         } else {
             setAvailableSprints([]);
             setAvailableMembers([]);
+            setAvailableStatuses([]);
             setData('sprint_id', '');
             setData('assignee_id', '');
+            setData('status_id', '');
         }
     }, [data.project_id]);
 
@@ -133,7 +178,6 @@ export default function TaskForm({
     };
 
     // Получаем опции для селектов
-    const taskStatuses = getTaskStatusOptions();
     const priorities = getTaskPriorityOptions();
 
     // Стили для модалки
@@ -298,8 +342,14 @@ export default function TaskForm({
                             })}
 
                             {/* Статус */}
-                            {renderField('status', 'Статус', 'select', {
-                                options: taskStatuses
+                            {renderField('status_id', 'Статус', 'select', {
+                                options: [
+                                    { value: '', label: 'Выберите статус' },
+                                    ...availableStatuses.map((status) => ({
+                                        value: status.id,
+                                        label: status.name
+                                    }))
+                                ]
                             })}
 
                             {/* Приоритет */}

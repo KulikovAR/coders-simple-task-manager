@@ -80,8 +80,26 @@ class TaskService
 
     public function createTask(array $data, Project $project, User $reporter): Task
     {
-        // Получаем первый статус (To Do) как статус по умолчанию
-        $defaultStatus = $project->taskStatuses()->orderBy('order')->first();
+        // Определяем статус задачи
+        $statusId = null;
+        
+        // Сначала проверяем, передан ли status_id напрямую
+        if (isset($data['status_id']) && $data['status_id']) {
+            $statusId = $data['status_id'];
+        }
+        // Потом проверяем, передано ли название статуса
+        elseif (isset($data['status']) && $data['status']) {
+            $status = $project->taskStatuses()->where('name', $data['status'])->first();
+            if ($status) {
+                $statusId = $status->id;
+            }
+        }
+        
+        // Если статус не найден, берем первый статус проекта как статус по умолчанию
+        if (!$statusId) {
+            $defaultStatus = $project->taskStatuses()->orderBy('order')->first();
+            $statusId = $defaultStatus ? $defaultStatus->id : null;
+        }
 
         $task = Task::create([
             'project_id' => $project->id,
@@ -93,7 +111,7 @@ class TaskService
             'assignee_id' => $data['assignee_id'] ?? null,
             'reporter_id' => $reporter->id,
             'priority' => $data['priority'] ?? 'medium',
-            'status_id' => $defaultStatus->id,
+            'status_id' => $statusId,
         ]);
 
         return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
@@ -111,8 +129,15 @@ class TaskService
             'priority' => $data['priority'] ?? $task->priority,
         ];
 
-        // Если передан статус, обновляем его
-        if (isset($data['status'])) {
+        // Обновляем статус, если он передан
+        if (isset($data['status_id']) && $data['status_id']) {
+            // Проверяем, что status_id принадлежит проекту задачи
+            $status = $task->project->taskStatuses()->where('id', $data['status_id'])->first();
+            if ($status) {
+                $updateData['status_id'] = $data['status_id'];
+            }
+        } elseif (isset($data['status']) && $data['status']) {
+            // Ищем статус по названию
             $status = $task->project->taskStatuses()->where('name', $data['status'])->first();
             if ($status) {
                 $updateData['status_id'] = $status->id;
