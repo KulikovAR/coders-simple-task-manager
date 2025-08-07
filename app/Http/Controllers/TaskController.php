@@ -125,7 +125,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project', 'sprint', 'status', 'comments.user']);
+        $task->load(['project', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
 
         return Inertia::render('Tasks/Show', [
             'task' => $task,

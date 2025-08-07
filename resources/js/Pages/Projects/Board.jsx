@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import TaskForm from '@/Components/TaskForm';
 import PaymentModal from '@/Components/PaymentModal';
@@ -19,6 +19,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    // Мобильный лонгтап для смены статуса
+    const [isStatusOverlayOpen, setIsStatusOverlayOpen] = useState(false);
+    const [statusOverlayTask, setStatusOverlayTask] = useState(null);
+    const longPressTimerRef = useRef(null);
+    const touchStartPointRef = useRef({ x: 0, y: 0 });
+    const longPressTriggeredRef = useRef(false);
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
@@ -311,6 +317,72 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setDragOverPriority(null);
     };
 
+    // Лонгтап на мобильных для смены статуса
+    const cancelLongPressTimer = () => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    };
+
+    const openStatusOverlay = (task) => {
+        setStatusOverlayTask(task);
+        setIsStatusOverlayOpen(true);
+    };
+
+    const closeStatusOverlay = () => {
+        setIsStatusOverlayOpen(false);
+        setStatusOverlayTask(null);
+    };
+
+    const handleTaskTouchStart = (e, task) => {
+        if (!e.touches || e.touches.length === 0) return;
+        const touch = e.touches[0];
+        touchStartPointRef.current = { x: touch.clientX, y: touch.clientY };
+        longPressTriggeredRef.current = false;
+        cancelLongPressTimer();
+        longPressTimerRef.current = setTimeout(() => {
+            longPressTriggeredRef.current = true;
+            openStatusOverlay(task);
+        }, 500);
+    };
+
+    const handleTaskTouchMove = (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - touchStartPointRef.current.x;
+        const dy = touch.clientY - touchStartPointRef.current.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 12) {
+            cancelLongPressTimer();
+        }
+    };
+
+    const handleTaskTouchEnd = (e) => {
+        if (longPressTriggeredRef.current) {
+            e.preventDefault();
+        }
+        cancelLongPressTimer();
+        longPressTriggeredRef.current = false;
+    };
+
+    const handleStatusSelect = (statusId) => {
+        if (!statusOverlayTask) return;
+        const taskId = statusOverlayTask.id;
+        router.put(route('tasks.status.update', taskId), {
+            status_id: statusId
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setLocalTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status_id: statusId } : t));
+                closeStatusOverlay();
+            },
+            onError: () => {
+                closeStatusOverlay();
+            }
+        });
+    };
+
     // Фильтрация задач по спринту и исполнителю
     const filteredTasks = localTasks.filter(task => {
         const sprintOk = selectedSprintId === 'all' || task.sprint_id == selectedSprintId;
@@ -423,7 +495,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             style={{ color: 'white' }}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386л-.548-.547z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                             Задача с ИИ
                         </button>
@@ -548,6 +620,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 onDragStart={(e) => handleDragStart(e, task)}
                                                 onDragEnd={handleDragEnd}
                                                 onClick={() => openTaskModal(task)}
+                                                onTouchStart={(e) => handleTaskTouchStart(e, task)}
+                                                onTouchMove={handleTaskTouchMove}
+                                                onTouchEnd={handleTaskTouchEnd}
                                             >
                                                 {/* Код задачи */}
                                                 {task.code && (
@@ -698,6 +773,33 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 isOpen={showPaymentModal}
                 onClose={closePaymentModal}
             />
+
+            {/* Мобильный оверлей выбора статуса при лонгтапе */}
+            {isStatusOverlayOpen && statusOverlayTask && (
+                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeStatusOverlay}>
+                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-text-primary font-semibold">Переместить задачу</h3>
+                            <button className="text-text-muted hover:text-text-primary" onClick={closeStatusOverlay}>×</button>
+                        </div>
+                        <div className="text-sm text-text-secondary mb-4">{statusOverlayTask.title}</div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {taskStatuses.map((status) => (
+                                <button
+                                    key={status.id}
+                                    className={`border rounded-xl p-3 text-left transition-all ${statusOverlayTask.status_id === status.id ? 'border-accent-blue bg-accent-blue/10' : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'}`}
+                                    onClick={() => handleStatusSelect(status.id)}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-2.5 h-2.5 rounded-full ${getStatusIndicatorColor(status.name)}`}></div>
+                                        <div className="text-sm text-text-primary font-medium">{status.name}</div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

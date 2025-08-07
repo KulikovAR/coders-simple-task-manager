@@ -72,7 +72,7 @@ class TaskService
             $query->where('assignee_id', $user->id);
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(12);
+        return $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
     }
 
     public function getProjectTasks(Project $project): Collection

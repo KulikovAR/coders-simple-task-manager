@@ -33,6 +33,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
             router.get(route('tasks.index'), newFilters, {
                 preserveState: true,
                 preserveScroll: true,
+                replace: true,
             });
         },
         [status, priority, projectId, assigneeId, reporterId, myTasks]
@@ -79,6 +80,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         router.get(route('tasks.index'), newFilters, {
             preserveState: true,
             preserveScroll: true,
+            replace: true,
         });
     };
 

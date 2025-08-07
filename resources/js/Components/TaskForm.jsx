@@ -62,20 +62,20 @@ export default function TaskForm({
                     }
                     return response.json();
                 })
-                .then(data => {
-                    let sprints = [];
-                    if (Array.isArray(data)) {
-                        sprints = data;
-                    } else if (data && typeof data === 'object' && Array.isArray(data.sprints)) {
-                        sprints = data.sprints;
-                    } else if (data && typeof data === 'object' && data.sprints) {
-                        sprints = Array.isArray(data.sprints) ? data.sprints : [];
+                .then(responseJson => {
+                    let loadedSprints = [];
+                    if (Array.isArray(responseJson)) {
+                        loadedSprints = responseJson;
+                    } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.sprints)) {
+                        loadedSprints = responseJson.sprints;
+                    } else if (responseJson && typeof responseJson === 'object' && responseJson.sprints) {
+                        loadedSprints = Array.isArray(responseJson.sprints) ? responseJson.sprints : [];
                     }
-                    
-                    setAvailableSprints(sprints);
-                    
+
+                    setAvailableSprints(loadedSprints);
+
                     // Сбрасываем выбранный спринт, если он не принадлежит новому проекту
-                    if (data.sprint_id && !sprints.find(s => s.id == data.sprint_id)) {
+                    if (data.sprint_id && !loadedSprints.find(s => s.id == data.sprint_id)) {
                         setData('sprint_id', '');
                     }
                 })
@@ -98,25 +98,25 @@ export default function TaskForm({
                     }
                     return response.json();
                 })
-                .then(data => {
-                    let statuses = [];
-                    if (Array.isArray(data)) {
-                        statuses = data;
-                    } else if (data && typeof data === 'object' && Array.isArray(data.taskStatuses)) {
-                        statuses = data.taskStatuses;
-                    } else if (data && typeof data === 'object' && data.taskStatuses) {
-                        statuses = Array.isArray(data.taskStatuses) ? data.taskStatuses : [];
+                .then(responseJson => {
+                    let loadedStatuses = [];
+                    if (Array.isArray(responseJson)) {
+                        loadedStatuses = responseJson;
+                    } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.taskStatuses)) {
+                        loadedStatuses = responseJson.taskStatuses;
+                    } else if (responseJson && typeof responseJson === 'object' && responseJson.taskStatuses) {
+                        loadedStatuses = Array.isArray(responseJson.taskStatuses) ? responseJson.taskStatuses : [];
                     }
-                    
-                    setAvailableStatuses(statuses);
-                    
+
+                    setAvailableStatuses(loadedStatuses);
+
                     // Если нет выбранного статуса и это создание задачи, выбираем первый статус
-                    if (!isEditing && !data.status_id && statuses.length > 0) {
-                        setData('status_id', statuses[0].id);
+                    if (!isEditing && !data.status_id && loadedStatuses.length > 0) {
+                        setData('status_id', loadedStatuses[0].id);
                     }
                     // Сбрасываем выбранный статус, если он не принадлежит новому проекту
-                    else if (data.status_id && !statuses.find(s => s.id == data.status_id)) {
-                        const firstStatus = statuses.length > 0 ? statuses[0].id : '';
+                    else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
+                        const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
                         setData('status_id', firstStatus);
                     }
                 })
@@ -139,20 +139,20 @@ export default function TaskForm({
                     }
                     return response.json();
                 })
-                .then(data => {
-                    let members = [];
-                    if (Array.isArray(data)) {
-                        members = data;
-                    } else if (data && typeof data === 'object' && Array.isArray(data.members)) {
-                        members = data.members;
-                    } else if (data && typeof data === 'object' && data.members) {
-                        members = Array.isArray(data.members) ? data.members : [];
+                .then(responseJson => {
+                    let loadedMembers = [];
+                    if (Array.isArray(responseJson)) {
+                        loadedMembers = responseJson;
+                    } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.members)) {
+                        loadedMembers = responseJson.members;
+                    } else if (responseJson && typeof responseJson === 'object' && responseJson.members) {
+                        loadedMembers = Array.isArray(responseJson.members) ? responseJson.members : [];
                     }
-                    
-                    setAvailableMembers(members);
-                    
+
+                    setAvailableMembers(loadedMembers);
+
                     // Сбрасываем выбранного исполнителя, если он не принадлежит новому проекту
-                    if (data.assignee_id && !members.find(m => m.id == data.assignee_id)) {
+                    if (data.assignee_id && !loadedMembers.find(m => m.id == data.assignee_id)) {
                         setData('assignee_id', '');
                     }
                 })
