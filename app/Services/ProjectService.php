@@ -52,6 +52,8 @@ class ProjectService
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'owner_id' => $user->id,
+            'status' => $data['status'] ?? 'active',
+            'deadline' => $data['deadline'] ?? null,
             'docs' => $data['docs'] ?? [],
         ]);
 
@@ -66,6 +68,8 @@ class ProjectService
         $project->update([
             'name' => $data['name'] ?? $project->name,
             'description' => $data['description'] ?? $project->description,
+            'status' => $data['status'] ?? $project->status,
+            'deadline' => $data['deadline'] ?? $project->deadline,
             'docs' => $data['docs'] ?? $project->docs,
         ]);
 

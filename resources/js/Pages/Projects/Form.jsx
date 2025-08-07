@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function Form({ auth, project = null, errors = {} }) {
     const isEditing = !!project;
-    const [docs, setDocs] = useState(project?.docs || ['']);
+    const [docs, setDocs] = useState(project?.docs && project.docs.length > 0 ? project.docs : ['']);
     const [showTips, setShowTips] = useState(!isEditing);
 
     const { data, setData, post, put, processing, errors: formErrors } = useForm({
@@ -12,7 +12,7 @@ export default function Form({ auth, project = null, errors = {} }) {
         description: project?.description || '',
         status: project?.status || 'active',
         deadline: project?.deadline ? project.deadline.split('T')[0] : '',
-        docs: project?.docs || [],
+        docs: project?.docs && project.docs.length > 0 ? project.docs : [],
     });
 
     const handleSubmit = (e) => {
@@ -31,17 +31,25 @@ export default function Form({ auth, project = null, errors = {} }) {
     };
 
     const addDoc = () => {
-        setDocs([...docs, '']);
+        const newDocs = [...docs, ''];
+        setDocs(newDocs);
+        // Синхронизируем с данными формы
+        setData('docs', newDocs);
     };
 
     const removeDoc = (index) => {
-        setDocs(docs.filter((_, i) => i !== index));
+        const newDocs = docs.filter((_, i) => i !== index);
+        setDocs(newDocs);
+        // Синхронизируем с данными формы
+        setData('docs', newDocs);
     };
 
     const updateDoc = (index, value) => {
         const newDocs = [...docs];
         newDocs[index] = value;
         setDocs(newDocs);
+        // Синхронизируем с данными формы
+        setData('docs', newDocs);
     };
 
     const getStatusColor = (status) => {
@@ -313,6 +321,27 @@ export default function Form({ auth, project = null, errors = {} }) {
                                         <p className="text-text-secondary text-sm line-clamp-3">
                                             {data.description}
                                         </p>
+                                    </div>
+                                )}
+                                {docs.filter(doc => doc.trim() !== '').length > 0 && (
+                                    <div>
+                                        <span className="text-sm text-text-muted">Документы:</span>
+                                        <div className="space-y-1 mt-1">
+                                            {docs.filter(doc => doc.trim() !== '').map((doc, index) => (
+                                                <a
+                                                    key={index}
+                                                    href={doc}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-accent-blue hover:text-blue-300 text-xs flex items-center transition-colors"
+                                                >
+                                                    <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                    <span className="truncate">Документ {index + 1}</span>
+                                                </a>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>

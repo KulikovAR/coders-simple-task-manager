@@ -16,11 +16,13 @@ class Project extends Model
         'description',
         'owner_id',
         'status',
+        'deadline',
         'docs',
     ];
 
     protected $casts = [
         'docs' => 'array',
+        'deadline' => 'date',
     ];
 
     public function owner(): BelongsTo
