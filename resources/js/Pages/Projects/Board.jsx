@@ -776,8 +776,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Мобильный оверлей выбора статуса при лонгтапе */}
             {isStatusOverlayOpen && statusOverlayTask && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeStatusOverlay}>
-                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 select-none" onClick={closeStatusOverlay}>
+                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 select-none" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-text-primary font-semibold">Переместить задачу</h3>
                             <button className="text-text-muted hover:text-text-primary" onClick={closeStatusOverlay}>×</button>
