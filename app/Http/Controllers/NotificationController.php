@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use App\Services\NotificationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class NotificationController extends Controller
 {
     public function __construct(
         private NotificationService $notificationService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Показать страницу уведомлений
@@ -24,10 +24,7 @@ class NotificationController extends Controller
         $notifications = $this->notificationService->getAllNotifications($user, 50);
         $unreadCount = $this->notificationService->getUnreadCount($user);
 
-        return Inertia::render('Notifications/Index', [
-            'notifications' => $notifications,
-            'unreadCount' => $unreadCount,
-        ]);
+        return Inertia::render('Notifications/Index', compact('notifications', 'unreadCount'));
     }
 
     /**
@@ -39,26 +36,7 @@ class NotificationController extends Controller
         $notifications = $this->notificationService->getUnreadNotifications($user, 10);
         $unreadCount = $this->notificationService->getUnreadCount($user);
 
-        // Добавляем отладочную информацию
-        Log::info('Уведомления для пользователя', [
-            'user_id' => $user->id,
-            'unread_count' => $unreadCount,
-            'notifications_count' => $notifications->count(),
-            'notifications' => $notifications->map(function($notification) {
-                return [
-                    'id' => $notification->id,
-                    'type' => $notification->type,
-                    'data' => $notification->data,
-                    'read' => $notification->read,
-                    'created_at' => $notification->created_at,
-                ];
-            })
-        ]);
-
-        return response()->json([
-            'notifications' => $notifications,
-            'unreadCount' => $unreadCount,
-        ]);
+        return response()->json(compact('notifications', 'unreadCount'));
     }
 
     /**
@@ -66,7 +44,6 @@ class NotificationController extends Controller
      */
     public function markAsRead(Notification $notification)
     {
-        // Проверяем, что уведомление принадлежит текущему пользователю
         if ($notification->user_id !== Auth::id()) {
             abort(403);
         }
@@ -98,7 +75,6 @@ class NotificationController extends Controller
      */
     public function destroy(Notification $notification)
     {
-        // Проверяем, что уведомление принадлежит текущему пользователю
         if ($notification->user_id !== Auth::id()) {
             abort(403);
         }
@@ -117,7 +93,7 @@ class NotificationController extends Controller
     public function destroyRead()
     {
         $user = Auth::user();
-        
+
         Notification::where('user_id', $user->id)
             ->where('read', true)
             ->delete();

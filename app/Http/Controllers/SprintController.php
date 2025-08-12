@@ -36,17 +36,14 @@ class SprintController extends Controller
         }
 
         $sprints = $this->sprintService->getProjectSprints($project);
-        
+
         Log::info('Sprints loaded in SprintController', [
             'project_id' => $project->id,
             'sprints_count' => $sprints->count(),
             'sprints' => $sprints->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
         ]);
-        
-        return Inertia::render('Sprints/Index', [
-            'project' => $project,
-            'sprints' => $sprints,
-        ]);
+
+        return Inertia::render('Sprints/Index', compact('project', 'sprints'));
     }
 
     public function create(Project $project)
@@ -97,7 +94,7 @@ class SprintController extends Controller
         }
 
         $sprint->load(['tasks.assignee', 'tasks.reporter', 'tasks.status']);
-        
+
         return Inertia::render('Sprints/Show', [
             'project' => $project,
             'sprint' => $sprint,
@@ -155,4 +152,4 @@ class SprintController extends Controller
         return redirect()->route('sprints.index', $project)
             ->with('success', 'Спринт успешно удален.');
     }
-} 
+}

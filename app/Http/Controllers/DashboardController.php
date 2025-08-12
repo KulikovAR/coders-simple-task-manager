@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Sprint;
 use App\Models\Task;
 use App\Models\TaskStatus;
-use App\Models\Sprint;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -16,12 +15,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $projects = Project::where(function($q) use ($user) {
-                $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', function($query) use ($user) {
-                      $query->where('user_id', $user->id);
-                  });
-            })
+        $projects = Project::where(function ($q) use ($user) {
+            $q->where('owner_id', $user->id)
+                ->orWhereHas('members', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                });
+        })
             ->where('status', 'active')
             ->withCount('tasks')
             ->orderBy('created_at', 'desc')
@@ -31,7 +30,7 @@ class DashboardController extends Controller
         $inProgressStatus = TaskStatus::where('name', 'In Progress')->first();
 
         $userProjects = Project::where('owner_id', $user->id)
-            ->orWhereHas('members', function($query) use ($user) {
+            ->orWhereHas('members', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
 
@@ -39,23 +38,20 @@ class DashboardController extends Controller
             'projects_count' => $userProjects->count(),
             'tasks_in_progress' => $inProgressStatus ?
                 Task::where('status_id', $inProgressStatus->id)
-                    ->whereHas('project', function($query) use ($user) {
+                    ->whereHas('project', function ($query) use ($user) {
                         $query->where('owner_id', $user->id)
-                              ->orWhereHas('members', function($memberQuery) use ($user) {
-                                  $memberQuery->where('user_id', $user->id);
-                              });
+                            ->orWhereHas('members', function ($memberQuery) use ($user) {
+                                $memberQuery->where('user_id', $user->id);
+                            });
                     })->count() : 0,
-            'sprints_count' => Sprint::whereHas('project', function($query) use ($user) {
+            'sprints_count' => Sprint::whereHas('project', function ($query) use ($user) {
                 $query->where('owner_id', $user->id)
-                      ->orWhereHas('members', function($memberQuery) use ($user) {
-                          $memberQuery->where('user_id', $user->id);
-                      });
+                    ->orWhereHas('members', function ($memberQuery) use ($user) {
+                        $memberQuery->where('user_id', $user->id);
+                    });
             })->count(),
         ];
 
-        return Inertia::render('Dashboard', [
-            'stats' => $stats,
-            'projects' => $projects,
-        ]);
+        return Inertia::render('Dashboard', compact('stats', 'projects'));
     }
 }

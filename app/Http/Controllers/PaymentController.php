@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
-    // Старт оплаты: создаёт платеж в Юкасса и возвращает ссылку на оплату
     public function start(Request $request)
     {
         $user = Auth::user();
-        $amount = 299.00; // цена подписки, можно вынести в конфиг
+        $amount = 2000.00;
         $payment = Payment::create([
             'user_id' => $user->id,
             'amount' => $amount,
@@ -57,7 +56,6 @@ class PaymentController extends Controller
         ]);
     }
 
-    // Webhook для Юкасса: обновляет статус платежа и пользователя
     public function webhook(Request $request)
     {
         $event = $request->input('event');

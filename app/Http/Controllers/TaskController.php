@@ -43,10 +43,10 @@ class TaskController extends Controller
             $projectStatuses = $project->taskStatuses()->orderBy('order')->get();
             $taskStatuses = $taskStatuses->merge($projectStatuses);
         }
-        
+
         // Группируем по маппингу и берем русские названия
         $statusMapping = TaskStatusHelper::getStatusMapping();
-        
+
         $taskStatuses = $taskStatuses->groupBy(function ($status) use ($statusMapping) {
             // Если это английское название, возвращаем русское
             if (isset($statusMapping[$status->name])) {
@@ -103,13 +103,10 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
-        // Загружаем связанные данные для уведомлений
         $task->load(['assignee', 'project.users']);
 
-        // Создаем уведомления о новой задаче
         $this->notificationService->taskCreated($task, Auth::user());
-
-        // Если назначен исполнитель, уведомляем его
+        
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
@@ -321,7 +318,7 @@ class TaskController extends Controller
 
         // Применяем маппинг к статусам
         $statusMapping = TaskStatusHelper::getStatusMapping();
-        
+
         $taskStatuses = $taskStatuses->map(function ($status) use ($statusMapping) {
             if (isset($statusMapping[$status->name])) {
                 $status->name = $statusMapping[$status->name];

@@ -47,7 +47,7 @@ class ProjectController extends Controller
         }
 
         $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.project', 'taskStatuses', 'members.user']);
-        
+
         return Inertia::render('Projects/Show', [
             'project' => $project,
             'tasks' => $project->tasks,
@@ -64,7 +64,7 @@ class ProjectController extends Controller
         $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
-        
+
         return Inertia::render('Projects/Board', [
             'project' => $project,
             'tasks' => $project->tasks,
@@ -80,9 +80,7 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        return Inertia::render('Projects/Form', [
-            'project' => $project,
-        ]);
+        return Inertia::render('Projects/Form', compact('project'));
     }
 
     public function update(ProjectRequest $request, Project $project)
@@ -121,7 +119,7 @@ class ProjectController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-        
+
         if ($project->members()->where('user_id', $user->id)->exists()) {
             return redirect()->back()->with('error', 'Пользователь уже является участником проекта.');
         }
@@ -142,7 +140,7 @@ class ProjectController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        
+
         if ($project->owner_id === $user->id) {
             return redirect()->back()->with('error', 'Нельзя удалить владельца проекта.');
         }
@@ -162,4 +160,4 @@ class ProjectController extends Controller
 
         return response()->json($members);
     }
-} 
+}

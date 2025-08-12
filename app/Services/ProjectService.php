@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\TaskStatus;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -85,7 +86,13 @@ class ProjectService
 
     public function deleteProject(Project $project): bool
     {
-        return $project->delete();
+        return DB::transaction(function () use ($project) {
+            // Удаляем задачи проекта явно, чтобы избежать конфликта FK
+            $project->tasks()->delete();
+
+            // После удаления задач каскадное удаление статусов пройдет без ошибок
+            return $project->delete();
+        });
     }
 
     public function addMember(Project $project, User $user, string $role = 'member'): ProjectMember
