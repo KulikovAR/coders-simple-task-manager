@@ -5,6 +5,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
+import FlashMessages from '@/Components/FlashMessages';
 
 export default function StatusManagement({ 
     auth, 
@@ -13,7 +14,8 @@ export default function StatusManagement({
     taskStatuses = [], 
     hasCustomStatuses = false,
     projectStatuses = [],
-    type = 'project' 
+    type = 'project',
+    flash = {}
 }) {
     const [statuses, setStatuses] = useState(taskStatuses || []);
     const [isEditing, setIsEditing] = useState(false);
@@ -119,6 +121,7 @@ export default function StatusManagement({
             onSuccess: () => {
                 setIsEditing(false);
                 setProcessing(false);
+                setErrors({}); // Очищаем ошибки при успехе
             },
             onError: (errors) => {
                 setErrors(errors);
@@ -140,6 +143,7 @@ export default function StatusManagement({
             preserveScroll: true,
             onSuccess: () => {
                 setProcessing(false);
+                setErrors({}); // Очищаем ошибки при успехе
             },
             onError: (errors) => {
                 setErrors(errors);
@@ -156,6 +160,7 @@ export default function StatusManagement({
             onSuccess: () => {
                 setShowDeleteModal(false);
                 setProcessing(false);
+                setErrors({}); // Очищаем ошибки при успехе
             },
             onError: (errors) => {
                 setErrors(errors);
@@ -173,6 +178,67 @@ export default function StatusManagement({
             <Head title={pageTitle} />
 
             <div className="space-y-6">
+                {/* Отображение ошибок в самом верху */}
+                {Object.keys(errors).length > 0 && (
+                    <div className="space-y-2">
+                        {errors.message && (
+                            <div className="p-4 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                        <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <h4 className="font-medium mb-1">Ошибка при сохранении статусов</h4>
+                                            <p className="text-sm">{errors.message}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setErrors({})}
+                                        className="text-accent-red/70 hover:text-accent-red transition-colors"
+                                        title="Закрыть"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {/* Показываем остальные ошибки */}
+                        {Object.entries(errors)
+                            .filter(([key]) => key !== 'message')
+                            .map(([key, message]) => (
+                                <div key={key} className="p-4 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-start gap-3">
+                                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            <div>
+                                                <p className="text-sm">{typeof message === 'string' ? message : JSON.stringify(message)}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors[key];
+                                                return newErrors;
+                                            })}
+                                            className="text-accent-red/70 hover:text-accent-red transition-colors"
+                                            title="Закрыть"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                )}
+
                 {/* Хлебные крошки */}
                 <div className="flex items-center space-x-2 text-sm text-text-secondary">
                     <Link href={route('projects.index')} className="hover:text-accent-blue">Проекты</Link>
@@ -278,11 +344,30 @@ export default function StatusManagement({
                             </div>
                         </div>
 
-                        {errors.statuses && (
-                            <div className="mb-4 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm">
-                                {errors.statuses}
-                            </div>
-                        )}
+                                {/* Показываем все ошибки */}
+        {Object.keys(errors).length > 0 && (
+            <div className="mb-4 space-y-2">
+                {errors.statuses && (
+                    <div className="p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm">
+                        {errors.statuses}
+                    </div>
+                )}
+                {errors.message && (
+                    <div className="p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm">
+                        {errors.message}
+                    </div>
+                )}
+                {/* Для всех остальных ошибок */}
+                {Object.entries(errors)
+                    .filter(([key]) => !['statuses', 'message'].includes(key))
+                    .map(([key, message]) => (
+                        <div key={key} className="p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg text-accent-red text-sm">
+                            {typeof message === 'string' ? message : JSON.stringify(message)}
+                        </div>
+                    ))
+                }
+            </div>
+        )}
 
                         <div className="space-y-3">
                             {statuses.map((status, index) => (

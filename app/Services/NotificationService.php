@@ -30,8 +30,8 @@ class NotificationService
             fromUserId: $fromUser?->id ?? Auth::id(),
             notifiable: $task,
             data: [
-                'task_title' => $task->title ?? 'Неизвестная задача',
-                'project_name' => $task->project?->name ?? 'Неизвестный проект',
+                'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
             ]
         );
     }
@@ -52,9 +52,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
-                    'status' => $newStatus,
-                    'old_status' => $oldStatus,
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'status' => $this->sanitizeUtf8($newStatus),
+                    'old_status' => $this->sanitizeUtf8($oldStatus),
                 ]
             );
         }
@@ -67,9 +67,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
-                    'status' => $newStatus,
-                    'old_status' => $oldStatus,
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'status' => $this->sanitizeUtf8($newStatus),
+                    'old_status' => $this->sanitizeUtf8($oldStatus),
                 ]
             );
         }
@@ -118,9 +118,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
-                    'priority' => $newPriority,
-                    'old_priority' => $oldPriority,
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'priority' => $this->sanitizeUtf8($newPriority),
+                    'old_priority' => $this->sanitizeUtf8($oldPriority),
                 ]
             );
         }
@@ -133,9 +133,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
-                    'priority' => $newPriority,
-                    'old_priority' => $oldPriority,
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'priority' => $this->sanitizeUtf8($newPriority),
+                    'old_priority' => $this->sanitizeUtf8($oldPriority),
                 ]
             );
         }
@@ -159,9 +159,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $comment,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
                     'task_id' => $task->id,
-                    'comment_preview' => substr($comment->content, 0, 50) . '...',
+                    'comment_preview' => $this->createCommentPreview($comment->content),
                 ]
             );
         }
@@ -174,9 +174,9 @@ class NotificationService
                 fromUserId: $fromUser?->id ?? Auth::id(),
                 notifiable: $comment,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
                     'task_id' => $task->id,
-                    'comment_preview' => substr($comment->content, 0, 50) . '...',
+                    'comment_preview' => $this->createCommentPreview($comment->content),
                 ]
             );
         }
@@ -199,10 +199,10 @@ class NotificationService
                     userId: $member->id,
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
-                    data: [
-                        'sprint_name' => $sprint->name ?? 'Неизвестный спринт',
-                        'project_name' => $sprint->project?->name ?? 'Неизвестный проект',
-                    ]
+                                    data: [
+                    'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
+                    'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
+                ]
                 );
             }
         }
@@ -225,10 +225,10 @@ class NotificationService
                     userId: $member->id,
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
-                    data: [
-                        'sprint_name' => $sprint->name ?? 'Неизвестный спринт',
-                        'project_name' => $sprint->project?->name ?? 'Неизвестный проект',
-                    ]
+                                    data: [
+                    'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
+                    'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
+                ]
                 );
             }
         }
@@ -245,7 +245,7 @@ class NotificationService
             fromUserId: $fromUser?->id ?? Auth::id(),
             notifiable: $project,
             data: [
-                'project_name' => $project->name,
+                'project_name' => $this->sanitizeUtf8($project->name),
             ]
         );
     }
@@ -262,7 +262,7 @@ class NotificationService
                 fromUserId: null,
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
                     'deadline' => $task->deadline,
                 ]
             );
@@ -281,7 +281,7 @@ class NotificationService
                 fromUserId: null,
                 notifiable: $task,
                 data: [
-                    'task_title' => $task->title ?? 'Неизвестная задача',
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
                     'deadline' => $task->deadline,
                 ]
             );
@@ -315,7 +315,7 @@ class NotificationService
                 'from_user_id' => $fromUserId,
                 'notifiable_type' => get_class($notifiable),
                 'notifiable_id' => $notifiable->id,
-                'data' => $data,
+                'data' => $this->sanitizeNotificationData($data),
             ]);
 
             // Отправляем email и Telegram уведомления
@@ -476,5 +476,65 @@ class NotificationService
         return Notification::where('user_id', $user->id)
             ->where('read', false)
             ->count();
+    }
+
+    /**
+     * Создать безопасное превью комментария
+     */
+    private function createCommentPreview(string $content, int $length = 50): string
+    {
+        $cleanContent = $this->sanitizeUtf8($content);
+        
+        if (mb_strlen($cleanContent, 'UTF-8') <= $length) {
+            return $cleanContent;
+        }
+        
+        return mb_substr($cleanContent, 0, $length, 'UTF-8') . '...';
+    }
+
+    /**
+     * Очистить и валидировать UTF-8 строку
+     */
+    private function sanitizeUtf8(?string $string): string
+    {
+        if ($string === null) {
+            return '';
+        }
+
+        // Проверяем, является ли строка корректной UTF-8
+        if (mb_check_encoding($string, 'UTF-8')) {
+            return $string;
+        }
+
+        // Если строка содержит некорректные UTF-8 последовательности, пытаемся их исправить
+        $clean = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+        
+        // Проверяем результат ещё раз
+        if (!mb_check_encoding($clean, 'UTF-8')) {
+            // Если всё ещё проблемы, заменяем некорректные символы
+            $clean = mb_convert_encoding($clean, 'UTF-8', 'auto');
+        }
+        
+        return $clean ?: '';
+    }
+
+    /**
+     * Очистить массив данных уведомления от некорректных UTF-8 символов
+     */
+    private function sanitizeNotificationData(array $data): array
+    {
+        $sanitized = [];
+        
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $sanitized[$key] = $this->sanitizeUtf8($value);
+            } elseif (is_array($value)) {
+                $sanitized[$key] = $this->sanitizeNotificationData($value);
+            } else {
+                $sanitized[$key] = $value;
+            }
+        }
+        
+        return $sanitized;
     }
 }
