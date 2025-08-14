@@ -10,6 +10,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskStatusController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -70,6 +71,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/sprints/{sprint}/edit', [App\Http\Controllers\SprintController::class, 'edit'])->name('sprints.edit');
     Route::put('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'update'])->name('sprints.update');
     Route::delete('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'destroy'])->name('sprints.destroy');
+
+    // Статусы задач
+    Route::get('/projects/{project}/statuses', [TaskStatusController::class, 'projectIndex'])->name('projects.statuses');
+    Route::put('/projects/{project}/statuses', [TaskStatusController::class, 'updateProject'])->name('projects.statuses.update');
+    Route::get('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'sprintIndex'])->name('sprints.statuses');
+    Route::post('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'createSprintStatuses'])->name('sprints.statuses.create');
+    Route::put('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'updateSprint'])->name('sprints.statuses.update');
+    Route::delete('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'deleteSprintStatuses'])->name('sprints.statuses.delete');
+    Route::get('/projects/{project}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('projects.statuses.api');
+    Route::get('/projects/{project}/sprints/{sprint}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('sprints.statuses.api');
 
     // Задачи
     Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');

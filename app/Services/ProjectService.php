@@ -7,12 +7,16 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\TaskStatus;
 use App\Models\User;
+use App\Services\TaskStatusService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProjectService
 {
+    public function __construct(
+        private TaskStatusService $taskStatusService
+    ) {}
     public function getUserProjects(User $user, array $filters = []): LengthAwarePaginator
     {
         // Группируем условие принадлежности проекту, чтобы фильтры применялись ко всем найденным проектам
@@ -66,7 +70,7 @@ class ProjectService
         ]);
 
         // Создаем стандартные статусы для проекта
-        $this->createDefaultTaskStatuses($project);
+        $this->taskStatusService->createDefaultProjectStatuses($project);
 
         return $project->load(['owner', 'members.user']);
     }
@@ -124,17 +128,5 @@ class ProjectService
                    ->whereIn('role', ['owner', 'member'])->exists();
     }
 
-    private function createDefaultTaskStatuses(Project $project): void
-    {
-        $defaultStatuses = TaskStatusType::getDefaultStatuses();
 
-        foreach ($defaultStatuses as $status) {
-            TaskStatus::create([
-                'project_id' => $project->id,
-                'name' => $status['name'],
-                'order' => $status['order'],
-                'color' => $status['color'],
-            ]);
-        }
-    }
 } 

@@ -13,9 +13,11 @@ class TaskStatus extends Model
 
     protected $fillable = [
         'project_id',
+        'sprint_id',
         'name',
         'order',
         'color',
+        'is_custom',
     ];
 
     public function project(): BelongsTo
@@ -27,4 +29,13 @@ class TaskStatus extends Model
     {
         return $this->hasMany(Task::class, 'status_id');
     }
+
+    public function sprint(): BelongsTo
+    {
+        return $this->belongsTo(Sprint::class);
+    }
+
+    protected $casts = [
+        'is_custom' => 'boolean',
+    ];
 }

@@ -145,6 +145,12 @@ export default function Show({ auth, project, tasks }) {
                         >
                             Редактировать
                         </Link>
+                        <Link
+                            href={route('projects.statuses', project.id)}
+                            className="btn btn-secondary"
+                        >
+                            Статусы
+                        </Link>
                         <button
                             type="button"
                             className="btn btn-danger"

@@ -52,7 +52,7 @@ class CommentService
     public function canUserViewComment(User $user, TaskComment $comment): bool
     {
         // Пользователь может видеть комментарий, если имеет доступ к задаче
-        $projectService = new ProjectService();
+        $projectService = app(ProjectService::class);
         return $projectService->canUserAccessProject($user, $comment->task->project);
     }
 

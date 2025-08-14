@@ -192,13 +192,13 @@ class TaskService
 
     public function canUserManageTask(User $user, Task $task): bool
     {
-        $projectService = new ProjectService();
+        $projectService = app(ProjectService::class);
         return $projectService->canUserManageProject($user, $task->project);
     }
 
     public function canUserViewTask(User $user, Task $task): bool
     {
-        $projectService = new ProjectService();
+        $projectService = app(ProjectService::class);
         return $projectService->canUserAccessProject($user, $task->project);
     }
 } 

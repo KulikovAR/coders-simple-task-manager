@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Http\Requests\ProjectRequest;
 use App\Services\ProjectService;
+use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -14,7 +15,8 @@ use Inertia\Inertia;
 class ProjectController extends Controller
 {
     public function __construct(
-        private ProjectService $projectService
+        private ProjectService $projectService,
+        private TaskStatusService $taskStatusService
     ) {}
 
     public function index(Request $request)
@@ -54,14 +56,25 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function board(Project $project)
+    public function board(Project $project, Request $request)
     {
         if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
         $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
-        $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+        
+        // Получаем выбранный спринт если есть
+        $selectedSprintId = $request->get('sprint_id');
+        $selectedSprint = null;
+        
+        if ($selectedSprintId && $selectedSprintId !== 'all') {
+            $selectedSprint = $project->sprints()->find($selectedSprintId);
+        }
+        
+        // Получаем релевантные статусы (спринта или проекта)
+        $taskStatuses = $this->taskStatusService->getRelevantStatuses($project, $selectedSprint);
+        
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
 
@@ -71,6 +84,8 @@ class ProjectController extends Controller
             'taskStatuses' => $taskStatuses,
             'sprints' => $sprints,
             'members' => $members,
+            'selectedSprintId' => $selectedSprintId,
+            'hasCustomStatuses' => $selectedSprint ? $this->taskStatusService->hasCustomStatuses($selectedSprint) : false,
         ]);
     }
 

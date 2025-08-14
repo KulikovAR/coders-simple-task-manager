@@ -52,7 +52,7 @@ class SprintService
 
     public function canUserManageSprint(User $user, Sprint $sprint): bool
     {
-        $projectService = new ProjectService();
+        $projectService = app(ProjectService::class);
         return $projectService->canUserManageProject($user, $sprint->project);
     }
 } 

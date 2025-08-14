@@ -5,9 +5,9 @@ import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtil
 import TaskForm from '@/Components/TaskForm';
 import PaymentModal from '@/Components/PaymentModal';
 
-export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [] }) {
+export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'all', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
-    const [selectedSprintId, setSelectedSprintId] = useState('all');
+    const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'all');
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
     const [showTaskModal, setShowTaskModal] = useState(false);
@@ -178,24 +178,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         }
     };
 
-    // Цвета статусов для индикаторов
-    const getStatusIndicatorColor = (statusName) => {
-        switch (statusName) {
-            case 'To Do':
-                return 'bg-accent-slate';
-            case 'In Progress':
-                return 'bg-accent-blue';
-            case 'Review':
-                return 'bg-accent-yellow';
-            case 'Testing':
-                return 'bg-accent-purple';
-            case 'Ready for Release':
-                return 'bg-accent-pink';
-            case 'Done':
-                return 'bg-accent-green';
-            default:
-                return 'bg-accent-slate';
-        }
+    // Цвета статусов из данных (динамические)
+    const getStatusIndicatorColor = (statusId) => {
+        const status = taskStatuses.find(s => s.id === statusId);
+        return status?.color || '#6B7280';
+    };
+
+    const getStatusIndicatorBgClass = (statusId) => {
+        // Конвертируем hex цвет в CSS класс background
+        const color = getStatusIndicatorColor(statusId);
+        return 'bg-[' + color + ']';
     };
 
     const handleDragStart = (e, task) => {
@@ -385,7 +377,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     // Фильтрация задач по спринту и исполнителю
     const filteredTasks = localTasks.filter(task => {
-        const sprintOk = selectedSprintId === 'all' || task.sprint_id == selectedSprintId;
+        const sprintOk = currentSprintId === 'all' || task.sprint_id == currentSprintId;
         const assigneeOk = assigneeId ? String(task.assignee_id) === String(assigneeId) : true;
         const myOk = myTasks ? String(task.assignee_id) === String(auth.user.id) : true;
         return sprintOk && assigneeOk && myOk;
@@ -442,8 +434,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                   <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 justify-between">
                     {/* Спринты */}
                     <select
-                      value={selectedSprintId}
-                      onChange={e => setSelectedSprintId(e.target.value)}
+                      value={currentSprintId}
+                      onChange={e => {
+                        const newSprintId = e.target.value;
+                        setCurrentSprintId(newSprintId);
+                        // Обновляем URL для загрузки правильных статусов
+                        const url = newSprintId === 'all' 
+                          ? route('projects.board', project.id)
+                          : route('projects.board', { id: project.id, sprint_id: newSprintId });
+                        router.visit(url, { preserveState: true });
+                      }}
                       className="form-select min-w-[140px] max-w-[180px]"
                     >
                       <option value="all">Все спринты</option>
@@ -512,6 +512,29 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                   </div>
                 </div>
 
+                {/* Информация о статусах */}
+                {currentSprintId !== 'all' && (
+                    <div className="card">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${hasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
+                                <span className="text-body-small text-text-secondary">
+                                    {hasCustomStatuses 
+                                        ? 'Спринт использует кастомные статусы'
+                                        : 'Спринт использует статусы проекта'
+                                    }
+                                </span>
+                            </div>
+                            <Link
+                                href={route('sprints.statuses', [project.id, currentSprintId])}
+                                className="btn btn-secondary btn-sm"
+                            >
+                                Настроить статусы
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
                 {/* Kanban доска с ограничением по высоте */}
                 <div className="card">
                     <div className="flex justify-between items-center mb-6">
@@ -537,7 +560,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     {/* Заголовок колонки с индикатором */}
                                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-color">
                                         <div className="flex items-center space-x-3">
-                                            <div className={`w-3 h-3 rounded-full ${getStatusIndicatorColor(status.name)} shadow-sm`}></div>
+                                            <div 
+                                                className="w-3 h-3 rounded-full shadow-sm"
+                                                style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
+                                            ></div>
                                             <h4 className="text-text-primary font-semibold">{status.name}</h4>
                                         </div>
                                         <span className="bg-card-bg text-text-primary text-caption px-2.5 py-1 rounded-full font-medium shadow-sm">
@@ -791,7 +817,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     onClick={() => handleStatusSelect(status.id)}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <div className={`w-2.5 h-2.5 rounded-full ${getStatusIndicatorColor(status.name)}`}></div>
+                                        <div 
+                                            className="w-2.5 h-2.5 rounded-full"
+                                            style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
+                                        ></div>
                                         <div className="text-sm text-text-primary font-medium">{status.name}</div>
                                     </div>
                                 </button>

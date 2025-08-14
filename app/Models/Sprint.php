@@ -34,4 +34,9 @@ class Sprint extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function taskStatuses(): HasMany
+    {
+        return $this->hasMany(TaskStatus::class);
+    }
 }

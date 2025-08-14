@@ -57,6 +57,12 @@ export default function Show({ auth, project, sprint }) {
                         >
                             Редактировать
                         </Link>
+                        <Link
+                            href={route('sprints.statuses', [project.id, sprint.id])}
+                            className="btn btn-secondary"
+                        >
+                            Статусы
+                        </Link>
                         <button
                             type="button"
                             className="btn btn-danger"
@@ -293,6 +299,12 @@ export default function Show({ auth, project, sprint }) {
                                     className="btn btn-secondary btn-sm w-full"
                                 >
                                     Редактировать спринт
+                                </Link>
+                                <Link
+                                    href={route('sprints.statuses', [project.id, sprint.id])}
+                                    className="btn btn-secondary btn-sm w-full"
+                                >
+                                    Настроить статусы
                                 </Link>
                             </div>
                         </div>
