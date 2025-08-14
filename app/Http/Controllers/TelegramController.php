@@ -52,7 +52,18 @@ class TelegramController extends Controller
 
             // Приветственное сообщение с chatId
             if (in_array($text, ['/start', 'start', 'Start'], true)) {
-                $tg->sendMessage($chatId, "Ваш chatId: <b>{$chatId}</b>\n\nПерейдите в профиль на сайте и вставьте этот chatId в поле Telegram.");
+                $linkedUser = User::where('telegram_chat_id', (string) $chatId)->first();
+                if ($linkedUser) {
+                    $tg->sendMessage(
+                        $chatId,
+                        "✅ Telegram уже подключен к вашему аккаунту.\n\nДоступные команды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId"
+                    );
+                } else {
+                    $tg->sendMessage(
+                        $chatId,
+                        "Ваш chatId: <b>{$chatId}</b>\n\nПерейдите в профиль на сайте и вставьте этот chatId в поле Telegram.\n\nДоступные команды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId"
+                    );
+                }
                 return response()->noContent();
             }
 
@@ -78,6 +89,9 @@ class TelegramController extends Controller
                 }
 
                 try {
+                    // Смайлик ожидания
+                    $tg->sendMessage($chatId, '⏳');
+
                     $ai = $this->createFlexibleAiAgentService();
                     $result = $ai->processRequest($prompt, $user, null);
 
