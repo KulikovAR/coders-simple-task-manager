@@ -268,6 +268,248 @@ export default function TaskForm({
         );
     };
 
+    if (isModal) {
+        return (
+            <div className="h-full flex flex-col">
+                {/* Основное содержимое в две колонки */}
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6">
+                    {/* Левая колонка - основная информация */}
+                    <div className="md:col-span-2 space-y-4 md:space-y-6">
+                        {/* Название задачи */}
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">
+                                Название задачи
+                            </label>
+                            <input
+                                type="text"
+                                value={data.title}
+                                onChange={(e) => setData('title', e.target.value)}
+                                className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:ring-0"
+                                placeholder="Введите название задачи..."
+                                required
+                            />
+                            <div className="h-px bg-border-color mt-2"></div>
+                            {(formErrors.title || errors.title) && (
+                                <p className="mt-2 text-sm text-accent-red">{formErrors.title || errors.title}</p>
+                            )}
+                        </div>
+
+                        {/* Описание */}
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-3">
+                                Описание
+                            </label>
+                            <textarea
+                                value={data.description}
+                                onChange={(e) => setData('description', e.target.value)}
+                                rows={3}
+                                className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 md:px-4 py-2 md:py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all duration-150"
+                                placeholder="Опишите задачу подробно..."
+                            />
+                            {(formErrors.description || errors.description) && (
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.description || errors.description}</p>
+                            )}
+                        </div>
+
+                        {/* Дополнительные поля для редактирования */}
+                        {isEditing && (
+                            <>
+                                {/* Результат */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary mb-3">
+                                        Результат выполнения
+                                    </label>
+                                    <textarea
+                                        value={data.result}
+                                        onChange={(e) => setData('result', e.target.value)}
+                                        rows={3}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        placeholder="Опишите что было сделано..."
+                                    />
+                                </div>
+
+                                {/* Merge Request */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary mb-3">
+                                        Ссылка на Merge Request
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={data.merge_request}
+                                        onChange={(e) => setData('merge_request', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        placeholder="https://github.com/..."
+                                    />
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Правая колонка - параметры задачи */}
+                    <div className="space-y-4 md:space-y-6">
+                        {/* Быстрые действия */}
+                        <div className="bg-card-bg border border-border-color rounded-xl p-3 md:p-4">
+                            <h3 className="text-sm font-medium text-text-primary mb-4">Параметры задачи</h3>
+                            <div className="space-y-4">
+                                {/* Статус */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Статус
+                                    </label>
+                                    <select
+                                        value={data.status_id}
+                                        onChange={(e) => setData('status_id', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all duration-150"
+                                    >
+                                        <option value="">Выберите статус</option>
+                                        {availableStatuses.map((status) => (
+                                            <option key={status.id} value={status.id}>
+                                                {status.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Приоритет */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Приоритет
+                                    </label>
+                                    <select
+                                        value={data.priority}
+                                        onChange={(e) => setData('priority', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                    >
+                                        {priorities.map((priority) => (
+                                            <option key={priority.value} value={priority.value}>
+                                                {priority.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Исполнитель */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Исполнитель
+                                    </label>
+                                    <select
+                                        value={data.assignee_id}
+                                        onChange={(e) => setData('assignee_id', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                    >
+                                        <option value="">Не назначен</option>
+                                        {availableMembers.map((user) => (
+                                            <option key={user.id} value={user.id}>
+                                                {user.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Спринт */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Спринт
+                                    </label>
+                                    <select
+                                        value={data.sprint_id}
+                                        onChange={(e) => setData('sprint_id', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                    >
+                                        <option value="">Без спринта</option>
+                                        {availableSprints.map((sprint) => (
+                                            <option key={sprint.id} value={sprint.id}>
+                                                {sprint.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Дедлайн */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Дедлайн
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={data.deadline}
+                                        onChange={(e) => setData('deadline', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Проект (скрытый в редактировании) */}
+                        {!isEditing && (
+                            <div className="bg-card-bg border border-border-color rounded-xl p-4">
+                                <h3 className="text-sm font-medium text-text-primary mb-4">Размещение</h3>
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Проект
+                                    </label>
+                                    <select
+                                        value={data.project_id}
+                                        onChange={(e) => setData('project_id', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        required
+                                    >
+                                        <option value="">Выберите проект</option>
+                                        {projects.map((project) => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Нижняя панель с кнопками */}
+                <div className="border-t border-border-color bg-card-bg px-4 md:px-6 py-3 md:py-4">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
+                        <div className="text-sm text-text-secondary order-2 md:order-1">
+                            {isEditing && task?.created_at && (
+                                <span>Создана: {new Date(task.created_at).toLocaleDateString('ru-RU')}</span>
+                            )}
+                        </div>
+                        <div className="flex gap-3 order-1 md:order-2">
+                            <button
+                                type="button"
+                                onClick={onCancel}
+                                className="btn btn-secondary"
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                onClick={handleSubmit}
+                                className="btn btn-primary"
+                            >
+                                {processing ? (
+                                    <div className="flex items-center gap-2">
+                                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Сохранение...
+                                    </div>
+                                ) : (
+                                    isEditing ? 'Обновить задачу' : 'Создать задачу'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Обычная форма для не-модального режима
     return (
         <form onSubmit={handleSubmit} className={modalStyles.container}>
             {/* Кнопки действий */}

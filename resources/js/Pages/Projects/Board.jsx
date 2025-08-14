@@ -754,29 +754,119 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             {/* Модальное окно для просмотра и редактирования задачи */}
             {showTaskModal && selectedTask && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 md:p-4"
                     onClick={closeTaskModal}
                 >
                     <div
-                        className="bg-card-bg border border-border-color rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
+                        className="bg-primary-bg border border-border-color rounded-xl md:rounded-2xl w-full max-w-4xl h-full md:max-h-[95vh] shadow-xl transition-all duration-200 ease-out scale-95 animate-[scale-in_0.2s_ease-out_forwards] overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="p-6">
-                            <div className="flex justify-between items-start mb-6">
-                                <div>
-                                    <h2 className="text-heading-3 text-text-primary mb-2">Редактирование задачи</h2>
-                                    {selectedTask.code && (
-                                        <div className="text-body-small font-mono text-accent-blue">{selectedTask.code}</div>
-                                    )}
+                        {/* Заголовок модалки с градиентом */}
+                        <div className="bg-gradient-to-r from-accent-blue to-accent-purple p-4 md:p-6">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1 min-w-0">
+                                    {/* Мобильная версия - компактная */}
+                                    <div className="md:hidden">
+                                        <div className="flex items-center justify-between mb-2">
+                                            {selectedTask.code && (
+                                                <span className="px-2 py-1 bg-white/20 rounded-full text-white font-mono text-xs">
+                                                    {selectedTask.code}
+                                                </span>
+                                            )}
+                                            <div className="flex items-center gap-1">
+                                                {selectedTask.priority && (
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)}`}>
+                                                        {selectedTask.priority}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <h2 className="text-lg font-semibold text-white mb-2 truncate">
+                                            {selectedTask.title}
+                                        </h2>
+                                        <div className="flex flex-wrap items-center gap-2 text-white/80 text-xs">
+                                            {selectedTask.status && (
+                                                <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                                                    {selectedTask.status.name}
+                                                </span>
+                                            )}
+                                            {selectedTask.assignee && (
+                                                <div className="flex items-center gap-1">
+                                                    <div className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center">
+                                                        <span className="text-xs">
+                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
+                                                        </span>
+                                                    </div>
+                                                    <span className="truncate max-w-[80px]">{selectedTask.assignee.name}</span>
+                                                </div>
+                                            )}
+                                            {selectedTask.deadline && (
+                                                <span className="text-xs">
+                                                    {new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Десктопная версия */}
+                                    <div className="hidden md:block">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            {selectedTask.code && (
+                                                <span className="px-3 py-1 bg-white/20 rounded-full text-white font-mono text-sm">
+                                                    {selectedTask.code}
+                                                </span>
+                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {selectedTask.priority && (
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)}`}>
+                                                        {selectedTask.priority}
+                                                    </span>
+                                                )}
+                                                {selectedTask.status && (
+                                                    <span className="px-2 py-1 bg-white/20 rounded-full text-white text-xs font-medium">
+                                                        {selectedTask.status.name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <h2 className="text-xl font-semibold text-white mb-1">
+                                            {selectedTask.title}
+                                        </h2>
+                                        <div className="flex items-center gap-4 text-white/80 text-sm">
+                                            {selectedTask.assignee && (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                        <span className="text-xs font-medium">
+                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
+                                                        </span>
+                                                    </div>
+                                                    <span>{selectedTask.assignee.name}</span>
+                                                </div>
+                                            )}
+                                            {selectedTask.deadline && (
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span>{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={closeTaskModal}
-                                    className="text-text-muted hover:text-text-primary text-2xl font-bold transition-colors duration-200"
+                                    className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg p-1.5 md:p-2 transition-all duration-150 ml-2"
                                 >
-                                    ×
+                                    <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                 </button>
                             </div>
+                        </div>
 
+                        {/* Содержимое модалки */}
+                        <div className="overflow-y-auto h-[calc(100vh-120px)] md:max-h-[calc(95vh-160px)] scrollbar-thin">
                             <TaskForm
                                 task={selectedTask}
                                 projects={[project]}
