@@ -389,6 +389,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         return order[priority] || 4; // Задачи без приоритета идут последними
     };
 
+    // Динамическая проверка кастомных статусов
+    const currentSprintHasCustomStatuses = currentSprintId !== 'all' && taskStatuses.some(status => status.sprint_id == currentSprintId);
     const getFilteredStatusTasks = (statusId) => {
         const tasks = filteredTasks.filter(task => task.status_id === statusId);
         // Сортируем по приоритету: высокий -> средний -> низкий -> без приоритета
@@ -439,10 +441,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         const newSprintId = e.target.value;
                         setCurrentSprintId(newSprintId);
                         // Обновляем URL для загрузки правильных статусов
-                        const url = newSprintId === 'all' 
+                        const url = newSprintId === 'all'
                           ? route('projects.board', project.id)
-                          : route('projects.board', { id: project.id, sprint_id: newSprintId });
-                        router.visit(url, { preserveState: true });
+                          : route('projects.board', project.id) + '?sprint_id=' + newSprintId;
+                        router.visit(url, { preserveState: false });
                       }}
                       className="form-select min-w-[140px] max-w-[180px]"
                     >
@@ -517,9 +519,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full ${hasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
+                                <div className={`w-3 h-3 rounded-full ${currentSprintHasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
                                 <span className="text-body-small text-text-secondary">
-                                    {hasCustomStatuses 
+                                    {currentSprintHasCustomStatuses
                                         ? 'Спринт использует кастомные статусы'
                                         : 'Спринт использует статусы проекта'
                                     }
@@ -560,7 +562,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     {/* Заголовок колонки с индикатором */}
                                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-color">
                                         <div className="flex items-center space-x-3">
-                                            <div 
+                                            <div
                                                 className="w-3 h-3 rounded-full shadow-sm"
                                                 style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
                                             ></div>
@@ -907,7 +909,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     onClick={() => handleStatusSelect(status.id)}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <div 
+                                        <div
                                             className="w-2.5 h-2.5 rounded-full"
                                             style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
                                         ></div>
