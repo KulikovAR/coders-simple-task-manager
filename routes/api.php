@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SprintController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Resources\ApiResponse;
+use App\Http\Controllers\TelegramController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,3 +74,6 @@ Route::get('/health', function () {
         ApiResponse::success(null, 'CSTM API is running')
     );
 }); 
+
+// Telegram bot webhook (публичный, без CSRF)
+Route::post('/telegram/webhook/{token}', [TelegramController::class, 'webhook'])->name('telegram.webhook');

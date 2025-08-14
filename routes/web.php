@@ -121,9 +121,6 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
-// Telegram bot webhook (публичный)
-Route::post('/telegram/webhook/{token}', [TelegramController::class, 'webhook'])
-    ->name('telegram.webhook')
-    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+// Telegram webhook перенесён в routes/api.php
 
 require __DIR__.'/auth.php';
