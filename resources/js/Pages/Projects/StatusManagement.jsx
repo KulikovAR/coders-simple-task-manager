@@ -223,7 +223,7 @@ export default function StatusManagement({
                                 <div key={status.id} className="bg-secondary-bg border border-border-color rounded-lg p-4">
                                     <div className="flex items-center gap-3">
                                         <div 
-                                            className="w-4 h-4 rounded-full shadow-sm"
+                                            className="w-5 h-5 rounded-full border border-border-color shadow-sm"
                                             style={{ backgroundColor: status.color }}
                                         />
                                         <span className="text-text-primary font-medium">{status.name}</span>
@@ -306,13 +306,25 @@ export default function StatusManagement({
                                         )}
 
                                         <div className="flex items-center gap-3 flex-1">
-                                            <input
-                                                type="color"
-                                                value={status.color}
-                                                onChange={(e) => handleStatusChange(index, 'color', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="w-8 h-8 rounded border border-border-color cursor-pointer disabled:cursor-default"
-                                            />
+                                            {isEditing ? (
+                                                <div className="relative">
+                                                    <input
+                                                        type="color"
+                                                        value={status.color}
+                                                        onChange={(e) => handleStatusChange(index, 'color', e.target.value)}
+                                                        className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer"
+                                                    />
+                                                    <div 
+                                                        className="w-8 h-8 rounded-full border-2 border-border-color cursor-pointer hover:scale-110 transition-transform duration-200 shadow-sm"
+                                                        style={{ backgroundColor: status.color }}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div 
+                                                    className="w-6 h-6 rounded-full border border-border-color shadow-sm"
+                                                    style={{ backgroundColor: status.color }}
+                                                />
+                                            )}
                                             
                                             {isEditing ? (
                                                 <input
