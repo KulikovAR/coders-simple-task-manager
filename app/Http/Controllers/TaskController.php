@@ -106,7 +106,7 @@ class TaskController extends Controller
         $task->load(['assignee', 'project.users']);
 
         $this->notificationService->taskCreated($task, Auth::user());
-        
+
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());

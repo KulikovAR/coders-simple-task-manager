@@ -16,6 +16,7 @@ export default function UpdateProfileInformation({
         useForm({
             name: user.name,
             email: user.email,
+            telegram_chat_id: user.telegram_chat_id || '',
         });
 
     const submit = (e) => {
@@ -57,6 +58,24 @@ export default function UpdateProfileInformation({
                     />
 
                     <InputError className="mt-2" message={errors.email} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="telegram_chat_id" value="Telegram chatId" />
+
+                    <TextInput
+                        id="telegram_chat_id"
+                        className="mt-1 block w-full"
+                        value={data.telegram_chat_id}
+                        onChange={(e) => setData('telegram_chat_id', e.target.value)}
+                        placeholder="Напр. 123456789"
+                    />
+
+                    <div className="mt-2 text-xs text-text-muted">
+                        Откройте нашего бота в Telegram и отправьте команду <code>/start</code> — бот пришлёт ваш chatId. Вставьте его сюда.
+                    </div>
+
+                    <InputError className="mt-2" message={errors.telegram_chat_id} />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

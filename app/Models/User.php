@@ -25,6 +25,7 @@ class User extends Authenticatable
         'paid',
         'expires_at',
         'email_notifications',
+        'telegram_chat_id',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'paid' => 'boolean',
             'expires_at' => 'datetime',
             'email_notifications' => 'boolean',
+            'telegram_chat_id' => 'string',
         ];
     }
 

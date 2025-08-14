@@ -13,6 +13,7 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -119,5 +120,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment/start', [\App\Http\Controllers\PaymentController::class, 'start'])->name('payment.start');
 });
 Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
+
+// Telegram bot webhook (публичный)
+Route::post('/telegram/webhook/{token}', [TelegramController::class, 'webhook'])
+    ->name('telegram.webhook')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 require __DIR__.'/auth.php';

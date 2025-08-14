@@ -12,6 +12,7 @@ use App\Mail\NotificationMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\TelegramService;
 
 class NotificationService
 {
@@ -317,8 +318,9 @@ class NotificationService
                 'data' => $data,
             ]);
 
-            // Отправляем email уведомление
+            // Отправляем email и Telegram уведомления
             $this->sendEmailNotification($notification);
+            $this->sendTelegramNotification($notification);
         }
     }
 
@@ -384,6 +386,39 @@ class NotificationService
             }
         } catch (\Exception $e) {
             return null;
+        }
+    }
+
+    /**
+     * Отправить Telegram уведомление
+     */
+    private function sendTelegramNotification(Notification $notification): void
+    {
+        try {
+            /** @var TelegramService $tg */
+            $tg = app(TelegramService::class);
+            if (!$tg->isEnabled()) {
+                return;
+            }
+
+            $user = $notification->user;
+            if (!$user || empty($user->telegram_chat_id)) {
+                return;
+            }
+
+            $message = $notification->getIcon() . ' ' . $notification->getMessage();
+            $actionUrl = $this->getNotificationActionUrl($notification);
+            if ($actionUrl) {
+                $message .= "\n\n" . '<a href="' . e($actionUrl) . '">Открыть</a>';
+            }
+
+            $tg->sendMessage($user->telegram_chat_id, $message);
+        } catch (\Throwable $e) {
+            Log::error('Ошибка отправки Telegram уведомления', [
+                'notification_id' => $notification->id,
+                'user_id' => $notification->user_id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\TelegramService;
 
 class ProfileController extends Controller
 {
@@ -30,13 +31,23 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $originalChatId = $user->telegram_chat_id;
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        // Если chatId появился или изменился — отправим подтверждение в Telegram
+        if ($user->telegram_chat_id && $user->telegram_chat_id !== $originalChatId) {
+            /** @var TelegramService $tg */
+            $tg = app(TelegramService::class);
+            $tg->sendMessage($user->telegram_chat_id, '✅ Telegram подключен. Вы будете получать уведомления здесь.');
+        }
 
         return Redirect::route('profile.edit');
     }
