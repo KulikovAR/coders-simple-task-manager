@@ -45,14 +45,6 @@ class ProjectContextProvider implements ContextProviderInterface
             'projects' => $projectsArray,
             'projects_count' => $projects->count(),
             'project_names' => $projects->pluck('name')->toArray(),
-            'available_statuses' => [
-                'к выполнению' => 'To Do',
-                'в работе' => 'In Progress',
-                'готово' => 'Done',
-                'на проверке' => 'Review',
-                'отменено' => 'Cancelled',
-                'тестирование' => 'Testing',
-            ],
             'available_priorities' => [
                 'низкий' => 'low',
                 'средний' => 'medium',

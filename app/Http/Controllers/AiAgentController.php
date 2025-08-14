@@ -9,11 +9,13 @@ use App\Services\Ai\ContextProviders\UserContextProvider;
 use App\Services\Ai\ContextProviders\ProjectContextProvider;
 use App\Services\Ai\ContextProviders\UsersContextProvider;
 use App\Services\Ai\ContextProviders\EnumsContextProvider;
+use App\Services\Ai\ContextProviders\DynamicStatusContextProvider;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\SprintService;
 use App\Services\CommentService;
 use App\Services\AiConversationService;
+use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -171,6 +173,7 @@ class AiAgentController extends Controller
             new ProjectContextProvider(app(ProjectService::class)),
             new UsersContextProvider(),
             new EnumsContextProvider(),
+            new DynamicStatusContextProvider(app(TaskStatusService::class)),
         ];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));

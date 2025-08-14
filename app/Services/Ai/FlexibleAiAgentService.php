@@ -234,7 +234,7 @@ class FlexibleAiAgentService
 
         // Если команды не найдены, используем fallback
         if (empty($parsedCommands['commands'])) {
-            $fallbackCommands = $this->getFallbackCommands($userInput);
+            $fallbackCommands = $this->getFallbackCommands($userInput, $context);
             if (!empty($fallbackCommands)) {
                 Log::info('Using fallback commands', [
                     'user_input' => $userInput,
@@ -303,14 +303,17 @@ class FlexibleAiAgentService
         $prompt .= "Контекст пользователя:\n";
         $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
 
-        // Добавляем информацию о enum'ах
-        if (isset($context['enums'])) {
+        // Добавляем информацию о доступных статусах задач
+        if (isset($context['dynamic_statuses']) && !empty($context['dynamic_statuses']['available_status_names'])) {
             $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ЗАДАЧ:\n";
-            foreach ($context['enums']['task_statuses'] as $status) {
-                $prompt .= "- {$status['name']} ({$status['key']}): {$status['description']}\n";
+            foreach ($context['dynamic_statuses']['status_mapping'] as $statusName => $description) {
+                $prompt .= "- {$statusName}: {$description}\n";
             }
             $prompt .= "\n";
+        }
 
+        // Добавляем информацию о типах комментариев
+        if (isset($context['enums']['comment_types'])) {
             $prompt .= "ТИПЫ КОММЕНТАРИЕВ:\n";
             foreach ($context['enums']['comment_types'] as $type) {
                 $prompt .= "- {$type['name']} ({$type['key']}): {$type['label']} {$type['icon']}\n";
@@ -337,8 +340,13 @@ class FlexibleAiAgentService
         $prompt .= "7. Если пользователь говорит 'переведи задачи в статус выполнено' - используй BULK_UPDATE_TASK_STATUS\n";
         $prompt .= "8. Если пользователь подтверждает действие (да, сделай, ок) - выполняй предыдущие команды\n";
         $prompt .= "9. Для массового обновления статуса используй BULK_UPDATE_TASK_STATUS с параметрами project_name и current_status\n";
-        $prompt .= "10. ВАЖНО: Используй точные названия статусов из enum'ов\n";
-        $prompt .= "11. Статусы задач: 'К выполнению', 'В работе', 'На проверке', 'Тестирование', 'Готова к релизу', 'Завершена'\n";
+        $prompt .= "10. ВАЖНО: Используй только точные названия статусов из доступных статусов задач\n";
+        if (isset($context['dynamic_statuses']) && !empty($context['dynamic_statuses']['available_status_names'])) {
+            $statusNames = implode("', '", $context['dynamic_statuses']['available_status_names']);
+            $prompt .= "11. Доступные статусы задач: '{$statusNames}'\n";
+        } else {
+            $prompt .= "11. ВНИМАНИЕ: Статусы задач не загружены. Используй общие названия.\n";
+        }
         $prompt .= "12. Возвращай ТОЛЬКО JSON\n\n";
 
         $prompt .= "Формат ответа:\n";
@@ -476,9 +484,15 @@ class FlexibleAiAgentService
     /**
      * Получить команды по ключевым словам (fallback)
      */
-    private function getFallbackCommands(string $userInput): array
+    private function getFallbackCommands(string $userInput, array $context = []): array
     {
         $input = mb_strtolower($userInput);
+
+        // Получаем доступные статусы из контекста
+        $availableStatuses = [];
+        if (isset($context['dynamic_statuses']['available_status_names'])) {
+            $availableStatuses = $context['dynamic_statuses']['available_status_names'];
+        }
 
         // Статус проекта/задач
         if (preg_match('/(статус|состояние|как дела|что происходит)/', $input)) {
@@ -502,40 +516,38 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Задачи к выполнению
-        if (preg_match('/(к выполнению|готовые к выполнению|новые задачи|не начатые)/', $input)) {
-            return [
-                [
-                    'name' => 'LIST_TASKS',
-                    'parameters' => [
-                        'status' => 'To Do'
-                    ]
-                ]
-            ];
-        }
+        // Попытка найти соответствующий статус в доступных
+        $statusMapping = [
+            '/(к выполнению|готовые к выполнению|новые задачи|не начатые)/' => ['К выполнению', 'To Do'],
+            '/(в работе|выполняются|активные задачи|текущие)/' => ['В работе', 'In Progress'],
+            '/(готово|завершено|выполнено|готовые|завершенные)/' => ['Завершена', 'Done'],
+            '/(на проверке|проверка|ревью|review)/' => ['На проверке', 'Review'],
+            '/(тестировани|тестирую|testing)/' => ['Тестирование', 'Testing'],
+            '/(готов к релизу|релиз|готов|ready)/' => ['Готова к релизу', 'Ready for Release'],
+        ];
 
-        // Задачи в работе
-        if (preg_match('/(в работе|выполняются|активные задачи|текущие)/', $input)) {
-            return [
-                [
-                    'name' => 'LIST_TASKS',
-                    'parameters' => [
-                        'status' => 'In Progress'
-                    ]
-                ]
-            ];
-        }
+        foreach ($statusMapping as $pattern => $possibleStatuses) {
+            if (preg_match($pattern, $input)) {
+                // Ищем первый подходящий статус из доступных
+                $foundStatus = null;
+                foreach ($possibleStatuses as $statusName) {
+                    if (in_array($statusName, $availableStatuses)) {
+                        $foundStatus = $statusName;
+                        break;
+                    }
+                }
 
-        // Готовые задачи
-        if (preg_match('/(готово|завершено|выполнено|готовые|завершенные)/', $input)) {
-            return [
-                [
-                    'name' => 'LIST_TASKS',
-                    'parameters' => [
-                        'status' => 'Done'
-                    ]
-                ]
-            ];
+                if ($foundStatus) {
+                    return [
+                        [
+                            'name' => 'LIST_TASKS',
+                            'parameters' => [
+                                'status' => $foundStatus
+                            ]
+                        ]
+                    ];
+                }
+            }
         }
 
         // Общие запросы о задачах
@@ -550,17 +562,16 @@ class FlexibleAiAgentService
 
         // Массовое обновление статуса задач
         if (preg_match('/(переведи|перевести|обнови|обновить).*?(задач|задачи).*?(статус|статус).*?(выполнено|готово|done)/', $input)) {
-            $parameters = ['new_status' => 'Done'];
-
-            // Проверяем разные варианты статуса "выполнено"
-            if (preg_match('/(?:в статус|на статус)\s+(выполнено|готово|done)/i', $input, $matches)) {
-                $status = strtolower($matches[1]);
-                if ($status === 'done' || $status === 'выполнено' || $status === 'готово') {
-                    $parameters['new_status'] = 'Done';
-                } else {
-                    $parameters['new_status'] = $status;
+            // Ищем подходящий "завершенный" статус
+            $completedStatus = 'Done'; // fallback
+            foreach (['Завершена', 'Done', 'Готова к релизу'] as $status) {
+                if (in_array($status, $availableStatuses)) {
+                    $completedStatus = $status;
+                    break;
                 }
             }
+
+            $parameters = ['new_status' => $completedStatus];
 
             // Ищем название проекта
             if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
@@ -571,7 +582,14 @@ class FlexibleAiAgentService
 
             // Ищем текущий статус
             if (preg_match('/(?:которые|что).*?(?:в|на).*?(тестировании|тестирование)/', $input)) {
-                $parameters['current_status'] = 'Testing';
+                $testingStatus = 'Testing'; // fallback
+                foreach (['Тестирование', 'Testing'] as $status) {
+                    if (in_array($status, $availableStatuses)) {
+                        $testingStatus = $status;
+                        break;
+                    }
+                }
+                $parameters['current_status'] = $testingStatus;
             }
 
             return [['name' => 'BULK_UPDATE_TASK_STATUS', 'parameters' => $parameters]];

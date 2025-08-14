@@ -193,6 +193,7 @@ class TelegramController extends Controller
             new ProjectContextProvider(app(ProjectService::class)),
             new UsersContextProvider(),
             new EnumsContextProvider(),
+            new \App\Services\Ai\ContextProviders\DynamicStatusContextProvider(app(\App\Services\TaskStatusService::class)),
         ];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
