@@ -54,4 +54,9 @@ return [
         'log_commands' => env('AI_AGENT_LOG_COMMANDS', true),
         'log_responses' => env('AI_AGENT_LOG_RESPONSES', false),
     ],
+
+    'free' => [
+        // Количество бесплатных запросов к ИИ (для paid = false)
+        'requests' => env('AI_AGENT_FREE_REQUESTS', 9),
+    ],
 ]; 

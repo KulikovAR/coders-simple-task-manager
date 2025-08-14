@@ -76,6 +76,19 @@ class AiAgentService
         RateLimiter::hit($key, 60); // 1 минута
 
         try {
+            // Проверка лимита бесплатных запросов
+            if (!$user->paid && $this->conversationService) {
+                $freeRequests = $this->conversationService->getUserFreeAiRequestsCount($user);
+                $freeLimit = (int) config('ai-agent.free.requests', 9);
+                if ($freeRequests >= $freeLimit) {
+                    return [
+                        'success' => false,
+                        'message' => "Бесплатный лимит в {$freeLimit} запросов исчерпан. Для продолжения оплатите подписку.",
+                        'results' => [],
+                        'commands_executed' => 0,
+                    ];
+                }
+            }
             // Кэшируем контекст
             $contextCacheKey = 'ai_context_' . $user->id;
             $contextTtl = config('ai-agent.caching.context_ttl', 300);

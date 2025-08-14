@@ -40,8 +40,8 @@ export default function PaymentModal({ isOpen, onClose }) {
                     <h3 className="text-xl font-bold text-text-primary mb-2">
                         Спасибо за тестирование!
                     </h3>
-                                                <p className="text-text-secondary text-sm">
-                                В вашем тарифе доступно 5 бесплатных запросов в месяц
+                            <p className="text-text-secondary text-sm">
+                                В вашем тарифе доступно 9 бесплатных запросов в месяц
                             </p>
                 </div>
 
