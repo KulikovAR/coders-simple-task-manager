@@ -4,6 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\TelegramService;
+use App\Services\Ai\FlexibleAiAgentService;
+use App\Services\Ai\CommandRegistry;
+use App\Services\Ai\ContextProviders\UserContextProvider;
+use App\Services\Ai\ContextProviders\ProjectContextProvider;
+use App\Services\Ai\ContextProviders\UsersContextProvider;
+use App\Services\Ai\ContextProviders\EnumsContextProvider;
+use App\Services\ProjectService;
+use App\Services\TaskService;
+use App\Services\SprintService;
+use App\Services\CommentService;
+use App\Services\AiConversationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,6 +62,35 @@ class TelegramController extends Controller
                 return response()->noContent();
             }
 
+            // Команда для общения с ИИ: /ai <запрос>
+            if (str_starts_with(mb_strtolower($text), '/ai')) {
+                // Пытаемся найти пользователя по chatId
+                $user = User::where('telegram_chat_id', (string) $chatId)->first();
+                if (!$user) {
+                    $tg->sendMessage($chatId, 'Аккаунт не привязан. Отправьте /start, скопируйте chatId и вставьте его в профиль на сайте.');
+                    return response()->noContent();
+                }
+
+                $prompt = trim(mb_substr($text, 3));
+                if ($prompt === '') {
+                    $tg->sendMessage($chatId, 'Использование: /ai ваш запрос. Например: /ai создай задачу "Сверстать хедер" в проекте Site.');
+                    return response()->noContent();
+                }
+
+                try {
+                    $ai = $this->createFlexibleAiAgentService();
+                    $result = $ai->processRequest($prompt, $user, null);
+
+                    $reply = $result['message'] ?? 'Не удалось получить ответ.';
+                    $tg->sendMessage($chatId, $reply);
+                } catch (\Throwable $e) {
+                    Log::error('Telegram AI error', ['error' => $e->getMessage()]);
+                    $tg->sendMessage($chatId, 'Произошла ошибка при обращении к ИИ. Попробуйте позже.');
+                }
+
+                return response()->noContent();
+            }
+
             // Если пользователь прислал email — попробуем связать автоматически
             if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
                 $user = User::where('email', $text)->first();
@@ -71,6 +111,25 @@ class TelegramController extends Controller
             Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
             return response()->noContent();
         }
+    }
+
+    private function createFlexibleAiAgentService(): FlexibleAiAgentService
+    {
+        $commandRegistry = new CommandRegistry(
+            app(ProjectService::class),
+            app(TaskService::class),
+            app(SprintService::class),
+            app(CommentService::class)
+        );
+
+        $contextProviders = [
+            new UserContextProvider(),
+            new ProjectContextProvider(app(ProjectService::class)),
+            new UsersContextProvider(),
+            new EnumsContextProvider(),
+        ];
+
+        return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
     }
 }
 

@@ -173,10 +173,7 @@ class TaskController extends Controller
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
 
-        // Уведомляем о создании задачи, если это новая задача
-        if ($oldAssigneeId === null && $task->assignee_id) {
-            $this->notificationService->taskCreated($task, Auth::user());
-        }
+        // Не дублируем уведомление о создании при обновлении задачи
 
         // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');

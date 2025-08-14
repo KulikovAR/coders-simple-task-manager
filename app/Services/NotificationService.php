@@ -83,11 +83,11 @@ class NotificationService
         // Загружаем связанные данные
         $task->load(['project.users']);
 
-        // Уведомляем всех участников проекта
+        // Уведомляем всех участников проекта, кроме автора события и исполнителя (он получит отдельное уведомление task_assigned)
         $projectMembers = $task->project->users ?? collect();
         
         foreach ($projectMembers as $member) {
-            if ($member->id !== Auth::id()) {
+            if ($member->id !== Auth::id() && $member->id !== $task->assignee_id) {
                 $this->createNotification(
                     type: Notification::TYPE_TASK_CREATED,
                     userId: $member->id,
