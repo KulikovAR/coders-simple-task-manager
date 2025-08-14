@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
-export default function Dashboard({ auth, stats, projects }) {
+export default function Dashboard({ auth, stats, projects, telegram }) {
     const [showTips, setShowTips] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('dashboardTipsHidden') !== '1';
@@ -54,6 +54,45 @@ export default function Dashboard({ auth, stats, projects }) {
                             day: 'numeric'
                         })}
                     </p>
+                </div>
+
+                {/* Telegram бот */}
+                <div className="card">
+                    <div className="card-header">
+                        <h3 className="card-title flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Telegram-бот
+                        </h3>
+                        <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
+                    </div>
+                    <div className="card-body">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div className="text-text-secondary text-sm">
+                                {telegram?.bot_username ? (
+                                    <>
+                                        <div>
+                                            Бот: <span className="font-semibold text-text-primary">{telegram.bot_username}</span>
+                                        </div>
+                                        <div className="text-xs text-text-muted mt-1">
+                                            Команды: <code className="px-1 py-0.5 bg-secondary-bg rounded">/start</code>, <code className="px-1 py-0.5 bg-secondary-bg rounded">/id</code>, <code className="px-1 py-0.5 bg-secondary-bg rounded">/ai ваш запрос</code>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-accent-yellow">Имя бота не настроено. Укажите TELEGRAM_BOT_USERNAME в .env</div>
+                                )}
+                            </div>
+                            {telegram?.bot_link && (
+                                <a href={telegram.bot_link} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center w-full md:w-auto justify-center">
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h6m0 0v6m0-6L10 16l-4-4" />
+                                    </svg>
+                                    Открыть в Telegram
+                                </a>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Быстрые действия */}
