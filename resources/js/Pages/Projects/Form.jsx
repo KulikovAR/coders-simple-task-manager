@@ -4,7 +4,13 @@ import { useState } from 'react';
 
 export default function Form({ auth, project = null, errors = {} }) {
     const isEditing = !!project;
-    const [docs, setDocs] = useState(project?.docs && project.docs.length > 0 ? project.docs : ['']);
+    const [docs, setDocs] = useState(() => {
+        if (project?.docs && Array.isArray(project.docs) && project.docs.length > 0) {
+            // Убеждаемся, что все элементы являются строками
+            return project.docs.map(doc => typeof doc === 'string' ? doc : '');
+        }
+        return [''];
+    });
     const [showTips, setShowTips] = useState(!isEditing);
 
     const { data, setData, post, put, processing, errors: formErrors } = useForm({
@@ -12,7 +18,12 @@ export default function Form({ auth, project = null, errors = {} }) {
         description: project?.description || '',
         status: project?.status || 'active',
         deadline: project?.deadline ? project.deadline.split('T')[0] : '',
-        docs: project?.docs && project.docs.length > 0 ? project.docs : [],
+        docs: (() => {
+            if (project?.docs && Array.isArray(project.docs) && project.docs.length > 0) {
+                return project.docs.map(doc => typeof doc === 'string' ? doc : '');
+            }
+            return [];
+        })(),
     });
 
     const handleSubmit = (e) => {
@@ -20,7 +31,7 @@ export default function Form({ auth, project = null, errors = {} }) {
         
         const formData = {
             ...data,
-            docs: docs.filter(doc => doc.trim() !== ''),
+            docs: docs.filter(doc => typeof doc === 'string' && doc.trim() !== ''),
         };
 
         if (isEditing) {
@@ -46,7 +57,7 @@ export default function Form({ auth, project = null, errors = {} }) {
 
     const updateDoc = (index, value) => {
         const newDocs = [...docs];
-        newDocs[index] = value;
+        newDocs[index] = typeof value === 'string' ? value : '';
         setDocs(newDocs);
         // Синхронизируем с данными формы
         setData('docs', newDocs);
@@ -323,11 +334,11 @@ export default function Form({ auth, project = null, errors = {} }) {
                                         </p>
                                     </div>
                                 )}
-                                {docs.filter(doc => doc.trim() !== '').length > 0 && (
+                                {docs.filter(doc => typeof doc === 'string' && doc.trim() !== '').length > 0 && (
                                     <div>
                                         <span className="text-sm text-text-muted">Документы:</span>
                                         <div className="space-y-1 mt-1">
-                                            {docs.filter(doc => doc.trim() !== '').map((doc, index) => (
+                                            {docs.filter(doc => typeof doc === 'string' && doc.trim() !== '').map((doc, index) => (
                                                 <a
                                                     key={index}
                                                     href={doc}
