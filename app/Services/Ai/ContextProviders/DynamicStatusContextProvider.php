@@ -30,7 +30,7 @@ class DynamicStatusContextProvider implements ContextProviderInterface
 
         // Кэшируем статусы на 5 минут
         $cacheKey = "dynamic_statuses_user_{$user->id}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($user) {
             $context = [
                 'project_statuses' => [],
@@ -50,7 +50,7 @@ class DynamicStatusContextProvider implements ContextProviderInterface
 
             foreach ($projects as $project) {
                 $statuses = $this->taskStatusService->getProjectStatuses($project);
-                
+
                 $projectStatuses = $statuses->map(function ($status) {
                     return [
                         'id' => $status->id,
@@ -62,12 +62,12 @@ class DynamicStatusContextProvider implements ContextProviderInterface
                 })->toArray();
 
                 $context['project_statuses'][$project->name] = $projectStatuses;
-                
+
                 // Собираем все уникальные названия статусов
                 foreach ($statuses as $status) {
                     if (!in_array($status->name, $context['available_status_names'])) {
                         $context['available_status_names'][] = $status->name;
-                        
+
                         // Добавляем в маппинг (название -> описание статуса)
                         $context['status_mapping'][$status->name] = $this->getStatusDescription($status->name);
                     }
@@ -90,14 +90,6 @@ class DynamicStatusContextProvider implements ContextProviderInterface
             'Тестирование' => 'Задачи, которые проходят тестирование',
             'Готова к релизу' => 'Задачи, готовые к выпуску',
             'Завершена' => 'Завершенные задачи',
-            'To Do' => 'Задачи к выполнению',
-            'In Progress' => 'Задачи в работе',
-            'Review' => 'Задачи на проверке',
-            'Testing' => 'Задачи в тестировании',
-            'Ready for Release' => 'Задачи готовые к релизу',
-            'Done' => 'Завершенные задачи',
-            'Cancelled' => 'Отмененные задачи',
-            'Отменена' => 'Отмененные задачи',
         ];
 
         return $descriptions[$statusName] ?? "Пользовательский статус: {$statusName}";
