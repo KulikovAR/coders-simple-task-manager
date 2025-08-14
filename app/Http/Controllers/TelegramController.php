@@ -41,6 +41,11 @@ class TelegramController extends Controller
 
             $chat = $message['chat'] ?? [];
             $chatId = $chat['id'] ?? null;
+            $chatType = $chat['type'] ?? 'private';
+            $from = $message['from'] ?? [];
+            $fromId = isset($from['id']) ? (string) $from['id'] : null;
+            $botUsername = config('telegram.bot_username');
+            $botLink = $botUsername ? ('https://t.me/' . ltrim($botUsername, '@')) : null;
             $text = trim((string) ($message['text'] ?? ''));
 
             /** @var TelegramService $tg */
@@ -54,40 +59,68 @@ class TelegramController extends Controller
             if (in_array($text, ['/start', 'start', 'Start'], true)) {
                 $tg->setMyCommands([
                     ['command' => 'ai', 'description' => 'Общение с ИИ: /ai <запрос>'],
-                    ['command' => 'id', 'description' => 'Показать ваш chatId'],
+                    ['command' => 'id', 'description' => 'Показать chatId и senderId'],
                     ['command' => 'start', 'description' => 'Справка и статус подключения'],
                 ]);
             }
 
-            // Приветственное сообщение с chatId
+            // Приветственное сообщение с инструкциями
             if (in_array($text, ['/start', 'start', 'Start'], true)) {
-                $linkedUser = User::where('telegram_chat_id', (string) $chatId)->first();
+                // Проверяем привязку по senderId (в группах chatId = id группы)
+                $linkedUser = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
+
                 if ($linkedUser) {
-                    $tg->sendMessage(
-                        $chatId,
-                        "✅ Telegram уже подключен к вашему аккаунту.\n\nДоступные команды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId"
-                    );
+                    $help = '<b>✅ Telegram уже подключен к вашему аккаунту.</b><br/><br/>' .
+                        '<b>Команды:</b><br/>' .
+                        '<code>/ai ваш запрос</code> — общение с ИИ<br/>' .
+                        '<code>/id</code> — показать chatId и senderId<br/>' .
+                        '<code>/start</code> — справка и статус подключения';
+                    if ($chatType !== 'private') {
+                        $help .= '<br/><br/><i>Вы пишете в группе. Для личных уведомлений начните диалог с ботом в личке</i>';
+                        if ($botLink) {
+                            $help .= ' — <a href="' . $botLink . '">открыть бота</a>';
+                        }
+                    }
+                    $tg->sendMessage($chatId, $help);
                 } else {
-                    $tg->sendMessage(
-                        $chatId,
-                        "Ваш chatId: <b>{$chatId}</b>\n\nПерейдите в профиль на сайте и вставьте этот chatId в поле Telegram.\n\nДоступные команды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId"
-                    );
+                    $help = '<b>Я бот‑помощник</b>: присылаю уведомления и общаюсь с ИИ.<br/><br/>' .
+                        '<b>Ваш chatId:</b> <code>' . $chatId . '</code><br/>' .
+                        ($fromId ? ('<b>Ваш senderId:</b> <code>' . $fromId . '</code><br/>') : '') .
+                        '<br/><b>Как привязать:</b><br/>' .
+                        '— Вставьте <u>senderId</u> в поле Telegram в профиле на сайте<br/>' .
+                        '— Или начните диалог с ботом и отправьте свой email для автопривязки';
+                    if ($botLink) {
+                        $help .= '<br/>Личный чат с ботом: <a href="' . $botLink . '">' . $botLink . '</a>';
+                    }
+                    $help .= '<br/><br/><b>Команды:</b><br/>' .
+                        '<code>/ai ваш запрос</code> — общение с ИИ<br/>' .
+                        '<code>/id</code> — показать chatId и senderId<br/>' .
+                        '<code>/start</code> — справка и статус подключения';
+                    $tg->sendMessage($chatId, $help);
                 }
                 return response()->noContent();
             }
 
             // Обработка команды /id
             if (in_array($text, ['/id', 'id', 'ID'], true)) {
-                $tg->sendMessage($chatId, "Ваш chatId: <b>{$chatId}</b>");
+                $idText = '<b>Ваш chatId:</b> <code>' . $chatId . '</code>';
+                if ($fromId) {
+                    $idText .= "\n<b>Ваш senderId:</b> <code>" . $fromId . '</code>\n<i>Для привязки используйте senderId</i>';
+                }
+                $tg->sendMessage($chatId, $idText);
                 return response()->noContent();
             }
 
             // Команда для общения с ИИ: /ai <запрос>
             if (str_starts_with(mb_strtolower($text), '/ai')) {
-                // Пытаемся найти пользователя по chatId
-                $user = User::where('telegram_chat_id', (string) $chatId)->first();
+                // Ищем пользователя по senderId, чтобы корректно работать в группах
+                $user = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
                 if (!$user) {
-                    $tg->sendMessage($chatId, 'Аккаунт не привязан. Отправьте /start, скопируйте chatId и вставьте его в профиль на сайте.');
+                    $msg = 'Аккаунт не привязан. Вставьте ваш <b>senderId</b> в профиль на сайте (поле Telegram chatId).';
+                    if ($botLink) {
+                        $msg .= "\nЛичный чат с ботом: <a href=\"" . $botLink . '\">перейти</a>';
+                    }
+                    $tg->sendMessage($chatId, $msg);
                     return response()->noContent();
                 }
 
@@ -118,15 +151,25 @@ class TelegramController extends Controller
             if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
                 $user = User::where('email', $text)->first();
                 if ($user) {
-                    $user->telegram_chat_id = (string) $chatId;
+                    // Привязываем по senderId, чтобы связь была персональной, а не с группой
+                    $user->telegram_chat_id = (string) ($fromId ?: $chatId);
                     $user->save();
                     $tg->sendMessage($chatId, 'Telegram успешно подключен к вашему аккаунту.');
                 } else {
-                    $tg->sendMessage($chatId, 'Пользователь с таким email не найден. Введите /id, чтобы получить chatId и вставьте его в профиль.');
+                    $tg->sendMessage($chatId, 'Пользователь с таким email не найден. Введите /id, чтобы получить senderId и вставьте его в профиль.');
                 }
             } else {
-                // Эхо-подсказка
-                $tg->sendMessage($chatId, 'Я бот-помощник: присылаю уведомления и общаюсь с ИИ.\n\nКоманды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId\n- /start — справка и статус подключения\n\nДля привязки отправьте свой email или вставьте chatId в профиль на сайте.');
+                // Эхо-подсказка с HTML-оформлением
+                $hint = '<b>Я бот‑помощник</b>: присылаю уведомления и общаюсь с ИИ.<br/><br/>' .
+                    '<b>Команды:</b><br/>' .
+                    '<code>/ai ваш запрос</code> — общение с ИИ<br/>' .
+                    '<code>/id</code> — показать chatId и senderId<br/>' .
+                    '<code>/start</code> — справка и статус подключения<br/><br/>' .
+                    'Для привязки отправьте свой <b>email</b> или вставьте <u>senderId</u> в профиль на сайте.';
+                if ($botLink) {
+                    $hint .= '<br/>Личный чат с ботом: <a href="' . $botLink . '">' . $botLink . '</a>';
+                }
+                $tg->sendMessage($chatId, $hint);
             }
 
             return response()->noContent();
