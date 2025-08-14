@@ -10,10 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TelegramController extends Controller
 {
-    public function webhook(Request $request, string $token): Response
+    public function webhook(Request $request): Response
     {
-        if ($token !== config('telegram.bot_token')) {
-            return response()->noContent(403);
+        $secret = (string) config('telegram.webhook_secret');
+        if ($secret !== '') {
+            $incoming = (string) $request->header('X-Telegram-Bot-Api-Secret-Token', '');
+            if (!hash_equals($secret, $incoming)) {
+                return response()->noContent(403);
+            }
         }
 
         $update = $request->all();

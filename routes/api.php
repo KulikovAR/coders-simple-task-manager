@@ -75,5 +75,5 @@ Route::get('/health', function () {
     );
 }); 
 
-// Telegram bot webhook (публичный, без CSRF)
-Route::post('/telegram/webhook/{token}', [TelegramController::class, 'webhook'])->name('telegram.webhook');
+// Telegram bot webhook (публичный, без CSRF). Проверка по заголовку X-Telegram-Bot-Api-Secret-Token
+Route::post('/telegram/webhook', [TelegramController::class, 'webhook'])->name('telegram.webhook');
