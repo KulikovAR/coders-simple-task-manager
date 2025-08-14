@@ -50,6 +50,15 @@ class TelegramController extends Controller
                 return response()->noContent();
             }
 
+            // Обновим список команд при каждом /start (безопасно и дёшево)
+            if (in_array($text, ['/start', 'start', 'Start'], true)) {
+                $tg->setMyCommands([
+                    ['command' => 'ai', 'description' => 'Общение с ИИ: /ai <запрос>'],
+                    ['command' => 'id', 'description' => 'Показать ваш chatId'],
+                    ['command' => 'start', 'description' => 'Справка и статус подключения'],
+                ]);
+            }
+
             // Приветственное сообщение с chatId
             if (in_array($text, ['/start', 'start', 'Start'], true)) {
                 $linkedUser = User::where('telegram_chat_id', (string) $chatId)->first();
@@ -117,7 +126,7 @@ class TelegramController extends Controller
                 }
             } else {
                 // Эхо-подсказка
-                $tg->sendMessage($chatId, 'Я бот-уведомлятор. Отправьте /start, /id, либо ваш email для автопривязки.');
+                $tg->sendMessage($chatId, 'Я бот-помощник: присылаю уведомления и общаюсь с ИИ.\n\nКоманды:\n- /ai ваш запрос — общение с ИИ\n- /id — показать ваш chatId\n- /start — справка и статус подключения\n\nДля привязки отправьте свой email или вставьте chatId в профиль на сайте.');
             }
 
             return response()->noContent();

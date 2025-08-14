@@ -52,6 +52,39 @@ class TelegramService
             return false;
         }
     }
+
+    public function setMyCommands(array $commands, array $scope = null, ?string $languageCode = null): bool
+    {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+
+        try {
+            $payload = [
+                'commands' => $commands,
+            ];
+
+            if ($scope !== null) {
+                $payload['scope'] = $scope;
+            }
+            if ($languageCode !== null) {
+                $payload['language_code'] = $languageCode;
+            }
+
+            $response = Http::post($this->apiUrl('setMyCommands'), $payload);
+            if (!$response->ok() || !($response->json('ok') === true)) {
+                Log::warning('Telegram setMyCommands failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return false;
+            }
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Telegram setMyCommands exception', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
 }
 
 
