@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\StatusHasTasksException;
 use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\TaskStatus;
@@ -80,17 +81,29 @@ class TaskStatusController extends Controller
             'statuses.*.id' => 'nullable|integer|exists:task_statuses,id',
         ]);
 
-        $updatedStatuses = $this->taskStatusService->updateProjectStatuses($project, $request->statuses);
+        try {
+            $updatedStatuses = $this->taskStatusService->updateProjectStatuses($project, $request->statuses);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Статусы проекта успешно обновлены',
-                'statuses' => $updatedStatuses,
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Статусы проекта успешно обновлены',
+                    'statuses' => $updatedStatuses,
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Статусы проекта успешно обновлены');
+        } catch (StatusHasTasksException $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'status_names' => $e->getStatusNames(),
+                ], 422);
+            }
+
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Статусы проекта успешно обновлены');
     }
 
     /**
@@ -138,17 +151,29 @@ class TaskStatusController extends Controller
             'statuses.*.color' => ['required', 'string', 'regex:/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/'],
         ]);
 
-        $updatedStatuses = $this->taskStatusService->updateSprintStatuses($sprint, $request->statuses);
+        try {
+            $updatedStatuses = $this->taskStatusService->updateSprintStatuses($sprint, $request->statuses);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Статусы спринта успешно обновлены',
-                'statuses' => $updatedStatuses,
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Статусы спринта успешно обновлены',
+                    'statuses' => $updatedStatuses,
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Статусы спринта успешно обновлены');
+        } catch (StatusHasTasksException $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'status_names' => $e->getStatusNames(),
+                ], 422);
+            }
+
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Статусы спринта успешно обновлены');
     }
 
     /**
@@ -164,33 +189,28 @@ class TaskStatusController extends Controller
             abort(404, 'Спринт не найден в этом проекте');
         }
 
-        // Проверяем, есть ли задачи с кастомными статусами
-        $sprintStatuses = $this->taskStatusService->getSprintStatuses($sprint);
-        $hasTasksWithCustomStatuses = $sprintStatuses->filter(function ($status) {
-            return $status->is_custom && $status->tasks()->count() > 0;
-        })->isNotEmpty();
+        try {
+            $this->taskStatusService->deleteSprintStatuses($sprint);
 
-        if ($hasTasksWithCustomStatuses) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Кастомные статусы спринта удалены. Теперь используются статусы проекта.',
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Кастомные статусы спринта удалены. Теперь используются статусы проекта.');
+        } catch (StatusHasTasksException $e) {
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Нельзя удалить кастомные статусы: есть задачи с этими статусами',
+                    'message' => $e->getMessage(),
+                    'status_names' => $e->getStatusNames(),
                 ], 422);
             }
 
-            return redirect()->back()->with('error', 'Нельзя удалить кастомные статусы: есть задачи с этими статусами');
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        $this->taskStatusService->deleteSprintStatuses($sprint);
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Кастомные статусы спринта удалены. Теперь используются статусы проекта.',
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Кастомные статусы спринта удалены. Теперь используются статусы проекта.');
     }
 
     /**

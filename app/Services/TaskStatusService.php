@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\TaskStatusType;
+use App\Exceptions\StatusHasTasksException;
 use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\TaskStatus;
@@ -90,7 +91,22 @@ class TaskStatusService
     public function updateSprintStatuses(Sprint $sprint, array $statusesData): Collection
     {
         return DB::transaction(function () use ($sprint, $statusesData) {
-            // Удаляем старые кастомные статусы спринта
+            // Проверяем старые статусы спринта перед удалением
+            $oldStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
+            $statusesWithTasks = [];
+            
+            foreach ($oldStatuses as $status) {
+                if (!$this->canDeleteStatus($status)) {
+                    $statusesWithTasks[] = $status->name;
+                }
+            }
+
+            // Если есть статусы с задачами, выбрасываем исключение
+            if (!empty($statusesWithTasks)) {
+                throw new StatusHasTasksException($statusesWithTasks);
+            }
+
+            // Удаляем старые кастомные статусы спринта только если в них нет задач
             TaskStatus::where('sprint_id', $sprint->id)->delete();
 
             $updatedStatuses = new \Illuminate\Database\Eloquent\Collection();
@@ -144,12 +160,30 @@ class TaskStatusService
                 $updatedStatuses->push($status);
             }
 
-            // Удаляем статусы, которые больше не нужны
+            // Проверяем статусы, которые нужно удалить
             $keepIds = $updatedStatuses->pluck('id')->filter();
-            TaskStatus::where('project_id', $project->id)
+            $statusesToDelete = TaskStatus::where('project_id', $project->id)
                 ->whereNull('sprint_id')
                 ->whereNotIn('id', $keepIds)
-                ->delete();
+                ->get();
+
+            // Проверяем, есть ли задачи в статусах, которые планируется удалить
+            $statusesWithTasks = [];
+            foreach ($statusesToDelete as $status) {
+                if (!$this->canDeleteStatus($status)) {
+                    $statusesWithTasks[] = $status->name;
+                }
+            }
+
+            // Если есть статусы с задачами, выбрасываем исключение
+            if (!empty($statusesWithTasks)) {
+                throw new StatusHasTasksException($statusesWithTasks);
+            }
+
+            // Удаляем статусы только если в них нет задач
+            foreach ($statusesToDelete as $status) {
+                $status->delete();
+            }
 
             return $updatedStatuses;
         });
@@ -160,6 +194,21 @@ class TaskStatusService
      */
     public function deleteSprintStatuses(Sprint $sprint): bool
     {
+        // Проверяем статусы спринта перед удалением
+        $sprintStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
+        $statusesWithTasks = [];
+        
+        foreach ($sprintStatuses as $status) {
+            if (!$this->canDeleteStatus($status)) {
+                $statusesWithTasks[] = $status->name;
+            }
+        }
+
+        // Если есть статусы с задачами, выбрасываем исключение
+        if (!empty($statusesWithTasks)) {
+            throw new StatusHasTasksException($statusesWithTasks);
+        }
+
         return TaskStatus::where('sprint_id', $sprint->id)->delete();
     }
 
