@@ -6,7 +6,6 @@ use App\Http\Requests\TaskRequest;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
-use App\Helpers\TaskStatusHelper;
 use App\Services\NotificationService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
@@ -44,28 +43,8 @@ class TaskController extends Controller
             $taskStatuses = $taskStatuses->merge($projectStatuses);
         }
 
-        // Группируем по маппингу и берем русские названия
-        $statusMapping = TaskStatusHelper::getStatusMapping();
-
-        $taskStatuses = $taskStatuses->groupBy(function ($status) use ($statusMapping) {
-            // Если это английское название, возвращаем русское
-            if (isset($statusMapping[$status->name])) {
-                return $statusMapping[$status->name];
-            }
-            // Если это русское название, возвращаем его
-            if (in_array($status->name, $statusMapping)) {
-                return $status->name;
-            }
-            // Иначе возвращаем оригинальное название
-            return $status->name;
-        })->map(function ($group) use ($statusMapping) {
-            $status = $group->first();
-            // Обновляем название на русское, если это английское
-            if (isset($statusMapping[$status->name])) {
-                $status->name = $statusMapping[$status->name];
-            }
-            return $status;
-        })->sortBy('order')->values();
+        // Убираем дубликаты и сортируем по порядку
+        $taskStatuses = $taskStatuses->unique('name')->sortBy('order')->values();
 
         return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'filters'));
     }
@@ -312,16 +291,6 @@ class TaskController extends Controller
         }
 
         $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
-
-        // Применяем маппинг к статусам
-        $statusMapping = TaskStatusHelper::getStatusMapping();
-
-        $taskStatuses = $taskStatuses->map(function ($status) use ($statusMapping) {
-            if (isset($statusMapping[$status->name])) {
-                $status->name = $statusMapping[$status->name];
-            }
-            return $status;
-        });
 
         Log::info('Task statuses loaded', [
             'project_id' => $project->id,

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\TaskStatusHelper;
+
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
@@ -31,20 +31,9 @@ class TaskService
         }
 
         if (!empty($filters['status'])) {
-            $searchStatus = $filters['status'];
-            $statusMapping = TaskStatusHelper::getStatusMapping();
-            
-            // Если ищем русское название, добавляем поиск по английскому
-            if (isset($statusMapping[$searchStatus])) {
-                $query->whereHas('status', function($q) use ($searchStatus, $statusMapping) {
-                    $q->where('name', $searchStatus)
-                      ->orWhere('name', $statusMapping[$searchStatus]);
-                });
-            } else {
-                $query->whereHas('status', function($q) use ($filters) {
-                    $q->where('name', 'like', '%' . $filters['status'] . '%');
-                });
-            }
+            $query->whereHas('status', function($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['status'] . '%');
+            });
         }
 
         if (!empty($filters['priority'])) {

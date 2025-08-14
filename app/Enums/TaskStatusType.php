@@ -4,12 +4,12 @@ namespace App\Enums;
 
 enum TaskStatusType: string
 {
-    case TODO = 'To Do';
-    case IN_PROGRESS = 'In Progress';
-    case REVIEW = 'Review';
-    case TESTING = 'Testing';
-    case READY_FOR_RELEASE = 'Ready for Release';
-    case DONE = 'Done';
+    case TODO = 'К выполнению';
+    case IN_PROGRESS = 'В работе';
+    case REVIEW = 'На проверке';
+    case TESTING = 'Тестирование';
+    case READY_FOR_RELEASE = 'Готов к релизу';
+    case DONE = 'Завершена';
 
     public function getOrder(): int
     {
