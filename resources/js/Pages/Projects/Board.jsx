@@ -19,6 +19,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     // Мобильный лонгтап для смены статуса
     const [isStatusOverlayOpen, setIsStatusOverlayOpen] = useState(false);
     const [statusOverlayTask, setStatusOverlayTask] = useState(null);
@@ -30,6 +31,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     useEffect(() => {
         setLocalTasks(tasks);
     }, [tasks]);
+
+    // Автоматически скрываем сообщение об успехе через 4 секунды
+    useEffect(() => {
+        if (successMessage) {
+            const timer = setTimeout(() => {
+                setSuccessMessage('');
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [successMessage]);
 
     // Обработка клавиши Escape для закрытия модалки
     useEffect(() => {
@@ -99,33 +110,91 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowPaymentModal(false);
     };
 
-    const handleTaskUpdate = (data) => {
+    const handleTaskUpdate = async (data) => {
         setProcessing(true);
         setErrors({});
 
-        router.put(route('tasks.update', selectedTask.id), data, {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: (page) => {
-                // Обновляем задачу в локальном состоянии
+        try {
+            // Подготавливаем данные для отправки
+            const formData = new FormData();
+            
+            // Добавляем все поля из data
+            Object.keys(data).forEach(key => {
+                if (data[key] !== null && data[key] !== undefined) {
+                    formData.append(key, data[key]);
+                }
+            });
+            
+            // Добавляем метод для Laravel
+            formData.append('_method', 'PUT');
+
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            const response = await fetch(route('tasks.update', selectedTask.id), {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Обновляем задачу в локальном состоянии с данными, полученными от сервера
                 setLocalTasks(prevTasks =>
                     prevTasks.map(task =>
                         task.id === selectedTask.id
-                            ? { ...task, ...data }
+                            ? {
+                                ...task,
+                                ...result.task,
+                                // Убеждаемся, что связанные объекты правильно обновляются
+                                assignee: result.task.assignee || task.assignee,
+                                status: result.task.status || task.status,
+                                sprint: result.task.sprint || task.sprint,
+                                project: result.task.project || task.project,
+                                // Обновляем поля статуса для совместимости
+                                status_id: result.task.status_id || result.task.status?.id || task.status_id,
+                                sprint_id: result.task.sprint_id || result.task.sprint?.id || task.sprint_id,
+                                assignee_id: result.task.assignee_id || result.task.assignee?.id || task.assignee_id,
+                                project_id: result.task.project_id || result.task.project?.id || task.project_id
+                            }
                             : task
                     )
                 );
+                
+                // Обновляем выбранную задачу для отображения в модалке
+                setSelectedTask(prev => ({
+                    ...prev,
+                    ...result.task,
+                    assignee: result.task.assignee || prev.assignee,
+                    status: result.task.status || prev.status,
+                    sprint: result.task.sprint || prev.sprint,
+                    project: result.task.project || prev.project
+                }));
+                
                 closeTaskModal();
-                setProcessing(false);
-            },
-            onError: (errors) => {
-                setErrors(errors);
-                setProcessing(false);
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        });
+                
+                // Показываем сообщение об успехе
+                setSuccessMessage(result.message || 'Задача успешно обновлена');
+            } else {
+                // Обрабатываем ошибки валидации
+                if (result.errors) {
+                    setErrors(result.errors);
+                } else {
+                    setErrors({ general: result.message || 'Произошла ошибка при обновлении задачи' });
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении задачи:', error);
+            setErrors({ general: 'Произошла ошибка при обновлении задачи' });
+        } finally {
+            setProcessing(false);
+        }
     };
 
     const getStatusColor = (status) => {
@@ -435,6 +504,29 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             <Head title={`${project.name} - Доска`} />
 
             <div className="space-y-6">
+                {/* Сообщение об успехе */}
+                {successMessage && (
+                    <div className="bg-accent-green/10 border border-accent-green/20 rounded-lg text-accent-green animate-fade-in">
+                        <div className="flex items-start gap-3 p-4">
+                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <div className="flex-1">
+                                <h4 className="font-medium mb-1">Успешно!</h4>
+                                <p className="text-sm">{successMessage}</p>
+                            </div>
+                            <button
+                                onClick={() => setSuccessMessage('')}
+                                className="text-accent-green/60 hover:text-accent-green transition-colors p-1"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Новый заголовок и статус */}
                 <div className="mb-2">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">

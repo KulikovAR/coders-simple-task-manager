@@ -124,7 +124,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project.users', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
+        $task->load(['project.users', 'project.owner', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
 
         // Если это AJAX запрос из модалки доски, возвращаем JSON
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
@@ -188,6 +188,16 @@ class TaskController extends Controller
         }
 
         // Не дублируем уведомление о создании при обновлении задачи
+
+        // Проверяем, это AJAX запрос или обычный
+        if ($request->ajax() || $request->wantsJson()) {
+            // Возвращаем JSON ответ для AJAX запросов
+            return response()->json([
+                'success' => true,
+                'message' => 'Задача успешно обновлена.',
+                'task' => $task->load(['assignee', 'project', 'status', 'sprint'])
+            ]);
+        }
 
         // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');

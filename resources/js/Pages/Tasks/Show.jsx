@@ -140,7 +140,16 @@ export default function Show({ auth, task }) {
                             task={task}
                             comments={task.comments || []}
                             auth={auth}
-                            users={task.project?.users || []}
+                            users={
+                                task.project 
+                                    ? [
+                                        ...(task.project.owner ? [task.project.owner] : []), 
+                                        ...(task.project.users || [])
+                                      ].filter((user, index, array) => 
+                                        array.findIndex(u => u.id === user.id) === index
+                                      )
+                                    : []
+                            }
                             compact={false}
                         />
                     </div>
