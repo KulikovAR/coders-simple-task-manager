@@ -60,7 +60,27 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     }, [localTasks, draggedTask]);
 
     const openTaskModal = (task) => {
-        setSelectedTask(task);
+        // Загружаем задачу с комментариями
+        fetch(route('tasks.show', task.id) + '?modal=1', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.props && data.props.task) {
+                setSelectedTask(data.props.task);
+            } else {
+                setSelectedTask(task);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки задачи:', error);
+            setSelectedTask(task);
+        });
+        
         setShowTaskModal(true);
         setErrors({});
     };
@@ -886,6 +906,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 onCancel={closeTaskModal}
                                 isModal={true}
                                 processing={processing}
+                                auth={auth}
                             />
                         </div>
                     </div>

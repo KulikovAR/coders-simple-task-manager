@@ -1,54 +1,17 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
-import { 
-    getCommentTypeLabel, 
-    getCommentTypeIcon, 
-    getCommentTypeClass, 
-    getCommentTemplate,
-    getBasicCommentTypeOptions,
-    getSpecialCommentTypeOptions,
-    COMMENT_TYPES
-} from '@/utils/commentUtils';
+import TaskComments from '@/Components/TaskComments';
 
 export default function Show({ auth, task }) {
-    const [showCommentForm, setShowCommentForm] = useState(false);
-    const [commentType, setCommentType] = useState(COMMENT_TYPES.GENERAL);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    
-    const { data, setData, post, processing, errors } = useForm({
-        content: '',
-        type: COMMENT_TYPES.GENERAL,
-    });
 
     const getPriorityText = (priority) => {
         return getPriorityLabel(priority);
     };
 
-    const handleCommentSubmit = (e) => {
-        e.preventDefault();
-        post(route('tasks.comments.store', task.id), {
-            onSuccess: () => {
-                setData('content', '');
-                setData('type', COMMENT_TYPES.GENERAL);
-                setCommentType(COMMENT_TYPES.GENERAL);
-                setShowCommentForm(false);
-            },
-        });
-    };
 
-    const handleCommentTypeChange = (newType) => {
-        setCommentType(newType);
-        setData('type', newType);
-        
-        const template = getCommentTemplate(newType);
-        if (template) {
-            setData('content', template);
-        } else {
-            setData('content', '');
-        }
-    };
 
     const getProjectStatusText = (status) => {
         switch (status) {
@@ -65,13 +28,7 @@ export default function Show({ auth, task }) {
         }
     };
 
-    const getCommentCardClass = (commentType) => {
-        const baseClass = 'comment-card';
-        const specialClass = commentType !== COMMENT_TYPES.GENERAL ? 'comment-card-special' : '';
-        const typeClass = `comment-card-${commentType.replace('_', '-')}`;
-        
-        return `${baseClass} ${specialClass} ${typeClass}`;
-    };
+
 
     // Удаление задачи
     const handleDelete = () => {
@@ -179,141 +136,13 @@ export default function Show({ auth, task }) {
                         )}
 
                         {/* Комментарии */}
-                        <div className="card">
-                            <div className="card-header">
-                                <h3 className="card-title">Комментарии</h3>
-                                <button
-                                    onClick={() => setShowCommentForm(!showCommentForm)}
-                                    className="btn btn-primary btn-sm"
-                                >
-                                    {showCommentForm ? 'Отмена' : 'Добавить комментарий'}
-                                </button>
-                            </div>
-
-                            {showCommentForm && (
-                                <form onSubmit={handleCommentSubmit} className="mb-6">
-                                    <div className="space-y-4">
-                                        {/* Тип комментария */}
-                                        <div>
-                                            <label className="form-label">Тип комментария</label>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                {/* Основные типы */}
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Основные</h4>
-                                                    <div className="space-y-2">
-                                                        {getBasicCommentTypeOptions().map((option) => (
-                                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
-                                                                <input
-                                                                    type="radio"
-                                                                    name="commentType"
-                                                                    value={option.value}
-                                                                    checked={commentType === option.value}
-                                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
-                                                                    className="form-radio"
-                                                                />
-                                                                <span className="text-sm">{option.icon} {option.label}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                
-                                                {/* Специальные типы */}
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Специальные</h4>
-                                                    <div className="space-y-2">
-                                                        {getSpecialCommentTypeOptions().map((option) => (
-                                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
-                                                                <input
-                                                                    type="radio"
-                                                                    name="commentType"
-                                                                    value={option.value}
-                                                                    checked={commentType === option.value}
-                                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
-                                                                    className="form-radio"
-                                                                />
-                                                                <span className="text-sm">{option.icon} {option.label}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {errors.type && (
-                                                <p className="mt-1 text-sm text-accent-red">{errors.type}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Содержание комментария */}
-                                        <div>
-                                            <label htmlFor="content" className="form-label">
-                                                Содержание
-                                            </label>
-                                            <textarea
-                                                id="content"
-                                                value={data.content}
-                                                onChange={(e) => setData('content', e.target.value)}
-                                                rows={commentType === COMMENT_TYPES.GENERAL ? 4 : 8}
-                                                className={`form-input ${
-                                                    errors.content ? 'border-accent-red focus:ring-accent-red' : ''
-                                                }`}
-                                                placeholder="Введите комментарий..."
-                                                required
-                                            />
-                                            {errors.content && (
-                                                <p className="mt-1 text-sm text-accent-red">{errors.content}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Кнопки */}
-                                        <div className="flex space-x-3">
-                                            <button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="btn btn-primary"
-                                            >
-                                                {processing ? 'Отправка...' : 'Отправить'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowCommentForm(false)}
-                                                className="btn btn-secondary"
-                                            >
-                                                Отмена
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            )}
-
-                            {/* Список комментариев */}
-                            <div className="space-y-4">
-                                {task.comments && task.comments.length > 0 ? (
-                                    task.comments.map((comment) => (
-                                        <div key={comment.id} className={getCommentCardClass(comment.type)}>
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center space-x-3">
-                                                    <span className={`comment-badge ${getCommentTypeClass(comment.type)}`}>
-                                                        {getCommentTypeIcon(comment.type)} {getCommentTypeLabel(comment.type)}
-                                                    </span>
-                                                    <span className="text-sm font-medium text-text-primary">
-                                                        {comment.user.name}
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs text-text-muted">
-                                                    {new Date(comment.created_at).toLocaleString('ru-RU')}
-                                                </span>
-                                            </div>
-                                            <div className="text-text-secondary text-sm whitespace-pre-wrap">
-                                                {comment.content}
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-text-muted text-center py-4">
-                                        Комментариев пока нет
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                        <TaskComments
+                            task={task}
+                            comments={task.comments || []}
+                            auth={auth}
+                            users={task.project?.users || []}
+                            compact={false}
+                        />
                     </div>
 
                     {/* Боковая панель */}

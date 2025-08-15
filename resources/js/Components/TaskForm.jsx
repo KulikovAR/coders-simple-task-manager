@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import { useState, useEffect } from 'react';
+import TaskComments from '@/Components/TaskComments';
 
 export default function TaskForm({ 
     task = null, 
@@ -12,7 +13,8 @@ export default function TaskForm({
     onSubmit, 
     onCancel, 
     isModal = false,
-    processing = false 
+    processing = false,
+    auth = null
 }) {
     const isEditing = !!task;
 
@@ -384,6 +386,24 @@ export default function TaskForm({
                                         placeholder="https://github.com/..."
                                     />
                                 </div>
+
+                                {/* Комментарии */}
+                                {auth && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-secondary mb-3">
+                                            Комментарии
+                                        </label>
+                                        <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
+                                            <TaskComments
+                                                task={task}
+                                                comments={task.comments || []}
+                                                auth={auth}
+                                                users={members}
+                                                compact={true}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>

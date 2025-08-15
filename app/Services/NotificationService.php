@@ -183,6 +183,29 @@ class NotificationService
     }
 
     /**
+     * Создать уведомление об упоминании пользователя в комментарии
+     */
+    public function userMentioned(TaskComment $comment, User $mentionedUser, ?User $fromUser = null): void
+    {
+        // Загружаем связанные данные
+        $comment->load(['task.project']);
+
+        $this->createNotification(
+            type: Notification::TYPE_USER_MENTIONED,
+            userId: $mentionedUser->id,
+            fromUserId: $fromUser?->id ?? Auth::id(),
+            notifiable: $comment,
+            data: [
+                'task_title' => $this->sanitizeUtf8($comment->task?->title ?? 'Неизвестная задача'),
+                'task_id' => $comment->task->id,
+                'project_name' => $this->sanitizeUtf8($comment->task?->project?->name ?? 'Неизвестный проект'),
+                'comment_preview' => $this->createCommentPreview($comment->content),
+                'mentioned_user_name' => $this->sanitizeUtf8($mentionedUser->name),
+            ]
+        );
+    }
+
+    /**
      * Создать уведомление о начале спринта
      */
     public function sprintStarted(Sprint $sprint, ?User $fromUser = null): void

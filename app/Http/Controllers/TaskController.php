@@ -118,13 +118,22 @@ class TaskController extends Controller
             ->with('success', 'Задача успешно создана.');
     }
 
-    public function show(Task $task)
+    public function show(Task $task, Request $request)
     {
         if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
+        $task->load(['project.users', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
+
+        // Если это AJAX запрос из модалки доски, возвращаем JSON
+        if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
+            return response()->json([
+                'props' => [
+                    'task' => $task,
+                ]
+            ]);
+        }
 
         return Inertia::render('Tasks/Show', [
             'task' => $task,

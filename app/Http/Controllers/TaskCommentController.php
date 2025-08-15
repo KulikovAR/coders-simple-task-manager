@@ -8,6 +8,7 @@ use App\Http\Requests\TaskCommentRequest;
 use App\Services\NotificationService;
 use App\Services\TaskCommentService;
 use App\Services\TaskService;
+use App\Helpers\MentionHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -43,10 +44,32 @@ class TaskCommentController extends Controller
         $comment = $this->taskCommentService->createComment($request->validated(), $task, Auth::user());
 
         // Загружаем связанные данные для уведомлений
-        $comment->load(['task.assignee', 'task.reporter']);
+        $comment->load(['task.assignee', 'task.reporter', 'task.project.users']);
 
         // Уведомляем о новом комментарии
         $this->notificationService->commentAdded($comment, Auth::user());
+
+        // Обрабатываем упоминания в комментарии
+        $mentionedUsers = MentionHelper::getMentionedUsers(
+            $comment->content, 
+            $comment->task->project->users
+        );
+
+        // Отправляем уведомления упомянутым пользователям
+        foreach ($mentionedUsers as $mentionedUser) {
+            if ($mentionedUser->id !== Auth::id()) {
+                $this->notificationService->userMentioned($comment, $mentionedUser, Auth::user());
+            }
+        }
+
+        // Если это AJAX запрос, возвращаем JSON
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Комментарий успешно добавлен.',
+                'comment' => $comment->load('user')
+            ]);
+        }
 
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Комментарий успешно добавлен.');
@@ -72,11 +95,20 @@ class TaskCommentController extends Controller
 
         $comment = $this->taskCommentService->updateComment($comment, $request->validated());
 
+        // Если это AJAX запрос, возвращаем JSON
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Комментарий успешно обновлен.',
+                'comment' => $comment->load('user')
+            ]);
+        }
+
         return redirect()->route('tasks.show', $comment->task)
             ->with('success', 'Комментарий успешно обновлен.');
     }
 
-    public function destroy(TaskComment $comment)
+    public function destroy(TaskComment $comment, Request $request)
     {
         if (!$this->taskCommentService->canUserManageComment(Auth::user(), $comment)) {
             abort(403, 'Доступ запрещен');
@@ -84,6 +116,14 @@ class TaskCommentController extends Controller
 
         $task = $comment->task;
         $this->taskCommentService->deleteComment($comment);
+
+        // Если это AJAX запрос, возвращаем JSON
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Комментарий успешно удален.'
+            ]);
+        }
 
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Комментарий успешно удален.');

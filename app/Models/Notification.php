@@ -35,6 +35,7 @@ class Notification extends Model
     const TYPE_TASK_UPDATED = 'task_updated';
     const TYPE_TASK_PRIORITY_CHANGED = 'task_priority_changed';
     const TYPE_COMMENT_ADDED = 'comment_added';
+    const TYPE_USER_MENTIONED = 'user_mentioned';
     const TYPE_SPRINT_STARTED = 'sprint_started';
     const TYPE_SPRINT_ENDED = 'sprint_ended';
     const TYPE_PROJECT_INVITED = 'project_invited';
@@ -90,6 +91,7 @@ class Notification extends Model
             self::TYPE_TASK_UPDATED => 'Задача ":task_title" обновлена',
             self::TYPE_TASK_PRIORITY_CHANGED => 'Приоритет задачи ":task_title" изменен на ":priority"',
             self::TYPE_COMMENT_ADDED => 'Добавлен комментарий к задаче ":task_title"',
+            self::TYPE_USER_MENTIONED => 'Вас упомянули в комментарии к задаче ":task_title"',
             self::TYPE_SPRINT_STARTED => 'Спринт ":sprint_name" начался',
             self::TYPE_SPRINT_ENDED => 'Спринт ":sprint_name" завершён',
             self::TYPE_PROJECT_INVITED => 'Вас пригласили в проект ":project_name"',
@@ -118,6 +120,7 @@ class Notification extends Model
             self::TYPE_TASK_CREATED => '➕',
             self::TYPE_TASK_UPDATED => '✏️',
             self::TYPE_COMMENT_ADDED => '💬',
+            self::TYPE_USER_MENTIONED => '👋',
             self::TYPE_SPRINT_STARTED => '🏃',
             self::TYPE_SPRINT_ENDED => '🏁',
             self::TYPE_PROJECT_INVITED => '👥',
@@ -137,6 +140,7 @@ class Notification extends Model
             self::TYPE_TASK_CREATED => 'text-purple-500',
             self::TYPE_TASK_UPDATED => 'text-yellow-500',
             self::TYPE_COMMENT_ADDED => 'text-indigo-500',
+            self::TYPE_USER_MENTIONED => 'text-purple-500',
             self::TYPE_SPRINT_STARTED => 'text-green-500',
             self::TYPE_SPRINT_ENDED => 'text-red-500',
             self::TYPE_PROJECT_INVITED => 'text-blue-500',
