@@ -16,7 +16,7 @@ export default function TaskCard({ task }) {
                         {task.code}
                     </div>
                 )}
-                <Link 
+                <Link
                     href={route('tasks.show', task.id)}
                     className="block group-hover:text-accent-blue transition-colors duration-200"
                 >
@@ -84,8 +84,8 @@ export default function TaskCard({ task }) {
                     <div className="flex items-center justify-between">
                         <span className="text-body-small text-text-muted font-medium">Дедлайн:</span>
                         <span className={`text-body-small font-medium ${
-                            new Date(task.deadline) < new Date() 
-                                ? 'text-accent-red' 
+                            new Date(task.deadline) < new Date()
+                                ? 'text-accent-red'
                                 : 'text-text-primary'
                         }`}>
                             {new Date(task.deadline).toLocaleDateString('ru-RU')}
@@ -108,4 +108,4 @@ export default function TaskCard({ task }) {
             </div>
         </div>
     );
-} 
+}

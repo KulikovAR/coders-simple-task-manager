@@ -92,11 +92,42 @@ class TaskStatusService
     public function updateSprintStatuses(Sprint $sprint, array $statusesData): Collection
     {
         return DB::transaction(function () use ($sprint, $statusesData) {
-            // Проверяем старые статусы спринта перед удалением
-            $oldStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
+            $existingStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
+            $updatedStatuses = new \Illuminate\Database\Eloquent\Collection();
+
+            foreach ($statusesData as $index => $statusData) {
+                $statusId = $statusData['id'] ?? null;
+                
+                if ($statusId && $status = $existingStatuses->find($statusId)) {
+                    // Обновляем существующий статус
+                    $status->update([
+                        'name' => $statusData['name'],
+                        'order' => $index + 1,
+                        'color' => $statusData['color'],
+                    ]);
+                } else {
+                    // Создаем новый статус
+                    $status = TaskStatus::create([
+                        'project_id' => $sprint->project_id,
+                        'sprint_id' => $sprint->id,
+                        'name' => $statusData['name'],
+                        'order' => $index + 1,
+                        'color' => $statusData['color'],
+                        'is_custom' => true,
+                    ]);
+                }
+                $updatedStatuses->push($status);
+            }
+
+            // Проверяем статусы, которые нужно удалить
+            $keepIds = $updatedStatuses->pluck('id')->filter();
+            $statusesToDelete = TaskStatus::where('sprint_id', $sprint->id)
+                ->whereNotIn('id', $keepIds)
+                ->get();
+
+            // Проверяем, есть ли задачи в статусах, которые планируется удалить
             $statusesWithTasks = [];
-            
-            foreach ($oldStatuses as $status) {
+            foreach ($statusesToDelete as $status) {
                 if (!$this->canDeleteStatus($status)) {
                     $statusesWithTasks[] = $status->name;
                 }
@@ -107,21 +138,9 @@ class TaskStatusService
                 throw new StatusHasTasksException($statusesWithTasks);
             }
 
-            // Удаляем старые кастомные статусы спринта только если в них нет задач
-            TaskStatus::where('sprint_id', $sprint->id)->delete();
-
-            $updatedStatuses = new \Illuminate\Database\Eloquent\Collection();
-
-            foreach ($statusesData as $index => $statusData) {
-                $status = TaskStatus::create([
-                    'project_id' => $sprint->project_id,
-                    'sprint_id' => $sprint->id,
-                    'name' => $statusData['name'],
-                    'order' => $index + 1,
-                    'color' => $statusData['color'],
-                    'is_custom' => true,
-                ]);
-                $updatedStatuses->push($status);
+            // Удаляем статусы только если в них нет задач
+            foreach ($statusesToDelete as $status) {
+                $status->delete();
             }
 
             return $updatedStatuses;

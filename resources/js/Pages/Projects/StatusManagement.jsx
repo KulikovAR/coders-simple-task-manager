@@ -5,8 +5,6 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
-import FlashMessages from '@/Components/FlashMessages';
-
 export default function StatusManagement({ 
     auth, 
     project, 
@@ -15,13 +13,14 @@ export default function StatusManagement({
     hasCustomStatuses = false,
     projectStatuses = [],
     type = 'project',
-    flash = {}
+    flash = {},
+    errors: pageErrors = {}
 }) {
     const [statuses, setStatuses] = useState(taskStatuses || []);
     const [isEditing, setIsEditing] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState(pageErrors || {});
     const [draggedIndex, setDraggedIndex] = useState(null);
 
     // Цвета по умолчанию для новых статусов
@@ -39,6 +38,10 @@ export default function StatusManagement({
     useEffect(() => {
         setStatuses(taskStatuses || []);
     }, [taskStatuses]);
+
+    useEffect(() => {
+        setErrors(pageErrors || {});
+    }, [pageErrors]);
 
     const isSprintMode = type === 'sprint';
     const pageTitle = isSprintMode ? `Статусы спринта: ${sprint?.name}` : `Статусы проекта: ${project.name}`;

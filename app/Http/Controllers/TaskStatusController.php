@@ -102,7 +102,11 @@ class TaskStatusController extends Controller
                 ], 422);
             }
 
-            return redirect()->back()->with('error', $e->getMessage());
+            // Для Inertia-запросов возвращаем ошибки валидации
+            return redirect()->back()->withErrors([
+                'message' => $e->getMessage(),
+                'status_names' => $e->getStatusNames(),
+            ]);
         }
     }
 
@@ -172,7 +176,11 @@ class TaskStatusController extends Controller
                 ], 422);
             }
 
-            return redirect()->back()->with('error', $e->getMessage());
+            // Для Inertia-запросов возвращаем ошибки валидации
+            return redirect()->back()->withErrors([
+                'message' => $e->getMessage(),
+                'status_names' => $e->getStatusNames(),
+            ]);
         }
     }
 
@@ -209,7 +217,11 @@ class TaskStatusController extends Controller
                 ], 422);
             }
 
-            return redirect()->back()->with('error', $e->getMessage());
+            // Для Inertia-запросов возвращаем ошибки валидации
+            return redirect()->back()->withErrors([
+                'message' => $e->getMessage(),
+                'status_names' => $e->getStatusNames(),
+            ]);
         }
     }
 
