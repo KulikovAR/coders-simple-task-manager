@@ -6,6 +6,7 @@ import StatsGrid from '@/Components/StatsGrid';
 import FilterPanel from '@/Components/FilterPanel';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
+import PageHeader from '@/Components/PageHeader';
 
 export default function Index({ auth, projects, filters }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -61,33 +62,29 @@ export default function Index({ auth, projects, filters }) {
             <Head title="Проекты" />
 
             <div className="space-y-6">
-                {/* Заголовок и кнопка создания */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-text-primary">Проекты</h1>
-                        <p className="text-text-secondary mt-1">Управление проектами и задачами</p>
-                    </div>
-                    <div className="flex space-x-3">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="btn btn-secondary inline-flex items-center"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Фильтры
-                        </button>
-                        <Link
-                            href={route('projects.create')}
-                            className="btn btn-primary inline-flex items-center"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Новый проект
-                        </Link>
-                    </div>
-                </div>
+                {/* Заголовок и кнопки действий */}
+                <PageHeader
+                    title="Проекты"
+                    description="Управление проектами и задачами"
+                    actions={[
+                        {
+                            type: 'button',
+                            variant: 'secondary',
+                            text: 'Фильтры',
+                            icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',
+                            onClick: () => setShowFilters(!showFilters),
+                            mobileOrder: 2
+                        },
+                        {
+                            type: 'link',
+                            variant: 'primary',
+                            text: 'Новый проект',
+                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+                            href: route('projects.create'),
+                            mobileOrder: 1
+                        }
+                    ]}
+                />
 
                 {/* Статистика */}
                 <StatsGrid 

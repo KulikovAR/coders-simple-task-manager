@@ -549,85 +549,101 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                   </div>
                 </div>
 
-                {/* Компактный фильтр и кнопки */}
+                {/* Улучшенные фильтры и кнопки */}
                 <div className="card">
-                  <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 justify-between">
-                    {/* Спринты */}
-                    <select
-                      value={currentSprintId}
-                      onChange={e => {
-                        const newSprintId = e.target.value;
-                        setCurrentSprintId(newSprintId);
-                        // Обновляем URL для загрузки правильных статусов
-                        const url = newSprintId === 'none'
-                          ? route('projects.board', project.id)
-                          : route('projects.board', project.id) + '?sprint_id=' + newSprintId;
-                        router.visit(url, { preserveState: false });
-                      }}
-                      className="form-select min-w-[140px] max-w-[180px]"
-                    >
-                      <option value="none">Без спринта</option>
-                      {sprints.map(sprint => (
-                        <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
-                      ))}
-                    </select>
-                    {/* Исполнитель */}
-                    <select
-                      value={assigneeId}
-                      onChange={e => setAssigneeId(e.target.value)}
-                      className="form-select min-w-[140px] max-w-[180px]"
-                    >
-                      <option value="">Все исполнители</option>
-                      {members.map(user => (
-                        <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
-                      ))}
-                    </select>
-                    {/* Мои задачи */}
-                    <label className="flex items-center gap-2 text-body-small text-text-primary whitespace-nowrap select-none cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={myTasks}
-                        onChange={e => setMyTasks(e.target.checked)}
-                        className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200"
-                      />
-                      <span className="ml-1">Мои задачи</span>
-                    </label>
-                    {/* Кнопка создать спринт */}
-                    <Link
-                      href={route('sprints.create', project.id)}
-                      className="btn btn-secondary ml-auto"
-                    >
-                      + Спринт
-                    </Link>
-                    {/* Кнопки создания задач */}
-                    <div className="flex space-x-3">
-                        <button
-                            onClick={() => {
-                                // Проверяем, есть ли у пользователя активная подписка
-                                const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
-                                if (!isPaid) {
-                                    openPaymentModal();
-                                } else {
-                                    router.visit(route('ai-agent.index'));
-                                }
-                            }}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm justify-center min-w-[160px]"
-                            style={{ color: 'white' }}
+                  <div className="space-y-4">
+                    {/* Первая строка: основные фильтры */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {/* Спринты */}
+                      <div>
+                        <label className="block text-xs font-medium text-text-secondary mb-1">Спринт</label>
+                        <select
+                          value={currentSprintId}
+                          onChange={e => {
+                            const newSprintId = e.target.value;
+                            setCurrentSprintId(newSprintId);
+                            const url = newSprintId === 'none'
+                              ? route('projects.board', project.id)
+                              : route('projects.board', project.id) + '?sprint_id=' + newSprintId;
+                            router.visit(url, { preserveState: false });
+                          }}
+                          className="form-select w-full"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            Задача с ИИ
+                          <option value="none">Без спринта</option>
+                          {sprints.map(sprint => (
+                            <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {/* Исполнитель */}
+                      <div>
+                        <label className="block text-xs font-medium text-text-secondary mb-1">Исполнитель</label>
+                        <select
+                          value={assigneeId}
+                          onChange={e => setAssigneeId(e.target.value)}
+                          className="form-select w-full"
+                        >
+                          <option value="">Все исполнители</option>
+                          {members.map(user => (
+                            <option key={user.id} value={user.id}>{user.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {/* Мои задачи */}
+                      <div className="flex items-end">
+                        <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
+                          <input
+                            type="checkbox"
+                            checked={myTasks}
+                            onChange={e => setMyTasks(e.target.checked)}
+                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200"
+                          />
+                          <span>Мои задачи</span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    {/* Вторая строка: кнопки действий */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-border-color">
+                      <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                        <Link
+                          href={route('sprints.create', project.id)}
+                          className="btn btn-secondary btn-mobile-stack order-3 sm:order-1"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Создать спринт
+                        </Link>
+                        <button
+                          onClick={() => {
+                            const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
+                            if (!isPaid) {
+                              openPaymentModal();
+                            } else {
+                              router.visit(route('ai-agent.index'));
+                            }
+                          }}
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm text-white btn-mobile-stack order-2 sm:order-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          <span className="hidden sm:inline">Задача с ИИ</span>
+                          <span className="sm:hidden">ИИ задача</span>
                         </button>
                         <Link
-                            href={route('tasks.create', { project_id: project.id })}
-                            className="btn btn-primary justify-center min-w-[120px]"
+                          href={route('tasks.create', { project_id: project.id })}
+                          className="btn btn-primary btn-mobile-stack btn-mobile-priority order-1 sm:order-3"
                         >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Задача
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Новая задача
                         </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -875,66 +891,27 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Модальное окно для просмотра и редактирования задачи */}
             {showTaskModal && selectedTask && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 md:p-4"
-                    onClick={closeTaskModal}
-                >
-                    <div
-                        className="bg-primary-bg border border-border-color rounded-xl md:rounded-2xl w-full max-w-6xl h-full md:max-h-[95vh] shadow-xl transition-all duration-200 ease-out scale-95 animate-[scale-in_0.2s_ease-out_forwards] overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Заголовок модалки с градиентом */}
-                        <div className="bg-gradient-to-r from-accent-blue to-accent-purple p-4 md:p-6">
-                            <div className="flex justify-between items-start">
-                                <div className="flex-1 min-w-0">
-                                    {/* Мобильная версия - компактная */}
-                                    <div className="md:hidden">
-                                        <div className="flex items-center justify-between mb-2">
-                                            {selectedTask.code && (
-                                                <span className="px-2 py-1 bg-white/20 rounded-full text-white font-mono text-xs">
-                                                    {selectedTask.code}
-                                                </span>
-                                            )}
-                                            <div className="flex items-center gap-1">
-                                                {selectedTask.priority && (
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)}`}>
-                                                        {selectedTask.priority}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <h2 className="text-lg font-semibold text-white mb-2 truncate">
-                                            {selectedTask.title}
-                                        </h2>
-                                        <div className="flex flex-wrap items-center gap-2 text-white/80 text-xs">
-                                            {selectedTask.status && (
-                                                <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
-                                                    {selectedTask.status.name}
-                                                </span>
-                                            )}
-                                            {selectedTask.assignee && (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center">
-                                                        <span className="text-xs">
-                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                                        </span>
-                                                    </div>
-                                                    <span className="truncate max-w-[80px]">{selectedTask.assignee.name}</span>
-                                                </div>
-                                            )}
-                                            {selectedTask.deadline && (
-                                                <span className="text-xs">
-                                                    {new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Десктопная версия */}
-                                    <div className="hidden md:block">
+                <div className="fixed inset-0 z-50 overflow-hidden">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+                        onClick={closeTaskModal}
+                    />
+                    
+                    {/* Modal container - полноэкранная на мобильных */}
+                    <div className="relative z-10 flex min-h-full lg:items-center lg:justify-center lg:p-4">
+                        <div 
+                            className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-card-bg border border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Заголовок модалки с градиентом */}
+                            <div className="bg-gradient-to-r from-accent-blue to-accent-purple p-4 lg:p-6">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1 min-w-0">
+                                        {/* Адаптивная версия заголовка */}
                                         <div className="flex items-center gap-3 mb-2">
                                             {selectedTask.code && (
-                                                <span className="px-3 py-1 bg-white/20 rounded-full text-white font-mono text-sm">
+                                                <span className="px-2 lg:px-3 py-1 bg-white/20 rounded-full text-white font-mono text-xs lg:text-sm">
                                                     {selectedTask.code}
                                                 </span>
                                             )}
@@ -951,23 +928,23 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 )}
                                             </div>
                                         </div>
-                                        <h2 className="text-xl font-semibold text-white mb-1">
+                                        <h2 className="text-lg lg:text-xl font-semibold text-white mb-1 line-clamp-2">
                                             {selectedTask.title}
                                         </h2>
-                                        <div className="flex items-center gap-4 text-white/80 text-sm">
+                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-white/80 text-xs lg:text-sm">
                                             {selectedTask.assignee && (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/20 rounded-full flex items-center justify-center">
                                                         <span className="text-xs font-medium">
                                                             {selectedTask.assignee.name?.charAt(0) || 'U'}
                                                         </span>
                                                     </div>
-                                                    <span>{selectedTask.assignee.name}</span>
+                                                    <span className="truncate max-w-[120px] lg:max-w-none">{selectedTask.assignee.name}</span>
                                                 </div>
                                             )}
                                             {selectedTask.deadline && (
                                                 <div className="flex items-center gap-1">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
                                                     <span>{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
@@ -975,33 +952,33 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             )}
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={closeTaskModal}
+                                        className="flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 rounded-lg p-2 transition-all duration-200 ml-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={closeTaskModal}
-                                    className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg p-1.5 md:p-2 transition-all duration-150 ml-2"
-                                >
-                                    <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
                             </div>
-                        </div>
 
-                        {/* Содержимое модалки */}
-                        <div className="overflow-y-auto h-[calc(100vh-120px)] md:max-h-[calc(95vh-160px)] scrollbar-thin">
-                            <TaskForm
-                                task={selectedTask}
-                                projects={[project]}
-                                sprints={sprints}
-                                taskStatuses={taskStatuses}
-                                members={members}
-                                errors={errors}
-                                onSubmit={handleTaskUpdate}
-                                onCancel={closeTaskModal}
-                                isModal={true}
-                                processing={processing}
-                                auth={auth}
-                            />
+                            {/* Содержимое модалки с корректной высотой */}
+                            <div className="overflow-y-auto scrollbar-thin h-[calc(100vh-140px)] lg:max-h-[calc(90vh-140px)]">
+                                <TaskForm
+                                    task={selectedTask}
+                                    projects={[project]}
+                                    sprints={sprints}
+                                    taskStatuses={taskStatuses}
+                                    members={members}
+                                    errors={errors}
+                                    onSubmit={handleTaskUpdate}
+                                    onCancel={closeTaskModal}
+                                    isModal={true}
+                                    processing={processing}
+                                    auth={auth}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

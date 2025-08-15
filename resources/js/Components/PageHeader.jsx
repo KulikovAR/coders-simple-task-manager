@@ -1,3 +1,5 @@
+import { Link } from '@inertiajs/react';
+
 /**
  * Компонент заголовка страницы с кнопками действий
  * @param {string} title - заголовок страницы
@@ -10,70 +12,95 @@
  *     text: 'Текст кнопки',
  *     icon: 'SVG path for icon',
  *     href: 'route' (для link),
- *     onClick: function (для button)
+ *     onClick: function (для button),
+ *     mobileOrder: number (порядок на мобильных, по умолчанию как в массиве)
  *   }
  * ]
  * @param {string} className - дополнительные CSS классы
+ * @param {boolean} stackOnMobile - складывать кнопки вертикально на мобильных
  */
-export default function PageHeader({ title, description, actions = [], className = '' }) {
-    const getButtonClasses = (variant) => {
+export default function PageHeader({ 
+    title, 
+    description, 
+    actions = [], 
+    className = '',
+    stackOnMobile = true 
+}) {
+    const getButtonClasses = (variant, isMobile = false) => {
+        const baseClasses = isMobile 
+            ? 'inline-flex items-center justify-center h-11 w-full sm:w-auto' 
+            : 'inline-flex items-center justify-center h-11';
+            
         switch (variant) {
             case 'primary':
-                return 'btn btn-primary';
+                return `btn btn-primary ${baseClasses}`;
             case 'secondary':
-                return 'btn btn-secondary';
+                return `btn btn-secondary ${baseClasses}`;
             case 'gradient':
-                return 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-white';
+                return `bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-white ${baseClasses}`;
             default:
-                return 'btn btn-secondary';
+                return `btn btn-secondary ${baseClasses}`;
         }
     };
 
+    // Сортируем действия по приоритету для мобильных
+    const sortedActions = [...actions].sort((a, b) => {
+        const orderA = a.mobileOrder ?? actions.indexOf(a);
+        const orderB = b.mobileOrder ?? actions.indexOf(b);
+        return orderA - orderB;
+    });
+
     return (
-        <div className={`flex flex-col sm:flex-row sm:justify-between sm:items-center ${className}`}>
-            <div>
-                <h1 className="text-2xl font-bold text-text-primary">{title}</h1>
+        <div className={`flex flex-col space-y-4 lg:flex-row lg:justify-between lg:items-start lg:space-y-0 ${className}`}>
+            <div className="min-w-0 flex-1">
+                <h1 className="text-heading-2 lg:text-heading-1 text-text-primary">{title}</h1>
                 {description && (
-                    <p className="text-text-secondary mt-1">{description}</p>
+                    <p className="text-text-secondary mt-1 text-body lg:text-body-large">{description}</p>
                 )}
             </div>
             
-            {actions.length > 0 && (
-                <div className="flex flex-col gap-3 mt-4 sm:mt-0 sm:flex-row sm:space-x-3 sm:items-center">
-                    {actions.map((action, index) => {
-                        const buttonClasses = `${getButtonClasses(action.variant)} inline-flex items-center justify-center h-11`;
+            {sortedActions.length > 0 && (
+                <div className={`
+                    flex-shrink-0 w-full lg:w-auto
+                    ${stackOnMobile 
+                        ? 'flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 lg:space-x-3' 
+                        : 'flex flex-row flex-wrap gap-2 sm:gap-3'
+                    }
+                `}>
+                    {sortedActions.map((action, index) => {
+                        const buttonClasses = getButtonClasses(action.variant, stackOnMobile);
                         
                         if (action.type === 'link') {
-                            const { Link } = require('@inertiajs/react');
                             return (
                                 <Link
-                                    key={index}
+                                    key={action.key || index}
                                     href={action.href}
                                     className={buttonClasses}
                                 >
                                     {action.icon && (
-                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={action.icon} />
                                         </svg>
                                     )}
-                                    {action.text}
+                                    <span className="text-sm sm:text-base">{action.text}</span>
                                 </Link>
                             );
                         }
                         
                         return (
                             <button
-                                key={index}
+                                key={action.key || index}
                                 onClick={action.onClick}
                                 className={buttonClasses}
+                                disabled={action.disabled}
                                 style={action.variant === 'gradient' ? { color: 'white' } : {}}
                             >
                                 {action.icon && (
-                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={action.icon} />
                                     </svg>
                                 )}
-                                {action.text}
+                                <span className="text-sm sm:text-base">{action.text}</span>
                             </button>
                         );
                     })}

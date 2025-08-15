@@ -1192,24 +1192,143 @@ input::placeholder, textarea::placeholder {
     backdrop-filter: blur(64px);
 }
 
-/* ===== АДАПТИВ ДЛЯ IPHONE 16, 16 PRO, 16 PRO MAX ===== */
-/* Безопасные зоны для новых iPhone */
+/* ===== УЛУЧШЕННАЯ АДАПТИВНОСТЬ ===== */
+/* Безопасные зоны для современных устройств */
 .safe-area-inset-x {
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
 }
 
 .safe-area-inset-y {
-    padding-top: max(3rem, env(safe-area-inset-top));
+    padding-top: max(1rem, env(safe-area-inset-top));
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 .safe-area-inset-t {
-    padding-top: max(3rem, env(safe-area-inset-top));
+    padding-top: max(1rem, env(safe-area-inset-top));
 }
 
 .safe-area-inset-b {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Адаптивные модалки */
+.modal-mobile-full {
+    @apply fixed inset-0 z-50 overflow-hidden;
+}
+
+.modal-mobile-full > .modal-backdrop {
+    @apply absolute inset-0 bg-black/60 backdrop-blur-sm;
+}
+
+.modal-mobile-full > .modal-container {
+    @apply relative z-10 flex min-h-full lg:items-center lg:justify-center lg:p-4;
+}
+
+.modal-mobile-content {
+    @apply w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl bg-card-bg border border-border-color shadow-2xl;
+}
+
+/* Улучшенные кнопки для мобильных */
+.btn-mobile-stack {
+    @apply w-full justify-center sm:w-auto;
+}
+
+.btn-mobile-priority {
+    @apply order-1 sm:order-none;
+}
+
+/* Адаптивные сетки */
+.grid-responsive-1 {
+    @apply grid grid-cols-1;
+}
+
+.grid-responsive-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2;
+}
+
+.grid-responsive-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.grid-responsive-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.grid-responsive-5 {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5;
+}
+
+/* Улучшенные отступы для мобильных */
+.container-mobile {
+    @apply px-4 sm:px-6 lg:px-8;
+}
+
+.spacing-mobile {
+    @apply space-y-4 sm:space-y-6;
+}
+
+/* Адаптивная типографика */
+.text-responsive-xs {
+    @apply text-xs sm:text-sm;
+}
+
+.text-responsive-sm {
+    @apply text-sm sm:text-base;
+}
+
+.text-responsive-base {
+    @apply text-base sm:text-lg;
+}
+
+.text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl;
+}
+
+.text-responsive-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+}
+
+/* Тач-френдли элементы */
+.touch-target {
+    @apply min-h-[44px] min-w-[44px];
+}
+
+.touch-target-lg {
+    @apply min-h-[48px] min-w-[48px];
+}
+
+/* Скрытие элементов на мобильных */
+.mobile-hidden {
+    @apply hidden sm:block;
+}
+
+.mobile-only {
+    @apply block sm:hidden;
+}
+
+/* Улучшенные формы на мобильных */
+.form-mobile {
+    @apply text-base; /* Предотвращает zoom на iOS */
+}
+
+/* Безопасные зоны для iPhone */
+@supports (padding: max(0px)) {
+    .safe-top {
+        padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    
+    .safe-bottom {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    
+    .safe-left {
+        padding-left: max(1rem, env(safe-area-inset-left));
+    }
+    
+    .safe-right {
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
 }
 
 /* Специфичные стили для iPhone 16 серии */

@@ -7,6 +7,7 @@ import FilterPanel from '@/Components/FilterPanel';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
 import SearchInput from '@/Components/SearchInput';
+import PageHeader from '@/Components/PageHeader';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
 export default function Index({ auth, tasks, filters, projects, users = [], taskStatuses = [], sprints = [] }) {
@@ -131,51 +132,44 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
             <Head title="Задачи" />
 
             <div className="space-y-6">
-                {/* Заголовок и кнопка создания */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-text-primary">Задачи</h1>
-                        <p className="text-text-secondary mt-1">Управление задачами и их выполнением</p>
-                    </div>
-                    <div className="flex flex-col gap-3 mt-4 sm:mt-0 sm:flex-row sm:space-x-3 sm:items-center">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="btn btn-secondary inline-flex items-center justify-center h-11"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Фильтры
-                        </button>
-                        <button
-                            onClick={() => {
-                                // Проверяем, есть ли у пользователя активная подписка
+                {/* Заголовок и кнопки действий */}
+                <PageHeader
+                    title="Задачи"
+                    description="Управление задачами и их выполнением"
+                    actions={[
+                        {
+                            type: 'button',
+                            variant: 'secondary',
+                            text: 'Фильтры',
+                            icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',
+                            onClick: () => setShowFilters(!showFilters),
+                            mobileOrder: 3
+                        },
+                        {
+                            type: 'button',
+                            variant: 'gradient',
+                            text: 'Задача с ИИ',
+                            icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+                            onClick: () => {
                                 const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
                                 if (!isPaid) {
                                     openPaymentModal();
                                 } else {
                                     router.visit(route('ai-agent.index'));
                                 }
-                            }}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center h-11 text-sm"
-                            style={{ color: 'white' }}
-                        >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            Задача с ИИ
-                        </button>
-                        <Link
-                            href={route('tasks.create')}
-                            className="btn btn-primary inline-flex items-center justify-center h-11"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Новая задача
-                        </Link>
-                    </div>
-                </div>
+                            },
+                            mobileOrder: 2
+                        },
+                        {
+                            type: 'link',
+                            variant: 'primary',
+                            text: 'Новая задача',
+                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+                            href: route('tasks.create'),
+                            mobileOrder: 1
+                        }
+                    ]}
+                />
 
                 {/* Фильтры */}
                 <FilterPanel
