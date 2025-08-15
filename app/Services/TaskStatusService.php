@@ -235,6 +235,7 @@ class TaskStatusService
 
     /**
      * Получить статусы с учетом полного контекста (проект, спринт, задача)
+     * Это главный метод для всех операций со статусами
      */
     public function getContextualStatuses(Project $project, ?Sprint $sprint = null, ?Task $task = null): Collection
     {

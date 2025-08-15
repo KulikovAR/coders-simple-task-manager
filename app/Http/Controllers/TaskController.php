@@ -45,10 +45,8 @@ class TaskController extends Controller
             $taskStatuses = $taskStatuses->merge($projectStatuses);
         }
 
-        // Убираем дубликаты по имени + проекту и сортируем по порядку
-        $taskStatuses = $taskStatuses->unique(function ($status) {
-            return $status->name . '_' . $status->project_id;
-        })->sortBy('order')->values();
+        // Убираем дубликаты только по имени статуса (для фильтра нужны уникальные имена)
+        $taskStatuses = $taskStatuses->unique('name')->sortBy('order')->values();
 
         return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'filters'));
     }
