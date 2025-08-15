@@ -27,7 +27,7 @@ class TaskController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'status', 'priority', 'project_id', 'assignee_id', 'reporter_id', 'my_tasks']);
+        $filters = $request->only(['search', 'status', 'priority', 'project_id', 'sprint_id', 'assignee_id', 'reporter_id', 'my_tasks']);
         $tasks = $this->taskService->getUserTasks(Auth::user(), $filters);
         $projects = $this->projectService->getUserProjectsList(Auth::user());
 
@@ -38,17 +38,31 @@ class TaskController extends Controller
         }
         $users = $users->unique('id')->values();
 
-        // Получаем уникальные статусы для фильтров (только статусы проекта, без спринтов)
+        // Получаем контекстные статусы если выбран проект
         $taskStatuses = collect();
-        foreach ($projects as $project) {
-            $projectStatuses = $this->taskStatusService->getProjectStatuses($project);
-            $taskStatuses = $taskStatuses->merge($projectStatuses);
+        $sprints = collect();
+        
+        if (!empty($filters['project_id'])) {
+            $selectedProject = $projects->firstWhere('id', (int)$filters['project_id']);
+            if ($selectedProject) {
+                // Получаем спринты выбранного проекта
+                $sprints = $selectedProject->sprints()->orderBy('start_date', 'desc')->get();
+                
+                // Получаем статусы в зависимости от выбранного спринта
+                if (!empty($filters['sprint_id'])) {
+                    $selectedSprint = $sprints->firstWhere('id', (int)$filters['sprint_id']);
+                    if ($selectedSprint) {
+                        $taskStatuses = $this->taskStatusService->getContextualStatuses($selectedProject, $selectedSprint);
+                    } else {
+                        $taskStatuses = $this->taskStatusService->getContextualStatuses($selectedProject);
+                    }
+                } else {
+                    $taskStatuses = $this->taskStatusService->getContextualStatuses($selectedProject);
+                }
+            }
         }
 
-        // Убираем дубликаты только по имени статуса (для фильтра нужны уникальные имена)
-        $taskStatuses = $taskStatuses->unique('name')->sortBy('order')->values();
-
-        return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'filters'));
+        return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'sprints', 'filters'));
     }
 
     public function create(Request $request)

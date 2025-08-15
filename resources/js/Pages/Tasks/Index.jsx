@@ -5,15 +5,16 @@ import TaskCard from '@/Components/TaskCard';
 import PaymentModal from '@/Components/PaymentModal';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
-export default function Index({ auth, tasks, filters, projects, users = [], taskStatuses = [] }) {
+export default function Index({ auth, tasks, filters, projects, users = [], taskStatuses = [], sprints = [] }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [priority, setPriority] = useState(filters.priority || '');
     const [projectId, setProjectId] = useState(filters.project_id || '');
+    const [sprintId, setSprintId] = useState(filters.sprint_id || '');
     const [assigneeId, setAssigneeId] = useState(filters.assignee_id || '');
     const [reporterId, setReporterId] = useState(filters.reporter_id || '');
     const [myTasks, setMyTasks] = useState(filters.my_tasks === '1');
-    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
+    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.sprint_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -25,6 +26,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 status,
                 priority,
                 project_id: projectId,
+                sprint_id: sprintId,
                 assignee_id: assigneeId,
                 reporter_id: reporterId,
                 my_tasks: myTasks ? '1' : '',
@@ -36,7 +38,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 replace: true,
             });
         },
-        [status, priority, projectId, assigneeId, reporterId, myTasks]
+        [status, priority, projectId, sprintId, assigneeId, reporterId, myTasks]
     );
 
     useEffect(() => {
@@ -62,16 +64,23 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         // Обновляем локальное состояние
         if (filter === 'status') setStatus(value);
         if (filter === 'priority') setPriority(value);
-        if (filter === 'project_id') setProjectId(value);
+        if (filter === 'project_id') {
+            setProjectId(value);
+            // При смене проекта сбрасываем спринт и статус
+            setSprintId('');
+            setStatus('');
+        }
+        if (filter === 'sprint_id') setSprintId(value);
         if (filter === 'assignee_id') setAssigneeId(value);
         if (filter === 'reporter_id') setReporterId(value);
         if (filter === 'my_tasks') setMyTasks(value === '1');
 
         const newFilters = {
             search,
-            status: filter === 'status' ? value : status,
+            status: filter === 'status' ? value : (filter === 'project_id' ? '' : status),
             priority: filter === 'priority' ? value : priority,
             project_id: filter === 'project_id' ? value : projectId,
+            sprint_id: filter === 'sprint_id' ? value : (filter === 'project_id' ? '' : sprintId),
             assignee_id: filter === 'assignee_id' ? value : assigneeId,
             reporter_id: filter === 'reporter_id' ? value : reporterId,
             my_tasks: filter === 'my_tasks' ? value : (myTasks ? '1' : ''),
@@ -89,6 +98,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         setStatus('');
         setPriority('');
         setProjectId('');
+        setSprintId('');
         setAssigneeId('');
         setReporterId('');
         setMyTasks(false);
@@ -176,7 +186,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                                 <div>
                                     <label className="form-label">
                                         Поиск по названию
@@ -248,6 +258,25 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                                         ))}
                                     </select>
                                 </div>
+                                {/* Спринт */}
+                                <div>
+                                    <label className="form-label">
+                                        Спринт
+                                    </label>
+                                    <select
+                                        value={sprintId}
+                                        onChange={(e) => handleFilterChange('sprint_id', e.target.value)}
+                                        className="form-select"
+                                        disabled={!projectId}
+                                    >
+                                        <option value="">Все спринты</option>
+                                        {sprints.map((sprint) => (
+                                            <option key={sprint.id} value={sprint.id}>
+                                                {sprint.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                                 {/* Исполнитель */}
                                 <div>
                                     <label className="form-label">Исполнитель</label>
@@ -292,7 +321,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 )}
 
                 {/* Подсказка по поиску */}
-                {(search || status || priority || projectId || assigneeId || reporterId || myTasks) && tasks.data.length === 0 && (
+                {(search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks) && tasks.data.length === 0 && (
                     <div className="card bg-gradient-to-r from-accent-yellow/10 to-accent-orange/10 border-accent-yellow/20">
                         <div className="flex items-start space-x-3">
                             <div className="text-accent-yellow text-xl">💡</div>
@@ -323,6 +352,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                                 {status && ` • Статус: ${getStatusLabel(status)}`}
                                 {priority && ` • Приоритет: ${getPriorityLabel(priority)}`}
                                 {projectId && ` • Проект: ${projects.find(p => p.id == projectId)?.name}`}
+                                {sprintId && ` • Спринт: ${sprints.find(s => s.id == sprintId)?.name}`}
                                 {assigneeId && ` • Исполнитель: ${users.find(u => u.id == assigneeId)?.name}`}
                                 {reporterId && ` • Создатель: ${users.find(u => u.id == reporterId)?.name}`}
                                 {myTasks && ' • Мои задачи'}
@@ -340,15 +370,15 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                         <h3 className="text-lg font-medium text-text-secondary mb-2">
-                            {search || status || priority || projectId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
+                            {search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
                         </h3>
                         <p className="text-text-muted mb-4">
-                            {search || status || priority || projectId || assigneeId || reporterId || myTasks
+                            {search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks
                                 ? 'Попробуйте изменить параметры поиска или очистить фильтры'
                                 : 'Создайте первую задачу для начала работы'
                             }
                         </p>
-                        {!search && !status && !priority && !projectId && !assigneeId && !reporterId && !myTasks && (
+                        {!search && !status && !priority && !projectId && !sprintId && !assigneeId && !reporterId && !myTasks && (
                             <Link
                                 href={route('tasks.create')}
                                 className="btn btn-primary inline-flex items-center"
