@@ -27,24 +27,24 @@ return new class extends Migration
             });
         }
 
-        Schema::table('task_statuses', function (Blueprint $table) {
-            // Индекс для быстрого поиска статусов спринта (если не существует)
-            if (!collect(\DB::select("SHOW INDEX FROM task_statuses WHERE Key_name = 'task_statuses_sprint_order_index'"))->count()) {
+        // Добавляем индекс для быстрого поиска статусов спринта
+        // Используем try-catch для избежания ошибки если индекс уже существует
+        try {
+            Schema::table('task_statuses', function (Blueprint $table) {
                 $table->index(['sprint_id', 'order'], 'task_statuses_sprint_order_index');
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            // Индекс уже существует, игнорируем ошибку
+        }
 
-        // В отдельной операции работаем с unique индексом
-        // ВРЕМЕННО оставляем старый индекс, создаем только новый
-        Schema::table('task_statuses', function (Blueprint $table) {
-            // Проверяем существование нового индекса и создаем его
-            $newIndexExists = collect(\DB::select("SHOW INDEX FROM task_statuses WHERE Key_name = 'task_statuses_project_sprint_name_unique'"))->count() > 0;
-            if (!$newIndexExists) {
-                // Создаем новый индекс для уникальности с учетом спринтов
-                // Пока оставляем и старый индекс, чтобы не нарушить внешние ключи
+        // Добавляем составной индекс для уникальности с учетом спринтов
+        try {
+            Schema::table('task_statuses', function (Blueprint $table) {
                 $table->index(['project_id', 'sprint_id', 'name'], 'task_statuses_project_sprint_name_index');
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            // Индекс уже существует, игнорируем ошибку
+        }
     }
 
     /**

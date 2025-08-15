@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Project;
+use App\Models\Sprint;
+use App\Rules\ValidTaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -56,14 +59,27 @@ class TaskRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            // Проверяем, что status_id принадлежит проекту задачи
-            if ($this->filled('status_id') && $this->filled('project_id')) {
-                $statusExists = \App\Models\TaskStatus::where('id', $this->status_id)
-                    ->where('project_id', $this->project_id)
-                    ->exists();
-                
-                if (!$statusExists) {
-                    $validator->errors()->add('status_id', 'Выбранный статус не принадлежит данному проекту.');
+            // Контекстная валидация статуса
+            if ($this->filled('status_id')) {
+                $project = null;
+                $sprint = null;
+
+                // Получаем проект
+                if ($this->filled('project_id')) {
+                    $project = Project::find($this->project_id);
+                }
+
+                // Получаем спринт если указан
+                if ($this->filled('sprint_id') && $project) {
+                    $sprint = $project->sprints()->find($this->sprint_id);
+                }
+
+                // Применяем контекстную валидацию
+                if ($project) {
+                    $rule = new ValidTaskStatus($project, $sprint);
+                    $rule->validate('status_id', $this->status_id, function ($message) use ($validator) {
+                        $validator->errors()->add('status_id', $message);
+                    });
                 }
             }
         });

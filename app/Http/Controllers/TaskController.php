@@ -9,6 +9,7 @@ use App\Models\TaskStatus;
 use App\Services\NotificationService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
+use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,8 @@ class TaskController extends Controller
     public function __construct(
         private TaskService $taskService,
         private ProjectService $projectService,
-        private NotificationService $notificationService
+        private NotificationService $notificationService,
+        private TaskStatusService $taskStatusService
     ) {
     }
 
@@ -36,15 +38,17 @@ class TaskController extends Controller
         }
         $users = $users->unique('id')->values();
 
-        // Получаем все уникальные статусы из проектов пользователя
+        // Получаем уникальные статусы для фильтров (только статусы проекта, без спринтов)
         $taskStatuses = collect();
         foreach ($projects as $project) {
-            $projectStatuses = $project->taskStatuses()->orderBy('order')->get();
+            $projectStatuses = $this->taskStatusService->getProjectStatuses($project);
             $taskStatuses = $taskStatuses->merge($projectStatuses);
         }
 
-        // Убираем дубликаты и сортируем по порядку
-        $taskStatuses = $taskStatuses->unique('name')->sortBy('order')->values();
+        // Убираем дубликаты по имени + проекту и сортируем по порядку
+        $taskStatuses = $taskStatuses->unique(function ($status) {
+            return $status->name . '_' . $status->project_id;
+        })->sortBy('order')->values();
 
         return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'filters'));
     }
@@ -63,7 +67,14 @@ class TaskController extends Controller
             $project = Project::with(['owner', 'users'])->find($selectedProjectId);
             if ($project && $this->projectService->canUserAccessProject(Auth::user(), $project)) {
                 $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
-                $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+                
+                // Получаем статусы с учетом контекста спринта
+                $selectedSprint = null;
+                if ($selectedSprintId) {
+                    $selectedSprint = $sprints->find($selectedSprintId);
+                }
+                $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
+                
                 // owner + users (members)
                 $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
             }
@@ -125,7 +136,10 @@ class TaskController extends Controller
         if ($task->project) {
             $project = Project::with(['owner', 'users'])->find($task->project_id);
             $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
-            $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+            
+            // Получаем статусы с учетом контекста текущей задачи
+            $taskStatuses = $this->taskStatusService->getAvailableStatusesForTask($task, $project);
+            
             $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
         }
 
@@ -185,8 +199,15 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
+        // Загружаем связанные данные для валидации
+        $task->load(['project', 'sprint']);
+
         $request->validate([
-            'status_id' => 'required|exists:task_statuses,id',
+            'status_id' => [
+                'required',
+                'exists:task_statuses,id',
+                new \App\Rules\ValidTaskStatus($task->project, $task->sprint)
+            ],
         ]);
 
         // Загружаем связанные данные
@@ -280,6 +301,7 @@ class TaskController extends Controller
             'project_name' => $project->name,
             'user_id' => Auth::id(),
             'user_name' => Auth::user()?->name,
+            'sprint_id' => $request->get('sprint_id'),
         ]);
 
         if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
@@ -290,12 +312,31 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $taskStatuses = $project->taskStatuses()->orderBy('order')->get();
+        // Получаем контекст спринта если передан
+        $sprintId = $request->get('sprint_id');
+        $sprint = null;
+        
+        if ($sprintId && $sprintId !== 'all') {
+            $sprint = $project->sprints()->find($sprintId);
+            if (!$sprint) {
+                return response()->json(['error' => 'Спринт не найден'], 404);
+            }
+        }
+
+        // Используем новый контекстный метод
+        $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $sprint);
 
         Log::info('Task statuses loaded', [
             'project_id' => $project->id,
+            'sprint_id' => $sprint?->id,
+            'has_custom_statuses' => $sprint ? $this->taskStatusService->hasCustomStatuses($sprint) : false,
             'statuses_count' => $taskStatuses->count(),
-            'statuses' => $taskStatuses->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->toArray(),
+            'statuses' => $taskStatuses->map(fn($s) => [
+                'id' => $s->id, 
+                'name' => $s->name, 
+                'sprint_id' => $s->sprint_id,
+                'is_custom' => $s->is_custom
+            ])->toArray(),
         ]);
 
         // Для AJAX запросов возвращаем JSON

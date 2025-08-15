@@ -5,9 +5,9 @@ import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtil
 import TaskForm from '@/Components/TaskForm';
 import PaymentModal from '@/Components/PaymentModal';
 
-export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'all', hasCustomStatuses = false }) {
+export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'none', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
-    const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'all');
+    const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'none');
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
     const [showTaskModal, setShowTaskModal] = useState(false);
@@ -377,7 +377,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     // Фильтрация задач по спринту и исполнителю
     const filteredTasks = localTasks.filter(task => {
-        const sprintOk = currentSprintId === 'all' || task.sprint_id == currentSprintId;
+        let sprintOk = false;
+        if (currentSprintId === 'none') {
+            sprintOk = !task.sprint_id; // Показать только задачи без спринта
+        } else {
+            sprintOk = task.sprint_id == currentSprintId; // Показать задачи конкретного спринта
+        }
+        
         const assigneeOk = assigneeId ? String(task.assignee_id) === String(assigneeId) : true;
         const myOk = myTasks ? String(task.assignee_id) === String(auth.user.id) : true;
         return sprintOk && assigneeOk && myOk;
@@ -390,7 +396,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     // Динамическая проверка кастомных статусов
-    const currentSprintHasCustomStatuses = currentSprintId !== 'all' && taskStatuses.some(status => status.sprint_id == currentSprintId);
+    const currentSprintHasCustomStatuses = currentSprintId !== 'none' && taskStatuses.some(status => status.sprint_id == currentSprintId);
     const getFilteredStatusTasks = (statusId) => {
         const tasks = filteredTasks.filter(task => task.status_id === statusId);
         // Сортируем по приоритету: высокий -> средний -> низкий -> без приоритета
@@ -441,14 +447,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         const newSprintId = e.target.value;
                         setCurrentSprintId(newSprintId);
                         // Обновляем URL для загрузки правильных статусов
-                        const url = newSprintId === 'all'
+                        const url = newSprintId === 'none'
                           ? route('projects.board', project.id)
                           : route('projects.board', project.id) + '?sprint_id=' + newSprintId;
                         router.visit(url, { preserveState: false });
                       }}
                       className="form-select min-w-[140px] max-w-[180px]"
                     >
-                      <option value="all">Все спринты</option>
+                      <option value="none">Без спринта</option>
                       {sprints.map(sprint => (
                         <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
                       ))}
@@ -515,7 +521,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 </div>
 
                 {/* Информация о статусах */}
-                {currentSprintId !== 'all' && (
+                {currentSprintId !== 'none' && (
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">

@@ -81,6 +81,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'deleteSprintStatuses'])->name('sprints.statuses.delete');
     Route::get('/projects/{project}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('projects.statuses.api');
     Route::get('/projects/{project}/sprints/{sprint}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('sprints.statuses.api');
+    
+    // Новый универсальный роут для получения контекстных статусов
+    Route::get('/projects/{project}/contextual-statuses', [TaskStatusController::class, 'getContextualStatuses'])->name('projects.contextual-statuses');
 
     // Задачи
     Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');

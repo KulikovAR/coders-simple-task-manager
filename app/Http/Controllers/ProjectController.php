@@ -65,15 +65,15 @@ class ProjectController extends Controller
         $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
         
         // Получаем выбранный спринт если есть
-        $selectedSprintId = $request->get('sprint_id');
+        $selectedSprintId = $request->get('sprint_id', 'none'); // Дефолт "Без спринта"
         $selectedSprint = null;
         
-        if ($selectedSprintId && $selectedSprintId !== 'all') {
+        if ($selectedSprintId && $selectedSprintId !== 'none') {
             $selectedSprint = $project->sprints()->find($selectedSprintId);
         }
         
-        // Получаем релевантные статусы (спринта или проекта)
-        $taskStatuses = $this->taskStatusService->getRelevantStatuses($project, $selectedSprint);
+        // Получаем релевантные статусы с учетом контекста
+        $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
         
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();

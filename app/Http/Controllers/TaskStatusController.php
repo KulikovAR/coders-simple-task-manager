@@ -230,4 +230,53 @@ class TaskStatusController extends Controller
 
         return response()->json($statuses);
     }
+
+    /**
+     * Получить контекстные статусы (новый универсальный метод)
+     */
+    public function getContextualStatuses(Request $request, Project $project)
+    {
+        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        // Получаем параметры контекста
+        $sprintId = $request->get('sprint_id');
+        $taskId = $request->get('task_id');
+        
+        $sprint = null;
+        $task = null;
+
+        // Загружаем спринт если указан
+        if ($sprintId && $sprintId !== 'all') {
+            $sprint = $project->sprints()->find($sprintId);
+            if (!$sprint) {
+                return response()->json(['error' => 'Спринт не найден'], 404);
+            }
+        }
+
+        // Загружаем задачу если указана
+        if ($taskId) {
+            $task = $project->tasks()->find($taskId);
+            if (!$task) {
+                return response()->json(['error' => 'Задача не найдена'], 404);
+            }
+        }
+
+        // Получаем контекстные статусы
+        $statuses = $this->taskStatusService->getContextualStatuses($project, $sprint, $task);
+
+        // Добавляем метаинформацию о контексте
+        $response = [
+            'statuses' => $statuses->toArray(),
+            'context' => [
+                'project_id' => $project->id,
+                'sprint_id' => $sprint?->id,
+                'task_id' => $task?->id,
+                'has_custom_statuses' => $sprint ? $this->taskStatusService->hasCustomStatuses($sprint) : false,
+            ]
+        ];
+
+        return response()->json($response);
+    }
 }

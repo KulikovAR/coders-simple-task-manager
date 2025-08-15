@@ -6,6 +6,7 @@ use App\Enums\TaskStatusType;
 use App\Exceptions\StatusHasTasksException;
 use App\Models\Project;
 use App\Models\Sprint;
+use App\Models\Task;
 use App\Models\TaskStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -233,10 +234,98 @@ class TaskStatusService
     }
 
     /**
+     * Получить статусы с учетом полного контекста (проект, спринт, задача)
+     */
+    public function getContextualStatuses(Project $project, ?Sprint $sprint = null, ?Task $task = null): Collection
+    {
+        // Если передана задача, приоритет контексту задачи
+        if ($task) {
+            // Если у задачи есть спринт, используем его
+            if ($task->sprint_id && $task->sprint) {
+                return $this->getSprintStatuses($task->sprint);
+            }
+            
+            // Если у задачи нет спринта, используем статусы проекта
+            return $this->getProjectStatuses($task->project ?? $project);
+        }
+
+        // Если спринт передан явно, используем его статусы
+        if ($sprint) {
+            return $this->getSprintStatuses($sprint);
+        }
+
+        // По умолчанию используем статусы проекта
+        return $this->getProjectStatuses($project);
+    }
+
+    /**
+     * Проверить принадлежит ли статус указанному контексту
+     */
+    public function isStatusValidForContext(TaskStatus $status, Project $project, ?Sprint $sprint = null): bool
+    {
+        // Статус должен принадлежать проекту
+        if ($status->project_id !== $project->id) {
+            return false;
+        }
+
+        // Если контекст - спринт
+        if ($sprint) {
+            // Статус должен принадлежать либо спринту, либо проекту (если у спринта нет кастомных статусов)
+            $hasCustomStatuses = $this->hasCustomStatuses($sprint);
+            
+            if ($hasCustomStatuses) {
+                // У спринта есть кастомные статусы - статус должен принадлежать спринту
+                return $status->sprint_id === $sprint->id;
+            } else {
+                // У спринта нет кастомных статусов - статус должен принадлежать проекту
+                return $status->sprint_id === null;
+            }
+        }
+
+        // Контекст - проект, статус должен принадлежать проекту (не спринту)
+        return $status->sprint_id === null;
+    }
+
+    /**
+     * Получить доступные статусы для конкретной задачи
+     */
+    public function getAvailableStatusesForTask(?Task $task, Project $project, ?Sprint $sprint = null): Collection
+    {
+        return $this->getContextualStatuses($project, $sprint, $task);
+    }
+
+    /**
      * Проверить есть ли кастомные статусы у спринта
      */
     public function hasCustomStatuses(Sprint $sprint): bool
     {
         return TaskStatus::where('sprint_id', $sprint->id)->exists();
+    }
+
+    /**
+     * Получить статистику по статусам в контексте
+     */
+    public function getStatusStats(Project $project, ?Sprint $sprint = null): array
+    {
+        $statuses = $this->getContextualStatuses($project, $sprint);
+        $stats = [];
+
+        foreach ($statuses as $status) {
+            $taskCount = $status->tasks()
+                ->when($sprint, function ($query) use ($sprint) {
+                    return $query->where('sprint_id', $sprint->id);
+                })
+                ->when(!$sprint, function ($query) use ($project) {
+                    return $query->where('project_id', $project->id)->whereNull('sprint_id');
+                })
+                ->count();
+
+            $stats[] = [
+                'status' => $status,
+                'task_count' => $taskCount,
+            ];
+        }
+
+        return $stats;
     }
 }

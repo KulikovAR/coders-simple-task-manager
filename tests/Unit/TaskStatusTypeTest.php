@@ -11,12 +11,12 @@ class TaskStatusTypeTest extends TestCase
     {
         $this->assertTrue(enum_exists(TaskStatusType::class));
         
-        $this->assertEquals('To Do', TaskStatusType::TODO->value);
-        $this->assertEquals('In Progress', TaskStatusType::IN_PROGRESS->value);
-        $this->assertEquals('Review', TaskStatusType::REVIEW->value);
-        $this->assertEquals('Testing', TaskStatusType::TESTING->value);
-        $this->assertEquals('Ready for Release', TaskStatusType::READY_FOR_RELEASE->value);
-        $this->assertEquals('Done', TaskStatusType::DONE->value);
+        $this->assertEquals('К выполнению', TaskStatusType::TODO->value);
+        $this->assertEquals('В работе', TaskStatusType::IN_PROGRESS->value);
+        $this->assertEquals('На проверке', TaskStatusType::REVIEW->value);
+        $this->assertEquals('Тестирование', TaskStatusType::TESTING->value);
+        $this->assertEquals('Готов к релизу', TaskStatusType::READY_FOR_RELEASE->value);
+        $this->assertEquals('Завершена', TaskStatusType::DONE->value);
     }
 
     public function test_enum_has_correct_orders(): void
@@ -47,12 +47,12 @@ class TaskStatusTypeTest extends TestCase
         $this->assertCount(6, $defaultStatuses);
         
         // Проверяем первый статус
-        $this->assertEquals('To Do', $defaultStatuses[0]['name']);
+        $this->assertEquals('К выполнению', $defaultStatuses[0]['name']);
         $this->assertEquals(1, $defaultStatuses[0]['order']);
         $this->assertEquals('#6B7280', $defaultStatuses[0]['color']);
         
         // Проверяем последний статус
-        $this->assertEquals('Done', $defaultStatuses[5]['name']);
+        $this->assertEquals('Завершена', $defaultStatuses[5]['name']);
         $this->assertEquals(6, $defaultStatuses[5]['order']);
         $this->assertEquals('#10B981', $defaultStatuses[5]['color']);
     }

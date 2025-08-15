@@ -84,8 +84,9 @@ export default function TaskForm({
                     setAvailableSprints([]);
                 });
 
-            // Загружаем статусы задач
-            fetch(route('tasks.project.statuses', data.project_id), {
+            // Загружаем статусы задач с учетом контекста спринта
+            const sprintParam = data.sprint_id ? `?sprint_id=${data.sprint_id}` : '';
+            fetch(route('tasks.project.statuses', data.project_id) + sprintParam, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
@@ -169,6 +170,48 @@ export default function TaskForm({
             setData('status_id', '');
         }
     }, [data.project_id]);
+
+    // Перезагружаем статусы при изменении спринта
+    useEffect(() => {
+        if (data.project_id && data.sprint_id !== '') {
+            const sprintParam = data.sprint_id ? `?sprint_id=${data.sprint_id}` : '';
+            fetch(route('tasks.project.statuses', data.project_id) + sprintParam, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(responseJson => {
+                    let loadedStatuses = [];
+                    if (Array.isArray(responseJson)) {
+                        loadedStatuses = responseJson;
+                    } else if (responseJson && typeof responseJson === 'object' && Array.isArray(responseJson.taskStatuses)) {
+                        loadedStatuses = responseJson.taskStatuses;
+                    } else if (responseJson && typeof responseJson === 'object' && responseJson.taskStatuses) {
+                        loadedStatuses = Array.isArray(responseJson.taskStatuses) ? responseJson.taskStatuses : [];
+                    }
+
+                    setAvailableStatuses(loadedStatuses);
+
+                    // Сбрасываем выбранный статус, если он не принадлежит новому контексту
+                    if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
+                        const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
+                        setData('status_id', firstStatus);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки статусов для спринта:', error);
+                    setAvailableStatuses([]);
+                });
+        }
+    }, [data.sprint_id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
