@@ -125,7 +125,13 @@ class ProjectService
     {
         return $project->owner_id === $user->id || 
                $project->members()->where('user_id', $user->id)
-                   ->whereIn('role', ['owner', 'member'])->exists();
+                   ->whereIn('role', ['owner', 'admin'])->exists();
+    }
+
+    public function canUserContributeToProject(User $user, Project $project): bool
+    {
+        return $project->owner_id === $user->id || 
+               $project->members()->where('user_id', $user->id)->exists();
     }
 
 

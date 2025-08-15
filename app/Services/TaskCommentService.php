@@ -45,6 +45,13 @@ class TaskCommentService
 
     public function canUserManageComment(User $user, TaskComment $comment): bool
     {
-        return $comment->user_id === $user->id;
+        // Автор комментария может управлять им
+        if ($comment->user_id === $user->id) {
+            return true;
+        }
+
+        // Владелец проекта может управлять любыми комментариями в своем проекте
+        $projectService = app(ProjectService::class);
+        return $projectService->canUserManageProject($user, $comment->task->project);
     }
 } 

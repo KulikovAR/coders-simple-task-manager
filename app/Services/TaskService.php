@@ -182,7 +182,7 @@ class TaskService
     public function canUserManageTask(User $user, Task $task): bool
     {
         $projectService = app(ProjectService::class);
-        return $projectService->canUserManageProject($user, $task->project);
+        return $projectService->canUserContributeToProject($user, $task->project);
     }
 
     public function canUserViewTask(User $user, Task $task): bool

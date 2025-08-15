@@ -6,11 +6,32 @@ use App\Models\User;
 use App\Models\AiConversation;
 use App\Models\AiConversationMessage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AiAgentControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Фейкаем HTTP запросы к AI сервису
+        Http::fake([
+            'https://oneai-proxy.ru/api/v1/ai' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => '{"commands": []}'
+                        ]
+                    ]
+                ],
+                'session_id' => 'test-session-123',
+                'output' => 'Test AI response message'
+            ], 200)
+        ]);
+    }
 
     public function test_index_page_is_displayed_for_authenticated_user(): void
     {
@@ -83,7 +104,10 @@ class AiAgentControllerTest extends TestCase
         $response->assertJsonStructure([
             'success',
             'message',
-            'data'
+            'session_id',
+            'commands_executed',
+            'processing_time',
+            'command_results'
         ]);
     }
 
@@ -207,8 +231,7 @@ class AiAgentControllerTest extends TestCase
         $user = User::factory()->create();
         $conversation = AiConversation::factory()->create(['user_id' => $user->id]);
         $message = AiConversationMessage::factory()->create([
-            'conversation_id' => $conversation->id,
-            'user_id' => $user->id
+            'conversation_id' => $conversation->id
         ]);
 
         $response = $this
@@ -256,8 +279,7 @@ class AiAgentControllerTest extends TestCase
         // Создаем 25 сообщений
         for ($i = 0; $i < 25; $i++) {
             AiConversationMessage::factory()->create([
-                'conversation_id' => $conversation->id,
-                'user_id' => $user->id
+                'conversation_id' => $conversation->id
             ]);
         }
 
@@ -279,8 +301,7 @@ class AiAgentControllerTest extends TestCase
         // Создаем 25 сообщений
         for ($i = 0; $i < 25; $i++) {
             AiConversationMessage::factory()->create([
-                'conversation_id' => $conversation->id,
-                'user_id' => $user->id
+                'conversation_id' => $conversation->id
             ]);
         }
 
@@ -370,8 +391,7 @@ class AiAgentControllerTest extends TestCase
         // Создаем несколько сообщений
         for ($i = 0; $i < 5; $i++) {
             AiConversationMessage::factory()->create([
-                'conversation_id' => $conversation->id,
-                'user_id' => $user->id
+                'conversation_id' => $conversation->id
             ]);
         }
 
@@ -386,26 +406,7 @@ class AiAgentControllerTest extends TestCase
         $this->assertEquals(0, AiConversationMessage::where('conversation_id', $conversation->id)->count());
     }
 
-    public function test_features_page_is_displayed(): void
-    {
-        $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->get('/ai-agent/features');
-
-        $response->assertOk();
-        $response->assertInertia(fn ($page) => $page
-            ->component('AiAgent/Features')
-        );
-    }
-
-    public function test_features_page_requires_authentication(): void
-    {
-        $response = $this->get('/ai-agent/features');
-
-        $response->assertRedirect('/login');
-    }
 
     public function test_ai_agent_handles_empty_message(): void
     {

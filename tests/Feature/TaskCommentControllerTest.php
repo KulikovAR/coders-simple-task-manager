@@ -354,6 +354,13 @@ class TaskCommentControllerTest extends TestCase
         $user2 = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $user1->id]);
         $task = Task::factory()->create(['project_id' => $project->id]);
+        
+        // Добавляем user2 как участника проекта
+        ProjectMember::factory()->create([
+            'project_id' => $project->id,
+            'user_id' => $user2->id,
+            'role' => 'member',
+        ]);
 
         $response = $this
             ->actingAs($user2)

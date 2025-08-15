@@ -21,7 +21,7 @@ class ProjectMemberFactory extends Factory
         return [
             'project_id' => Project::factory(),
             'user_id' => User::factory(),
-            'role' => $this->faker->randomElement(['member', 'admin']),
+            'role' => $this->faker->randomElement(['member', 'viewer']),
         ];
     }
 }

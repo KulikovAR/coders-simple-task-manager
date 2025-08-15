@@ -72,9 +72,17 @@ class AiAgentController extends Controller
         $conversationService = app(AiConversationService::class);
         $perPage = $request->get('per_page', 10);
         
+        $paginatedConversations = $conversationService->getUserConversations($user, $perPage);
+        
         return response()->json([
             'success' => true,
-            'conversations' => $conversationService->getUserConversations($user, $perPage),
+            'conversations' => $paginatedConversations->items(),
+            'pagination' => [
+                'current_page' => $paginatedConversations->currentPage(),
+                'last_page' => $paginatedConversations->lastPage(),
+                'per_page' => $paginatedConversations->perPage(),
+                'total' => $paginatedConversations->total(),
+            ],
         ]);
     }
 
@@ -91,10 +99,18 @@ class AiAgentController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
         
+        $paginatedMessages = $conversationService->getConversationMessages($conversation, $perPage);
+        
         return response()->json([
             'success' => true,
             'conversation' => $conversation,
-            'messages' => $conversationService->getConversationMessages($conversation, $perPage),
+            'messages' => $paginatedMessages->items(),
+            'pagination' => [
+                'current_page' => $paginatedMessages->currentPage(),
+                'last_page' => $paginatedMessages->lastPage(),
+                'per_page' => $paginatedMessages->perPage(),
+                'total' => $paginatedMessages->total(),
+            ],
         ]);
     }
 

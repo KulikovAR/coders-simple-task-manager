@@ -144,7 +144,7 @@ class DashboardTest extends TestCase
     {
         $user = User::factory()->create();
         $activeProject = Project::factory()->create(['owner_id' => $user->id, 'status' => 'active']);
-        $inactiveProject = Project::factory()->create(['owner_id' => $user->id, 'status' => 'inactive']);
+        $inactiveProject = Project::factory()->create(['owner_id' => $user->id, 'status' => 'on_hold']);
         
         TaskStatus::factory()->create(['name' => 'In Progress']);
 
@@ -156,7 +156,10 @@ class DashboardTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('Dashboard')
             ->where('projects.0.id', $activeProject->id)
-            ->missing('projects', fn ($projects) => $projects->contains('id', $inactiveProject->id))
+            ->has('projects', 1)
+            ->where('projects', fn ($projects) => 
+                collect($projects)->every(fn ($project) => $project['status'] === 'active')
+            )
         );
     }
 

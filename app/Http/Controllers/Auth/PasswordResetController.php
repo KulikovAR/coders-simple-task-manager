@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\PasswordResetMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -33,15 +31,7 @@ class PasswordResetController extends Controller
         ]);
 
         $status = Password::sendResetLink(
-            $request->only('email'),
-            function ($user, $token) {
-                $url = route('password.reset', [
-                    'token' => $token,
-                    'email' => $user->email,
-                ]);
-
-                Mail::to($user->email)->send(new PasswordResetMail($url));
-            }
+            $request->only('email')
         );
 
         if ($status === Password::RESET_LINK_SENT) {

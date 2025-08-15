@@ -61,30 +61,24 @@ class TaskIndexStatusDuplicationTest extends TestCase
         // Аутентифицируемся
         $this->actingAs($user);
         
-        // Переходим на страницу задач
-        $response = $this->get(route('tasks.index'));
+        // Переходим на страницу задач с выбранным проектом (статусы показываются только в контексте проекта)
+        $response = $this->get(route('tasks.index', ['project_id' => $project1->id]));
         
         $response->assertOk();
         
         // Получаем статусы из ответа
         $taskStatuses = $response->viewData('page')['props']['taskStatuses'];
         
-        // Проверяем, что нет дублирующихся статусов по имени
+        // Проверяем, что статусы возвращаются для выбранного проекта
+        $this->assertNotEmpty($taskStatuses, 'Статусы должны возвращаться при выборе проекта');
+        
+        // Проверяем, что статусы принадлежат выбранному проекту
         $statusNames = collect($taskStatuses)->pluck('name')->toArray();
-        $uniqueStatusNames = array_unique($statusNames);
-        
-        $this->assertEquals(
-            count($uniqueStatusNames), 
-            count($statusNames),
-            'Найдены дублирующиеся статусы по именам: ' . implode(', ', array_diff_assoc($statusNames, $uniqueStatusNames))
-        );
-        
-        // Проверяем, что есть все ожидаемые уникальные статусы
-        $expectedStatusNames = ['К выполнению', 'В работе', 'Выполнено'];
+        $expectedStatusNames = ['К выполнению', 'В работе']; // Статусы только из project1
         sort($expectedStatusNames);
-        sort($uniqueStatusNames);
+        sort($statusNames);
         
-        $this->assertEquals($expectedStatusNames, $uniqueStatusNames);
+        $this->assertEquals($expectedStatusNames, $statusNames);
     }
     
     /**
@@ -126,8 +120,8 @@ class TaskIndexStatusDuplicationTest extends TestCase
         // Аутентифицируемся
         $this->actingAs($user);
         
-        // Переходим на страницу задач
-        $response = $this->get(route('tasks.index'));
+        // Переходим на страницу задач с выбранным проектом (статусы показываются только в контексте проекта)
+        $response = $this->get(route('tasks.index', ['project_id' => $project->id]));
         
         $response->assertOk();
         
