@@ -226,27 +226,27 @@ export default function TaskComments({
                                 </div>
                             </div>
                             
-                            {/* Специальные типы */}
-                            {!compact && (
-                                <div>
+                            {/* Специальные типы - показываем всегда */}
+                            <div>
+                                {!compact && (
                                     <h4 className="text-sm font-medium text-text-secondary mb-2">Специальные</h4>
-                                    <div className="space-y-2">
-                                        {getSpecialCommentTypeOptions().map((option) => (
-                                            <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="commentType"
-                                                    value={option.value}
-                                                    checked={commentType === option.value}
-                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
-                                                    className="form-radio text-accent-blue"
-                                                />
-                                                <span className="text-xs">{option.icon} {option.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    {getSpecialCommentTypeOptions().map((option) => (
+                                        <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="commentType"
+                                                value={option.value}
+                                                checked={commentType === option.value}
+                                                onChange={(e) => handleCommentTypeChange(e.target.value)}
+                                                className="form-radio text-accent-blue"
+                                            />
+                                            <span className="text-xs">{option.icon} {option.label}</span>
+                                        </label>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
                         </div>
                         {errors.type && (
                             <p className="mt-1 text-xs text-accent-red">{errors.type}</p>
@@ -263,8 +263,8 @@ export default function TaskComments({
                             value={data.content}
                             onChange={(newValue) => setData('content', newValue)}
                             users={users}
-                            rows={compact ? 3 : (commentType === COMMENT_TYPES.GENERAL ? 4 : 6)}
-                            className={`w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all text-sm ${
+                            rows={compact ? 5 : (commentType === COMMENT_TYPES.GENERAL ? 4 : 6)}
+                            className={`w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all text-sm ${
                                 errors.content ? 'border-accent-red focus:ring-accent-red' : ''
                             }`}
                             placeholder="Введите комментарий... (используйте @ для упоминания пользователей)"

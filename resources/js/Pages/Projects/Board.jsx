@@ -689,13 +689,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 {/* Заголовок задачи */}
                                                 <div className="flex justify-between items-start mb-3">
                                                     <h5 className="text-text-primary font-semibold text-body-small leading-tight">
-                                                        <Link
+                                                        <a
                                                             href={route('tasks.show', task.id)}
                                                             className="hover:text-accent-blue transition-colors duration-200"
                                                             onClick={(e) => e.stopPropagation()}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
                                                         >
                                                             {task.title}
-                                                        </Link>
+                                                        </a>
                                                     </h5>
                                                 </div>
 
@@ -786,7 +788,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     onClick={closeTaskModal}
                 >
                     <div
-                        className="bg-primary-bg border border-border-color rounded-xl md:rounded-2xl w-full max-w-4xl h-full md:max-h-[95vh] shadow-xl transition-all duration-200 ease-out scale-95 animate-[scale-in_0.2s_ease-out_forwards] overflow-hidden"
+                        className="bg-primary-bg border border-border-color rounded-xl md:rounded-2xl w-full max-w-6xl h-full md:max-h-[95vh] shadow-xl transition-all duration-200 ease-out scale-95 animate-[scale-in_0.2s_ease-out_forwards] overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Заголовок модалки с градиентом */}

@@ -316,10 +316,12 @@ export default function TaskForm({
     if (isModal) {
         return (
             <div className="h-full flex flex-col">
-                {/* Основное содержимое в две колонки */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6">
-                    {/* Левая колонка - основная информация */}
-                    <div className="md:col-span-2 space-y-4 md:space-y-6">
+                {/* Основное содержимое */}
+                <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
+                    {/* Основная информация и параметры в две колонки */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                        {/* Левая колонка - основная информация */}
+                        <div className="md:col-span-2 space-y-4 md:space-y-6">
                         {/* Название задачи */}
                         <div>
                             <label className="block text-sm font-medium text-text-secondary mb-2">
@@ -387,23 +389,6 @@ export default function TaskForm({
                                     />
                                 </div>
 
-                                {/* Комментарии */}
-                                {auth && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-text-secondary mb-3">
-                                            Комментарии
-                                        </label>
-                                        <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
-                                            <TaskComments
-                                                task={task}
-                                                comments={task.comments || []}
-                                                auth={auth}
-                                                users={members}
-                                                compact={true}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </>
                         )}
                     </div>
@@ -529,6 +514,24 @@ export default function TaskForm({
                             </div>
                         )}
                     </div>
+                    </div>
+
+                    {/* Комментарии - на всю ширину */}
+                    {isEditing && auth && (
+                        <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
+                            <div className="mb-4">
+                                <h3 className="text-lg font-semibold text-text-primary">Комментарии</h3>
+                                <p className="text-sm text-text-secondary">Обсудите задачу с командой</p>
+                            </div>
+                            <TaskComments
+                                task={task}
+                                comments={task.comments || []}
+                                auth={auth}
+                                users={members}
+                                compact={true}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Нижняя панель с кнопками */}
