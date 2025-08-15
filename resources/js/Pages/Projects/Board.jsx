@@ -29,7 +29,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
-        setLocalTasks(tasks);
+        // Нормализуем ID для корректного сравнения
+        const normalizedTasks = tasks.map(task => ({
+            ...task,
+            status_id: parseInt(task.status_id),
+            sprint_id: task.sprint_id ? parseInt(task.sprint_id) : task.sprint_id,
+            assignee_id: task.assignee_id ? parseInt(task.assignee_id) : task.assignee_id,
+            project_id: parseInt(task.project_id)
+        }));
+        setLocalTasks(normalizedTasks);
     }, [tasks]);
 
     // Автоматически скрываем сообщение об успехе через 4 секунды
@@ -157,11 +165,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 status: result.task.status || task.status,
                                 sprint: result.task.sprint || task.sprint,
                                 project: result.task.project || task.project,
-                                // Обновляем поля статуса для совместимости
-                                status_id: result.task.status_id || result.task.status?.id || task.status_id,
-                                sprint_id: result.task.sprint_id || result.task.sprint?.id || task.sprint_id,
-                                assignee_id: result.task.assignee_id || result.task.assignee?.id || task.assignee_id,
-                                project_id: result.task.project_id || result.task.project?.id || task.project_id
+                                // Обновляем поля статуса для совместимости, приводим к числу для единообразия
+                                status_id: parseInt(result.task.status_id || result.task.status?.id || task.status_id),
+                                sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : (result.task.sprint?.id ? parseInt(result.task.sprint.id) : task.sprint_id),
+                                assignee_id: result.task.assignee_id ? parseInt(result.task.assignee_id) : (result.task.assignee?.id ? parseInt(result.task.assignee.id) : task.assignee_id),
+                                project_id: parseInt(result.task.project_id || result.task.project?.id || task.project_id)
                             }
                             : task
                     )
@@ -289,7 +297,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         e.dataTransfer.dropEffect = 'move';
 
         // Если перетаскиваем в том же статусе, показываем зоны приоритетов
-        if (draggedTask && draggedTask.status_id === statusId) {
+        if (draggedTask && parseInt(draggedTask.status_id) === parseInt(statusId)) {
             setShowPriorityDropZones(true);
             setDragOverStatusId(statusId);
         } else {
@@ -360,7 +368,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setDragOverStatusId(null);
         setShowPriorityDropZones(false);
 
-        if (draggedTask && draggedTask.status_id !== statusId) {
+        if (draggedTask && parseInt(draggedTask.status_id) !== parseInt(statusId)) {
             router.put(route('tasks.status.update', draggedTask.id), {
                 status_id: statusId
             }, {
@@ -370,7 +378,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     setLocalTasks(prevTasks =>
                         prevTasks.map(task =>
                             task.id === draggedTask.id
-                                ? { ...task, status_id: statusId }
+                                ? { ...task, status_id: parseInt(statusId) }
                                 : task
                         )
                     );
@@ -455,7 +463,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                setLocalTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status_id: statusId } : t));
+                setLocalTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status_id: parseInt(statusId) } : t));
                 closeStatusOverlay();
             },
             onError: () => {
@@ -470,11 +478,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         if (currentSprintId === 'none') {
             sprintOk = !task.sprint_id; // Показать только задачи без спринта
         } else {
-            sprintOk = task.sprint_id == currentSprintId; // Показать задачи конкретного спринта
+            sprintOk = parseInt(task.sprint_id) === parseInt(currentSprintId); // Показать задачи конкретного спринта
         }
         
-        const assigneeOk = assigneeId ? String(task.assignee_id) === String(assigneeId) : true;
-        const myOk = myTasks ? String(task.assignee_id) === String(auth.user.id) : true;
+        const assigneeOk = assigneeId ? parseInt(task.assignee_id) === parseInt(assigneeId) : true;
+        const myOk = myTasks ? parseInt(task.assignee_id) === parseInt(auth.user.id) : true;
         return sprintOk && assigneeOk && myOk;
     });
 
@@ -485,9 +493,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     // Динамическая проверка кастомных статусов
-    const currentSprintHasCustomStatuses = currentSprintId !== 'none' && taskStatuses.some(status => status.sprint_id == currentSprintId);
+    const currentSprintHasCustomStatuses = currentSprintId !== 'none' && taskStatuses.some(status => parseInt(status.sprint_id) === parseInt(currentSprintId));
     const getFilteredStatusTasks = (statusId) => {
-        const tasks = filteredTasks.filter(task => task.status_id === statusId);
+        // Приводим statusId к числу для корректного сравнения
+        const normalizedStatusId = parseInt(statusId);
+        const tasks = filteredTasks.filter(task => task.status_id === normalizedStatusId);
         // Сортируем по приоритету: высокий -> средний -> низкий -> без приоритета
         return tasks.sort((a, b) => {
             const priorityA = getPriorityOrder(a.priority);
@@ -708,7 +718,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     </div>
 
                                     {/* Фиксированные зоны приоритетов при перетаскивании в том же статусе */}
-                                    {showPriorityDropZones && dragOverStatusId === status.id && draggedTask?.status_id === status.id && (
+                                    {showPriorityDropZones && parseInt(dragOverStatusId) === parseInt(status.id) && parseInt(draggedTask?.status_id) === parseInt(status.id) && (
                                         <div className="space-y-3 mb-4 flex-shrink-0">
                                             <div className="text-caption text-text-muted font-medium mb-3 text-center">Выберите приоритет:</div>
                                             {[
@@ -901,49 +911,49 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     {/* Modal container - полноэкранная на мобильных */}
                     <div className="relative z-10 flex min-h-full lg:items-center lg:justify-center lg:p-4">
                         <div 
-                            className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-card-bg border border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden"
+                            className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-card-bg/50 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-sm"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Заголовок модалки с градиентом */}
-                            <div className="bg-gradient-to-r from-accent-blue to-accent-purple p-4 lg:p-6">
+                            {/* Заголовок модалки с градиентом и кнопками */}
+                            <div className="bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 dark:border-border-color border-b border-slate-200 backdrop-blur-md p-4 lg:p-6">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
                                         {/* Адаптивная версия заголовка */}
                                         <div className="flex items-center gap-3 mb-2">
                                             {selectedTask.code && (
-                                                <span className="px-2 lg:px-3 py-1 bg-white/20 rounded-full text-white font-mono text-xs lg:text-sm">
+                                                <span className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm">
                                                     {selectedTask.code}
                                                 </span>
                                             )}
                                             <div className="flex items-center gap-2">
                                                 {selectedTask.priority && (
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)}`}>
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)} shadow-sm`}>
                                                         {selectedTask.priority}
                                                     </span>
                                                 )}
                                                 {selectedTask.status && (
-                                                    <span className="px-2 py-1 bg-white/20 rounded-full text-white text-xs font-medium">
+                                                    <span className="px-2 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-xs font-medium border border-slate-300 dark:border-white shadow-sm">
                                                         {selectedTask.status.name}
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
-                                        <h2 className="text-lg lg:text-xl font-semibold text-white mb-1 line-clamp-2">
+                                        <h2 className="text-lg lg:text-xl font-semibold text-slate-900 dark:text-text-primary mb-1 line-clamp-2 drop-shadow-sm">
                                             {selectedTask.title}
                                         </h2>
-                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-white/80 text-xs lg:text-sm">
+                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-slate-700 dark:text-text-secondary text-xs lg:text-sm">
                                             {selectedTask.assignee && (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                        <span className="text-xs font-medium">
+                                                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
+                                                        <span className="text-xs font-medium text-slate-800 dark:text-white">
                                                             {selectedTask.assignee.name?.charAt(0) || 'U'}
                                                         </span>
                                                     </div>
-                                                    <span className="truncate max-w-[120px] lg:max-w-none">{selectedTask.assignee.name}</span>
+                                                    <span className="truncate max-w-[120px] lg:max-w-none drop-shadow-sm">{selectedTask.assignee.name}</span>
                                                 </div>
                                             )}
                                             {selectedTask.deadline && (
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1 drop-shadow-sm">
                                                     <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
@@ -952,14 +962,43 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             )}
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={closeTaskModal}
-                                        className="flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 rounded-lg p-2 transition-all duration-200 ml-2"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
+                                    
+                                    {/* Кнопки действий в шапке */}
+                                    <div className="flex items-center gap-3 ml-4">
+                                        <button
+                                            type="button"
+                                            onClick={closeTaskModal}
+                                            className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/90 dark:hover:bg-secondary-bg/80 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-border-color shadow-sm backdrop-blur-sm"
+                                        >
+                                            Отмена
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={processing}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                // Вызываем submit формы TaskForm
+                                                const form = document.querySelector('#task-form');
+                                                if (form) {
+                                                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                                    form.dispatchEvent(submitEvent);
+                                                }
+                                            }}
+                                            className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center gap-2 shadow-md"
+                                        >
+                                            {processing ? (
+                                                <>
+                                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Сохранение...
+                                                </>
+                                            ) : (
+                                                'Обновить задачу'
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1003,7 +1042,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             {taskStatuses.map((status) => (
                                 <button
                                     key={status.id}
-                                    className={`border rounded-xl p-3 text-left transition-all ${statusOverlayTask.status_id === status.id ? 'border-accent-blue bg-accent-blue/10' : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'}`}
+                                    className={`border rounded-xl p-3 text-left transition-all ${parseInt(statusOverlayTask.status_id) === parseInt(status.id) ? 'border-accent-blue bg-accent-blue/10' : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'}`}
                                     onClick={() => handleStatusSelect(status.id)}
                                 >
                                     <div className="flex items-center gap-2">

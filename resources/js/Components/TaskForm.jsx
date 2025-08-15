@@ -315,7 +315,7 @@ export default function TaskForm({
 
     if (isModal) {
         return (
-            <div className="h-full flex flex-col">
+            <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
                 {/* Основное содержимое */}
                 <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
                     {/* Общие ошибки */}
@@ -335,9 +335,6 @@ export default function TaskForm({
                         <div className="md:col-span-2 space-y-4 md:space-y-6">
                         {/* Название задачи */}
                         <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">
-                                Название задачи
-                            </label>
                             <input
                                 type="text"
                                 value={data.title}
@@ -544,45 +541,7 @@ export default function TaskForm({
                         </div>
                     )}
                 </div>
-
-                {/* Нижняя панель с кнопками */}
-                <div className="border-t border-border-color bg-card-bg px-4 md:px-6 py-3 md:py-4">
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
-                        <div className="text-sm text-text-secondary order-2 md:order-1">
-                            {isEditing && task?.created_at && (
-                                <span>Создана: {new Date(task.created_at).toLocaleDateString('ru-RU')}</span>
-                            )}
-                        </div>
-                        <div className="flex gap-3 order-1 md:order-2">
-                            <button
-                                type="button"
-                                onClick={onCancel}
-                                className="btn btn-secondary"
-                            >
-                                Отмена
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                onClick={handleSubmit}
-                                className="btn btn-primary"
-                            >
-                                {processing ? (
-                                    <div className="flex items-center gap-2">
-                                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Сохранение...
-                                    </div>
-                                ) : (
-                                    isEditing ? 'Обновить задачу' : 'Создать задачу'
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </form>
         );
     }
 
