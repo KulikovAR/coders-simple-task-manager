@@ -3,6 +3,10 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
 import TaskCard from '@/Components/TaskCard';
 import PaymentModal from '@/Components/PaymentModal';
+import FilterPanel from '@/Components/FilterPanel';
+import EmptyState from '@/Components/EmptyState';
+import Pagination from '@/Components/Pagination';
+import SearchInput from '@/Components/SearchInput';
 import { getStatusLabel, getPriorityLabel } from '@/utils/statusUtils';
 
 export default function Index({ auth, tasks, filters, projects, users = [], taskStatuses = [], sprints = [] }) {
@@ -174,151 +178,104 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 </div>
 
                 {/* Фильтры */}
-                {showFilters && (
-                    <div className="card">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="card-title">Фильтры поиска</h3>
-                            <button
-                                onClick={clearFilters}
-                                className="text-sm text-accent-red hover:text-accent-red/80 transition-colors"
-                            >
-                                Очистить все
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                                <div>
-                                    <label className="form-label">
-                                        Поиск по названию
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={search}
-                                            onChange={(e) => handleSearchChange(e.target.value)}
-                                            placeholder="Введите название задачи..."
-                                            className="form-input pr-10"
-                                        />
-                                        {isSearching && (
-                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <svg className="animate-spin h-4 w-4 text-text-secondary" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="form-label">
-                                        Статус задачи
-                                    </label>
-                                    <select
-                                        value={status}
-                                        onChange={(e) => handleFilterChange('status', e.target.value)}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все статусы</option>
-                                        {taskStatuses.map((taskStatus) => (
-                                            <option key={taskStatus.id} value={taskStatus.name}>
-                                                {taskStatus.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="form-label">
-                                        Приоритет
-                                    </label>
-                                    <select
-                                        value={priority}
-                                        onChange={(e) => handleFilterChange('priority', e.target.value)}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все приоритеты</option>
-                                        <option value="low">Низкий</option>
-                                        <option value="medium">Средний</option>
-                                        <option value="high">Высокий</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="form-label">
-                                        Проект
-                                    </label>
-                                    <select
-                                        value={projectId}
-                                        onChange={(e) => handleFilterChange('project_id', e.target.value)}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все проекты</option>
-                                        {projects.map((project) => (
-                                            <option key={project.id} value={project.id}>
-                                                {project.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Спринт */}
-                                <div>
-                                    <label className="form-label">
-                                        Спринт
-                                    </label>
-                                    <select
-                                        value={sprintId}
-                                        onChange={(e) => handleFilterChange('sprint_id', e.target.value)}
-                                        className="form-select"
-                                        disabled={!projectId}
-                                    >
-                                        <option value="">Все спринты</option>
-                                        {sprints.map((sprint) => (
-                                            <option key={sprint.id} value={sprint.id}>
-                                                {sprint.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Исполнитель */}
-                                <div>
-                                    <label className="form-label">Исполнитель</label>
-                                    <select
-                                        value={assigneeId}
-                                        onChange={e => handleFilterChange('assignee_id', e.target.value)}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все исполнители</option>
-                                        {users.map(user => (
-                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Создатель */}
-                                <div>
-                                    <label className="form-label">Создатель</label>
-                                    <select
-                                        value={reporterId}
-                                        onChange={e => handleFilterChange('reporter_id', e.target.value)}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все создатели</option>
-                                        {users.map(user => (
-                                            <option key={user.id} value={user.id}>{user.name} {user.email ? `(${user.email})` : ''}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                            {/* Мои задачи (как на доске) */}
-                            <label className="flex items-center gap-2 text-body-small text-text-primary whitespace-nowrap select-none cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={myTasks}
-                                    onChange={e => handleFilterChange('my_tasks', e.target.checked ? '1' : '')}
-                                    className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200"
-                                />
-                                <span className="ml-1">Мои задачи</span>
-                            </label>
-                        </div>
-                    </div>
-                )}
+                <FilterPanel
+                    isVisible={showFilters}
+                    onClearFilters={clearFilters}
+                    searchConfig={{
+                        label: 'Поиск по названию',
+                        value: search,
+                        onChange: handleSearchChange,
+                        placeholder: 'Введите название задачи...',
+                        isLoading: isSearching
+                    }}
+                    filters={[
+                        {
+                            type: 'select',
+                            label: 'Статус задачи',
+                            value: status,
+                            onChange: (e) => handleFilterChange('status', e.target.value),
+                            options: [
+                                { value: '', label: 'Все статусы' },
+                                ...taskStatuses.map((taskStatus) => ({
+                                    value: taskStatus.name,
+                                    label: taskStatus.name
+                                }))
+                            ]
+                        },
+                        {
+                            type: 'select',
+                            label: 'Приоритет',
+                            value: priority,
+                            onChange: (e) => handleFilterChange('priority', e.target.value),
+                            options: [
+                                { value: '', label: 'Все приоритеты' },
+                                { value: 'low', label: 'Низкий' },
+                                { value: 'medium', label: 'Средний' },
+                                { value: 'high', label: 'Высокий' }
+                            ]
+                        },
+                        {
+                            type: 'select',
+                            label: 'Проект',
+                            value: projectId,
+                            onChange: (e) => handleFilterChange('project_id', e.target.value),
+                            options: [
+                                { value: '', label: 'Все проекты' },
+                                ...projects.map((project) => ({
+                                    value: project.id,
+                                    label: project.name
+                                }))
+                            ]
+                        },
+                        {
+                            type: 'select',
+                            label: 'Спринт',
+                            value: sprintId,
+                            onChange: (e) => handleFilterChange('sprint_id', e.target.value),
+                            disabled: !projectId,
+                            options: [
+                                { value: '', label: 'Все спринты' },
+                                ...sprints.map((sprint) => ({
+                                    value: sprint.id,
+                                    label: sprint.name
+                                }))
+                            ]
+                        },
+                        {
+                            type: 'select',
+                            label: 'Исполнитель',
+                            value: assigneeId,
+                            onChange: (e) => handleFilterChange('assignee_id', e.target.value),
+                            options: [
+                                { value: '', label: 'Все исполнители' },
+                                ...users.map(user => ({
+                                    value: user.id,
+                                    label: `${user.name} ${user.email ? `(${user.email})` : ''}`
+                                }))
+                            ]
+                        },
+                        {
+                            type: 'select',
+                            label: 'Создатель',
+                            value: reporterId,
+                            onChange: (e) => handleFilterChange('reporter_id', e.target.value),
+                            options: [
+                                { value: '', label: 'Все создатели' },
+                                ...users.map(user => ({
+                                    value: user.id,
+                                    label: `${user.name} ${user.email ? `(${user.email})` : ''}`
+                                }))
+                            ]
+                        },
+                        {
+                            type: 'checkbox',
+                            label: '',
+                            checked: myTasks,
+                            onChange: (e) => handleFilterChange('my_tasks', e.target.checked ? '1' : ''),
+                            checkboxLabel: 'Мои задачи'
+                        }
+                    ]}
+                />
 
                 {/* Подсказка по поиску */}
                 {(search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks) && tasks.data.length === 0 && (
@@ -365,68 +322,25 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                         </div>
                     </div>
                 ) : (
-                    <div className="card text-center">
-                        <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-text-secondary mb-2">
-                            {search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
-                        </h3>
-                        <p className="text-text-muted mb-4">
-                            {search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks
-                                ? 'Попробуйте изменить параметры поиска или очистить фильтры'
-                                : 'Создайте первую задачу для начала работы'
-                            }
-                        </p>
-                        {!search && !status && !priority && !projectId && !sprintId && !assigneeId && !reporterId && !myTasks && (
-                            <Link
-                                href={route('tasks.create')}
-                                className="btn btn-primary inline-flex items-center"
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Создать задачу
-                            </Link>
-                        )}
-                    </div>
+                    <EmptyState 
+                        title={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
+                        description={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks
+                            ? 'Попробуйте изменить параметры поиска или очистить фильтры'
+                            : 'Создайте первую задачу для начала работы'
+                        }
+                        icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                        hasFilters={!!(search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks)}
+                        onClearFilters={clearFilters}
+                        action={!search && !status && !priority && !projectId && !sprintId && !assigneeId && !reporterId && !myTasks ? {
+                            href: route('tasks.create'),
+                            text: 'Создать задачу',
+                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'
+                        } : null}
+                    />
                 )}
 
                 {/* Пагинация */}
-                {tasks.data.length > 0 && tasks.links && tasks.links.length > 3 && (
-                    <div className="flex justify-center">
-                        <nav className="flex space-x-2">
-                            {tasks.links.map((link, index) => {
-                                // Заменяем английские тексты на русские
-                                let label = link.label;
-                                if (label.includes('Previous')) {
-                                    label = label.replace('Previous', 'Предыдущая');
-                                } else if (label.includes('Next')) {
-                                    label = label.replace('Next', 'Следующая');
-                                }
-                                
-                                return link.url ? (
-                                    <Link
-                                        key={index}
-                                        href={link.url}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            link.active
-                                                ? 'bg-secondary-bg text-text-primary'
-                                                : 'bg-card-bg text-text-primary hover:bg-secondary-bg'
-                                        }`}
-                                        dangerouslySetInnerHTML={{ __html: label }}
-                                    />
-                                ) : (
-                                    <span
-                                        key={index}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-card-bg text-text-muted cursor-not-allowed`}
-                                        dangerouslySetInnerHTML={{ __html: label }}
-                                    />
-                                );
-                            })}
-                        </nav>
-                    </div>
-                )}
+                <Pagination data={tasks} />
 
                 {/* Модальное окно оплаты */}
                 {showPaymentModal && (

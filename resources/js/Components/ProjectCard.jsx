@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import StatusBadge from './StatusBadge';
 
 export default function ProjectCard({ project }) {
     const getStatusClass = (status) => {

@@ -1,10 +1,8 @@
 import { Link } from '@inertiajs/react';
-import { getStatusClass, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
+import StatusBadge from './StatusBadge';
+import PriorityBadge from './PriorityBadge';
 
 export default function TaskCard({ task }) {
-    const getPriorityText = (priority) => {
-        return getPriorityLabel(priority);
-    };
 
     return (
         <div className="card hover:shadow-glow transition-all duration-300 group flex flex-col h-full">
@@ -37,19 +35,14 @@ export default function TaskCard({ task }) {
                 {task.status && (
                     <div className="flex items-center justify-between">
                         <span className="text-body-small text-text-muted font-medium">Статус:</span>
-                        <span className={`status-badge ${getStatusClass(task.status.name)}`}>
-                            {task.status.name}
-                        </span>
+                        <StatusBadge status={task.status} />
                     </div>
                 )}
 
                 {/* Приоритет */}
                 <div className="flex items-center justify-between">
                     <span className="text-body-small text-text-muted font-medium">Приоритет:</span>
-                    <span className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-sm ${getPriorityColor(task.priority)}`}>
-                        <span className="text-sm">{getPriorityIcon(task.priority)}</span>
-                        <span>{getPriorityText(task.priority)}</span>
-                    </span>
+                    <PriorityBadge priority={task.priority} />
                 </div>
 
                 {/* Проект */}

@@ -2,6 +2,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import ProjectCard from '@/Components/ProjectCard';
+import StatsGrid from '@/Components/StatsGrid';
+import FilterPanel from '@/Components/FilterPanel';
+import EmptyState from '@/Components/EmptyState';
+import Pagination from '@/Components/Pagination';
 
 export default function Index({ auth, projects, filters }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -86,75 +90,43 @@ export default function Index({ auth, projects, filters }) {
                 </div>
 
                 {/* Статистика */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div className="card text-center">
-                        <div className="text-2xl font-bold text-text-primary mb-1">{stats.total}</div>
-                        <div className="text-sm text-text-secondary">Всего</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-2xl font-bold text-accent-green mb-1">{stats.active}</div>
-                        <div className="text-sm text-text-secondary">Активных</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-2xl font-bold text-accent-blue mb-1">{stats.completed}</div>
-                        <div className="text-sm text-text-secondary">Завершенных</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-2xl font-bold text-accent-yellow mb-1">{stats.onHold}</div>
-                        <div className="text-sm text-text-secondary">Приостановленных</div>
-                    </div>
-                    <div className="card text-center">
-                        <div className="text-2xl font-bold text-accent-red mb-1">{stats.cancelled}</div>
-                        <div className="text-sm text-text-secondary">Отмененных</div>
-                    </div>
-                </div>
+                <StatsGrid 
+                    columns={5}
+                    stats={[
+                        { label: 'Всего', value: stats.total, color: 'text-text-primary' },
+                        { label: 'Активных', value: stats.active, color: 'text-accent-green' },
+                        { label: 'Завершенных', value: stats.completed, color: 'text-accent-blue' },
+                        { label: 'Приостановленных', value: stats.onHold, color: 'text-accent-yellow' },
+                        { label: 'Отмененных', value: stats.cancelled, color: 'text-accent-red' },
+                    ]}
+                />
 
                 {/* Фильтры */}
-                {showFilters && (
-                    <div className="card">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="card-title">Фильтры поиска</h3>
-                            <button
-                                onClick={clearFilters}
-                                className="text-sm text-accent-red hover:text-accent-red/80 transition-colors"
-                            >
-                                Очистить все
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="form-label">
-                                        Поиск по названию
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Введите название проекта..."
-                                        className="form-input"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="form-label">
-                                        Статус проекта
-                                    </label>
-                                    <select
-                                        value={status}
-                                        onChange={handleStatusChange}
-                                        className="form-select"
-                                    >
-                                        <option value="">Все статусы</option>
-                                        <option value="active">Активный</option>
-                                        <option value="completed">Завершен</option>
-                                        <option value="on_hold">Приостановлен</option>
-                                        <option value="cancelled">Отменен</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <FilterPanel
+                    isVisible={showFilters}
+                    onClearFilters={clearFilters}
+                    searchConfig={{
+                        label: 'Поиск по названию',
+                        value: search,
+                        onChange: setSearch,
+                        placeholder: 'Введите название проекта...'
+                    }}
+                    filters={[
+                        {
+                            type: 'select',
+                            label: 'Статус проекта',
+                            value: status,
+                            onChange: handleStatusChange,
+                            options: [
+                                { value: '', label: 'Все статусы' },
+                                { value: 'active', label: 'Активный' },
+                                { value: 'completed', label: 'Завершен' },
+                                { value: 'on_hold', label: 'Приостановлен' },
+                                { value: 'cancelled', label: 'Отменен' }
+                            ]
+                        }
+                    ]}
+                />
 
                 {/* Подсказка по поиску */}
                 {(search || status) && projects.data.length === 0 && (
@@ -193,64 +165,24 @@ export default function Index({ auth, projects, filters }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="card text-center">
-                        <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <h3 className="text-lg font-medium text-text-secondary mb-2">
-                            {search || status ? 'Проекты не найдены' : 'Проекты отсутствуют'}
-                        </h3>
-                        <p className="text-text-muted mb-4">
-                            {search || status 
-                                ? 'Попробуйте изменить параметры поиска или очистить фильтры' 
-                                : 'Создайте первый проект для начала работы с задачами'
-                            }
-                        </p>
-                        {!search && !status && (
-                            <Link
-                                href={route('projects.create')}
-                                className="btn btn-primary inline-flex items-center"
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Создать проект
-                            </Link>
-                        )}
-                    </div>
+                    <EmptyState 
+                        title={search || status ? 'Проекты не найдены' : 'Проекты отсутствуют'}
+                        description={search || status 
+                            ? 'Попробуйте изменить параметры поиска или очистить фильтры' 
+                            : 'Создайте первый проект для начала работы с задачами'
+                        }
+                        hasFilters={!!(search || status)}
+                        onClearFilters={clearFilters}
+                        action={!search && !status ? {
+                            href: route('projects.create'),
+                            text: 'Создать проект',
+                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'
+                        } : null}
+                    />
                 )}
 
                 {/* Пагинация */}
-                {projects.data.length > 0 && projects.links && projects.links.length > 3 && (
-                    <div className="flex justify-center">
-                        <nav className="flex space-x-2">
-                            {projects.links.map((link, index) => {
-                                // Заменяем английские тексты на русские
-                                let label = link.label;
-                                if (label.includes('Previous')) {
-                                    label = label.replace('Previous', 'Предыдущая');
-                                } else if (label.includes('Next')) {
-                                    label = label.replace('Next', 'Следующая');
-                                }
-                                
-                                return (
-                                    <Link
-                                        key={index}
-                                        href={link.url}
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            link.active
-                                                ? 'bg-secondary-bg text-text-primary'
-                                                : link.url
-                                                ? 'bg-card-bg text-text-primary hover:bg-secondary-bg'
-                                                : 'bg-card-bg text-text-muted cursor-not-allowed'
-                                        }`}
-                                        dangerouslySetInnerHTML={{ __html: label }}
-                                    />
-                                );
-                            })}
-                        </nav>
-                    </div>
-                )}
+                <Pagination data={projects} />
             </div>
         </AuthenticatedLayout>
     );
