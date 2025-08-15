@@ -17,7 +17,7 @@ class MentionHelper
     {
         $pattern = '/@([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/';
         preg_match_all($pattern, $text, $matches);
-        
+
         return array_unique($matches[1] ?? []);
     }
 
@@ -31,15 +31,14 @@ class MentionHelper
     public static function getUsersByEmails(array $emails, ?Collection $projectUsers = null): Collection
     {
         $users = User::whereIn('email', $emails)->get();
-        
-        // Если указаны пользователи проекта, фильтруем только по ним
-        if ($projectUsers) {
+
+        if (!$projectUsers->isEmpty()) {
             $projectUserIds = $projectUsers->pluck('id')->toArray();
             $users = $users->filter(function ($user) use ($projectUserIds) {
                 return in_array($user->id, $projectUserIds);
             });
         }
-        
+
         return $users;
     }
 
@@ -53,11 +52,11 @@ class MentionHelper
     public static function getMentionedUsers(string $text, ?Collection $projectUsers = null): Collection
     {
         $emails = self::extractMentions($text);
-        
+
         if (empty($emails)) {
             return collect();
         }
-        
+
         return self::getUsersByEmails($emails, $projectUsers);
     }
 
