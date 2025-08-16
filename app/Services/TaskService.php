@@ -106,6 +106,7 @@ class TaskService
             'reporter_id' => $reporter->id,
             'priority' => $data['priority'] ?? 'medium',
             'status_id' => $statusId,
+            'deadline' => $data['deadline'] ?? null,
         ]);
 
         return $task->load(['assignee', 'reporter', 'status', 'sprint', 'project']);
@@ -121,6 +122,7 @@ class TaskService
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
             'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,
+            'deadline' => $data['deadline'] ?? $task->deadline,
         ];
 
         // Обновляем статус, если он передан
