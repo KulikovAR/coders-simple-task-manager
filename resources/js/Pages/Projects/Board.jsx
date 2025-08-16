@@ -66,7 +66,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
         return () => {
             document.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'unset';
+            document.body.style.overflow = '';
         };
     }, [showTaskModal]);
 
@@ -102,20 +102,28 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         
         setShowTaskModal(true);
         setErrors({});
+        // Блокируем скролл страницы
+        document.body.style.overflow = 'hidden';
     };
 
     const closeTaskModal = () => {
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
+        // Разблокируем скролл страницы
+        document.body.style.overflow = '';
     };
 
     const openPaymentModal = () => {
         setShowPaymentModal(true);
+        // Блокируем скролл страницы
+        document.body.style.overflow = 'hidden';
     };
 
     const closePaymentModal = () => {
         setShowPaymentModal(false);
+        // Разблокируем скролл страницы
+        document.body.style.overflow = '';
     };
 
     const handleTaskUpdate = async (data) => {
@@ -418,11 +426,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openStatusOverlay = (task) => {
         setStatusOverlayTask(task);
         setIsStatusOverlayOpen(true);
+        // Блокируем скролл страницы
+        document.body.style.overflow = 'hidden';
     };
 
     const closeStatusOverlay = () => {
         setIsStatusOverlayOpen(false);
         setStatusOverlayTask(null);
+        // Разблокируем скролл страницы
+        document.body.style.overflow = '';
     };
 
     const handleTaskTouchStart = (e, task) => {
