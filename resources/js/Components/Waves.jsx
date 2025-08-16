@@ -111,6 +111,10 @@ const Waves = ({
       const height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
+      
+      // Устанавливаем прозрачный фон для canvas
+      canvas.style.background = 'transparent';
+      canvas.style.backgroundColor = 'transparent';
     }
 
     function setLines() {
@@ -181,9 +185,17 @@ const Waves = ({
       const width = window.innerWidth;
       const height = window.innerHeight;
       const ctx = ctxRef.current;
+      
+      // Очищаем canvas с прозрачным фоном
       ctx.clearRect(0, 0, width, height);
+      
+      // Устанавливаем глобальную композитную операцию для прозрачности
+      ctx.globalCompositeOperation = 'source-over';
+      
       ctx.beginPath();
       ctx.strokeStyle = configRef.current.lineColor;
+      ctx.lineWidth = 1;
+      
       linesRef.current.forEach((points) => {
         let p1 = moved(points[0], false);
         ctx.moveTo(p1.x, p1.y);

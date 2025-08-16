@@ -27,10 +27,94 @@
     }
 }
 
+/* Исправляем проблему с темной областью на мобильных */
+html, body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: var(--primary-bg);
+}
+
+/* Для iOS используем -webkit-fill-available */
+@supports (-webkit-touch-callout: none) {
+    html, body {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* Убираем темную область внизу */
+body {
+    background-color: var(--primary-bg);
+    background-attachment: fixed;
+}
+
+/* Для основного контейнера */
+.min-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: var(--primary-bg);
+}
+
+@supports (-webkit-touch-callout: none) {
+    .min-h-screen {
+        min-height: -webkit-fill-available;
+    }
+}
+
 /* Улучшаем скролл в модалке */
 .modal-content {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+}
+
+/* Исправляем проблему с Waves компонентом */
+.waves-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Убираем темную область от Waves */
+.waves-container canvas {
+    background: transparent !important;
+}
+
+/* Дополнительная защита от темной области */
+* {
+    background-color: inherit;
+}
+
+/* Принудительно убираем темный фон у всех элементов */
+html, body, div, section, main, article, aside, header, footer, nav {
+    background-color: var(--primary-bg) !important;
+}
+
+/* Для canvas элементов принудительно устанавливаем прозрачность */
+canvas {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Убираем темную область у Waves компонента */
+.waves, .waves-canvas, .waves::before {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Для основного контента */
+main {
+    background-color: var(--primary-bg);
+    min-height: calc(100vh - 4rem); /* Вычитаем высоту навигации */
+    min-height: calc(100dvh - 4rem);
+}
+
+@supports (-webkit-touch-callout: none) {
+    main {
+        min-height: calc(-webkit-fill-available - 4rem);
+    }
 }
 
 /* Предотвращаем "прыжки" при открытии модалки */
