@@ -47,7 +47,7 @@ export default function Authenticated({ user, header, children, flash }) {
     }
 
     return (
-        <div className="min-h-screen bg-primary-bg text-text-primary relative">
+        <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden">
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}

@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== ИСПРАВЛЕНИЯ ДЛЯ iOS ===== */
+/* Предотвращаем скролл страницы при скролле в модалке */
+.modal-open {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Исправляем проблему с черным блоком на iOS */
+@supports (-webkit-touch-callout: none) {
+    .min-h-screen {
+        min-height: -webkit-fill-available;
+    }
+    
+    /* Предотвращаем скролл страницы на iOS */
+    body.modal-open {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Улучшаем скролл в модалке */
+.modal-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
 /* ===== БАЗОВЫЕ СТИЛИ ===== */
 /* Принудительная темная тема для лендинга */
 body[data-page="Welcome"] {
