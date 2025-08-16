@@ -47,6 +47,75 @@
     transform: translateZ(0);
 }
 
+/* ===== ПРЕДОТВРАЩЕНИЕ ZOOM НА МОБИЛЬНЫХ ===== */
+/* Запрещаем автоматическое увеличение масштаба на мобильных устройствах */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Для очень маленьких экранов можно использовать медиа-запрос */
+@media screen and (max-width: 480px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* Дополнительные стили для предотвращения zoom */
+input:focus,
+textarea:focus,
+select:focus {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Специальные правила для модалок и форм */
+.modal-content input,
+.modal-content textarea,
+.modal-content select,
+form input,
+form textarea,
+form select {
+    font-size: 16px !important;
+}
+
+/* Для компонентов с кастомными стилями */
+[class*="input"],
+[class*="textarea"],
+[class*="select"] {
+    font-size: 16px !important;
+}
+
+/* Дополнительная защита для iOS */
+@supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
 /* ===== БАЗОВЫЕ СТИЛИ ===== */
 /* Принудительная темная тема для лендинга */
 body[data-page="Welcome"] {
