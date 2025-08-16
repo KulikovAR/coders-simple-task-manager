@@ -8,6 +8,13 @@ import PaymentModal from '@/Components/PaymentModal';
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'none', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
     const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'none');
+    
+    // Автоматически перенаправляем на активный спринт при загрузке, если не выбран конкретный спринт
+    useEffect(() => {
+        if (selectedSprintId !== 'none' && selectedSprintId !== currentSprintId) {
+            setCurrentSprintId(selectedSprintId);
+        }
+    }, [selectedSprintId, currentSprintId]);
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
     const [showTaskModal, setShowTaskModal] = useState(false);
@@ -612,7 +619,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {/* Спринты */}
                       <div>
-                        <label className="block text-xs font-medium text-text-secondary mb-1">Спринт</label>
+                        <label className="block text-xs font-medium text-text-secondary mb-1">
+                          Спринт
+                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                            <span className="ml-2 text-accent-green text-xs">(Активный)</span>
+                          )}
+                        </label>
                         <select
                           value={currentSprintId}
                           onChange={e => {
@@ -627,9 +639,17 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         >
                           <option value="none">Без спринта</option>
                           {sprints.map(sprint => (
-                            <option key={sprint.id} value={sprint.id}>{sprint.name}</option>
+                            <option key={sprint.id} value={sprint.id}>
+                              {sprint.name} {sprint.status === 'active' ? '(Активный)' : ''}
+                              {sprint.id == selectedSprintId && sprint.status === 'active' && !window.location.search.includes('sprint_id') ? ' (по умолчанию)' : ''}
+                            </option>
                           ))}
                         </select>
+                        {sprints.some(s => s.status === 'active') && (
+                          <p className="text-xs text-text-muted mt-1">
+                            💡 Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
+                          </p>
+                        )}
                       </div>
                       
                       {/* Исполнитель */}
@@ -705,7 +725,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 </div>
 
                 {/* Информация о статусах */}
-                {currentSprintId !== 'none' && (
+                {currentSprintId !== 'none' ? (
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -715,16 +735,55 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         ? 'Спринт использует кастомные статусы'
                                         : 'Спринт использует статусы проекта'
                                     }
+                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                                        <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
+                                    )}
                                 </span>
                             </div>
-                            <Link
-                                href={route('sprints.statuses', [project.id, currentSprintId])}
-                                className="btn btn-secondary btn-sm"
-                            >
-                                Настроить статусы
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href={route('sprints.statuses', [project.id, currentSprintId])}
+                                    className="btn btn-secondary btn-sm"
+                                >
+                                    Настроить статусы
+                                </Link>
+                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                                    <button
+                                        onClick={() => {
+                                            router.visit(route('projects.board', project.id), { preserveState: false });
+                                        }}
+                                        className="btn btn-outline btn-sm"
+                                    >
+                                        Переключиться на "Без спринта"
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
+                ) : (
+                    // Показываем информацию о том, что активный спринт доступен
+                    sprints.some(s => s.status === 'active') && (
+                        <div className="card">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-accent-green"></div>
+                                    <span className="text-body-small text-text-secondary">
+                                        Есть активный спринт. <button 
+                                            onClick={() => {
+                                                const activeSprint = sprints.find(s => s.status === 'active');
+                                                if (activeSprint) {
+                                                    router.visit(route('projects.board', project.id) + '?sprint_id=' + activeSprint.id, { preserveState: false });
+                                                }
+                                            }}
+                                            className="text-accent-blue hover:text-accent-blue/80 underline font-medium"
+                                        >
+                                            Переключиться на него
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 )}
 
                 {/* Kanban доска с ограничением по высоте */}

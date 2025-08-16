@@ -64,18 +64,30 @@ class ProjectController extends Controller
 
         $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
         
-        // Получаем выбранный спринт если есть
-        $selectedSprintId = $request->get('sprint_id', 'none'); // Дефолт "Без спринта"
+        // Получаем спринты и определяем активный спринт
+        $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+        $activeSprint = $sprints->where('status', 'active')->first();
+        
+        // Логика выбора спринта:
+        // 1. Если пользователь явно указал sprint_id - используем его
+        // 2. Если sprint_id не указан и есть активный спринт - используем активный по умолчанию
+        // 3. В остальных случаях (нет активного спринта или пользователь выбрал "без спринта") - используем "без спринта"
+        $selectedSprintId = $request->get('sprint_id');
         $selectedSprint = null;
         
         if ($selectedSprintId && $selectedSprintId !== 'none') {
             $selectedSprint = $project->sprints()->find($selectedSprintId);
+        } elseif ($activeSprint && !$request->has('sprint_id')) {
+            // Если активный спринт не выбран и не указан конкретный спринт, используем его по умолчанию
+            $selectedSprintId = $activeSprint->id;
+            $selectedSprint = $activeSprint;
+        } else {
+            // Если нет активного спринта или пользователь явно выбрал "без спринта", используем "без спринта"
+            $selectedSprintId = 'none';
         }
         
         // Получаем релевантные статусы с учетом контекста
         $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
-        
-        $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
 
         return Inertia::render('Projects/Board', [
