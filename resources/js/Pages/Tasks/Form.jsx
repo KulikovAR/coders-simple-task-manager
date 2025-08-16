@@ -21,7 +21,12 @@ export default function Form({ auth, task = null, projects = [], selectedProject
 
     const handleSubmit = (data) => {
         if (isEditing) {
-            router.put(route('tasks.update', task.id), data);
+            // Используем router.visit для корректной обработки ответа от сервера
+            router.visit(route('tasks.update', task.id), {
+                method: 'put',
+                data: data,
+                preserveState: false
+            });
         } else {
             router.post(route('tasks.store'), data);
         }

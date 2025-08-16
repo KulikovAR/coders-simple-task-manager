@@ -189,6 +189,22 @@ class TaskController extends Controller
 
         // Не дублируем уведомление о создании при обновлении задачи
 
+        // Проверяем, это Inertia запрос или обычный
+        if ($request->header('X-Inertia')) {
+            // Для Inertia запросов проверяем, откуда пришел запрос
+            $referer = $request->header('Referer');
+            if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+                // Возвращаемся на доску проекта
+                $projectId = $task->project_id;
+                return redirect()->route('projects.board', $projectId)
+                    ->with('success', 'Задача успешно обновлена.');
+            }
+            
+            // По умолчанию возвращаемся к просмотру задачи
+            return redirect()->route('tasks.show', $task)
+                ->with('success', 'Задача успешно обновлена.');
+        }
+        
         // Проверяем, это AJAX запрос или обычный
         if ($request->ajax() || $request->wantsJson()) {
             // Возвращаем JSON ответ для AJAX запросов
