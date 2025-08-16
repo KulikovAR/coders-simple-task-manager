@@ -11,7 +11,7 @@ class CommentController extends Controller
     public function store(CommentRequest $request, Task $task)
     {
         $task->comments()->create([
-            'content' => $request->content,
+            'content' => $request->input('content'),
             'type' => $request->type,
             'user_id' => auth()->id(),
         ]);

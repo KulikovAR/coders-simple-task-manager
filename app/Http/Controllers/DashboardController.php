@@ -53,15 +53,12 @@ class DashboardController extends Controller
         ];
 
         $botUsername = config('telegram.bot_username');
+
         $telegram = [
             'bot_username' => $botUsername,
             'bot_link' => $botUsername ? ('https://t.me/' . ltrim($botUsername, '@')) : null,
         ];
 
-        return Inertia::render('Dashboard', [
-            'stats' => $stats,
-            'projects' => $projects,
-            'telegram' => $telegram,
-        ]);
+        return Inertia::render('Dashboard', compact('stats', 'projects', 'telegram'));
     }
 }

@@ -36,6 +36,7 @@ export default function TaskComments({
 
     // Синхронизируем локальные комментарии с пропсами
     useEffect(() => {
+        console.log('TaskComments: comments prop changed:', comments);
         setLocalComments(comments);
     }, [comments]);
 
@@ -43,6 +44,7 @@ export default function TaskComments({
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
         setProcessing(true);
         
         try {
@@ -70,7 +72,7 @@ export default function TaskComments({
                     setShowCommentForm(false);
                     setEditingComment(null);
                     if (onCommentUpdated) {
-                        onCommentUpdated();
+                        onCommentUpdated(result.comment);
                     }
                 }
             } else {
@@ -88,13 +90,15 @@ export default function TaskComments({
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Comment response:', result);
                     // Добавляем новый комментарий в начало списка
                     setLocalComments(prev => [result.comment, ...prev]);
                     reset();
                     setCommentType(COMMENT_TYPES.GENERAL);
                     setShowCommentForm(false);
                     if (onCommentAdded) {
-                        onCommentAdded();
+                        console.log('Calling onCommentAdded with:', result.comment);
+                        onCommentAdded(result.comment);
                     }
                 }
             }
@@ -148,7 +152,7 @@ export default function TaskComments({
                 setLocalComments(prev => prev.filter(c => c.id !== comment.id));
                 setDeletingComment(null);
                 if (onCommentDeleted) {
-                    onCommentDeleted();
+                    onCommentDeleted(comment.id);
                 }
             }
         } catch (error) {
@@ -197,7 +201,7 @@ export default function TaskComments({
             )}
 
             {showCommentForm && (
-                <form onSubmit={handleCommentSubmit} className="mb-4 space-y-3">
+                <div className="mb-4 space-y-3">
                     {/* Тип комментария */}
                     <div>
                         <label className="block text-xs font-medium text-text-secondary mb-2">
@@ -278,8 +282,9 @@ export default function TaskComments({
                     {/* Кнопки */}
                     <div className="flex space-x-2">
                         <button
-                            type="submit"
+                            type="button"
                             disabled={processing}
+                            onClick={handleCommentSubmit}
                             className="btn btn-primary btn-sm"
                         >
                             {processing ? 'Отправка...' : (editingComment ? 'Обновить' : 'Отправить')}
@@ -292,7 +297,7 @@ export default function TaskComments({
                             Отмена
                         </button>
                     </div>
-                </form>
+                </div>
             )}
 
             {/* Список комментариев */}

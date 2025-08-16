@@ -1015,6 +1015,41 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     isModal={true}
                                     processing={processing}
                                     auth={auth}
+                                    onCommentAdded={(newComment) => {
+                                        console.log('Comment added:', newComment);
+                                        console.log('Current selectedTask:', selectedTask);
+                                        // Обновляем комментарии в локальной задаче
+                                        if (selectedTask) {
+                                            setSelectedTask(prev => {
+                                                const updated = {
+                                                    ...prev,
+                                                    comments: [newComment, ...(prev.comments || [])]
+                                                };
+                                                console.log('Updated selectedTask:', updated);
+                                                return updated;
+                                            });
+                                        }
+                                    }}
+                                    onCommentUpdated={(updatedComment) => {
+                                        // Обновляем комментарии в локальной задаче
+                                        if (selectedTask) {
+                                            setSelectedTask(prev => ({
+                                                ...prev,
+                                                comments: prev.comments?.map(comment => 
+                                                    comment.id === updatedComment.id ? updatedComment : comment
+                                                ) || []
+                                            }));
+                                        }
+                                    }}
+                                    onCommentDeleted={(deletedCommentId) => {
+                                        // Удаляем комментарий из локальной задачи
+                                        if (selectedTask) {
+                                            setSelectedTask(prev => ({
+                                                ...prev,
+                                                comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
+                                            }));
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>

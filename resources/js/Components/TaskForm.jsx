@@ -14,7 +14,10 @@ export default function TaskForm({
     onCancel,
     isModal = false,
     processing = false,
-    auth = null
+    auth = null,
+    onCommentAdded = null,
+    onCommentUpdated = null,
+    onCommentDeleted = null
 }) {
     const isEditing = !!task;
 
@@ -537,6 +540,9 @@ export default function TaskForm({
                                 auth={auth}
                                 users={members}
                                 compact={true}
+                                onCommentAdded={onCommentAdded}
+                                onCommentUpdated={onCommentUpdated}
+                                onCommentDeleted={onCommentDeleted}
                             />
                         </div>
                     )}
