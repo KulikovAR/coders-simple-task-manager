@@ -185,7 +185,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     project: result.task.project || prev.project
                 }));
                 
-                closeTaskModal();
+                // НЕ закрываем модалку автоматически
+                // closeTaskModal();
                 
                 // Показываем сообщение об успехе
                 setSuccessMessage(result.message || 'Задача успешно обновлена');
@@ -904,12 +905,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 <div className="fixed inset-0 z-50 overflow-hidden">
                     {/* Backdrop */}
                     <div 
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 z-30"
                         onClick={closeTaskModal}
                     />
                     
                     {/* Modal container - полноэкранная на мобильных */}
-                    <div className="relative z-10 flex min-h-full lg:items-center lg:justify-center lg:p-4">
+                    <div className="relative z-50 flex min-h-full lg:items-center lg:justify-center lg:p-4">
                         <div 
                             className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-card-bg/50 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-sm"
                             onClick={(e) => e.stopPropagation()}
@@ -968,7 +969,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             onClick={closeTaskModal}
                                             className="!text-white hover:!text-white hover:bg-white/90 dark:hover:bg-gray-700 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-gray-600 shadow-sm backdrop-blur-sm"
                                         >
-                                            Отмена
+                                            Закрыть
                                         </button>
                                         <button
                                             type="button"
