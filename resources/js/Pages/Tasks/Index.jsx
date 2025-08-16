@@ -36,7 +36,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 reporter_id: reporterId,
                 my_tasks: myTasks ? '1' : '',
             };
-            
+
             router.get(route('tasks.index'), newFilters, {
                 preserveState: true,
                 preserveScroll: true,
@@ -90,7 +90,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
             reporter_id: filter === 'reporter_id' ? value : reporterId,
             my_tasks: filter === 'my_tasks' ? value : (myTasks ? '1' : ''),
         };
-        
+
         router.get(route('tasks.index'), newFilters, {
             preserveState: true,
             preserveScroll: true,
@@ -295,9 +295,6 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 {tasks.data.length > 0 ? (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-text-primary">
-                                Найдено задач: {tasks.data.length}
-                            </h3>
                             <div className="text-sm text-text-secondary">
                                 {search && `Поиск: "${search}"`}
                                 {status && ` • Статус: ${getStatusLabel(status)}`}
@@ -316,7 +313,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                         </div>
                     </div>
                 ) : (
-                    <EmptyState 
+                    <EmptyState
                         title={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
                         description={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks
                             ? 'Попробуйте изменить параметры поиска или очистить фильтры'
@@ -347,4 +344,4 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
             </div>
         </AuthenticatedLayout>
     );
-} 
+}

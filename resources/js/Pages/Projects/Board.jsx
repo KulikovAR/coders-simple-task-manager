@@ -929,87 +929,86 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         >
                             {/* Заголовок модалки с градиентом и кнопками */}
                             <div className="bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 dark:border-border-color border-b border-slate-200 backdrop-blur-md p-4 lg:p-6">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1 min-w-0">
-                                        {/* Адаптивная версия заголовка */}
-                                        <div className="flex items-center gap-3 mb-2">
-                                            {selectedTask.code && (
-                                                <span className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm">
-                                                    {selectedTask.code}
+                                {/* Информация о задаче */}
+                                <div className="mb-4 lg:mb-0">
+                                    {/* Адаптивная версия заголовка */}
+                                    <div className="flex items-center gap-3 mb-2">
+                                        {selectedTask.code && (
+                                            <span className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm">
+                                                {selectedTask.code}
+                                            </span>
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                            {selectedTask.priority && (
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)} shadow-sm`}>
+                                                    {selectedTask.priority}
                                                 </span>
                                             )}
-                                            <div className="flex items-center gap-2">
-                                                {selectedTask.priority && (
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)} shadow-sm`}>
-                                                        {selectedTask.priority}
-                                                    </span>
-                                                )}
-                                                {selectedTask.status && (
-                                                    <span className="px-2 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-xs font-medium border border-slate-300 dark:border-white shadow-sm">
-                                                        {selectedTask.status.name}
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {selectedTask.status && (
+                                                <span className="px-2 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-xs font-medium border border-slate-300 dark:border-white shadow-sm">
+                                                    {selectedTask.status.name}
+                                                </span>
+                                            )}
                                         </div>
+                                    </div>
 
-                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 !text-white text-xs lg:text-sm">
-                                            {selectedTask.assignee && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                                        <span className="text-xs font-medium text-slate-800 dark:text-white">
-                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                                        </span>
-                                                    </div>
-                                                    <span className="truncate max-w-[120px] lg:max-w-none drop-shadow-sm">{selectedTask.assignee.name}</span>
+                                    <div className="flex flex-wrap items-center gap-2 lg:gap-4 !text-white text-xs lg:text-sm">
+                                        {selectedTask.assignee && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
+                                                    <span className="text-xs font-medium text-slate-800 dark:text-white">
+                                                        {selectedTask.assignee.name?.charAt(0) || 'U'}
+                                                    </span>
                                                 </div>
-                                            )}
-                                            {selectedTask.deadline && (
-                                                <div className="flex items-center gap-1 drop-shadow-sm">
-                                                    <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span>{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                                <span className="truncate max-w-[120px] lg:max-w-none drop-shadow-sm">{selectedTask.assignee.name}</span>
+                                            </div>
+                                        )}
+                                        {selectedTask.deadline && (
+                                            <div className="flex items-center gap-1 drop-shadow-sm">
+                                                <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span>{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                    
-                                    {/* Кнопки действий в шапке */}
-                                    <div className="flex items-center gap-3 ml-4">
-                                        <button
-                                            type="button"
-                                            onClick={closeTaskModal}
-                                            className="!text-white hover:!text-white hover:bg-white/90 dark:hover:bg-gray-700 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-gray-600 shadow-sm backdrop-blur-sm"
-                                        >
-                                            Закрыть
-                                        </button>
-                                        <button
-                                            type="button"
-                                            disabled={processing}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                // Вызываем submit формы TaskForm
-                                                const form = document.querySelector('#task-form');
-                                                if (form) {
-                                                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                                    form.dispatchEvent(submitEvent);
-                                                }
-                                            }}
-                                            className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center gap-2 shadow-md"
-                                        >
-                                            {processing ? (
-                                                <>
-                                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Сохранение...
-                                                </>
-                                            ) : (
-                                                'Обновить задачу'
-                                            )}
-                                        </button>
-                                    </div>
+                                </div>
+                                
+                                {/* Кнопки действий - отдельная строка на мобильных */}
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={closeTaskModal}
+                                        className="!text-white hover:!text-white hover:bg-white/90 dark:hover:bg-gray-700 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-gray-600 shadow-sm backdrop-blur-sm flex-1 sm:flex-none"
+                                    >
+                                        Закрыть
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={processing}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            // Вызываем submit формы TaskForm
+                                            const form = document.querySelector('#task-form');
+                                            if (form) {
+                                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                                form.dispatchEvent(submitEvent);
+                                            }
+                                        }}
+                                        className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md flex-1 sm:flex-none"
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Сохранение...
+                                            </>
+                                        ) : (
+                                            'Обновить задачу'
+                                        )}
+                                    </button>
                                 </div>
                             </div>
 
