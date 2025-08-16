@@ -33,6 +33,20 @@
     overscroll-behavior: contain;
 }
 
+/* Предотвращаем "прыжки" при открытии модалки */
+.modal-open {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Плавные переходы для предотвращения рывков */
+.modal-open * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
 /* ===== БАЗОВЫЕ СТИЛИ ===== */
 /* Принудительная темная тема для лендинга */
 body[data-page="Welcome"] {

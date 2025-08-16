@@ -546,6 +546,11 @@ export default function TaskForm({
                             />
                         </div>
                     )}
+                    
+                    {/* Свободная область под комментариями для мобильных устройств */}
+                    {isModal && (
+                        <div className="h-20 lg:h-0"></div>
+                    )}
                 </div>
             </form>
         );

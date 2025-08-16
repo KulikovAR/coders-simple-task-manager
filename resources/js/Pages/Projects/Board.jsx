@@ -67,6 +67,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         return () => {
             document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = '';
+            document.body.classList.remove('modal-open');
         };
     }, [showTaskModal]);
 
@@ -79,6 +80,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     }, [localTasks, draggedTask]);
 
     const openTaskModal = (task) => {
+        // Сохраняем текущую позицию скролла
+        const scrollY = window.scrollY;
+        
         // Загружаем задачу с комментариями
         fetch(route('tasks.show', task.id) + '?modal=1', {
             headers: {
@@ -102,9 +106,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         
         setShowTaskModal(true);
         setErrors({});
-        // Блокируем скролл страницы
+        
+        // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
         document.body.classList.add('modal-open');
+        
+        // Восстанавливаем позицию скролла после блокировки
+        requestAnimationFrame(() => {
+            window.scrollTo(0, scrollY);
+        });
     };
 
     const closeTaskModal = () => {
@@ -117,15 +127,26 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     const openPaymentModal = () => {
+        // Сохраняем текущую позицию скролла
+        const scrollY = window.scrollY;
+        
         setShowPaymentModal(true);
-        // Блокируем скролл страницы
+        
+        // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        
+        // Восстанавливаем позицию скролла после блокировки
+        requestAnimationFrame(() => {
+            window.scrollTo(0, scrollY);
+        });
     };
 
     const closePaymentModal = () => {
         setShowPaymentModal(false);
         // Разблокируем скролл страницы
         document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
     };
 
     const handleTaskUpdate = async (data) => {
@@ -426,10 +447,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     const openStatusOverlay = (task) => {
+        // Сохраняем текущую позицию скролла
+        const scrollY = window.scrollY;
+        
         setStatusOverlayTask(task);
         setIsStatusOverlayOpen(true);
-        // Блокируем скролл страницы
+        
+        // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        
+        // Восстанавливаем позицию скролла после блокировки
+        requestAnimationFrame(() => {
+            window.scrollTo(0, scrollY);
+        });
     };
 
     const closeStatusOverlay = () => {
