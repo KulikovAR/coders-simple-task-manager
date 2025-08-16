@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import { useState, useEffect } from 'react';
 import TaskComments from '@/Components/TaskComments';
+import RichTextEditor from '@/Components/RichTextEditor';
 
 export default function TaskForm({
     task = null,
@@ -269,17 +270,29 @@ export default function TaskForm({
                     {label}
                 </label>
                 {type === 'textarea' ? (
-                    <textarea
-                        id={fieldName}
-                        value={data[fieldName]}
-                        onChange={(e) => setData(fieldName, e.target.value)}
-                        rows={options.rows || 4}
-                        className={`${modalStyles.textarea} ${
-                            hasError ? 'border-accent-red focus:ring-accent-red' : ''
-                        }`}
-                        placeholder={options.placeholder || ''}
-                        required={options.required}
-                    />
+                    // Используем RichTextEditor для полей description и result
+                    (fieldName === 'description' || fieldName === 'result') ? (
+                        <RichTextEditor
+                            value={data[fieldName]}
+                            onChange={(value) => setData(fieldName, value)}
+                            placeholder={options.placeholder || ''}
+                            className={`w-full ${
+                                hasError ? 'border-accent-red' : ''
+                            }`}
+                        />
+                    ) : (
+                        <textarea
+                            id={fieldName}
+                            value={data[fieldName]}
+                            onChange={(e) => setData(fieldName, e.target.value)}
+                            rows={options.rows || 4}
+                            className={`${modalStyles.textarea} ${
+                                hasError ? 'border-accent-red focus:ring-accent-red' : ''
+                            }`}
+                            placeholder={options.placeholder || ''}
+                            required={options.required}
+                        />
+                    )
                 ) : type === 'select' ? (
                     <select
                         id={fieldName}
@@ -357,12 +370,11 @@ export default function TaskForm({
                             <label className="block text-sm font-medium !text-white mb-3">
                                 Описание
                             </label>
-                            <textarea
+                            <RichTextEditor
                                 value={data.description}
-                                onChange={(e) => setData('description', e.target.value)}
-                                rows={3}
-                                className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 md:px-4 py-2 md:py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all duration-150"
-                                placeholder="Опишите задачу подробно..."
+                                onChange={(value) => setData('description', value)}
+                                placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения и ссылки)"
+                                className="w-full"
                             />
                             {(formErrors.description || errors.description) && (
                                 <p className="mt-1 text-sm text-accent-red">{formErrors.description || errors.description}</p>
@@ -377,12 +389,11 @@ export default function TaskForm({
                                     <label className="block text-sm font-medium !text-white mb-3">
                                         Результат выполнения
                                     </label>
-                                    <textarea
+                                    <RichTextEditor
                                         value={data.result}
-                                        onChange={(e) => setData('result', e.target.value)}
-                                        rows={3}
-                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
-                                        placeholder="Опишите что было сделано..."
+                                        onChange={(value) => setData('result', value)}
+                                        placeholder="Опишите что было сделано... (поддерживается форматирование, изображения и ссылки)"
+                                        className="w-full"
                                     />
                                 </div>
 

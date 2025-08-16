@@ -6,6 +6,7 @@ use App\Enums\CommentType;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\User;
+use App\Services\HtmlContentService;
 use Illuminate\Database\Eloquent\Collection;
 
 class TaskCommentService
@@ -20,18 +21,43 @@ class TaskCommentService
 
     public function createComment(array $data, Task $task, User $user): TaskComment
     {
+        // Обрабатываем HTML контент с изображениями
+        $htmlContentService = app(HtmlContentService::class);
+        $processedContent = $htmlContentService->processContent($data['content'], [
+            'storage_path' => 'comments/' . $task->id,
+            'disk' => 'public'
+        ]);
+
         return TaskComment::create([
             'task_id' => $task->id,
             'user_id' => $user->id,
-            'content' => $data['content'],
+            'content' => $processedContent['html'],
             'type' => $data['type'] ?? CommentType::GENERAL,
         ]);
     }
 
     public function updateComment(TaskComment $comment, array $data): TaskComment
     {
+        // Безопасно обновляем HTML контент с изображениями
+        $htmlContentService = app(HtmlContentService::class);
+        $processedContent = $htmlContentService->updateContent(
+            $data['content'],
+            $comment->content,
+            [
+                'storage_path' => 'comments/' . $comment->task_id,
+                'disk' => 'public'
+            ]
+        );
+
+        // Удаляем неиспользуемые изображения
+        $htmlContentService->cleanupUnusedImages(
+            $comment->content,
+            $processedContent['html'],
+            ['disk' => 'public']
+        );
+
         $comment->update([
-            'content' => $data['content'],
+            'content' => $processedContent['html'],
             'type' => $data['type'] ?? $comment->type,
         ]);
 

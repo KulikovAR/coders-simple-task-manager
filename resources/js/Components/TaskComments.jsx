@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
-import MentionTextarea from '@/Components/MentionTextarea';
-import MentionText from '@/Components/MentionText';
+import RichTextEditor from '@/Components/RichTextEditor';
+import HtmlRenderer from '@/Components/HtmlRenderer';
 import { 
     getCommentTypeLabel, 
     getCommentTypeIcon, 
@@ -262,17 +262,15 @@ export default function TaskComments({
                         <label htmlFor="content" className="block text-xs font-medium text-text-secondary mb-2">
                             Содержание
                         </label>
-                        <MentionTextarea
-                            id="content"
+                        <RichTextEditor
                             value={data.content}
                             onChange={(newValue) => setData('content', newValue)}
+                            onMentionSelect={(user) => console.log('User mentioned:', user)}
                             users={users}
-                            rows={compact ? 5 : (commentType === COMMENT_TYPES.GENERAL ? 4 : 6)}
-                            className={`w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all text-sm ${
-                                errors.content ? 'border-accent-red focus:ring-accent-red' : ''
+                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
+                            className={`w-full ${
+                                errors.content ? 'border-accent-red' : ''
                             }`}
-                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей)"
-                            required
                         />
                         {errors.content && (
                             <p className="mt-1 text-xs text-accent-red">{errors.content}</p>
@@ -340,12 +338,8 @@ export default function TaskComments({
                                     )}
                                 </div>
                             </div>
-                            <div className="text-text-secondary text-xs">
-                                <MentionText 
-                                    text={comment.content} 
-                                    users={users}
-                                    className="whitespace-pre-wrap"
-                                />
+                            <div className="text-text-secondary text-sm">
+                                <HtmlRenderer content={comment.content} />
                             </div>
                         </div>
                     ))

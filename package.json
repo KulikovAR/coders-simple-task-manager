@@ -25,6 +25,13 @@
     "dependencies": {
         "@react-spring/parallax": "^10.0.1",
         "@react-spring/web": "^10.0.1",
+        "@tiptap/extension-image": "^3.2.0",
+        "@tiptap/extension-link": "^3.2.0",
+        "@tiptap/extension-mention": "^3.2.0",
+        "@tiptap/extension-placeholder": "^3.2.0",
+        "@tiptap/pm": "^3.2.0",
+        "@tiptap/react": "^3.2.0",
+        "@tiptap/starter-kit": "^3.2.0",
         "framer-motion": "^12.23.9",
         "gsap": "^3.13.0",
         "lucide-react": "^0.526.0",

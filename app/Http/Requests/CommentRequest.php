@@ -14,7 +14,7 @@ class CommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|max:50000', // Увеличиваем лимит для HTML контента
             'type' => 'required|in:comment,status',
         ];
     }
@@ -23,9 +23,9 @@ class CommentRequest extends FormRequest
     {
         return [
             'content.required' => 'Содержание комментария обязательно для заполнения.',
-            'content.max' => 'Комментарий не может быть длиннее 1000 символов.',
+            'content.max' => 'Комментарий не может быть длиннее 50 000 символов.',
             'type.required' => 'Тип комментария обязателен для заполнения.',
             'type.in' => 'Выбран недопустимый тип комментария.',
         ];
     }
-} 
+}

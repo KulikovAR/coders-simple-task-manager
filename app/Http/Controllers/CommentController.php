@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentRequest;
 use App\Models\Task;
 use App\Models\TaskComment;
+use App\Services\CommentService;
 
 class CommentController extends Controller
 {
     public function store(CommentRequest $request, Task $task)
     {
-        $task->comments()->create([
+        $commentService = app(CommentService::class);
+        
+        $comment = $commentService->createComment([
             'content' => $request->input('content'),
             'type' => $request->type,
-            'user_id' => auth()->id(),
-        ]);
+        ], $task, auth()->user());
 
         return back()->with('success', 'Комментарий добавлен.');
     }
@@ -23,7 +25,9 @@ class CommentController extends Controller
     {
         $this->authorize('update', $comment);
 
-        $comment->update($request->validated());
+        $commentService = app(CommentService::class);
+        
+        $comment = $commentService->updateComment($comment, $request->validated());
 
         return back()->with('success', 'Комментарий обновлен.');
     }
@@ -32,7 +36,9 @@ class CommentController extends Controller
     {
         $this->authorize('delete', $comment);
 
-        $comment->delete();
+        $commentService = app(CommentService::class);
+        
+        $commentService->deleteComment($comment);
 
         return back()->with('success', 'Комментарий удален.');
     }

@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import StatusBadge from './StatusBadge';
 import PriorityBadge from './PriorityBadge';
+import HtmlRenderer from '@/Components/HtmlRenderer';
 
 export default function TaskCard({ task }) {
 
@@ -23,9 +24,9 @@ export default function TaskCard({ task }) {
                     </h3>
                 </Link>
                 {task.description && (
-                    <p className="text-body-small text-text-secondary mb-4 line-clamp-2 leading-relaxed">
-                        {task.description}
-                    </p>
+                    <div className="text-body-small text-text-secondary mb-4 line-clamp-2 leading-relaxed">
+                        <HtmlRenderer content={task.description} />
+                    </div>
                 )}
             </div>
 

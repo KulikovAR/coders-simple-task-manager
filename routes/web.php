@@ -33,6 +33,11 @@ Route::get('/faq', function () {
     return Inertia::render('Faq');
 })->name('faq');
 
+// Демо-страница RichTextEditor
+Route::get('/demo/rich-editor', function () {
+    return Inertia::render('Demo/RichEditorDemo');
+})->name('demo.rich-editor');
+
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

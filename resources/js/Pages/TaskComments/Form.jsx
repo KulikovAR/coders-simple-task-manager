@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import MentionTextarea from '@/Components/MentionTextarea';
+import RichTextEditor from '@/Components/RichTextEditor';
 import {
     getBasicCommentTypeOptions,
     getSpecialCommentTypeOptions,
@@ -99,13 +99,13 @@ export default function Form({ auth, comment, task }) {
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     Комментарий
                                 </label>
-                                <MentionTextarea
+                                <RichTextEditor
                                     value={data.content}
                                     onChange={(value) => setData('content', value)}
-                                    placeholder="Введите комментарий..."
+                                    onMentionSelect={(user) => console.log('User mentioned:', user)}
                                     users={task.project?.members || []}
-                                    rows={6}
-                                    className="input-field"
+                                    placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
+                                    className="w-full"
                                 />
                                 {errors.content && (
                                     <p className="text-red-500 text-sm mt-1">{errors.content}</p>

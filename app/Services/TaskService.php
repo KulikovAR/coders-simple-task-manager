@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
+use App\Services\HtmlContentService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -95,12 +96,31 @@ class TaskService
             $statusId = $defaultStatus ? $defaultStatus->id : null;
         }
 
+        // Обрабатываем HTML контент с изображениями
+        $htmlContentService = app(HtmlContentService::class);
+        
+        $processedDescription = null;
+        if (!empty($data['description'])) {
+            $processedDescription = $htmlContentService->processContent($data['description'], [
+                'storage_path' => 'tasks/' . $project->id . '/descriptions',
+                'disk' => 'public'
+            ]);
+        }
+        
+        $processedResult = null;
+        if (!empty($data['result'])) {
+            $processedResult = $htmlContentService->processContent($data['result'], [
+                'storage_path' => 'tasks/' . $project->id . '/results',
+                'disk' => 'public'
+            ]);
+        }
+
         $task = Task::create([
             'project_id' => $project->id,
             'sprint_id' => $data['sprint_id'] ?? null,
             'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'result' => $data['result'] ?? null,
+            'description' => $processedDescription ? $processedDescription['html'] : null,
+            'result' => $processedResult ? $processedResult['html'] : null,
             'merge_request' => $data['merge_request'] ?? null,
             'assignee_id' => $data['assignee_id'] ?? null,
             'reporter_id' => $reporter->id,
@@ -114,11 +134,70 @@ class TaskService
 
     public function updateTask(Task $task, array $data): Task
     {
+        // Обрабатываем HTML контент с изображениями
+        $htmlContentService = app(HtmlContentService::class);
+        
+        $processedDescription = null;
+        if (isset($data['description'])) {
+            if (!empty($data['description'])) {
+                $processedDescription = $htmlContentService->updateContent(
+                    $data['description'],
+                    $task->description ?? '',
+                    [
+                        'storage_path' => 'tasks/' . $task->project_id . '/descriptions',
+                        'disk' => 'public'
+                    ]
+                );
+                
+                // Удаляем неиспользуемые изображения
+                $htmlContentService->cleanupUnusedImages(
+                    $task->description ?? '',
+                    $processedDescription['html'],
+                    ['disk' => 'public']
+                );
+            } else {
+                // Если описание пустое, удаляем старые изображения
+                $htmlContentService->cleanupUnusedImages(
+                    $task->description ?? '',
+                    '',
+                    ['disk' => 'public']
+                );
+            }
+        }
+        
+        $processedResult = null;
+        if (isset($data['result'])) {
+            if (!empty($data['result'])) {
+                $processedResult = $htmlContentService->updateContent(
+                    $data['result'],
+                    $task->result ?? '',
+                    [
+                        'storage_path' => 'tasks/' . $task->project_id . '/results',
+                        'disk' => 'public'
+                    ]
+                );
+                
+                // Удаляем неиспользуемые изображения
+                $htmlContentService->cleanupUnusedImages(
+                    $task->result ?? '',
+                    $processedResult['html'],
+                    ['disk' => 'public']
+                );
+            } else {
+                // Если результат пустой, удаляем старые изображения
+                $htmlContentService->cleanupUnusedImages(
+                    $task->result ?? '',
+                    '',
+                    ['disk' => 'public']
+                );
+            }
+        }
+
         $updateData = [
             'sprint_id' => $data['sprint_id'] ?? $task->sprint_id,
             'title' => $data['title'] ?? $task->title,
-            'description' => $data['description'] ?? $task->description,
-            'result' => $data['result'] ?? $task->result,
+            'description' => $processedDescription ? $processedDescription['html'] : ($data['description'] ?? $task->description),
+            'result' => $processedResult ? $processedResult['html'] : ($data['result'] ?? $task->result),
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
             'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,

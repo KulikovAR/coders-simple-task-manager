@@ -15,7 +15,7 @@ class TaskCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string',
             'type' => 'sometimes|in:' . implode(',', CommentType::values()),
         ];
     }
@@ -29,4 +29,4 @@ class TaskCommentRequest extends FormRequest
             'type.in' => 'Неверный тип комментария.',
         ];
     }
-} 
+}
