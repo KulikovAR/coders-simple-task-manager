@@ -3,15 +3,15 @@ import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtil
 import { useState, useEffect } from 'react';
 import TaskComments from '@/Components/TaskComments';
 
-export default function TaskForm({ 
-    task = null, 
-    projects = [], 
-    sprints = [], 
-    members = [], 
+export default function TaskForm({
+    task = null,
+    projects = [],
+    sprints = [],
+    members = [],
     taskStatuses = [],
-    errors = {}, 
-    onSubmit, 
-    onCancel, 
+    errors = {},
+    onSubmit,
+    onCancel,
     isModal = false,
     processing = false,
     auth = null
@@ -230,28 +230,28 @@ export default function TaskForm({
         container: isModal ? "space-y-4" : "space-y-6",
         card: isModal ? "" : "card",
         cardTitle: isModal ? "text-lg font-semibold text-text-primary mb-3" : "card-title mb-4",
-        input: isModal 
+        input: isModal
             ? "w-full bg-card-bg border border-border-color rounded-lg px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
             : "form-input",
-        select: isModal 
+        select: isModal
             ? "w-full bg-card-bg border border-border-color rounded-lg px-3 py-2 text-text-primary focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
             : "form-select",
-        textarea: isModal 
+        textarea: isModal
             ? "w-full bg-card-bg border border-border-color rounded-lg px-3 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
             : "form-input",
-        label: isModal 
+        label: isModal
             ? "block text-sm font-medium text-text-primary mb-2"
             : "form-label",
-        error: isModal 
+        error: isModal
             ? "mt-1 text-sm text-accent-red"
             : "mt-1 text-sm text-accent-red",
-        buttonContainer: isModal 
+        buttonContainer: isModal
             ? "flex justify-end space-x-3 pt-4 border-t border-border-color"
             : "flex justify-end space-x-3 mb-6 pb-4 border-b border-border-color",
-        cancelButton: isModal 
+        cancelButton: isModal
             ? "btn btn-secondary"
             : "btn btn-secondary",
-        submitButton: isModal 
+        submitButton: isModal
             ? "btn btn-primary"
             : "btn btn-primary"
     };
@@ -259,7 +259,7 @@ export default function TaskForm({
     const renderField = (fieldName, label, type = 'text', options = {}) => {
         const hasError = (formErrors[fieldName] || errors[fieldName]);
         const errorMessage = formErrors[fieldName] || errors[fieldName];
-        
+
         return (
             <div>
                 <label htmlFor={fieldName} className={modalStyles.label}>
@@ -339,7 +339,7 @@ export default function TaskForm({
                                 type="text"
                                 value={data.title}
                                 onChange={(e) => setData('title', e.target.value)}
-                                className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:ring-0"
+                                className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 !text-white placeholder-white/70 focus:outline-none focus:ring-0"
                                 placeholder="Введите название задачи..."
                                 required
                             />
@@ -351,7 +351,7 @@ export default function TaskForm({
 
                         {/* Описание */}
                         <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-3">
+                            <label className="block text-sm font-medium !text-white mb-3">
                                 Описание
                             </label>
                             <textarea
@@ -371,7 +371,7 @@ export default function TaskForm({
                             <>
                                 {/* Результат */}
                                 <div>
-                                    <label className="block text-sm font-medium text-text-secondary mb-3">
+                                    <label className="block text-sm font-medium !text-white mb-3">
                                         Результат выполнения
                                     </label>
                                     <textarea
@@ -385,7 +385,7 @@ export default function TaskForm({
 
                                 {/* Merge Request */}
                                 <div>
-                                    <label className="block text-sm font-medium text-text-secondary mb-3">
+                                    <label className="block text-sm font-medium !text-white mb-3">
                                         Ссылка на Merge Request
                                     </label>
                                     <input
@@ -405,7 +405,7 @@ export default function TaskForm({
                     <div className="space-y-4 md:space-y-6">
                         {/* Быстрые действия */}
                         <div className="bg-card-bg border border-border-color rounded-xl p-3 md:p-4">
-                            <h3 className="text-sm font-medium text-text-primary mb-4">Параметры задачи</h3>
+                            <h3 className="text-sm font-medium !text-white mb-4">Параметры задачи</h3>
                             <div className="space-y-4">
                                 {/* Статус */}
                                 <div>
@@ -528,8 +528,8 @@ export default function TaskForm({
                     {isEditing && auth && (
                         <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
                             <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-text-primary">Комментарии</h3>
-                                <p className="text-sm text-text-secondary">Обсудите задачу с командой</p>
+                                <h3 className="text-lg font-semibold text-white dark:text-white">Комментарии</h3>
+                                <p className="text-sm text-white dark:text-gray-300">Обсудите задачу с командой</p>
                             </div>
                             <TaskComments
                                 task={task}
@@ -684,4 +684,4 @@ export default function TaskForm({
             </div>
         </form>
     );
-} 
+}

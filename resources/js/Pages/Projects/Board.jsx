@@ -938,10 +938,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 )}
                                             </div>
                                         </div>
-                                        <h2 className="text-lg lg:text-xl font-semibold text-slate-900 dark:text-text-primary mb-1 line-clamp-2 drop-shadow-sm">
-                                            {selectedTask.title}
-                                        </h2>
-                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-slate-700 dark:text-text-secondary text-xs lg:text-sm">
+
+                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 !text-white text-xs lg:text-sm">
                                             {selectedTask.assignee && (
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
@@ -968,7 +966,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         <button
                                             type="button"
                                             onClick={closeTaskModal}
-                                            className="text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/90 dark:hover:bg-secondary-bg/80 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-border-color shadow-sm backdrop-blur-sm"
+                                            className="!text-white hover:!text-white hover:bg-white/90 dark:hover:bg-gray-700 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border border-slate-300 dark:border-gray-600 shadow-sm backdrop-blur-sm"
                                         >
                                             Отмена
                                         </button>
