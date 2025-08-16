@@ -4,7 +4,7 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Mention from '@tiptap/extension-mention';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { 
     Bold, 
     Italic, 
@@ -191,6 +191,13 @@ export default function RichTextEditor({
             onChange(html);
         },
     });
+
+    // Обновляем содержимое редактора при изменении value пропса
+    useEffect(() => {
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value);
+        }
+    }, [value, editor]);
 
     // Обработка вставки изображения по URL
     const addImage = useCallback(() => {

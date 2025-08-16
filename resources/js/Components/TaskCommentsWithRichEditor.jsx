@@ -28,6 +28,7 @@ export default function TaskCommentsWithRichEditor({
     const [deletingComment, setDeletingComment] = useState(null);
     const [localComments, setLocalComments] = useState(comments);
     const [processing, setProcessing] = useState(false);
+    const [commentContent, setCommentContent] = useState('');
     
     const { data, setData, errors, reset } = useForm({
         content: '',
@@ -39,6 +40,8 @@ export default function TaskCommentsWithRichEditor({
         console.log('TaskComments: comments prop changed:', comments);
         setLocalComments(comments);
     }, [comments]);
+
+
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
@@ -67,6 +70,8 @@ export default function TaskCommentsWithRichEditor({
                     ));
                     reset();
                     setCommentType(COMMENT_TYPES.GENERAL);
+                    setData('type', COMMENT_TYPES.GENERAL);
+                    setCommentContent('');
                     setShowCommentForm(false);
                     setEditingComment(null);
                     if (onCommentUpdated) {
@@ -93,6 +98,8 @@ export default function TaskCommentsWithRichEditor({
                     setLocalComments(prev => [result.comment, ...prev]);
                     reset();
                     setCommentType(COMMENT_TYPES.GENERAL);
+                    setData('type', COMMENT_TYPES.GENERAL);
+                    setCommentContent('');
                     setShowCommentForm(false);
                     if (onCommentAdded) {
                         console.log('Calling onCommentAdded with:', result.comment);
@@ -109,6 +116,7 @@ export default function TaskCommentsWithRichEditor({
 
     const startEditing = (comment) => {
         setEditingComment(comment);
+        setCommentContent(comment.content);
         setData({
             content: comment.content,
             type: comment.type,
@@ -121,6 +129,8 @@ export default function TaskCommentsWithRichEditor({
         setEditingComment(null);
         reset();
         setCommentType(COMMENT_TYPES.GENERAL);
+        setData('type', COMMENT_TYPES.GENERAL);
+        setCommentContent('');
         setShowCommentForm(false);
     };
 
@@ -168,6 +178,18 @@ export default function TaskCommentsWithRichEditor({
         // Здесь можно добавить логику для уведомления упомянутого пользователя
     };
 
+    const handleCommentTypeChange = (newType) => {
+        setCommentType(newType);
+        setData('type', newType);
+        
+        // Всегда используем шаблоны, включая общий комментарий
+        const template = getCommentTemplate(newType);
+        if (template && !editingComment) {
+            setCommentContent(template);
+            setData('content', template);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Кнопка добавления комментария */}
@@ -193,22 +215,50 @@ export default function TaskCommentsWithRichEditor({
                             <label className="block text-xs font-medium text-text-secondary mb-2">
                                 Тип комментария
                             </label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {getBasicCommentTypeOptions().map((type) => (
-                                    <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="type"
-                                            value={type.value}
-                                            checked={data.type === type.value}
-                                            onChange={(e) => setData('type', e.target.value)}
-                                            className="text-accent-blue focus:ring-accent-blue"
-                                        />
-                                        <span className="text-sm text-text-primary">
-                                            {type.label}
-                                        </span>
-                                    </label>
-                                ))}
+                            <div className="space-y-3">
+                                {/* Основные типы */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Основные</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {getBasicCommentTypeOptions().map((type) => (
+                                            <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="type"
+                                                    value={type.value}
+                                                    checked={data.type === type.value}
+                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
+                                                    className="text-accent-blue focus:ring-accent-blue"
+                                                />
+                                                <span className="text-sm text-text-primary">
+                                                    {type.icon} {type.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Специальные типы */}
+                                <div>
+                                    <h4 className="text-sm font-medium text-text-secondary mb-2">Специальные</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {getSpecialCommentTypeOptions().map((type) => (
+                                            <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="type"
+                                                    value={type.value}
+                                                    checked={data.type === type.value}
+                                                    onChange={(e) => handleCommentTypeChange(e.target.value)}
+                                                    className="text-accent-blue focus:ring-accent-blue"
+                                                />
+                                                <span className="text-sm text-text-primary">
+                                                    {type.icon} {type.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                             {errors.type && (
                                 <p className="mt-1 text-xs text-accent-red">{errors.type}</p>
@@ -221,8 +271,11 @@ export default function TaskCommentsWithRichEditor({
                                 Содержание
                             </label>
                             <RichTextEditor
-                                value={data.content}
-                                onChange={(newValue) => setData('content', newValue)}
+                                value={commentContent || data.content}
+                                onChange={(newValue) => {
+                                    setCommentContent(newValue);
+                                    setData('content', newValue);
+                                }}
                                 onMentionSelect={handleMentionSelect}
                                 users={users}
                                 placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
