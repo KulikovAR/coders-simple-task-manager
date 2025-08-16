@@ -37,6 +37,43 @@ class NotificationService
     }
 
     /**
+     * Создать уведомление об изменении задачи
+     */
+    public function taskUpdated(Task $task, ?User $fromUser = null): void
+    {
+        // Загружаем связанные данные
+        $task->load(['assignee', 'reporter', 'project']);
+
+        // Уведомляем исполнителя задачи, если он есть и не является автором изменений
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_UPDATED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+                ]
+            );
+        }
+
+        // Уведомляем создателя задачи, если он не исполнитель и не является автором изменений
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_UPDATED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+                ]
+            );
+        }
+    }
+
+    /**
      * Создать уведомление о перемещении задачи
      */
     public function taskMoved(Task $task, string $oldStatus, string $newStatus, ?User $fromUser = null): void
