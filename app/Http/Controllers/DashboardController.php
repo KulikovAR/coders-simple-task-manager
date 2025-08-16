@@ -27,7 +27,7 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        $inProgressStatus = TaskStatus::where('name', 'In Progress')->first();
+        $inProgressStatuses = TaskStatus::where('name', 'В работе')->get()->pluck('id');
 
         $userProjects = Project::where('owner_id', $user->id)
             ->orWhereHas('members', function ($query) use ($user) {
@@ -36,8 +36,8 @@ class DashboardController extends Controller
 
         $stats = [
             'projects_count' => $userProjects->count(),
-            'tasks_in_progress' => $inProgressStatus ?
-                Task::where('status_id', $inProgressStatus->id)
+            'tasks_in_progress' => $inProgressStatuses ?
+                Task::whereIn('status_id', $inProgressStatuses)
                     ->whereHas('project', function ($query) use ($user) {
                         $query->where('owner_id', $user->id)
                             ->orWhereHas('members', function ($memberQuery) use ($user) {

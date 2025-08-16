@@ -83,7 +83,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                                 </div>
                                 <div className={`rounded px-3 py-3 flex items-center gap-3 border ${isPaid ? 'border-blue-500 bg-blue-500/10' : 'border-border-color'}`} style={{ color: isPaid ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                                     <span className="font-bold">ИИ-ассистент</span>
-                                    <span className="ml-auto text-gray-400">2000 ₽/мес</span>
+                                    <span className="ml-auto text-gray-400">2000 ₽/мес или 20000 ₽/год</span>
                                     {isPaid && (
                                         <>
                                             <span className="ml-2 text-green-400 font-semibold flex items-center">
@@ -177,9 +177,9 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
             </div>
 
             {/* Модалка оплаты подписки */}
-            <PaymentModal 
-                isOpen={showPaymentModal} 
-                onClose={closePaymentModal} 
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={closePaymentModal}
             />
         </AuthenticatedLayout>
     );

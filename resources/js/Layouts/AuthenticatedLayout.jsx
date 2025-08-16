@@ -47,7 +47,7 @@ export default function Authenticated({ user, header, children, flash }) {
     }
 
     return (
-        <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
+        <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden mobile-no-min-height">
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
@@ -227,7 +227,7 @@ export default function Authenticated({ user, header, children, flash }) {
                 </div>
             </nav>
             {/* header удалён по требованию пользователя */}
-            <main className="py-12 safe-area-inset-y">
+            <main className="py-12 safe-area-inset-y mobile-main">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
                         {/* Отображаем flash-сообщения глобально */}
