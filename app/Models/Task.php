@@ -31,6 +31,7 @@ class Task extends Model
     protected $casts = [
         'result' => 'string',
         'merge_request' => 'string',
+        'deadline' => 'date',
     ];
 
     public function project(): BelongsTo
