@@ -621,7 +621,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       <div>
                         <label className="block text-xs font-medium text-text-secondary mb-1">
                           Спринт
-                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
                             <span className="ml-2 text-accent-green text-xs">(Активный)</span>
                           )}
                         </label>
@@ -641,11 +641,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           {sprints.map(sprint => (
                             <option key={sprint.id} value={sprint.id}>
                               {sprint.name} {sprint.status === 'active' ? '(Активный)' : ''}
-                              {sprint.id == selectedSprintId && sprint.status === 'active' && !window.location.search.includes('sprint_id') ? ' (по умолчанию)' : ''}
+                              {sprint.id == selectedSprintId && sprint.status === 'active' && !window.location.search.includes('sprint_id') && !window.location.search.includes('sprint_id=none') ? ' (по умолчанию)' : ''}
                             </option>
                           ))}
                         </select>
-                        {sprints.some(s => s.status === 'active') && (
+                        {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
                           <p className="text-xs text-text-muted mt-1">
                             💡 Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
                           </p>
@@ -735,7 +735,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         ? 'Спринт использует кастомные статусы'
                                         : 'Спринт использует статусы проекта'
                                     }
-                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
                                         <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
                                     )}
                                 </span>
@@ -747,7 +747,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 >
                                     Настроить статусы
                                 </Link>
-                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
+                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
                                     <button
                                         onClick={() => {
                                             router.visit(route('projects.board', project.id), { preserveState: false });
@@ -761,8 +761,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         </div>
                     </div>
                 ) : (
-                    // Показываем информацию о том, что активный спринт доступен
-                    sprints.some(s => s.status === 'active') && (
+                    // Показываем информацию о том, что активный спринт доступен, только если пользователь не выбрал "Без спринта" явно
+                    sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
                         <div className="card">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">

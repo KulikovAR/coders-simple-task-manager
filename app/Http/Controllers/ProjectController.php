@@ -69,16 +69,22 @@ class ProjectController extends Controller
         $activeSprint = $sprints->where('status', 'active')->first();
         
         // Логика выбора спринта:
-        // 1. Если пользователь явно указал sprint_id - используем его
+        // 1. Если пользователь явно указал sprint_id (включая 'none') - используем его
         // 2. Если sprint_id не указан и есть активный спринт - используем активный по умолчанию
-        // 3. В остальных случаях (нет активного спринта или пользователь выбрал "без спринта") - используем "без спринта"
+        // 3. В остальных случаях (нет активного спринта) - используем "без спринта"
+        // Важно: если пользователь выбрал "без спринта", это не переопределяется активным спринтом
         $selectedSprintId = $request->get('sprint_id');
         $selectedSprint = null;
         
-        if ($selectedSprintId && $selectedSprintId !== 'none') {
-            $selectedSprint = $project->sprints()->find($selectedSprintId);
+        if ($selectedSprintId !== null) {
+            // Пользователь явно указал спринт (включая 'none')
+            if ($selectedSprintId !== 'none') {
+                $selectedSprint = $project->sprints()->find($selectedSprintId);
+            }
+            // Если selectedSprintId === 'none', то selectedSprint остается null
         } elseif ($activeSprint && !$request->has('sprint_id')) {
-            // Если активный спринт не выбран и не указан конкретный спринт, используем его по умолчанию
+            // Если спринт не указан и есть активный спринт, используем его по умолчанию
+            // Но только если пользователь не выбрал явно "без спринта"
             $selectedSprintId = $activeSprint->id;
             $selectedSprint = $activeSprint;
         } else {
