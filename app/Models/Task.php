@@ -25,6 +25,7 @@ class Task extends Model
         'reporter_id',
         'priority',
         'status_id',
+        'deadline'
     ];
 
     protected $casts = [

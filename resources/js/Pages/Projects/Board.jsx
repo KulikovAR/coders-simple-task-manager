@@ -9,6 +9,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [draggedTask, setDraggedTask] = useState(null);
     const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'none');
     
+    // Определяем, выбран ли спринт по умолчанию (активный спринт при первом заходе)
+    const isDefaultSprint = selectedSprintId !== 'none' && 
+                           sprints.find(s => s.id == selectedSprintId)?.status === 'active' && 
+                           !window.location.search.includes('sprint_id');
+    
+    // Отладочная информация
+    console.log('Board Debug:', {
+        selectedSprintId,
+        currentSprintId,
+        isDefaultSprint,
+        searchParams: window.location.search,
+        hasSprintIdNone: window.location.search.includes('sprint_id=none')
+    });
+    
     // Автоматически перенаправляем на активный спринт при загрузке, если не выбран конкретный спринт
     useEffect(() => {
         if (selectedSprintId !== 'none' && selectedSprintId !== currentSprintId) {
@@ -621,7 +635,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       <div>
                         <label className="block text-xs font-medium text-text-secondary mb-1">
                           Спринт
-                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
+                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
                             <span className="ml-2 text-accent-green text-xs">(Активный)</span>
                           )}
                         </label>
@@ -630,9 +644,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           onChange={e => {
                             const newSprintId = e.target.value;
                             setCurrentSprintId(newSprintId);
-                            const url = newSprintId === 'none'
-                              ? route('projects.board', project.id)
-                              : route('projects.board', project.id) + '?sprint_id=' + newSprintId;
+                            // Всегда используем параметр sprint_id для единообразия
+                            const url = route('projects.board', project.id) + '?sprint_id=' + newSprintId;
                             router.visit(url, { preserveState: false });
                           }}
                           className="form-select w-full"
@@ -641,7 +654,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           {sprints.map(sprint => (
                             <option key={sprint.id} value={sprint.id}>
                               {sprint.name} {sprint.status === 'active' ? '(Активный)' : ''}
-                              {sprint.id == selectedSprintId && sprint.status === 'active' && !window.location.search.includes('sprint_id') && !window.location.search.includes('sprint_id=none') ? ' (по умолчанию)' : ''}
+                              {sprint.id == selectedSprintId && sprint.status === 'active' && isDefaultSprint ? ' (по умолчанию)' : ''}
                             </option>
                           ))}
                         </select>
@@ -735,7 +748,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         ? 'Спринт использует кастомные статусы'
                                         : 'Спринт использует статусы проекта'
                                     }
-                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
+                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
                                         <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
                                     )}
                                 </span>
@@ -747,10 +760,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 >
                                     Настроить статусы
                                 </Link>
-                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && !window.location.search.includes('sprint_id=none') && (
+                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
                                     <button
                                         onClick={() => {
-                                            router.visit(route('projects.board', project.id), { preserveState: false });
+                                            router.visit(route('projects.board', project.id) + '?sprint_id=none', { preserveState: false });
                                         }}
                                         className="btn btn-outline btn-sm"
                                     >

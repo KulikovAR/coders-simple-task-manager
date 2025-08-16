@@ -69,26 +69,32 @@ class ProjectController extends Controller
         $activeSprint = $sprints->where('status', 'active')->first();
         
         // Логика выбора спринта:
-        // 1. Если пользователь явно указал sprint_id (включая 'none') - используем его
+        // 1. Если пользователь явно указал sprint_id - используем его (включая 'none')
         // 2. Если sprint_id не указан и есть активный спринт - используем активный по умолчанию
         // 3. В остальных случаях (нет активного спринта) - используем "без спринта"
-        // Важно: если пользователь выбрал "без спринта", это не переопределяется активным спринтом
         $selectedSprintId = $request->get('sprint_id');
         $selectedSprint = null;
         
         if ($selectedSprintId !== null) {
-            // Пользователь явно указал спринт (включая 'none')
-            if ($selectedSprintId !== 'none') {
+            // Пользователь явно указал спринт
+            if ($selectedSprintId === 'none') {
+                // Пользователь выбрал "без спринта"
+                $selectedSprintId = 'none';
+                $selectedSprint = null;
+            } else {
+                // Пользователь выбрал конкретный спринт
                 $selectedSprint = $project->sprints()->find($selectedSprintId);
+                if (!$selectedSprint) {
+                    // Если спринт не найден, сбрасываем на "без спринта"
+                    $selectedSprintId = 'none';
+                }
             }
-            // Если selectedSprintId === 'none', то selectedSprint остается null
-        } elseif ($activeSprint && !$request->has('sprint_id')) {
+        } elseif ($activeSprint) {
             // Если спринт не указан и есть активный спринт, используем его по умолчанию
-            // Но только если пользователь не выбрал явно "без спринта"
             $selectedSprintId = $activeSprint->id;
             $selectedSprint = $activeSprint;
         } else {
-            // Если нет активного спринта или пользователь явно выбрал "без спринта", используем "без спринта"
+            // Если нет активного спринта, используем "без спринта"
             $selectedSprintId = 'none';
         }
         
