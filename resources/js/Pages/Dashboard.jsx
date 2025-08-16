@@ -65,10 +65,10 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                             </svg>
                             Telegram-бот
                         </h3>
-                        <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
                     </div>
                     <div className="card-body">
                         <div className="space-y-4">
+                            <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
                             {/* Информация о боте */}
                             <div className="text-text-secondary text-sm">
                                 {telegram?.bot_username ? (
@@ -100,14 +100,14 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Кнопка действия */}
                             {telegram?.bot_link && (
                                 <div className="pt-2">
-                                    <a 
-                                        href={telegram.bot_link} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                    <a
+                                        href={telegram.bot_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="btn btn-primary inline-flex items-center justify-center w-full sm:w-auto group"
                                     >
                                         <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
