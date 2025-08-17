@@ -180,12 +180,7 @@ export default function RichTextEditor({
         extensions: [
             StarterKit,
             Image,
-            Link.configure({
-                openOnClick: false,
-                HTMLAttributes: {
-                    class: 'text-blue-600 underline cursor-pointer',
-                },
-            }),
+            // Убираем дублирующее расширение Link, так как оно уже есть в StarterKit
             Placeholder.configure({
                 placeholder,
                 emptyEditorClass: 'is-editor-empty',
@@ -198,6 +193,12 @@ export default function RichTextEditor({
                     items: ({ query }) => {
                         console.log('Mention items - query:', query);
                         console.log('Mention items - normalizedUsers:', normalizedUsers);
+                        
+                        // Проверяем, что массив пользователей не пустой
+                        if (!normalizedUsers || normalizedUsers.length === 0) {
+                            console.log('Mention items - нет пользователей для упоминания');
+                            return [];
+                        }
                         
                         if (!query) {
                             const result = normalizedUsers.slice(0, 5);
@@ -248,6 +249,11 @@ export default function RichTextEditor({
 
                         return {
                             onStart: props => {
+                                // Проверяем, что есть пользователи для отображения
+                                if (!props.items || props.items.length === 0) {
+                                    return;
+                                }
+
                                 component = new MentionList({
                                     props,
                                     editor: props.editor,
@@ -309,8 +315,15 @@ export default function RichTextEditor({
                                 // Обработчик клика вне popup
                                 const handleClickOutside = (event) => {
                                     if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
-                                        const editorElement = props.editor.view.dom;
-                                        if (!editorElement.contains(event.target)) {
+                                        // Безопасная проверка view.dom
+                                        try {
+                                            const editorElement = props.editor.view?.dom;
+                                            if (editorElement && !editorElement.contains(event.target)) {
+                                                popup.remove();
+                                                currentMentionPopup.current = null;
+                                            }
+                                        } catch (error) {
+                                            console.warn('Ошибка при проверке клика вне popup:', error);
                                             popup.remove();
                                             currentMentionPopup.current = null;
                                         }
@@ -328,6 +341,8 @@ export default function RichTextEditor({
                                 // }
                             },
                             onUpdate(props) {
+                                if (!component) return;
+                                
                                 component.updateProps(props);
 
                                 if (!props.clientRect || !popup) {
@@ -368,6 +383,7 @@ export default function RichTextEditor({
                                 }
                             },
                             onKeyDown(props) {
+                                if (!component) return false;
                                 return component.onKeyDown(props);
                             },
                             onExit() {
@@ -378,7 +394,9 @@ export default function RichTextEditor({
                                     popup.remove();
                                     currentMentionPopup.current = null;
                                 }
-                                component.destroy();
+                                if (component) {
+                                    component.destroy();
+                                }
                             },
                         };
                     },
@@ -438,13 +456,19 @@ export default function RichTextEditor({
             }, 100);
         };
 
-        if (editor) {
-            const editorElement = editor.view.dom;
-            editorElement.addEventListener('blur', handleBlur);
-            
-            return () => {
-                editorElement.removeEventListener('blur', handleBlur);
-            };
+        if (editor && editor.view && editor.view.dom) {
+            try {
+                const editorElement = editor.view.dom;
+                editorElement.addEventListener('blur', handleBlur);
+                
+                return () => {
+                    if (editorElement && !editor.isDestroyed) {
+                        editorElement.removeEventListener('blur', handleBlur);
+                    }
+                };
+            } catch (error) {
+                console.warn('Ошибка при добавлении обработчика blur:', error);
+            }
         }
     }, [editor, hideMentionPopup]);
 
@@ -466,7 +490,11 @@ export default function RichTextEditor({
     // Обновляем содержимое редактора при изменении value пропса
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value);
+            try {
+                editor.commands.setContent(value);
+            } catch (error) {
+                console.warn('Ошибка при обновлении содержимого редактора:', error);
+            }
         }
     }, [value, editor]);
 
@@ -758,96 +786,142 @@ class MentionList {
     }
 
     render() {
-        console.log('MentionList render - props.items:', this.props.items);
-        console.log('MentionList render - props.index:', this.props.index);
-        
-        this.element.innerHTML = `
-            ${this.props.items.map((item, index) => `
-                <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 transition-colors duration-150 ${
-                    index === this.props.index ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
-                }" data-index="${index}">
-                    <div class="w-8 h-8 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span class="text-sm font-semibold text-accent-blue">
-                            ${item.name.charAt(0).toUpperCase()}
-                        </span>
+        try {
+            console.log('MentionList render - props.items:', this.props.items);
+            console.log('MentionList render - props.index:', this.props.index);
+            
+            // Проверяем, что есть элементы для отображения
+            if (!this.props.items || this.props.items.length === 0) {
+                this.element.innerHTML = `
+                    <div class="px-3 py-2 text-sm text-text-muted">
+                        Нет пользователей для упоминания
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium truncate text-text-primary">${item.name}</div>
-                        <div class="text-xs text-text-muted truncate">${item.email}</div>
-                    </div>
-                </div>
-            `).join('')}
-        `;
-
-        this.element.addEventListener('click', (e) => {
-            const item = e.target.closest('[data-index]');
-            if (item) {
-                const index = parseInt(item.dataset.index);
-                const selectedItem = this.props.items[index];
-                console.log('MentionList click - выбран элемент:', selectedItem);
-                console.log('MentionList click - индекс:', index);
-                this.props.command(selectedItem);
+                `;
+                return;
             }
-        });
+            
+            this.element.innerHTML = `
+                ${this.props.items.map((item, index) => `
+                    <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 transition-colors duration-150 ${
+                        index === this.props.index ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
+                    }" data-index="${index}">
+                        <div class="w-8 h-8 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-semibold text-accent-blue">
+                                ${item.name.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium truncate text-text-primary">${item.name}</div>
+                            <div class="text-xs text-text-muted truncate">${item.email}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+
+            this.element.addEventListener('click', (e) => {
+                const item = e.target.closest('[data-index]');
+                if (item) {
+                    const index = parseInt(item.dataset.index);
+                    const selectedItem = this.props.items[index];
+                    console.log('MentionList click - выбран элемент:', selectedItem);
+                    console.log('MentionList click - индекс:', index);
+                    this.props.command(selectedItem);
+                }
+            });
+        } catch (error) {
+            console.error('Ошибка при рендеринге MentionList:', error);
+            this.element.innerHTML = `
+                <div class="px-3 py-2 text-sm text-red-500">
+                    Ошибка при загрузке списка пользователей
+                </div>
+            `;
+        }
     }
 
     updateProps(props) {
-        this.props = props;
-        this.render();
+        try {
+            this.props = props;
+            this.render();
+        } catch (error) {
+            console.error('Ошибка при обновлении props MentionList:', error);
+        }
     }
 
     onKeyDown(props) {
-        if (props.event.key === 'ArrowUp') {
-            this.up();
-            return true;
-        }
-
-        if (props.event.key === 'ArrowDown') {
-            this.down();
-            return true;
-        }
-
-        if (props.event.key === 'Enter' || props.event.key === 'Tab') {
-            this.select();
-            return true;
-        }
-
-        if (props.event.key === 'Escape') {
-            if (this.onExit) {
-                this.onExit();
+        try {
+            if (props.event.key === 'ArrowUp') {
+                this.up();
+                return true;
             }
-            return true;
-        }
 
-        return false;
+            if (props.event.key === 'ArrowDown') {
+                this.down();
+                return true;
+            }
+
+            if (props.event.key === 'Enter' || props.event.key === 'Tab') {
+                this.select();
+                return true;
+            }
+
+            if (props.event.key === 'Escape') {
+                if (this.onExit) {
+                    this.onExit();
+                }
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error('Ошибка при обработке клавиш в MentionList:', error);
+            return false;
+        }
     }
 
     up() {
-        const prev = this.props.items[this.props.index - 1];
-        if (prev) {
-            this.props.index = this.props.index - 1;
-            this.render();
+        try {
+            const prev = this.props.items[this.props.index - 1];
+            if (prev) {
+                this.props.index = this.props.index - 1;
+                this.render();
+            }
+        } catch (error) {
+            console.error('Ошибка при навигации вверх в MentionList:', error);
         }
     }
 
     down() {
-        const next = this.props.items[this.props.index + 1];
-        if (next) {
-            this.props.index = this.props.index + 1;
-            this.render();
+        try {
+            const next = this.props.items[this.props.index + 1];
+            if (next) {
+                this.props.index = this.props.index + 1;
+                this.render();
+            }
+        } catch (error) {
+            console.error('Ошибка при навигации вниз в MentionList:', error);
         }
     }
 
     select() {
-        const item = this.props.items[this.props.index];
-        if (item) {
-            console.log('MentionList select - выбран элемент:', item);
-            console.log('MentionList select - индекс:', this.props.index);
-            this.props.command(item);
+        try {
+            const item = this.props.items[this.props.index];
+            if (item) {
+                console.log('MentionList select - выбран элемент:', item);
+                console.log('MentionList select - индекс:', this.props.index);
+                this.props.command(item);
+            }
+        } catch (error) {
+            console.error('Ошибка при выборе элемента в MentionList:', error);
         }
     }
 
     destroy() {
-        this.element.remove();
+        try {
+            if (this.element && this.element.parentNode) {
+                this.element.remove();
+            }
+        } catch (error) {
+            console.error('Ошибка при уничтожении MentionList:', error);
+        }
     }
 }
