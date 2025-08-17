@@ -10,14 +10,9 @@ import {
     isSprintActive,
     isSprintCompleted
 } from '@/utils/sprintUtils';
-import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
 
 export default function Show({ auth, project, sprint }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-    const getPriorityText = (priority) => {
-        return getPriorityLabel(priority);
-    };
 
     // Удаление спринта
     const handleDelete = () => {
@@ -135,85 +130,26 @@ export default function Show({ auth, project, sprint }) {
                         <div className="card">
                             <div className="card-header">
                                 <h3 className="card-title">Задачи спринта</h3>
-                                <Link
-                                    href={route('tasks.create', { project_id: project.id, sprint_id: sprint.id })}
-                                    className="btn btn-primary btn-sm"
-                                >
-                                    Добавить задачу
-                                </Link>
                             </div>
 
-                            <div className="space-y-4">
-                                {sprint.tasks && sprint.tasks.length > 0 ? (
-                                    sprint.tasks.map((task) => (
-                                        <div key={task.id} className="border border-border-color rounded-lg p-4 hover:bg-secondary-bg/50 transition-colors">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center space-x-3 mb-2">
-                                                        <h4 className="text-white font-medium">
-                                                            <Link 
-                                                                href={route('tasks.show', task.id)} 
-                                                                className="hover:text-accent-blue transition-colors"
-                                                            >
-                                                                {task.title}
-                                                            </Link>
-                                                        </h4>
-                                                        <span className={`status-badge ${getStatusClass(task.status?.name)}`}
-                                                              style={task.status?.color ? {
-                                                                  backgroundColor: `${task.status.color}20`,
-                                                                  color: task.status.color,
-                                                                  border: `1px solid ${task.status.color}30`
-                                                              } : {}}>
-                                                            {getStatusLabel(task.status?.name)}
-                                                        </span>
-                                                    </div>
-                                                    
-                                                    {/* Убираем отображение описания */}
-
-                                                    <div className="flex items-center space-x-4 text-sm text-text-muted">
-                                                        {task.priority && (
-                                                            <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                                                                <span>{getPriorityIcon(task.priority)}</span>
-                                                                <span>Приоритет: {getPriorityText(task.priority)}</span>
-                                                            </span>
-                                                        )}
-                                                        {task.assignee && (
-                                                            <span>Исполнитель: {task.assignee.name}</span>
-                                                        )}
-                                                        {task.deadline && (
-                                                            <span>Дедлайн: {new Date(task.deadline).toLocaleDateString('ru-RU')}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex space-x-2 ml-4">
-                                                    <Link
-                                                        href={route('tasks.show', task.id)}
-                                                        className="btn btn-primary btn-sm"
-                                                    >
-                                                        Просмотр
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <div className="text-4xl mb-4">📋</div>
-                                        <h3 className="text-lg font-medium text-text-secondary mb-2">
-                                            Задачи отсутствуют
-                                        </h3>
-                                        <p className="text-text-muted mb-4">
-                                            Добавьте задачи в этот спринт
-                                        </p>
-                                        <Link
-                                            href={route('tasks.create', { project_id: project.id, sprint_id: sprint.id })}
-                                            className="btn btn-primary"
-                                        >
-                                            Добавить задачу
-                                        </Link>
-                                    </div>
-                                )}
+                            <div className="text-center py-8">
+                                <div className="text-4xl mb-4">📋</div>
+                                <h3 className="text-heading-4 text-text-secondary mb-2">Управление задачами</h3>
+                                <p className="text-text-muted mb-4">
+                                    Просматривайте и управляйте задачами спринта
+                                </p>
+                                
+                                <div className="flex justify-center">
+                                    <Link
+                                        href={route('tasks.index', { project_id: project.id, sprint_id: sprint.id })}
+                                        className="btn btn-primary"
+                                    >
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                        Просмотреть все задачи
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -289,12 +225,6 @@ export default function Show({ auth, project, sprint }) {
                         <div className="card">
                             <h3 className="card-title mb-4">Быстрые действия</h3>
                             <div className="space-y-2">
-                                <Link
-                                    href={route('tasks.create', { project_id: project.id, sprint_id: sprint.id })}
-                                    className="btn btn-primary btn-sm w-full"
-                                >
-                                    Добавить задачу
-                                </Link>
                                 <Link
                                     href={route('sprints.edit', [project.id, sprint.id])}
                                     className="btn btn-secondary btn-sm w-full"
