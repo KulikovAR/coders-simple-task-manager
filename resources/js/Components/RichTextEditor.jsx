@@ -493,7 +493,11 @@ export default function RichTextEditor({
         const handleScroll = () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
-                hideMentionPopup();
+                try {
+                    hideMentionPopup();
+                } catch (error) {
+                    console.warn('Ошибка при обработке скролла:', error);
+                }
             }, isMobile ? 50 : 0);
         };
 
@@ -505,13 +509,21 @@ export default function RichTextEditor({
         ];
 
         scrollableElements.forEach(element => {
-            element.addEventListener('scroll', handleScroll, { passive: true });
+            try {
+                element.addEventListener('scroll', handleScroll, { passive: true });
+            } catch (error) {
+                console.warn('Ошибка при добавлении обработчика скролла:', error);
+            }
         });
 
         return () => {
             clearTimeout(timeoutId);
             scrollableElements.forEach(element => {
-                element.removeEventListener('scroll', handleScroll);
+                try {
+                    element.removeEventListener('scroll', handleScroll);
+                } catch (error) {
+                    console.warn('Ошибка при удалении обработчика скролла:', error);
+                }
             });
         };
     }, [hideMentionPopup, isMobile]);
@@ -522,15 +534,27 @@ export default function RichTextEditor({
         const handleResize = () => {
             clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
-                hideMentionPopup();
+                try {
+                    hideMentionPopup();
+                } catch (error) {
+                    console.warn('Ошибка при обработке изменения размера:', error);
+                }
             }, isMobile ? 100 : 0);
         };
 
-        window.addEventListener('resize', handleResize, { passive: true });
+        try {
+            window.addEventListener('resize', handleResize, { passive: true });
+        } catch (error) {
+            console.warn('Ошибка при добавлении обработчика изменения размера:', error);
+        }
 
         return () => {
             clearTimeout(timeoutId);
-            window.removeEventListener('resize', handleResize);
+            try {
+                window.removeEventListener('resize', handleResize);
+            } catch (error) {
+                console.warn('Ошибка при удалении обработчика изменения размера:', error);
+            }
         };
     }, [hideMentionPopup, isMobile]);
 
@@ -597,24 +621,36 @@ export default function RichTextEditor({
         if (!isMobile) return;
 
         const handleTouchStart = (event) => {
-            // Если касание произошло вне mention popup, скрываем его
-            if (currentMentionPopup.current && !currentMentionPopup.current.contains(event.target)) {
-                try {
-                    const editorElement = editor?.view?.dom;
-                    if (editorElement && !editorElement.contains(event.target)) {
+            try {
+                // Если касание произошло вне mention popup, скрываем его
+                if (currentMentionPopup.current && !currentMentionPopup.current.contains(event.target)) {
+                    try {
+                        const editorElement = editor?.view?.dom;
+                        if (editorElement && !editorElement.contains(event.target)) {
+                            hideMentionPopup();
+                        }
+                    } catch (error) {
+                        console.warn('Ошибка при обработке касания:', error);
                         hideMentionPopup();
                     }
-                } catch (error) {
-                    console.warn('Ошибка при обработке касания:', error);
-                    hideMentionPopup();
                 }
+            } catch (error) {
+                console.warn('Ошибка при обработке касания:', error);
             }
         };
 
-        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        try {
+            document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        } catch (error) {
+            console.warn('Ошибка при добавлении обработчика касания:', error);
+        }
 
         return () => {
-            document.removeEventListener('touchstart', handleTouchStart);
+            try {
+                document.removeEventListener('touchstart', handleTouchStart);
+            } catch (error) {
+                console.warn('Ошибка при удалении обработчика касания:', error);
+            }
         };
     }, [isMobile, hideMentionPopup, editor]);
 
