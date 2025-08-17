@@ -5,11 +5,11 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
-export default function StatusManagement({ 
-    auth, 
-    project, 
-    sprint = null, 
-    taskStatuses = [], 
+export default function StatusManagement({
+    auth,
+    project,
+    sprint = null,
+    taskStatuses = [],
     hasCustomStatuses = false,
     projectStatuses = [],
     type = 'project',
@@ -80,13 +80,13 @@ export default function StatusManagement({
 
         const updatedStatuses = [...statuses];
         const draggedItem = updatedStatuses[draggedIndex];
-        
+
         // Удаляем элемент из старой позиции
         updatedStatuses.splice(draggedIndex, 1);
-        
+
         // Вставляем в новую позицию
         updatedStatuses.splice(index, 0, draggedItem);
-        
+
         setStatuses(updatedStatuses);
         setDraggedIndex(index);
     };
@@ -115,7 +115,7 @@ export default function StatusManagement({
             }))
         };
 
-        const url = isSprintMode 
+        const url = isSprintMode
             ? route('sprints.statuses.update', [project.id, sprint.id])
             : route('projects.statuses.update', project.id);
 
@@ -141,7 +141,7 @@ export default function StatusManagement({
 
     const handleCreateCustomStatuses = () => {
         setProcessing(true);
-        
+
         router.post(route('sprints.statuses.create', [project.id, sprint.id]), {}, {
             preserveScroll: true,
             onSuccess: () => {
@@ -157,7 +157,7 @@ export default function StatusManagement({
 
     const handleDeleteCustomStatuses = () => {
         setProcessing(true);
-        
+
         router.delete(route('sprints.statuses.delete', [project.id, sprint.id]), {
             preserveScroll: true,
             onSuccess: () => {
@@ -263,13 +263,13 @@ export default function StatusManagement({
                         <div>
                             <h1 className="text-heading-2 text-text-primary mb-2">{pageTitle}</h1>
                             <p className="text-body-small text-text-secondary">
-                                {isSprintMode 
+                                {isSprintMode
                                     ? 'Настройте статусы для этого спринта. Если не создавать кастомные статусы, будут использоваться статусы проекта.'
                                     : 'Настройте статусы задач для проекта. Эти статусы будут использоваться по умолчанию во всех спринтах.'
                                 }
                             </p>
                         </div>
-                        
+
                         {isSprintMode && !hasCustomStatuses && (
                             <PrimaryButton
                                 onClick={handleCreateCustomStatuses}
@@ -291,7 +291,7 @@ export default function StatusManagement({
                             {(projectStatuses || []).map((status) => (
                                 <div key={status.id} className="bg-secondary-bg border border-border-color rounded-lg p-4">
                                     <div className="flex items-center gap-3">
-                                        <div 
+                                        <div
                                             className="w-5 h-5 rounded-full border border-border-color shadow-sm"
                                             style={{ backgroundColor: status.color }}
                                         />
@@ -310,17 +310,8 @@ export default function StatusManagement({
                             <h3 className="text-heading-3 text-text-primary">
                                 {isEditing ? 'Редактирование статусов' : 'Список статусов'}
                             </h3>
-                            
+
                             <div className="flex items-center gap-3">
-                                {isSprintMode && hasCustomStatuses && !isEditing && (
-                                    <DangerButton
-                                        onClick={() => setShowDeleteModal(true)}
-                                        disabled={processing}
-                                    >
-                                        Удалить кастомные статусы
-                                    </DangerButton>
-                                )}
-                                
                                 {!isEditing ? (
                                     <PrimaryButton
                                         onClick={() => setIsEditing(true)}
@@ -402,18 +393,18 @@ export default function StatusManagement({
                                                         onChange={(e) => handleStatusChange(index, 'color', e.target.value)}
                                                         className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer"
                                                     />
-                                                    <div 
+                                                    <div
                                                         className="w-8 h-8 rounded-full border-2 border-border-color cursor-pointer hover:scale-110 transition-transform duration-200 shadow-sm"
                                                         style={{ backgroundColor: status.color }}
                                                     />
                                                 </div>
                                             ) : (
-                                                <div 
+                                                <div
                                                     className="w-6 h-6 rounded-full border border-border-color shadow-sm"
                                                     style={{ backgroundColor: status.color }}
                                                 />
                                             )}
-                                            
+
                                             {isEditing ? (
                                                 <input
                                                     type="text"
@@ -465,33 +456,6 @@ export default function StatusManagement({
                     </div>
                 )}
             </div>
-
-            {/* Модальное окно подтверждения удаления */}
-            <Modal show={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-                <div className="p-6">
-                    <h3 className="text-heading-3 text-text-primary mb-4">
-                        Удалить кастомные статусы?
-                    </h3>
-                    <p className="text-body-small text-text-secondary mb-6">
-                        Это действие удалит все кастомные статусы спринта. 
-                        Спринт будет использовать статусы проекта.
-                        <br /><br />
-                        <strong>Внимание:</strong> Убедитесь, что нет задач с кастомными статусами, иначе операция будет отклонена.
-                    </p>
-                    
-                    <div className="flex items-center gap-3 justify-end">
-                        <SecondaryButton onClick={() => setShowDeleteModal(false)}>
-                            Отмена
-                        </SecondaryButton>
-                        <DangerButton
-                            onClick={handleDeleteCustomStatuses}
-                            disabled={processing}
-                        >
-                            Удалить статусы
-                        </DangerButton>
-                    </div>
-                </div>
-            </Modal>
         </AuthenticatedLayout>
     );
 }
