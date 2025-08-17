@@ -48,11 +48,10 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.project', 'taskStatuses', 'members.user']);
+        $project->load(['owner', 'members.user', 'taskStatuses']);
 
         return Inertia::render('Projects/Show', [
             'project' => $project,
-            'tasks' => $project->tasks,
         ]);
     }
 

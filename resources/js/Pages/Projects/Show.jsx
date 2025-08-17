@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
-export default function Show({ auth, project, tasks }) {
+export default function Show({ auth, project }) {
     const [showAddMember, setShowAddMember] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -52,63 +52,6 @@ export default function Show({ auth, project, tasks }) {
                 return 'status-on-hold';
             case 'cancelled':
                 return 'status-cancelled';
-            default:
-                return 'status-todo';
-        }
-    };
-
-    const getTaskStatusColor = (status) => {
-        switch (status) {
-            case 'To Do':
-                return 'bg-gray-500 bg-opacity-20 text-gray-400';
-            case 'In Progress':
-                return 'bg-blue-500 bg-opacity-20 text-blue-400';
-            case 'Review':
-                return 'bg-yellow-500 bg-opacity-20 text-yellow-400';
-            case 'Testing':
-                return 'bg-purple-500 bg-opacity-20 text-purple-400';
-            case 'Ready for Release':
-                return 'bg-pink-500 bg-opacity-20 text-pink-400';
-            case 'Done':
-                return 'bg-green-500 bg-opacity-20 text-green-400';
-            default:
-                return 'bg-gray-500 bg-opacity-20 text-gray-400';
-        }
-    };
-
-    const getTaskStatusText = (status) => {
-        switch (status) {
-            case 'To Do':
-                return 'К выполнению';
-            case 'In Progress':
-                return 'В работе';
-            case 'Review':
-                return 'На проверке';
-            case 'Testing':
-                return 'Тестирование';
-            case 'Ready for Release':
-                return 'Готово к релизу';
-            case 'Done':
-                return 'Завершена';
-            default:
-                return status;
-        }
-    };
-
-    const getTaskStatusClass = (status) => {
-        switch (status) {
-            case 'To Do':
-                return 'status-todo';
-            case 'In Progress':
-                return 'status-in-progress';
-            case 'Review':
-                return 'status-review';
-            case 'Testing':
-                return 'status-testing';
-            case 'Ready for Release':
-                return 'status-ready';
-            case 'Done':
-                return 'status-done';
             default:
                 return 'status-todo';
         }
@@ -424,80 +367,28 @@ export default function Show({ auth, project, tasks }) {
                 {/* Задачи */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title">Задачи ({tasks.length})</h3>
-                        <Link
-                            href={route('tasks.create', { project_id: project.id })}
-                            className="btn btn-secondary btn-sm inline-flex items-center"
-                        >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Добавить задачу
-                        </Link>
+                        <h3 className="card-title">Задачи</h3>
                     </div>
 
-                    {tasks.length > 0 ? (
-                        <div className="space-y-4">
-                            {tasks.map((task) => (
-                                <div key={task.id} className="bg-secondary-bg border border-border-color rounded-lg p-4 hover:bg-card-bg transition-colors">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <h4 className="text-text-primary font-medium mb-2">
-                                                <Link href={route('tasks.show', task.id)} className="hover:text-accent-blue transition-colors">
-                                                    {task.title}
-                                                </Link>
-                                            </h4>
-                                            {/* Убираем отображение описания */}
-                                            <div className="flex flex-wrap items-center gap-3 text-body-small text-text-secondary">
-                                                <span className={`status-badge ${getTaskStatusClass(task.status?.name || 'To Do')}`}
-                                                      style={task.status?.color ? {
-                                                          backgroundColor: `${task.status.color}20`,
-                                                          color: task.status.color,
-                                                          border: `1px solid ${task.status.color}30`
-                                                      } : {}}>
-                                                    {getTaskStatusText(task.status?.name || 'To Do')}
-                                                </span>
-                                                {task.priority && (
-                                                    <span className="text-accent-yellow">Приоритет: {task.priority}</span>
-                                                )}
-                                                {task.deadline && (
-                                                    <span>Дедлайн: {new Date(task.deadline).toLocaleDateString('ru-RU')}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 ml-4">
-                                            <Link
-                                                href={route('tasks.edit', task.id)}
-                                                className="btn btn-secondary btn-sm"
-                                            >
-                                                Редактировать
-                                            </Link>
-                                            <Link
-                                                href={route('tasks.show', task.id)}
-                                                className="btn btn-primary btn-sm"
-                                            >
-                                                Просмотр
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8">
-                            <svg className="w-16 h-16 text-text-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                            <h3 className="text-heading-4 text-text-secondary mb-2">Задачи не найдены</h3>
-                            <p className="text-text-muted mb-4">Создайте первую задачу для этого проекта</p>
+                    <div className="text-center py-8">
+                        <div className="text-4xl mb-4">📋</div>
+                        <h3 className="text-heading-4 text-text-secondary mb-2">Управление задачами</h3>
+                        <p className="text-text-muted mb-4">
+                            Просматривайте и управляйте задачами проекта
+                        </p>
+                        
+                        <div className="flex justify-center">
                             <Link
-                                href={route('tasks.create', { project_id: project.id })}
+                                href={route('tasks.index', { project_id: project.id })}
                                 className="btn btn-primary"
                             >
-                                Создать задачу
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                Просмотреть все задачи
                             </Link>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
 
