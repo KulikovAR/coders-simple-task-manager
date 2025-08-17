@@ -436,8 +436,13 @@ export default function RichTextEditor({
 
     // Обработчик скролла страницы
     useEffect(() => {
+        // На мобильных устройствах скролл может быть более частым, добавляем throttling
+        let timeoutId;
         const handleScroll = () => {
-            hideMentionPopup();
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                hideMentionPopup();
+            }, isMobile ? 50 : 0);
         };
 
         // Добавляем обработчики для всех возможных элементов с прокруткой
@@ -452,32 +457,39 @@ export default function RichTextEditor({
         });
 
         return () => {
+            clearTimeout(timeoutId);
             scrollableElements.forEach(element => {
                 element.removeEventListener('scroll', handleScroll);
             });
         };
-    }, [hideMentionPopup]);
+    }, [hideMentionPopup, isMobile]);
 
     // Обработчик изменения размера окна
     useEffect(() => {
+        let timeoutId;
         const handleResize = () => {
-            hideMentionPopup();
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                hideMentionPopup();
+            }, isMobile ? 100 : 0);
         };
 
         window.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            clearTimeout(timeoutId);
             window.removeEventListener('resize', handleResize);
         };
-    }, [hideMentionPopup]);
+    }, [hideMentionPopup, isMobile]);
 
     // Обработчик потери фокуса редактором
     useEffect(() => {
         const handleBlur = () => {
-            // Небольшая задержка, чтобы успеть обработать клик по mention
+            // На мобильных устройствах увеличиваем задержку
+            const delay = isMobile ? 200 : 100;
             setTimeout(() => {
                 hideMentionPopup();
-            }, 100);
+            }, delay);
         };
 
         if (editor && editor.view && editor.view.dom) {
@@ -494,7 +506,7 @@ export default function RichTextEditor({
                 console.warn('Ошибка при добавлении обработчика blur:', error);
             }
         }
-    }, [editor, hideMentionPopup]);
+    }, [editor, hideMentionPopup, isMobile]);
 
     // Обработчик нажатия Escape
     useEffect(() => {
@@ -510,6 +522,27 @@ export default function RichTextEditor({
             document.removeEventListener('keydown', handleEscape);
         };
     }, [hideMentionPopup]);
+
+    // Обработчик касания для мобильных устройств
+    useEffect(() => {
+        if (!isMobile) return;
+
+        const handleTouchStart = (event) => {
+            // Если касание произошло вне mention popup, скрываем его
+            if (currentMentionPopup.current && !currentMentionPopup.current.contains(event.target)) {
+                const editorElement = editor?.view?.dom;
+                if (editorElement && !editorElement.contains(event.target)) {
+                    hideMentionPopup();
+                }
+            }
+        };
+
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+
+        return () => {
+            document.removeEventListener('touchstart', handleTouchStart);
+        };
+    }, [isMobile, hideMentionPopup, editor]);
 
     // Обновляем содержимое редактора при изменении value пропса
     useEffect(() => {
