@@ -8,12 +8,12 @@ import PaymentModal from '@/Components/PaymentModal';
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'none', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
     const [currentSprintId, setCurrentSprintId] = useState(selectedSprintId || 'none');
-    
+
     // Определяем, выбран ли спринт по умолчанию (активный спринт при первом заходе)
-    const isDefaultSprint = selectedSprintId !== 'none' && 
-                           sprints.find(s => s.id == selectedSprintId)?.status === 'active' && 
+    const isDefaultSprint = selectedSprintId !== 'none' &&
+                           sprints.find(s => s.id == selectedSprintId)?.status === 'active' &&
                            !window.location.search.includes('sprint_id');
-    
+
     // Отладочная информация
     console.log('Board Debug:', {
         selectedSprintId,
@@ -22,7 +22,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         searchParams: window.location.search,
         hasSprintIdNone: window.location.search.includes('sprint_id=none')
     });
-    
+
     // Автоматически перенаправляем на активный спринт при загрузке, если не выбран конкретный спринт
     useEffect(() => {
         if (selectedSprintId !== 'none' && selectedSprintId !== currentSprintId) {
@@ -103,7 +103,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openTaskModal = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
-        
+
         // Загружаем задачу с комментариями
         fetch(route('tasks.show', task.id) + '?modal=1', {
             headers: {
@@ -124,14 +124,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             console.error('Ошибка загрузки задачи:', error);
             setSelectedTask(task);
         });
-        
+
         setShowTaskModal(true);
         setErrors({});
-        
+
         // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
         document.body.classList.add('modal-open');
-        
+
         // Восстанавливаем позицию скролла после блокировки
         requestAnimationFrame(() => {
             window.scrollTo(0, scrollY);
@@ -150,13 +150,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openPaymentModal = () => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
-        
+
         setShowPaymentModal(true);
-        
+
         // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
         document.body.classList.add('modal-open');
-        
+
         // Восстанавливаем позицию скролла после блокировки
         requestAnimationFrame(() => {
             window.scrollTo(0, scrollY);
@@ -177,14 +177,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         try {
             // Подготавливаем данные для отправки
             const formData = new FormData();
-            
+
             // Добавляем все поля из data
             Object.keys(data).forEach(key => {
                 if (data[key] !== null && data[key] !== undefined) {
                     formData.append(key, data[key]);
                 }
             });
-            
+
             // Добавляем метод для Laravel
             formData.append('_method', 'PUT');
 
@@ -226,7 +226,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             : task
                     )
                 );
-                
+
                 // Обновляем выбранную задачу для отображения в модалке
                 setSelectedTask(prev => ({
                     ...prev,
@@ -236,10 +236,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     sprint: result.task.sprint || prev.sprint,
                     project: result.task.project || prev.project
                 }));
-                
+
                 // НЕ закрываем модалку автоматически
                 // closeTaskModal();
-                
+
                 // Показываем сообщение об успехе
                 setSuccessMessage(result.message || 'Задача успешно обновлена');
             } else {
@@ -470,14 +470,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openStatusOverlay = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
-        
+
         setStatusOverlayTask(task);
         setIsStatusOverlayOpen(true);
-        
+
         // Блокируем скролл страницы, но сохраняем позицию
         document.body.style.overflow = 'hidden';
         document.body.classList.add('modal-open');
-        
+
         // Восстанавливаем позицию скролла после блокировки
         requestAnimationFrame(() => {
             window.scrollTo(0, scrollY);
@@ -547,7 +547,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         } else {
             sprintOk = parseInt(task.sprint_id) === parseInt(currentSprintId); // Показать задачи конкретного спринта
         }
-        
+
         const assigneeOk = assigneeId ? parseInt(task.assignee_id) === parseInt(assigneeId) : true;
         const myOk = myTasks ? parseInt(task.assignee_id) === parseInt(auth.user.id) : true;
         return sprintOk && assigneeOk && myOk;
@@ -606,21 +606,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                 {/* Новый заголовок и статус */}
                 <div className="mb-2">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div>
-                      <h1 className="text-heading-2 text-text-primary">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="text-heading-2 text-text-primary break-words">
                         Доска задач <span className="text-gradient">/ {project.name}</span>
                       </h1>
-                      {project.description && (
-                        <p className="text-body-small text-text-secondary mt-2">{project.description}</p>
-                      )}
                     </div>
-                    <div className="flex items-center gap-3 mt-2 md:mt-0">
-                      <span className={`px-3 py-1.5 rounded-full text-caption font-medium shadow-sm ${getStatusColor(project.status)}`}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 md:mt-0 md:flex-shrink-0">
+                      <span className={`px-3 py-1.5 rounded-full text-caption font-medium shadow-sm ${getStatusColor(project.status)} text-center`}>
                           {getStatusText(project.status)}
                       </span>
                       {project.deadline && (
-                        <span className="text-caption text-text-muted">Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}</span>
+                        <span className="text-caption text-text-muted text-center sm:text-left">
+                          Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -632,7 +631,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     {/* Первая строка: основные фильтры */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {/* Спринты */}
-                      <div>
+                      <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">
                           Спринт
                           {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
@@ -659,14 +658,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           ))}
                         </select>
                         {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
-                          <p className="text-xs text-text-muted mt-1">
+                          <p className="text-xs text-text-muted mt-1 break-words">
                             💡 Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
                           </p>
                         )}
                       </div>
-                      
+
                       {/* Исполнитель */}
-                      <div>
+                      <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">Исполнитель</label>
                         <select
                           value={assigneeId}
@@ -679,7 +678,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                           ))}
                         </select>
                       </div>
-                      
+
                       {/* Мои задачи */}
                       <div className="flex items-end">
                         <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
@@ -687,24 +686,25 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                             type="checkbox"
                             checked={myTasks}
                             onChange={e => setMyTasks(e.target.checked)}
-                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200"
+                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200 flex-shrink-0"
                           />
-                          <span>Мои задачи</span>
+                          <span className="break-words">Мои задачи</span>
                         </label>
                       </div>
                     </div>
-                    
+
                     {/* Вторая строка: кнопки действий */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-border-color">
                       <div className="flex flex-col sm:flex-row gap-3 flex-1">
                         <Link
                           href={route('sprints.create', project.id)}
-                          className="btn btn-secondary btn-mobile-stack order-3 sm:order-1"
+                          className="btn btn-secondary btn-mobile-stack order-3 sm:order-1 text-center"
                         >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
-                          Создать спринт
+                          <span className="hidden sm:inline">Создать спринт</span>
+                          <span className="sm:hidden">Спринт</span>
                         </Link>
                         <button
                           onClick={() => {
@@ -715,9 +715,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                               router.visit(route('ai-agent.index'));
                             }
                           }}
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm text-white btn-mobile-stack order-2 sm:order-2"
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm text-white btn-mobile-stack order-2 sm:order-2 text-center"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                           </svg>
                           <span className="hidden sm:inline">Задача с ИИ</span>
@@ -725,12 +725,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         </button>
                         <Link
                           href={route('tasks.create', { project_id: project.id })}
-                          className="btn btn-primary btn-mobile-stack btn-mobile-priority order-1 sm:order-3"
+                          className="btn btn-primary btn-mobile-stack btn-mobile-priority order-1 sm:order-3 text-center"
                         >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
-                          Новая задача
+                          <span className="hidden sm:inline">Новая задача</span>
+                          <span className="sm:hidden">Задача</span>
                         </Link>
                       </div>
                     </div>
@@ -740,34 +741,38 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 {/* Информация о статусах */}
                 {currentSprintId !== 'none' ? (
                     <div className="card">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full ${currentSprintHasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
-                                <span className="text-body-small text-text-secondary">
-                                    {currentSprintHasCustomStatuses
-                                        ? 'Спринт использует кастомные статусы'
-                                        : 'Спринт использует статусы проекта'
-                                    }
-                                    {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
-                                        <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
-                                    )}
-                                </span>
+                                <div className={`w-3 h-3 rounded-full flex-shrink-0 ${currentSprintHasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="text-body-small text-text-secondary">
+                                        {currentSprintHasCustomStatuses
+                                            ? 'Спринт использует кастомные статусы'
+                                            : 'Спринт использует статусы проекта'
+                                        }
+                                        {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
+                                            <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-3 lg:flex-shrink-0">
                                 <Link
                                     href={route('sprints.statuses', [project.id, currentSprintId])}
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm text-center"
                                 >
-                                    Настроить статусы
+                                    <span className="hidden sm:inline">Настроить статусы</span>
+                                    <span className="sm:hidden">Статусы</span>
                                 </Link>
                                 {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
                                     <button
                                         onClick={() => {
                                             router.visit(route('projects.board', project.id) + '?sprint_id=none', { preserveState: false });
                                         }}
-                                        className="btn btn-outline btn-sm"
+                                        className="btn btn-outline btn-sm text-center"
                                     >
-                                        Переключиться на "Без спринта"
+                                        <span className="hidden sm:inline">Переключиться на "Без спринта"</span>
+                                        <span className="sm:hidden">Без спринта</span>
                                     </button>
                                 )}
                             </div>
@@ -777,22 +782,24 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     // Показываем информацию о том, что активный спринт доступен, только если пользователь не выбрал "Без спринта" явно
                     sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
                         <div className="card">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 rounded-full bg-accent-green"></div>
-                                    <span className="text-body-small text-text-secondary">
-                                        Есть активный спринт. <button 
-                                            onClick={() => {
-                                                const activeSprint = sprints.find(s => s.status === 'active');
-                                                if (activeSprint) {
-                                                    router.visit(route('projects.board', project.id) + '?sprint_id=' + activeSprint.id, { preserveState: false });
-                                                }
-                                            }}
-                                            className="text-accent-blue hover:text-accent-blue/80 underline font-medium"
-                                        >
-                                            Переключиться на него
-                                        </button>
-                                    </span>
+                                    <div className="w-3 h-3 rounded-full bg-accent-green flex-shrink-0"></div>
+                                    <div className="min-w-0 flex-1">
+                                        <span className="text-body-small text-text-secondary">
+                                            Есть активный спринт. <button
+                                                onClick={() => {
+                                                    const activeSprint = sprints.find(s => s.status === 'active');
+                                                    if (activeSprint) {
+                                                        router.visit(route('projects.board', project.id) + '?sprint_id=' + activeSprint.id, { preserveState: false });
+                                                    }
+                                                }}
+                                                className="text-accent-blue hover:text-accent-blue/80 underline font-medium"
+                                            >
+                                                Переключиться на него
+                                            </button>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1030,14 +1037,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             {showTaskModal && selectedTask && (
                 <div className="fixed inset-0 z-50 overflow-hidden">
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 z-30"
                         onClick={closeTaskModal}
                     />
-                    
+
                     {/* Modal container - полноэкранная на мобильных */}
                     <div className="relative z-50 flex min-h-full lg:items-center lg:justify-center lg:p-4">
-                        <div 
+                        <div
                             className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-card-bg/50 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-sm"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -1097,7 +1104,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     {/* Кнопки действий справа на десктопе */}
                                     <div className="flex items-center gap-3 ml-4">
                                         <button
@@ -1191,7 +1198,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     {/* Кнопки действий под информацией на мобильных */}
                                     <div className="flex flex-col items-stretch gap-2">
                                         <button
@@ -1265,7 +1272,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         if (selectedTask) {
                                             setSelectedTask(prev => ({
                                                 ...prev,
-                                                comments: prev.comments?.map(comment => 
+                                                comments: prev.comments?.map(comment =>
                                                     comment.id === updatedComment.id ? updatedComment : comment
                                                 ) || []
                                             }));
