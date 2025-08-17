@@ -60,7 +60,7 @@ class SprintController extends Controller
 
     public function store(Request $request, Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 

@@ -38,7 +38,7 @@ class SprintController extends Controller
 
     public function store(StoreSprintRequest $request, Project $project): JsonResponse
     {
-        if (!$this->projectService->canUserManageProject($request->user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject($request->user(), $project)) {
             return response()->json(
                 ApiResponse::error('Доступ запрещен', 403),
                 403

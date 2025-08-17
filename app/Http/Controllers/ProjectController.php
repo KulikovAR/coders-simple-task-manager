@@ -154,7 +154,7 @@ class ProjectController extends Controller
 
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'role' => 'nullable|in:member,admin',
+            'role' => 'nullable|in:member,viewer',
         ]);
 
         $user = User::where('email', $request->email)->first();

@@ -146,8 +146,38 @@ class SprintControllerTest extends TestCase
         ]);
     }
 
-    // TODO: исправить логику авторизации для members
-    // public function test_store_allows_access_for_member(): void
+    public function test_store_allows_access_for_member(): void
+    {
+        $user = User::factory()->create();
+        $owner = User::factory()->create();
+        $project = Project::factory()->create(['owner_id' => $owner->id]);
+        
+        ProjectMember::factory()->create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'role' => 'member',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->post("/projects/{$project->id}/sprints", [
+                'name' => 'Test Sprint',
+                'description' => 'Test Description',
+                'start_date' => now()->addDay()->format('Y-m-d'),
+                'end_date' => now()->addDays(14)->format('Y-m-d'),
+                'status' => 'planned',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Спринт успешно создан.');
+
+        $this->assertDatabaseHas('sprints', [
+            'name' => 'Test Sprint',
+            'description' => 'Test Description',
+            'project_id' => $project->id,
+            'status' => 'planned',
+        ]);
+    }
 
     public function test_store_validates_required_fields(): void
     {
