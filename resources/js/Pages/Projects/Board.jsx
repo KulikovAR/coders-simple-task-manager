@@ -939,6 +939,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                 {/* Убираем отображение описания */}
 
+                                                {/* Статус задачи */}
+                                                {task.status && (
+                                                    <div className="mb-3">
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+                                                              style={task.status.color ? {
+                                                                  backgroundColor: `${task.status.color}20`,
+                                                                  color: task.status.color,
+                                                                  border: `1px solid ${task.status.color}30`
+                                                              } : {}}>
+                                                            {task.status.name}
+                                                        </span>
+                                                    </div>
+                                                )}
+
                                                 {/* Мета-информация */}
                                                 <div className="space-y-3">
                                                     {/* Приоритет с цветным фоном */}
@@ -1046,7 +1060,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     </span>
                                                 )}
                                                 {selectedTask.status && (
-                                                    <span className="px-2 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-xs font-medium border border-slate-300 dark:border-white shadow-sm">
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium border shadow-sm"
+                                                          style={selectedTask.status.color ? {
+                                                              backgroundColor: `${selectedTask.status.color}20`,
+                                                              color: selectedTask.status.color,
+                                                              border: `1px solid ${selectedTask.status.color}30`
+                                                          } : {
+                                                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                                              color: '#1e293b',
+                                                              border: '1px solid #cbd5e1'
+                                                          }}>
                                                         {selectedTask.status.name}
                                                     </span>
                                                 )}
@@ -1131,7 +1154,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     </span>
                                                 )}
                                                 {selectedTask.status && (
-                                                    <span className="px-2 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-xs font-medium border border-slate-300 dark:border-white shadow-sm">
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium border shadow-sm"
+                                                          style={selectedTask.status.color ? {
+                                                              backgroundColor: `${selectedTask.status.color}20`,
+                                                              color: selectedTask.status.color,
+                                                              border: `1px solid ${selectedTask.status.color}30`
+                                                          } : {
+                                                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                                              color: '#1e293b',
+                                                              border: '1px solid #cbd5e1'
+                                                          }}>
                                                         {selectedTask.status.name}
                                                     </span>
                                                 )}

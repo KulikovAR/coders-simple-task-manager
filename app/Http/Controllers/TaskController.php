@@ -18,12 +18,11 @@ use Inertia\Inertia;
 class TaskController extends Controller
 {
     public function __construct(
-        private TaskService         $taskService,
-        private ProjectService      $projectService,
+        private TaskService $taskService,
+        private ProjectService $projectService,
         private NotificationService $notificationService,
-        private TaskStatusService   $taskStatusService
-    )
-    {
+        private TaskStatusService $taskStatusService
+    ) {
     }
 
     public function index(Request $request)
@@ -62,6 +61,9 @@ class TaskController extends Controller
                 }
             }
         }
+
+        // Убеждаемся, что задачи загружены с полной информацией о статусах
+        $tasks->load(['status:id,name,color,project_id,sprint_id', 'project', 'assignee', 'reporter', 'sprint']);
 
         return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'sprints', 'filters'));
     }
@@ -125,17 +127,20 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project.users', 'project.owner', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
+        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user']);
 
-
-        // Modal
+        // Если это AJAX запрос из модалки доски, возвращаем JSON
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
             return response()->json([
-                'props' => compact('task')
+                'props' => [
+                    'task' => $task,
+                ]
             ]);
         }
 
-        return Inertia::render('Tasks/Show', compact('task'));
+        return Inertia::render('Tasks/Show', [
+            'task' => $task,
+        ]);
     }
 
     public function edit(Task $task)
@@ -145,7 +150,7 @@ class TaskController extends Controller
         }
 
         // Загружаем задачу со связями
-        $task->load(['status', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'project']);
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
         // Получаем спринты, участников и статусы для проекта задачи
@@ -171,42 +176,56 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['assignee', 'project']);
+        // Загружаем связанные данные
+        $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id']);
 
         $oldAssigneeId = $task->assignee_id;
+        $oldData = $task->toArray();
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        if ($task->assignee_id !== $oldAssigneeId) {
+        // Уведомляем о назначении задачи, если изменился исполнитель
+        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId && $task->assignee_id !== Auth::id()) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
+        // Если исполнитель не изменился, но изменились другие поля, отправляем уведомление об изменении
+        elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $this->notificationService->taskUpdated($task, Auth::user());
+        }
 
-        $this->notificationService->taskUpdated($task, Auth::user());
+        // Не дублируем уведомление о создании при обновлении задачи
 
+        // Проверяем, это Inertia запрос или обычный
         if ($request->header('X-Inertia')) {
+            // Для Inertia запросов проверяем, откуда пришел запрос
             $referer = $request->header('Referer');
             if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+                // Возвращаемся на доску проекта
                 $projectId = $task->project_id;
                 return redirect()->route('projects.board', $projectId)
                     ->with('success', 'Задача успешно обновлена.');
             }
 
+            // По умолчанию возвращаемся к просмотру задачи
             return redirect()->route('tasks.show', $task)
                 ->with('success', 'Задача успешно обновлена.');
         }
 
-        // Modal
+        // Проверяем, это AJAX запрос или обычный
         if ($request->ajax() || $request->wantsJson()) {
+            // Возвращаем JSON ответ для AJAX запросов
             return response()->json([
                 'success' => true,
                 'message' => 'Задача успешно обновлена.',
-                'task' => $task->load(['assignee', 'project', 'status', 'sprint'])
+                'task' => $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
             ]);
         }
 
+        // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');
         if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+            // Возвращаемся на доску проекта
             $projectId = $task->project_id;
             return redirect()->route('projects.board', $projectId)
                 ->with('success', 'Задача успешно обновлена.');
@@ -246,7 +265,7 @@ class TaskController extends Controller
         ]);
 
         // Загружаем связанные данные
-        $task->load(['status', 'assignee', 'reporter', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'project']);
 
         $oldStatus = $task->status->name;
         $newStatus = TaskStatus::findOrFail($request->status_id);
@@ -276,7 +295,7 @@ class TaskController extends Controller
         ]);
 
         // Загружаем связанные данные
-        $task->load(['status', 'assignee', 'reporter', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'project']);
 
         $oldPriority = $task->priority;
         $newPriority = $request->priority;

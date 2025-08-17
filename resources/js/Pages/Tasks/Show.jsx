@@ -54,7 +54,12 @@ export default function Show({ auth, task }) {
                             <div className="text-xs font-mono text-accent-blue mb-2">{task.code}</div>
                         )}
                         <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
-                            <span className={`status-badge ${getStatusClass(task.status?.name)}`}>
+                            <span className={`status-badge ${getStatusClass(task.status?.name)}`} 
+                                  style={task.status?.color ? {
+                                      backgroundColor: `${task.status.color}20`,
+                                      color: task.status.color,
+                                      border: `1px solid ${task.status.color}30`
+                                  } : {}}>
                                 {getStatusLabel(task.status?.name)}
                             </span>
                             {task.priority && (

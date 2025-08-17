@@ -32,7 +32,7 @@ export default function TaskCard({ task }) {
                 {task.status && (
                     <div className="flex items-center justify-between">
                         <span className="text-body-small text-text-muted font-medium">Статус:</span>
-                        <StatusBadge status={task.status} />
+                        <StatusBadge status={task.status} useDynamicColors={true} />
                     </div>
                 )}
 

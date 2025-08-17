@@ -48,7 +48,7 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.project', 'taskStatuses', 'members.user']);
+        $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.project', 'taskStatuses', 'members.user']);
 
         return Inertia::render('Projects/Show', [
             'project' => $project,
@@ -62,7 +62,7 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
+        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
         
         // Получаем спринты и определяем активный спринт
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();

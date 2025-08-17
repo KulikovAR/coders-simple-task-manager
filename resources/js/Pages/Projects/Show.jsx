@@ -449,7 +449,12 @@ export default function Show({ auth, project, tasks }) {
                                             </h4>
                                             {/* Убираем отображение описания */}
                                             <div className="flex flex-wrap items-center gap-3 text-body-small text-text-secondary">
-                                                <span className={`status-badge ${getTaskStatusClass(task.status?.name || 'To Do')}`}>
+                                                <span className={`status-badge ${getTaskStatusClass(task.status?.name || 'To Do')}`}
+                                                      style={task.status?.color ? {
+                                                          backgroundColor: `${task.status.color}20`,
+                                                          color: task.status.color,
+                                                          border: `1px solid ${task.status.color}30`
+                                                      } : {}}>
                                                     {getTaskStatusText(task.status?.name || 'To Do')}
                                                 </span>
                                                 {task.priority && (
