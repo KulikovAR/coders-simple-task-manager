@@ -34,12 +34,30 @@ export default function Index({ auth, task, comments }) {
                     </div>
 
                     <div className="card-body">
-                        <TaskComments
-                            task={task}
-                            comments={comments}
-                            auth={auth}
-                            users={task.project?.members || []}
-                        />
+                        {(() => {
+                            const projectUsers = task.project 
+                                ? [
+                                    ...(task.project.owner ? [task.project.owner] : []), 
+                                    ...(task.project.users || [])
+                                  ].filter((user, index, array) => 
+                                    array.findIndex(u => u.id === user.id) === index
+                                  )
+                                : [];
+                            
+                            console.log('TaskComments/Index - task.project:', task.project);
+                            console.log('TaskComments/Index - task.project.owner:', task.project?.owner);
+                            console.log('TaskComments/Index - task.project.users:', task.project?.users);
+                            console.log('TaskComments/Index - итоговые пользователи:', projectUsers);
+                            
+                            return (
+                                <TaskComments
+                                    task={task}
+                                    comments={comments}
+                                    auth={auth}
+                                    users={projectUsers}
+                                />
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

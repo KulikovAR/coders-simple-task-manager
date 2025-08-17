@@ -46,6 +46,7 @@ export default function RichTextEditor({
             max-height: 200px;
             overflow-y: auto;
             min-width: 250px;
+            z-index: 9999;
         }
         
         .mention-suggestions::-webkit-scrollbar {
@@ -138,6 +139,28 @@ export default function RichTextEditor({
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
 
+    // Нормализуем массив пользователей для упоминаний
+    const normalizedUsers = users.map(user => {
+        // Если это ProjectMember, получаем пользователя из связи
+        if (user.user) {
+            return {
+                id: user.user.id,
+                name: user.user.name || 'Неизвестный пользователь',
+                email: user.user.email || 'unknown@example.com'
+            };
+        }
+        // Если это обычный User
+        return {
+            id: user.id,
+            name: user.name || 'Неизвестный пользователь',
+            email: user.email || 'unknown@example.com'
+        };
+    }).filter(user => user.name && user.name !== 'Неизвестный пользователь');
+
+    // Отладочная информация
+    console.log('RichTextEditor - исходные пользователи:', users);
+    console.log('RichTextEditor - нормализованные пользователи:', normalizedUsers);
+
     // Создание экземпляра редактора
     const editor = useEditor({
         extensions: [
@@ -159,79 +182,55 @@ export default function RichTextEditor({
                 },
                 suggestion: {
                     items: ({ query }) => {
-                        if (!query) return users.slice(0, 5);
-                        return users.filter(user => 
+                        console.log('Mention items - query:', query);
+                        console.log('Mention items - normalizedUsers:', normalizedUsers);
+                        
+                        if (!query) {
+                            const result = normalizedUsers.slice(0, 5);
+                            console.log('Mention items - без запроса, результат:', result);
+                            return result;
+                        }
+                        
+                        const result = normalizedUsers.filter(user => 
                             user.name.toLowerCase().includes(query.toLowerCase()) ||
                             user.email.toLowerCase().includes(query.toLowerCase())
                         ).slice(0, 5);
+                        
+                        console.log('Mention items - с запросом, результат:', result);
+                        return result;
                     },
                     renderItem: (item) => {
                         return {
                             id: item.id,
                             label: item.name,
+                            name: item.name,
                             email: item.email,
                         };
                     },
                     command: ({ editor, range, props }) => {
+                        // Отладочная информация
+                        console.log('Mention command - props:', props);
+                        console.log('Mention command - props.label:', props.label);
+                        console.log('Mention command - props.name:', props.name);
+                        
                         // Вставляем упоминание с именем пользователя
+                        const userName = props.label || props.name || 'Неизвестный пользователь';
                         editor
                             .chain()
                             .focus()
                             .deleteRange(range)
-                            .insertContent(`@${props.label}`)
+                            .insertContent(`@${userName}`)
                             .run();
+                        
+                        // Вызываем колбэк для родительского компонента с правильным пользователем
+                        if (onMentionSelect) {
+                            console.log('Mention command - вызываем onMentionSelect с:', props);
+                            onMentionSelect(props);
+                        }
                     },
                     render: () => {
                         let component;
                         let popup;
-
-                        // Функция для позиционирования popup
-                        const positionPopup = (popupElement, clientRect) => {
-                            if (!popupElement || !clientRect) return;
-                            
-                            const rect = clientRect();
-                            if (!rect) return;
-                            
-                            // Получаем размеры popup
-                            const popupRect = popupElement.getBoundingClientRect();
-                            const viewportWidth = window.innerWidth;
-                            const viewportHeight = window.innerHeight;
-                            
-                            // Базовые координаты (под курсором)
-                            let left = rect.left;
-                            let top = rect.bottom + 8; // 8px отступ от курсора
-                            
-                            // Проверяем, не выходит ли popup за правый край экрана
-                            if (left + popupRect.width > viewportWidth) {
-                                left = viewportWidth - popupRect.width - 16; // 16px отступ от края
-                            }
-                            
-                            // Проверяем, не выходит ли popup за левый край экрана
-                            if (left < 16) {
-                                left = 16;
-                            }
-                            
-                            // Проверяем, не выходит ли popup за нижний край экрана
-                            if (top + popupRect.height > viewportHeight) {
-                                // Показываем popup над курсором
-                                top = rect.top - popupRect.height - 8;
-                            }
-                            
-                            // Проверяем, не выходит ли popup за верхний край экрана
-                            if (top < 16) {
-                                top = 16;
-                            }
-                            
-                            // Применяем позицию с плавной анимацией
-                            popupElement.style.transition = 'none'; // Отключаем анимацию для позиционирования
-                            popupElement.style.left = `${left}px`;
-                            popupElement.style.top = `${top}px`;
-                            
-                            // Включаем анимацию обратно
-                            setTimeout(() => {
-                                popupElement.style.transition = '';
-                            }, 0);
-                        };
 
                         return {
                             onStart: props => {
@@ -256,37 +255,42 @@ export default function RichTextEditor({
                                 document.body.appendChild(popup);
                                 popup.appendChild(component.element);
                                 
-                                // Позиционируем относительно курсора
-                                positionPopup(popup, props.clientRect);
-                                
-                                // Добавляем обработчик скролла для обновления позиции
-                                const handleScroll = () => {
-                                    if (popup && props.clientRect) {
-                                        positionPopup(popup, props.clientRect);
+                                // Позиционируем popup
+                                const rect = props.clientRect();
+                                if (rect) {
+                                    // Простое позиционирование под курсором
+                                    popup.style.left = `${rect.left}px`;
+                                    popup.style.top = `${rect.bottom + 8}px`;
+                                    
+                                    // Проверяем, не выходит ли popup за границы экрана
+                                    const popupRect = popup.getBoundingClientRect();
+                                    const viewportWidth = window.innerWidth;
+                                    const viewportHeight = window.innerHeight;
+                                    
+                                    // Если popup выходит за правый край
+                                    if (popupRect.right > viewportWidth - 16) {
+                                        popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
                                     }
-                                };
-                                
-                                // Обрабатываем скролл на всех возможных элементах
-                                window.addEventListener('scroll', handleScroll, true);
-                                document.addEventListener('scroll', handleScroll, true);
-                                
-                                // Добавляем обработчик изменения размера окна
-                                const handleResize = () => {
-                                    if (popup && props.clientRect) {
-                                        positionPopup(popup, props.clientRect);
+                                    
+                                    // Если popup выходит за нижний край
+                                    if (popupRect.bottom > viewportHeight - 16) {
+                                        popup.style.top = `${rect.top - popupRect.height - 8}px`;
                                     }
-                                };
+                                    
+                                    // Если popup выходит за левый край
+                                    if (popupRect.left < 16) {
+                                        popup.style.left = '16px';
+                                    }
+                                    
+                                    // Если popup выходит за верхний край
+                                    if (popupRect.top < 16) {
+                                        popup.style.top = '16px';
+                                    }
+                                }
                                 
-                                window.addEventListener('resize', handleResize);
-                                
-                                // Сохраняем обработчики для удаления
-                                popup._scrollHandler = handleScroll;
-                                popup._resizeHandler = handleResize;
-                                
-                                // Добавляем обработчик клика вне popup
+                                // Обработчик клика вне popup
                                 const handleClickOutside = (event) => {
                                     if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
-                                        // Проверяем, что клик не в редакторе
                                         const editorElement = props.editor.view.dom;
                                         if (!editorElement.contains(event.target)) {
                                             popup.remove();
@@ -294,16 +298,15 @@ export default function RichTextEditor({
                                     }
                                 };
                                 
-                                // Добавляем обработчик с небольшой задержкой, чтобы избежать немедленного закрытия
                                 setTimeout(() => {
                                     document.addEventListener('mousedown', handleClickOutside);
                                     popup._clickOutsideHandler = handleClickOutside;
                                 }, 100);
                                 
-                                // Вызываем колбэк для родительского компонента
-                                if (onMentionSelect) {
-                                    onMentionSelect(props.items[props.index]);
-                                }
+                                // Убираем дублирующий вызов onMentionSelect
+                                // if (onMentionSelect) {
+                                //     onMentionSelect(props.items[props.index]);
+                                // }
                             },
                             onUpdate(props) {
                                 component.updateProps(props);
@@ -312,25 +315,44 @@ export default function RichTextEditor({
                                     return;
                                 }
 
-                                // Обновляем позицию при изменении
-                                positionPopup(popup, props.clientRect);
+                                // Обновляем позицию с той же логикой
+                                const rect = props.clientRect();
+                                if (rect) {
+                                    // Простое позиционирование под курсором
+                                    popup.style.left = `${rect.left}px`;
+                                    popup.style.top = `${rect.bottom + 8}px`;
+                                    
+                                    // Проверяем, не выходит ли popup за границы экрана
+                                    const popupRect = popup.getBoundingClientRect();
+                                    const viewportWidth = window.innerWidth;
+                                    const viewportHeight = window.innerHeight;
+                                    
+                                    // Если popup выходит за правый край
+                                    if (popupRect.right > viewportWidth - 16) {
+                                        popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
+                                    }
+                                    
+                                    // Если popup выходит за нижний край
+                                    if (popupRect.bottom > viewportHeight - 16) {
+                                        popup.style.top = `${rect.top - popupRect.height - 8}px`;
+                                    }
+                                    
+                                    // Если popup выходит за левый край
+                                    if (popupRect.left < 16) {
+                                        popup.style.left = '16px';
+                                    }
+                                    
+                                    // Если popup выходит за верхний край
+                                    if (popupRect.top < 16) {
+                                        popup.style.top = '16px';
+                                    }
+                                }
                             },
                             onKeyDown(props) {
-                                // Обработка клавиши Escape передается в MentionList
                                 return component.onKeyDown(props);
                             },
                             onExit() {
                                 if (popup) {
-                                    // Удаляем обработчик скролла
-                                    if (popup._scrollHandler) {
-                                        window.removeEventListener('scroll', popup._scrollHandler, true);
-                                        document.removeEventListener('scroll', popup._scrollHandler, true);
-                                    }
-                                    // Удаляем обработчик изменения размера
-                                    if (popup._resizeHandler) {
-                                        window.removeEventListener('resize', popup._resizeHandler);
-                                    }
-                                    // Удаляем обработчик клика вне popup
                                     if (popup._clickOutsideHandler) {
                                         document.removeEventListener('mousedown', popup._clickOutsideHandler);
                                     }
@@ -640,11 +662,14 @@ class MentionList {
         this.editor = editor;
         this.element = document.createElement('div');
         this.element.className = 'w-full bg-transparent';
-        this.onExit = onExit; // Сохраняем callback для закрытия
+        this.onExit = onExit;
         this.render();
     }
 
     render() {
+        console.log('MentionList render - props.items:', this.props.items);
+        console.log('MentionList render - props.index:', this.props.index);
+        
         this.element.innerHTML = `
             ${this.props.items.map((item, index) => `
                 <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 transition-colors duration-150 ${
@@ -667,7 +692,10 @@ class MentionList {
             const item = e.target.closest('[data-index]');
             if (item) {
                 const index = parseInt(item.dataset.index);
-                this.props.command(this.props.items[index]);
+                const selectedItem = this.props.items[index];
+                console.log('MentionList click - выбран элемент:', selectedItem);
+                console.log('MentionList click - индекс:', index);
+                this.props.command(selectedItem);
             }
         });
     }
@@ -694,7 +722,6 @@ class MentionList {
         }
 
         if (props.event.key === 'Escape') {
-            // Закрываем popup при нажатии Escape
             if (this.onExit) {
                 this.onExit();
             }
@@ -723,6 +750,8 @@ class MentionList {
     select() {
         const item = this.props.items[this.props.index];
         if (item) {
+            console.log('MentionList select - выбран элемент:', item);
+            console.log('MentionList select - индекс:', this.props.index);
             this.props.command(item);
         }
     }

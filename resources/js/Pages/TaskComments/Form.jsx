@@ -99,14 +99,36 @@ export default function Form({ auth, comment, task }) {
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     Комментарий
                                 </label>
-                                <RichTextEditor
-                                    value={data.content}
-                                    onChange={(value) => setData('content', value)}
-                                    onMentionSelect={(user) => console.log('User mentioned:', user)}
-                                    users={task.project?.members || []}
-                                    placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
-                                    className="w-full"
-                                />
+                                {(() => {
+                                    const projectUsers = task.project 
+                                        ? [
+                                            ...(task.project.owner ? [task.project.owner] : []), 
+                                            ...(task.project.users || [])
+                                          ].filter((user, index, array) => 
+                                            array.findIndex(u => u.id === user.id) === index
+                                          )
+                                        : [];
+                                    
+                                    console.log('TaskComments/Form - task.project:', task.project);
+                                    console.log('TaskComments/Form - task.project.owner:', task.project?.owner);
+                                    console.log('TaskComments/Form - task.project.users:', task.project?.users);
+                                    console.log('TaskComments/Form - итоговые пользователи:', projectUsers);
+                                    
+                                    return (
+                                        <RichTextEditor
+                                            value={data.content}
+                                            onChange={(value) => setData('content', value)}
+                                            onMentionSelect={(user) => {
+                                                console.log('TaskComments/Form - User mentioned:', user);
+                                                console.log('TaskComments/Form - User name:', user?.name);
+                                                console.log('TaskComments/Form - User email:', user?.email);
+                                            }}
+                                            users={projectUsers}
+                                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
+                                            className="w-full"
+                                        />
+                                    );
+                                })()}
                                 {errors.content && (
                                     <p className="text-red-500 text-sm mt-1">{errors.content}</p>
                                 )}

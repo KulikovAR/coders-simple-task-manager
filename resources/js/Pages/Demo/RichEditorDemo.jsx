@@ -15,8 +15,14 @@ export default function RichEditorDemo() {
         { id: 5, name: 'Сергей Козлов', email: 'sergey@example.com' },
     ];
 
+    // Отладочная информация о демо-пользователях
+    console.log('RichEditorDemo - demoUsers:', demoUsers);
+
     const handleMentionSelect = (user) => {
-        console.log('Упомянут пользователь:', user);
+        console.log('RichEditorDemo - Упомянут пользователь:', user);
+        console.log('RichEditorDemo - User name:', user?.name);
+        console.log('RichEditorDemo - User email:', user?.email);
+        console.log('RichEditorDemo - User id:', user?.id);
         // Здесь можно добавить логику уведомления
     };
 
@@ -50,24 +56,27 @@ export default function RichEditorDemo() {
 
                     {/* Кнопки управления */}
                     <div className="flex justify-between items-center mt-4">
-                        <div className="text-sm text-text-muted">
-                            {content.length > 0 ? `${content.length} символов` : 'Пустой редактор'}
-                        </div>
-                        
                         <div className="flex space-x-2">
                             <button
                                 onClick={() => setContent('')}
-                                className="px-4 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
                             >
                                 Очистить
                             </button>
                             <button
-                                onClick={() => setShowPreview(!showPreview)}
-                                className="px-4 py-2 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90 transition-colors"
+                                onClick={() => setContent('<p>Привет! Это <strong>тестовый</strong> контент с <em>форматированием</em>.</p><p>Попробуйте упомянуть @Александр Куликов или @Мария Иванова</p>')}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                             >
-                                {showPreview ? 'Скрыть' : 'Показать'} предпросмотр
+                                Загрузить тест
                             </button>
                         </div>
+                        
+                        <button
+                            onClick={() => setShowPreview(!showPreview)}
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                        >
+                            {showPreview ? 'Скрыть предпросмотр' : 'Показать предпросмотр'}
+                        </button>
                     </div>
                 </div>
 
@@ -77,31 +86,7 @@ export default function RichEditorDemo() {
                         <h2 className="text-xl font-semibold text-text-primary mb-4">
                             Предпросмотр
                         </h2>
-                        
-                        {content ? (
-                            <div className="prose prose-sm max-w-none">
-                                <HtmlRenderer content={content} />
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-text-muted">
-                                <p>Начните писать в редакторе, чтобы увидеть предпросмотр</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* HTML код */}
-                {content && (
-                    <div className="bg-card-bg border border-border-color rounded-lg p-6">
-                        <h2 className="text-xl font-semibold text-text-primary mb-4">
-                            HTML код
-                        </h2>
-                        
-                        <div className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
-                            <pre className="text-sm">
-                                <code>{content}</code>
-                            </pre>
-                        </div>
+                        <HtmlRenderer content={content} />
                     </div>
                 )}
 
@@ -110,109 +95,38 @@ export default function RichEditorDemo() {
                     <h2 className="text-xl font-semibold text-text-primary mb-4">
                         Как использовать
                     </h2>
-                    
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3 text-text-secondary">
                         <div>
-                            <h3 className="font-semibold text-text-primary mb-2">Форматирование</h3>
-                            <ul className="text-sm text-text-secondary space-y-1">
-                                <li>• <strong>Жирный</strong> - кнопка B или Ctrl+B</li>
-                                <li>• <em>Курсив</em> - кнопка I или Ctrl+I</li>
-                                <li>• <code>Код</code> - кнопка &lt;/&gt; или Ctrl+Shift+C</li>
-                                <li>• Цитаты - кнопка " в панели инструментов</li>
-                                <li>• Списки - кнопки маркированного и нумерованного списка</li>
-                            </ul>
+                            <h3 className="font-medium text-text-primary">Форматирование текста:</h3>
+                            <p>Используйте кнопки на панели инструментов для <strong>жирного</strong>, <em>курсивного</em> текста, списков и цитат.</p>
                         </div>
-                        
                         <div>
-                            <h3 className="font-semibold text-text-primary mb-2">Медиа и ссылки</h3>
-                            <ul className="text-sm text-text-secondary space-y-1">
-                                <li>• Ссылки - кнопка 🔗 в панели инструментов</li>
-                                <li>• Изображения - кнопка 🖼️ или перетащите файл</li>
-                                <li>• Файлы - кнопка 📎 для загрузки</li>
-                                <li>• Drag & Drop - перетащите изображение в редактор</li>
-                            </ul>
+                            <h3 className="font-medium text-text-primary">Упоминания пользователей:</h3>
+                            <p>Введите символ @ и начните печатать имя пользователя. Выберите нужного пользователя из списка.</p>
                         </div>
-                        
                         <div>
-                            <h3 className="font-semibold text-text-primary mb-2">Упоминания</h3>
-                            <ul className="text-sm text-text-secondary space-y-1">
-                                <li>• Начните писать @ для упоминания пользователей</li>
-                                <li>• Используйте стрелки для навигации</li>
-                                <li>• Enter или Tab для выбора</li>
-                                <li>• Escape для закрытия списка</li>
-                            </ul>
+                            <h3 className="font-medium text-text-primary">Добавление ссылок:</h3>
+                            <p>Нажмите на кнопку ссылки и введите URL.</p>
                         </div>
-                        
                         <div>
-                            <h3 className="font-semibold text-text-primary mb-2">Горячие клавиши</h3>
-                            <ul className="text-sm text-text-secondary space-y-1">
-                                <li>• Ctrl+Z - отменить</li>
-                                <li>• Ctrl+Y - повторить</li>
-                                <li>• Ctrl+B - жирный</li>
-                                <li>• Ctrl+I - курсив</li>
-                                <li>• Ctrl+Shift+C - код</li>
-                            </ul>
+                            <h3 className="font-medium text-text-primary">Добавление изображений:</h3>
+                            <p>Нажмите на кнопку изображения и введите URL или перетащите файл в редактор.</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Демо-контент */}
+                {/* Тестовые данные */}
                 <div className="bg-card-bg border border-border-color rounded-lg p-6">
                     <h2 className="text-xl font-semibold text-text-primary mb-4">
-                        Попробуйте готовый контент
+                        Тестовые пользователи для упоминаний
                     </h2>
-                    
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <button
-                            onClick={() => setContent(`
-                                <h2>Привет, мир! 👋</h2>
-                                <p>Это <strong>демонстрация</strong> возможностей <em>RichTextEditor</em>.</p>
-                                <p>Вы можете:</p>
-                                <ul>
-                                    <li>Форматировать <strong>текст</strong></li>
-                                    <li>Добавлять <em>списки</em></li>
-                                    <li>Вставлять <a href="https://example.com">ссылки</a></li>
-                                    <li>Упоминать пользователей с помощью @</li>
-                                </ul>
-                                <blockquote>
-                                    <p>Это цитата для демонстрации блочного цитирования.</p>
-                                </blockquote>
-                                <p>Также поддерживается <code>код</code> и другие элементы.</p>
-                            `)}
-                            className="p-3 text-left bg-secondary-bg border border-border-color rounded hover:bg-accent-blue/10 transition-colors"
-                        >
-                            <div className="font-semibold text-text-primary">Базовое форматирование</div>
-                            <div className="text-sm text-text-muted mt-1">
-                                Заголовки, жирный текст, курсив, списки, цитаты
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {demoUsers.map(user => (
+                            <div key={user.id} className="p-3 border border-border-color rounded-lg">
+                                <div className="font-medium text-text-primary">{user.name}</div>
+                                <div className="text-sm text-text-muted">{user.email}</div>
                             </div>
-                        </button>
-                        
-                        <button
-                            onClick={() => setContent(`
-                                <h3>Задача: Разработка веб-приложения</h3>
-                                <p><strong>Статус:</strong> <span style="color: #10b981;">В работе</span></p>
-                                <p><strong>Приоритет:</strong> <span style="color: #ef4444;">Высокий</span></p>
-                                <p><strong>Описание:</strong></p>
-                                <p>Необходимо создать современное веб-приложение для управления задачами с использованием:</p>
-                                <ul>
-                                    <li>React + TypeScript</li>
-                                    <li>Tailwind CSS</li>
-                                    <li>Laravel на бэкенде</li>
-                                    <li>MySQL база данных</li>
-                                </ul>
-                                <p><strong>Команда:</strong></p>
-                                <p>@Александр Куликов - фронтенд разработчик<br>
-                                @Мария Иванова - бэкенд разработчик<br>
-                                @Дмитрий Петров - дизайнер</p>
-                                <p><strong>Дедлайн:</strong> 15 декабря 2024</p>
-                            `)}
-                            className="p-3 text-left bg-secondary-bg border border-border-color rounded hover:bg-accent-blue/10 transition-colors"
-                        >
-                            <div className="font-semibold text-text-primary">Описание задачи</div>
-                            <div className="text-sm text-text-muted mt-1">
-                                Структурированное описание с упоминаниями и форматированием
-                            </div>
-                        </button>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -265,7 +265,11 @@ export default function TaskComments({
                         <RichTextEditor
                             value={data.content}
                             onChange={(newValue) => setData('content', newValue)}
-                            onMentionSelect={(user) => console.log('User mentioned:', user)}
+                            onMentionSelect={(user) => {
+                                console.log('TaskComments - User mentioned:', user);
+                                console.log('TaskComments - User name:', user?.name);
+                                console.log('TaskComments - User email:', user?.email);
+                            }}
                             users={users}
                             placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
                             className={`w-full ${

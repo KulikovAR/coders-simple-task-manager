@@ -30,7 +30,7 @@ class TaskCommentController extends Controller
         $comments = $this->taskCommentService->getTaskComments($task);
         
         return Inertia::render('TaskComments/Index', [
-            'task' => $task->load('project'),
+            'task' => $task->load(['project.users', 'project.owner']),
             'comments' => $comments,
         ]);
     }
@@ -83,7 +83,7 @@ class TaskCommentController extends Controller
 
         return Inertia::render('TaskComments/Form', [
             'comment' => $comment,
-            'task' => $comment->task->load('project'),
+            'task' => $comment->task->load(['project.users', 'project.owner']),
         ]);
     }
 

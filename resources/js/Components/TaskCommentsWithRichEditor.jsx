@@ -276,7 +276,12 @@ export default function TaskCommentsWithRichEditor({
                                     setCommentContent(newValue);
                                     setData('content', newValue);
                                 }}
-                                onMentionSelect={handleMentionSelect}
+                                onMentionSelect={(user) => {
+                                    console.log('TaskCommentsWithRichEditor - User mentioned:', user);
+                                    console.log('TaskCommentsWithRichEditor - User name:', user?.name);
+                                    console.log('TaskCommentsWithRichEditor - User email:', user?.email);
+                                    handleMentionSelect(user);
+                                }}
                                 users={users}
                                 placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
                                 className={`w-full ${
