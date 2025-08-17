@@ -138,6 +138,20 @@ export default function RichTextEditor({
     const [imageUrl, setImageUrl] = useState('');
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
+    
+    // Реф для хранения текущего popup'а упоминаний
+    const currentMentionPopup = useRef(null);
+
+    // Функция для скрытия mention popup'а
+    const hideMentionPopup = useCallback(() => {
+        if (currentMentionPopup.current) {
+            if (currentMentionPopup.current._clickOutsideHandler) {
+                document.removeEventListener('mousedown', currentMentionPopup.current._clickOutsideHandler);
+            }
+            currentMentionPopup.current.remove();
+            currentMentionPopup.current = null;
+        }
+    }, []);
 
     // Нормализуем массив пользователей для упоминаний
     const normalizedUsers = users.map(user => {
@@ -240,6 +254,7 @@ export default function RichTextEditor({
                                     onExit: () => {
                                         if (popup) {
                                             popup.remove();
+                                            currentMentionPopup.current = null;
                                         }
                                     }
                                 });
@@ -254,6 +269,9 @@ export default function RichTextEditor({
                                 popup.style.zIndex = '9999';
                                 document.body.appendChild(popup);
                                 popup.appendChild(component.element);
+                                
+                                // Сохраняем ссылку на текущий popup
+                                currentMentionPopup.current = popup;
                                 
                                 // Позиционируем popup
                                 const rect = props.clientRect();
@@ -294,6 +312,7 @@ export default function RichTextEditor({
                                         const editorElement = props.editor.view.dom;
                                         if (!editorElement.contains(event.target)) {
                                             popup.remove();
+                                            currentMentionPopup.current = null;
                                         }
                                     }
                                 };
@@ -357,6 +376,7 @@ export default function RichTextEditor({
                                         document.removeEventListener('mousedown', popup._clickOutsideHandler);
                                     }
                                     popup.remove();
+                                    currentMentionPopup.current = null;
                                 }
                                 component.destroy();
                             },
@@ -371,6 +391,77 @@ export default function RichTextEditor({
             onChange(html);
         },
     });
+
+    // Обработчик скролла страницы
+    useEffect(() => {
+        const handleScroll = () => {
+            hideMentionPopup();
+        };
+
+        // Добавляем обработчики для всех возможных элементов с прокруткой
+        const scrollableElements = [
+            window,
+            document.documentElement,
+            document.body
+        ];
+
+        scrollableElements.forEach(element => {
+            element.addEventListener('scroll', handleScroll, { passive: true });
+        });
+
+        return () => {
+            scrollableElements.forEach(element => {
+                element.removeEventListener('scroll', handleScroll);
+            });
+        };
+    }, [hideMentionPopup]);
+
+    // Обработчик изменения размера окна
+    useEffect(() => {
+        const handleResize = () => {
+            hideMentionPopup();
+        };
+
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [hideMentionPopup]);
+
+    // Обработчик потери фокуса редактором
+    useEffect(() => {
+        const handleBlur = () => {
+            // Небольшая задержка, чтобы успеть обработать клик по mention
+            setTimeout(() => {
+                hideMentionPopup();
+            }, 100);
+        };
+
+        if (editor) {
+            const editorElement = editor.view.dom;
+            editorElement.addEventListener('blur', handleBlur);
+            
+            return () => {
+                editorElement.removeEventListener('blur', handleBlur);
+            };
+        }
+    }, [editor, hideMentionPopup]);
+
+    // Обработчик нажатия Escape
+    useEffect(() => {
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                hideMentionPopup();
+            }
+        };
+
+        document.addEventListener('keydown', handleEscape);
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [hideMentionPopup]);
 
     // Обновляем содержимое редактора при изменении value пропса
     useEffect(() => {
