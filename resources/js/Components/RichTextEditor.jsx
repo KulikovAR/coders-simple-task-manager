@@ -141,11 +141,64 @@ export default function RichTextEditor({
                         let component;
                         let popup;
 
+                        // Функция для позиционирования popup
+                        const positionPopup = (popupElement, clientRect) => {
+                            if (!popupElement || !clientRect) return;
+                            
+                            const rect = clientRect();
+                            if (!rect) return;
+                            
+                            // Получаем размеры popup
+                            const popupRect = popupElement.getBoundingClientRect();
+                            const viewportWidth = window.innerWidth;
+                            const viewportHeight = window.innerHeight;
+                            
+                            // Базовые координаты (под курсором)
+                            let left = rect.left;
+                            let top = rect.bottom + 8; // 8px отступ от курсора
+                            
+                            // Проверяем, не выходит ли popup за правый край экрана
+                            if (left + popupRect.width > viewportWidth) {
+                                left = viewportWidth - popupRect.width - 16; // 16px отступ от края
+                            }
+                            
+                            // Проверяем, не выходит ли popup за левый край экрана
+                            if (left < 16) {
+                                left = 16;
+                            }
+                            
+                            // Проверяем, не выходит ли popup за нижний край экрана
+                            if (top + popupRect.height > viewportHeight) {
+                                // Показываем popup над курсором
+                                top = rect.top - popupRect.height - 8;
+                            }
+                            
+                            // Проверяем, не выходит ли popup за верхний край экрана
+                            if (top < 16) {
+                                top = 16;
+                            }
+                            
+                            // Применяем позицию с плавной анимацией
+                            popupElement.style.transition = 'none'; // Отключаем анимацию для позиционирования
+                            popupElement.style.left = `${left}px`;
+                            popupElement.style.top = `${top}px`;
+                            
+                            // Включаем анимацию обратно
+                            setTimeout(() => {
+                                popupElement.style.transition = '';
+                            }, 0);
+                        };
+
                         return {
                             onStart: props => {
                                 component = new MentionList({
                                     props,
                                     editor: props.editor,
+                                    onExit: () => {
+                                        if (popup) {
+                                            popup.remove();
+                                        }
+                                    }
                                 });
 
                                 if (!props.clientRect) {
@@ -154,30 +207,86 @@ export default function RichTextEditor({
 
                                 popup = document.createElement('div');
                                 popup.className = 'mention-suggestions';
+                                popup.style.position = 'fixed';
+                                popup.style.zIndex = '9999';
                                 document.body.appendChild(popup);
                                 popup.appendChild(component.element);
+                                
+                                // Позиционируем относительно курсора
+                                positionPopup(popup, props.clientRect);
+                                
+                                // Добавляем обработчик скролла для обновления позиции
+                                const handleScroll = () => {
+                                    if (popup && props.clientRect) {
+                                        positionPopup(popup, props.clientRect);
+                                    }
+                                };
+                                
+                                // Обрабатываем скролл на всех возможных элементах
+                                window.addEventListener('scroll', handleScroll, true);
+                                document.addEventListener('scroll', handleScroll, true);
+                                
+                                // Добавляем обработчик изменения размера окна
+                                const handleResize = () => {
+                                    if (popup && props.clientRect) {
+                                        positionPopup(popup, props.clientRect);
+                                    }
+                                };
+                                
+                                window.addEventListener('resize', handleResize);
+                                
+                                // Сохраняем обработчики для удаления
+                                popup._scrollHandler = handleScroll;
+                                popup._resizeHandler = handleResize;
+                                
+                                // Добавляем обработчик клика вне popup
+                                const handleClickOutside = (event) => {
+                                    if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
+                                        // Проверяем, что клик не в редакторе
+                                        const editorElement = props.editor.view.dom;
+                                        if (!editorElement.contains(event.target)) {
+                                            popup.remove();
+                                        }
+                                    }
+                                };
+                                
+                                // Добавляем обработчик с небольшой задержкой, чтобы избежать немедленного закрытия
+                                setTimeout(() => {
+                                    document.addEventListener('mousedown', handleClickOutside);
+                                    popup._clickOutsideHandler = handleClickOutside;
+                                }, 100);
                             },
                             onUpdate(props) {
                                 component.updateProps(props);
 
-                                if (!props.clientRect) {
+                                if (!props.clientRect || !popup) {
                                     return;
                                 }
 
-                                popup.style.position = 'absolute';
-                                popup.style.left = `${props.clientRect.left}px`;
-                                popup.style.top = `${props.clientRect.top + 24}px`;
+                                // Обновляем позицию при изменении
+                                positionPopup(popup, props.clientRect);
                             },
                             onKeyDown(props) {
-                                if (props.event.key === 'Escape') {
-                                    popup.remove();
-                                    return true;
-                                }
-
+                                // Обработка клавиши Escape передается в MentionList
                                 return component.onKeyDown(props);
                             },
                             onExit() {
-                                popup.remove();
+                                if (popup) {
+                                    // Удаляем обработчик скролла
+                                    if (popup._scrollHandler) {
+                                        window.removeEventListener('scroll', popup._scrollHandler, true);
+                                        document.removeEventListener('scroll', popup._scrollHandler, true);
+                                    }
+                                    // Удаляем обработчик изменения размера
+                                    if (popup._resizeHandler) {
+                                        window.removeEventListener('resize', popup._resizeHandler);
+                                    }
+                                    // Удаляем обработчик клика вне popup
+                                    if (popup._clickOutsideHandler) {
+                                        document.removeEventListener('mousedown', popup._clickOutsideHandler);
+                                    }
+                                    popup.remove();
+                                }
                                 component.destroy();
                             },
                         };
@@ -477,19 +586,20 @@ export default function RichTextEditor({
 
 // Компонент для отображения списка упоминаний
 class MentionList {
-    constructor({ props, editor }) {
+    constructor({ props, editor, onExit }) {
         this.props = props;
         this.editor = editor;
         this.element = document.createElement('div');
-        this.element.className = 'absolute z-50 w-64 bg-card-bg border border-border-color rounded-lg shadow-lg max-h-48 overflow-y-auto';
+        this.element.className = 'w-full bg-transparent';
+        this.onExit = onExit; // Сохраняем callback для закрытия
         this.render();
     }
 
     render() {
         this.element.innerHTML = `
             ${this.props.items.map((item, index) => `
-                <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-secondary-bg ${
-                    index === 0 ? 'bg-accent-blue/10 text-accent-blue' : 'text-text-primary'
+                <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 transition-colors duration-150 ${
+                    index === this.props.index ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                 }" data-index="${index}">
                     <div class="w-8 h-8 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
                         <span class="text-sm font-semibold text-accent-blue">
@@ -529,8 +639,16 @@ class MentionList {
             return true;
         }
 
-        if (props.event.key === 'Enter') {
+        if (props.event.key === 'Enter' || props.event.key === 'Tab') {
             this.select();
+            return true;
+        }
+
+        if (props.event.key === 'Escape') {
+            // Закрываем popup при нажатии Escape
+            if (this.onExit) {
+                this.onExit();
+            }
             return true;
         }
 
