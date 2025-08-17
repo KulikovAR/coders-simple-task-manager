@@ -31,6 +31,17 @@ export default function RichTextEditor({
     // Проверяем, является ли устройство мобильным
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
+    // Проверяем обязательные пропсы
+    if (typeof onChange !== 'function') {
+        console.error('RichTextEditor: onChange должен быть функцией');
+        return null;
+    }
+    
+    // Проверяем, что users является массивом
+    if (!Array.isArray(users)) {
+        console.warn('RichTextEditor: users должен быть массивом, получено:', typeof users);
+    }
+    
     // CSS стили для редактора
     const editorStyles = `
         .ProseMirror {
@@ -149,13 +160,21 @@ export default function RichTextEditor({
     const hideMentionPopup = useCallback(() => {
         if (currentMentionPopup.current) {
             try {
-                if (currentMentionPopup.current._clickOutsideHandler) {
-                    document.removeEventListener('mousedown', currentMentionPopup.current._clickOutsideHandler);
+                // Проверяем, что popup все еще существует в DOM
+                if (currentMentionPopup.current.parentNode) {
+                    if (currentMentionPopup.current._clickOutsideHandler) {
+                        try {
+                            document.removeEventListener('mousedown', currentMentionPopup.current._clickOutsideHandler);
+                        } catch (error) {
+                            console.warn('Ошибка при удалении обработчика клика:', error);
+                        }
+                    }
+                    currentMentionPopup.current.remove();
                 }
-                currentMentionPopup.current.remove();
                 currentMentionPopup.current = null;
             } catch (error) {
                 console.warn('Ошибка при скрытии mention popup:', error);
+                // Принудительно очищаем ссылку
                 currentMentionPopup.current = null;
             }
         }
@@ -278,148 +297,181 @@ export default function RichTextEditor({
                                     return;
                                 }
 
-                                component = new MentionList({
-                                    props,
-                                    editor: props.editor,
-                                    onExit: () => {
-                                        if (popup) {
-                                            popup.remove();
-                                            currentMentionPopup.current = null;
-                                        }
-                                    }
-                                });
-
-                                if (!props.clientRect) {
+                                // Проверяем, что редактор готов
+                                if (!props.editor || props.editor.isDestroyed || !props.editor.view || !props.editor.view.dom) {
+                                    console.warn('Редактор не готов для отображения mention popup');
                                     return;
                                 }
 
-                                popup = document.createElement('div');
-                                popup.className = 'mention-suggestions';
-                                popup.style.position = 'fixed';
-                                popup.style.zIndex = '9999';
-                                document.body.appendChild(popup);
-                                popup.appendChild(component.element);
-                                
-                                // Сохраняем ссылку на текущий popup
-                                currentMentionPopup.current = popup;
-                                
-                                // Позиционируем popup
-                                const rect = props.clientRect();
-                                if (rect) {
-                                    // Простое позиционирование под курсором
-                                    popup.style.left = `${rect.left}px`;
-                                    popup.style.top = `${rect.bottom + 8}px`;
-                                    
-                                    // Проверяем, не выходит ли popup за границы экрана
-                                    const popupRect = popup.getBoundingClientRect();
-                                    const viewportWidth = window.innerWidth;
-                                    const viewportHeight = window.innerHeight;
-                                    
-                                    // Если popup выходит за правый край
-                                    if (popupRect.right > viewportWidth - 16) {
-                                        popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
-                                    }
-                                    
-                                    // Если popup выходит за нижний край
-                                    if (popupRect.bottom > viewportHeight - 16) {
-                                        popup.style.top = `${rect.top - popupRect.height - 8}px`;
-                                    }
-                                    
-                                    // Если popup выходит за левый край
-                                    if (popupRect.left < 16) {
-                                        popup.style.left = '16px';
-                                    }
-                                    
-                                    // Если popup выходит за верхний край
-                                    if (popupRect.top < 16) {
-                                        popup.style.top = '16px';
-                                    }
-                                }
-                                
-                                // Обработчик клика вне popup
-                                const handleClickOutside = (event) => {
-                                    if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
-                                        // Безопасная проверка view.dom
-                                        try {
-                                            const editorElement = props.editor.view?.dom;
-                                            if (editorElement && !editorElement.contains(event.target)) {
+                                try {
+                                    component = new MentionList({
+                                        props,
+                                        editor: props.editor,
+                                        onExit: () => {
+                                            if (popup) {
                                                 popup.remove();
                                                 currentMentionPopup.current = null;
                                             }
-                                        } catch (error) {
-                                            console.warn('Ошибка при проверке клика вне popup:', error);
-                                            popup.remove();
-                                            currentMentionPopup.current = null;
+                                        }
+                                    });
+
+                                    if (!props.clientRect) {
+                                        return;
+                                    }
+
+                                    popup = document.createElement('div');
+                                    popup.className = 'mention-suggestions';
+                                    popup.style.position = 'fixed';
+                                    popup.style.zIndex = '9999';
+                                    document.body.appendChild(popup);
+                                    popup.appendChild(component.element);
+                                    
+                                    // Сохраняем ссылку на текущий popup
+                                    currentMentionPopup.current = popup;
+                                    
+                                    // Позиционируем popup
+                                    const rect = props.clientRect();
+                                    if (rect) {
+                                        // Простое позиционирование под курсором
+                                        popup.style.left = `${rect.left}px`;
+                                        popup.style.top = `${rect.bottom + 8}px`;
+                                        
+                                        // Проверяем, не выходит ли popup за границы экрана
+                                        const popupRect = popup.getBoundingClientRect();
+                                        const viewportWidth = window.innerWidth;
+                                        const viewportHeight = window.innerHeight;
+                                        
+                                        // Если popup выходит за правый край
+                                        if (popupRect.right > viewportWidth - 16) {
+                                            popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
+                                        }
+                                        
+                                        // Если popup выходит за нижний край
+                                        if (popupRect.bottom > viewportHeight - 16) {
+                                            popup.style.top = `${rect.top - popupRect.height - 8}px`;
+                                        }
+                                        
+                                        // Если popup выходит за левый край
+                                        if (popupRect.left < 16) {
+                                            popup.style.left = '16px';
+                                        }
+                                        
+                                        // Если popup выходит за верхний край
+                                        if (popupRect.top < 16) {
+                                            popup.style.top = '16px';
                                         }
                                     }
-                                };
-                                
-                                setTimeout(() => {
-                                    document.addEventListener('mousedown', handleClickOutside);
-                                    popup._clickOutsideHandler = handleClickOutside;
-                                }, 100);
-                                
-                                // Убираем дублирующий вызов onMentionSelect
-                                // if (onMentionSelect) {
-                                //     onMentionSelect(props.items[props.index]);
-                                // }
+                                    
+                                    // Обработчик клика вне popup
+                                    const handleClickOutside = (event) => {
+                                        if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
+                                            // Безопасная проверка view.dom
+                                            try {
+                                                const editorElement = props.editor.view?.dom;
+                                                if (editorElement && !editorElement.contains(event.target)) {
+                                                    popup.remove();
+                                                    currentMentionPopup.current = null;
+                                                }
+                                            } catch (error) {
+                                                console.warn('Ошибка при проверке клика вне popup:', error);
+                                                popup.remove();
+                                                currentMentionPopup.current = null;
+                                            }
+                                        }
+                                    };
+                                    
+                                    setTimeout(() => {
+                                        try {
+                                            document.addEventListener('mousedown', handleClickOutside);
+                                            popup._clickOutsideHandler = handleClickOutside;
+                                        } catch (error) {
+                                            console.warn('Ошибка при добавлении обработчика клика вне popup:', error);
+                                        }
+                                    }, 100);
+                                    
+                                    // Убираем дублирующий вызов onMentionSelect
+                                    // if (onMentionSelect) {
+                                    //     onMentionSelect(props.items[props.index]);
+                                    // }
+                                } catch (error) {
+                                    console.error('Ошибка при создании mention popup:', error);
+                                    if (popup) {
+                                        popup.remove();
+                                        currentMentionPopup.current = null;
+                                    }
+                                }
                             },
                             onUpdate(props) {
                                 if (!component) return;
                                 
-                                component.updateProps(props);
+                                try {
+                                    component.updateProps(props);
 
-                                if (!props.clientRect || !popup) {
-                                    return;
-                                }
+                                    if (!props.clientRect || !popup) {
+                                        return;
+                                    }
 
-                                // Обновляем позицию с той же логикой
-                                const rect = props.clientRect();
-                                if (rect) {
-                                    // Простое позиционирование под курсором
-                                    popup.style.left = `${rect.left}px`;
-                                    popup.style.top = `${rect.bottom + 8}px`;
-                                    
-                                    // Проверяем, не выходит ли popup за границы экрана
-                                    const popupRect = popup.getBoundingClientRect();
-                                    const viewportWidth = window.innerWidth;
-                                    const viewportHeight = window.innerHeight;
-                                    
-                                    // Если popup выходит за правый край
-                                    if (popupRect.right > viewportWidth - 16) {
-                                        popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
+                                    // Обновляем позицию с той же логикой
+                                    const rect = props.clientRect();
+                                    if (rect) {
+                                        // Простое позиционирование под курсором
+                                        popup.style.left = `${rect.left}px`;
+                                        popup.style.top = `${rect.bottom + 8}px`;
+                                        
+                                        // Проверяем, не выходит ли popup за границы экрана
+                                        const popupRect = popup.getBoundingClientRect();
+                                        const viewportWidth = window.innerWidth;
+                                        const viewportHeight = window.innerHeight;
+                                        
+                                        // Если popup выходит за правый край
+                                        if (popupRect.right > viewportWidth - 16) {
+                                            popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
+                                        }
+                                        
+                                        // Если popup выходит за нижний край
+                                        if (popupRect.bottom > viewportHeight - 16) {
+                                            popup.style.top = `${rect.top - popupRect.height - 8}px`;
+                                        }
+                                        
+                                        // Если popup выходит за левый край
+                                        if (popupRect.left < 16) {
+                                            popup.style.left = '16px';
+                                        }
+                                        
+                                        // Если popup выходит за верхний край
+                                        if (popupRect.top < 16) {
+                                            popup.style.top = '16px';
+                                        }
                                     }
-                                    
-                                    // Если popup выходит за нижний край
-                                    if (popupRect.bottom > viewportHeight - 16) {
-                                        popup.style.top = `${rect.top - popupRect.height - 8}px`;
-                                    }
-                                    
-                                    // Если popup выходит за левый край
-                                    if (popupRect.left < 16) {
-                                        popup.style.left = '16px';
-                                    }
-                                    
-                                    // Если popup выходит за верхний край
-                                    if (popupRect.top < 16) {
-                                        popup.style.top = '16px';
-                                    }
+                                } catch (error) {
+                                    console.error('Ошибка при обновлении mention popup:', error);
                                 }
                             },
                             onKeyDown(props) {
                                 if (!component) return false;
-                                return component.onKeyDown(props);
+                                try {
+                                    return component.onKeyDown(props);
+                                } catch (error) {
+                                    console.error('Ошибка при обработке клавиш в mention popup:', error);
+                                    return false;
+                                }
                             },
                             onExit() {
-                                if (popup) {
-                                    if (popup._clickOutsideHandler) {
-                                        document.removeEventListener('mousedown', popup._clickOutsideHandler);
+                                try {
+                                    if (popup) {
+                                        if (popup._clickOutsideHandler) {
+                                            document.removeEventListener('mousedown', popup._clickOutsideHandler);
+                                        }
+                                        popup.remove();
+                                        currentMentionPopup.current = null;
                                     }
-                                    popup.remove();
+                                    if (component) {
+                                        component.destroy();
+                                    }
+                                } catch (error) {
+                                    console.error('Ошибка при закрытии mention popup:', error);
+                                    // Принудительно очищаем ссылки
                                     currentMentionPopup.current = null;
-                                }
-                                if (component) {
-                                    component.destroy();
                                 }
                             },
                         };
@@ -492,19 +544,36 @@ export default function RichTextEditor({
             }, delay);
         };
 
-        if (editor && editor.view && editor.view.dom) {
-            try {
-                const editorElement = editor.view.dom;
-                editorElement.addEventListener('blur', handleBlur);
-                
-                return () => {
-                    if (editorElement && !editor.isDestroyed) {
-                        editorElement.removeEventListener('blur', handleBlur);
+        // Ждем полной инициализации редактора
+        if (editor && editor.isDestroyed === false) {
+            const checkEditorReady = () => {
+                try {
+                    if (editor.view && editor.view.dom && !editor.isDestroyed) {
+                        const editorElement = editor.view.dom;
+                        editorElement.addEventListener('blur', handleBlur);
+                        
+                        return () => {
+                            try {
+                                if (editorElement && !editor.isDestroyed) {
+                                    editorElement.removeEventListener('blur', handleBlur);
+                                }
+                            } catch (error) {
+                                console.warn('Ошибка при удалении обработчика blur:', error);
+                            }
+                        };
+                    } else {
+                        // Если редактор еще не готов, пробуем снова через 100ms
+                        setTimeout(checkEditorReady, 100);
+                        return () => {};
                     }
-                };
-            } catch (error) {
-                console.warn('Ошибка при добавлении обработчика blur:', error);
-            }
+                } catch (error) {
+                    console.warn('Ошибка при проверке готовности редактора:', error);
+                    return () => {};
+                }
+            };
+
+            const cleanup = checkEditorReady();
+            return cleanup;
         }
     }, [editor, hideMentionPopup, isMobile]);
 
@@ -530,8 +599,13 @@ export default function RichTextEditor({
         const handleTouchStart = (event) => {
             // Если касание произошло вне mention popup, скрываем его
             if (currentMentionPopup.current && !currentMentionPopup.current.contains(event.target)) {
-                const editorElement = editor?.view?.dom;
-                if (editorElement && !editorElement.contains(event.target)) {
+                try {
+                    const editorElement = editor?.view?.dom;
+                    if (editorElement && !editorElement.contains(event.target)) {
+                        hideMentionPopup();
+                    }
+                } catch (error) {
+                    console.warn('Ошибка при обработке касания:', error);
                     hideMentionPopup();
                 }
             }
@@ -548,7 +622,10 @@ export default function RichTextEditor({
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
             try {
-                editor.commands.setContent(value);
+                // Проверяем, что редактор готов
+                if (editor.view && editor.view.dom && !editor.isDestroyed) {
+                    editor.commands.setContent(value);
+                }
             } catch (error) {
                 console.warn('Ошибка при обновлении содержимого редактора:', error);
             }
@@ -607,6 +684,17 @@ export default function RichTextEditor({
 
     if (!editor) {
         return null;
+    }
+
+    // Дополнительная проверка готовности редактора
+    if (!editor.view || !editor.view.dom || editor.isDestroyed) {
+        return (
+            <div className={`border border-border-color rounded-lg ${className}`}>
+                <div className="flex items-center justify-center p-8 text-text-muted">
+                    Загрузка редактора...
+                </div>
+            </div>
+        );
     }
 
     return (
