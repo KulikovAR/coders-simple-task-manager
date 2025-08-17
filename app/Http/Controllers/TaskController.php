@@ -18,11 +18,12 @@ use Inertia\Inertia;
 class TaskController extends Controller
 {
     public function __construct(
-        private TaskService $taskService,
-        private ProjectService $projectService,
+        private TaskService         $taskService,
+        private ProjectService      $projectService,
         private NotificationService $notificationService,
-        private TaskStatusService $taskStatusService
-    ) {
+        private TaskStatusService   $taskStatusService
+    )
+    {
     }
 
     public function index(Request $request)
@@ -41,13 +42,13 @@ class TaskController extends Controller
         // Получаем контекстные статусы если выбран проект
         $taskStatuses = collect();
         $sprints = collect();
-        
+
         if (!empty($filters['project_id'])) {
             $selectedProject = $projects->firstWhere('id', (int)$filters['project_id']);
             if ($selectedProject) {
                 // Получаем спринты выбранного проекта
                 $sprints = $selectedProject->sprints()->orderBy('start_date', 'desc')->get();
-                
+
                 // Получаем статусы в зависимости от выбранного спринта
                 if (!empty($filters['sprint_id'])) {
                     $selectedSprint = $sprints->firstWhere('id', (int)$filters['sprint_id']);
@@ -79,14 +80,14 @@ class TaskController extends Controller
             $project = Project::with(['owner', 'users'])->find($selectedProjectId);
             if ($project && $this->projectService->canUserAccessProject(Auth::user(), $project)) {
                 $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
-                
+
                 // Получаем статусы с учетом контекста спринта
                 $selectedSprint = null;
                 if ($selectedSprintId) {
                     $selectedSprint = $sprints->find($selectedSprintId);
                 }
                 $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
-                
+
                 // owner + users (members)
                 $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
             }
@@ -126,18 +127,15 @@ class TaskController extends Controller
 
         $task->load(['project.users', 'project.owner', 'sprint', 'status', 'assignee', 'reporter', 'comments.user']);
 
-        // Если это AJAX запрос из модалки доски, возвращаем JSON
+
+        // Modal
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
             return response()->json([
-                'props' => [
-                    'task' => $task,
-                ]
+                'props' => compact('task')
             ]);
         }
 
-        return Inertia::render('Tasks/Show', [
-            'task' => $task,
-        ]);
+        return Inertia::render('Tasks/Show', compact('task'));
     }
 
     public function edit(Task $task)
@@ -157,10 +155,10 @@ class TaskController extends Controller
         if ($task->project) {
             $project = Project::with(['owner', 'users'])->find($task->project_id);
             $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
-            
+
             // Получаем статусы с учетом контекста текущей задачи
             $taskStatuses = $this->taskStatusService->getAvailableStatusesForTask($task, $project);
-            
+
             $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
         }
 
@@ -173,45 +171,33 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        // Загружаем связанные данные
         $task->load(['assignee', 'project']);
 
         $oldAssigneeId = $task->assignee_id;
-        $oldData = $task->toArray();
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        // Уведомляем о назначении задачи, если изменился исполнитель
-        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId && $task->assignee_id !== Auth::id()) {
+        if ($task->assignee_id !== $oldAssigneeId) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
-        } 
-        // Если исполнитель не изменился, но изменились другие поля, отправляем уведомление об изменении
-        elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id && $task->assignee_id !== Auth::id()) {
-            $this->notificationService->taskUpdated($task, Auth::user());
         }
 
-        // Не дублируем уведомление о создании при обновлении задачи
+        $this->notificationService->taskUpdated($task, Auth::user());
 
-        // Проверяем, это Inertia запрос или обычный
         if ($request->header('X-Inertia')) {
-            // Для Inertia запросов проверяем, откуда пришел запрос
             $referer = $request->header('Referer');
             if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
-                // Возвращаемся на доску проекта
                 $projectId = $task->project_id;
                 return redirect()->route('projects.board', $projectId)
                     ->with('success', 'Задача успешно обновлена.');
             }
-            
-            // По умолчанию возвращаемся к просмотру задачи
+
             return redirect()->route('tasks.show', $task)
                 ->with('success', 'Задача успешно обновлена.');
         }
-        
-        // Проверяем, это AJAX запрос или обычный
+
+        // Modal
         if ($request->ajax() || $request->wantsJson()) {
-            // Возвращаем JSON ответ для AJAX запросов
             return response()->json([
                 'success' => true,
                 'message' => 'Задача успешно обновлена.',
@@ -219,10 +205,8 @@ class TaskController extends Controller
             ]);
         }
 
-        // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');
         if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
-            // Возвращаемся на доску проекта
             $projectId = $task->project_id;
             return redirect()->route('projects.board', $projectId)
                 ->with('success', 'Задача успешно обновлена.');
@@ -366,7 +350,7 @@ class TaskController extends Controller
         // Получаем контекст спринта если передан
         $sprintId = $request->get('sprint_id');
         $sprint = null;
-        
+
         if ($sprintId && $sprintId !== 'all') {
             $sprint = $project->sprints()->find($sprintId);
             if (!$sprint) {
@@ -383,8 +367,8 @@ class TaskController extends Controller
             'has_custom_statuses' => $sprint ? $this->taskStatusService->hasCustomStatuses($sprint) : false,
             'statuses_count' => $taskStatuses->count(),
             'statuses' => $taskStatuses->map(fn($s) => [
-                'id' => $s->id, 
-                'name' => $s->name, 
+                'id' => $s->id,
+                'name' => $s->name,
                 'sprint_id' => $s->sprint_id,
                 'is_custom' => $s->is_custom
             ])->toArray(),

@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
+use App\Mail\NotificationMail;
 use App\Models\Notification;
-use App\Models\Task;
 use App\Models\Project;
 use App\Models\Sprint;
+use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\User;
-use App\Mail\NotificationMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Services\TelegramService;
 
 class NotificationService
 {
@@ -21,7 +20,10 @@ class NotificationService
      */
     public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            return;
+        }
+
         $task->load(['project']);
 
         $this->createNotification(
@@ -41,10 +43,8 @@ class NotificationService
      */
     public function taskUpdated(Task $task, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $task->load(['assignee', 'reporter', 'project']);
 
-        // Уведомляем исполнителя задачи, если он есть и не является автором изменений
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_UPDATED,
@@ -58,7 +58,6 @@ class NotificationService
             );
         }
 
-        // Уведомляем создателя задачи, если он не исполнитель и не является автором изменений
         if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_UPDATED,
@@ -78,10 +77,8 @@ class NotificationService
      */
     public function taskMoved(Task $task, string $oldStatus, string $newStatus, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $task->load(['assignee', 'reporter', 'project']);
 
-        // Уведомляем исполнителя задачи
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_MOVED,
@@ -96,7 +93,6 @@ class NotificationService
             );
         }
 
-        // Уведомляем создателя задачи, если он не исполнитель
         if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_MOVED,
@@ -117,14 +113,12 @@ class NotificationService
      */
     public function taskCreated(Task $task, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $task->load(['project.users']);
 
-        // Уведомляем всех участников проекта, кроме автора события и исполнителя (он получит отдельное уведомление task_assigned)
         $projectMembers = $task->project->users ?? collect();
-        
+
         foreach ($projectMembers as $member) {
-            if ($member->id !== Auth::id() && $member->id !== $task->assignee_id) {
+            if ($member->id !== Auth::id() && $member->id === $task->assignee_id) {
                 $this->createNotification(
                     type: Notification::TYPE_TASK_CREATED,
                     userId: $member->id,
@@ -144,10 +138,8 @@ class NotificationService
      */
     public function taskPriorityChanged(Task $task, string $oldPriority, string $newPriority, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $task->load(['assignee', 'reporter', 'project']);
 
-        // Уведомляем исполнителя задачи
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_PRIORITY_CHANGED,
@@ -162,7 +154,6 @@ class NotificationService
             );
         }
 
-        // Уведомляем создателя задачи, если он не исполнитель
         if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_PRIORITY_CHANGED,
@@ -183,12 +174,10 @@ class NotificationService
      */
     public function commentAdded(TaskComment $comment, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $comment->load(['task.assignee', 'task.reporter']);
-        
+
         $task = $comment->task;
-        
-        // Уведомляем исполнителя задачи
+
         if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_COMMENT_ADDED,
@@ -203,7 +192,6 @@ class NotificationService
             );
         }
 
-        // Уведомляем создателя задачи, если он не исполнитель
         if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && $task->reporter_id !== Auth::id()) {
             $this->createNotification(
                 type: Notification::TYPE_COMMENT_ADDED,
@@ -224,7 +212,6 @@ class NotificationService
      */
     public function userMentioned(TaskComment $comment, User $mentionedUser, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $comment->load(['task.project']);
 
         $this->createNotification(
@@ -247,11 +234,10 @@ class NotificationService
      */
     public function sprintStarted(Sprint $sprint, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $sprint->load(['project.users']);
-        
+
         $projectMembers = $sprint->project->users ?? collect();
-        
+
         foreach ($projectMembers as $member) {
             if ($member->id !== Auth::id()) {
                 $this->createNotification(
@@ -259,10 +245,10 @@ class NotificationService
                     userId: $member->id,
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
-                                    data: [
-                    'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
-                    'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
-                ]
+                    data: [
+                        'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
+                        'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
+                    ]
                 );
             }
         }
@@ -273,11 +259,10 @@ class NotificationService
      */
     public function sprintEnded(Sprint $sprint, ?User $fromUser = null): void
     {
-        // Загружаем связанные данные
         $sprint->load(['project.users']);
-        
+
         $projectMembers = $sprint->project->users ?? collect();
-        
+
         foreach ($projectMembers as $member) {
             if ($member->id !== Auth::id()) {
                 $this->createNotification(
@@ -285,10 +270,10 @@ class NotificationService
                     userId: $member->id,
                     fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
-                                    data: [
-                    'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
-                    'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
-                ]
+                    data: [
+                        'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
+                        'project_name' => $this->sanitizeUtf8($sprint->project?->name ?? 'Неизвестный проект'),
+                    ]
                 );
             }
         }
@@ -353,11 +338,12 @@ class NotificationService
      */
     private function createNotification(
         string $type,
-        int $userId,
-        ?int $fromUserId,
-        $notifiable,
-        array $data = []
-    ): void {
+        int    $userId,
+        ?int   $fromUserId,
+               $notifiable,
+        array  $data = []
+    ): void
+    {
         // Проверяем, не создали ли мы уже такое уведомление недавно
         $recentNotification = Notification::where([
             'type' => $type,
@@ -365,8 +351,8 @@ class NotificationService
             'notifiable_type' => get_class($notifiable),
             'notifiable_id' => $notifiable->id,
         ])
-        ->where('created_at', '>', now()->subMinutes(5))
-        ->first();
+            ->where('created_at', '>', now()->subMinutes(5))
+            ->first();
 
         if (!$recentNotification) {
             $notification = Notification::create([
@@ -378,7 +364,6 @@ class NotificationService
                 'data' => $this->sanitizeNotificationData($data),
             ]);
 
-            // Отправляем email и Telegram уведомления
             $this->sendEmailNotification($notification);
             $this->sendTelegramNotification($notification);
         }
@@ -391,23 +376,18 @@ class NotificationService
     {
         try {
             $user = $notification->user;
-            
-            // Проверяем, включены ли email уведомления у пользователя
+
             if (!$user->email_notifications) {
                 return;
             }
 
-            // Получаем текст уведомления
             $notificationText = $notification->getMessage();
-            
-            // Получаем ссылку на действие
+
             $actionUrl = $this->getNotificationActionUrl($notification);
 
-            // Отправляем email
             Mail::to($user->email)->send(new NotificationMail($notification, $notificationText, $actionUrl));
-            
+
         } catch (\Exception $e) {
-            // Логируем ошибку, но не прерываем выполнение
             Log::error('Ошибка отправки email уведомления', [
                 'notification_id' => $notification->id,
                 'user_id' => $notification->user_id,
@@ -423,7 +403,7 @@ class NotificationService
     {
         try {
             $notifiable = $notification->notifiable;
-            
+
             if (!$notifiable) {
                 return null;
             }
@@ -431,16 +411,16 @@ class NotificationService
             switch ($notification->notifiable_type) {
                 case 'App\\Models\\Task':
                     return route('tasks.show', $notifiable->id);
-                    
+
                 case 'App\\Models\\Project':
                     return route('projects.show', $notifiable->id);
-                    
+
                 case 'App\\Models\\Sprint':
                     return route('sprints.show', $notifiable->id);
-                    
+
                 case 'App\\Models\\TaskComment':
                     return route('tasks.show', $notifiable->task_id);
-                    
+
                 default:
                     return null;
             }
@@ -544,11 +524,11 @@ class NotificationService
     private function createCommentPreview(string $content, int $length = 50): string
     {
         $cleanContent = $this->sanitizeUtf8($content);
-        
+
         if (mb_strlen($cleanContent, 'UTF-8') <= $length) {
             return $cleanContent;
         }
-        
+
         return mb_substr($cleanContent, 0, $length, 'UTF-8') . '...';
     }
 
@@ -561,20 +541,16 @@ class NotificationService
             return '';
         }
 
-        // Проверяем, является ли строка корректной UTF-8
         if (mb_check_encoding($string, 'UTF-8')) {
             return $string;
         }
 
-        // Если строка содержит некорректные UTF-8 последовательности, пытаемся их исправить
         $clean = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
-        
-        // Проверяем результат ещё раз
+
         if (!mb_check_encoding($clean, 'UTF-8')) {
-            // Если всё ещё проблемы, заменяем некорректные символы
             $clean = mb_convert_encoding($clean, 'UTF-8', 'auto');
         }
-        
+
         return $clean ?: '';
     }
 
@@ -584,7 +560,7 @@ class NotificationService
     private function sanitizeNotificationData(array $data): array
     {
         $sanitized = [];
-        
+
         foreach ($data as $key => $value) {
             if (is_string($value)) {
                 $sanitized[$key] = $this->sanitizeUtf8($value);
@@ -594,7 +570,7 @@ class NotificationService
                 $sanitized[$key] = $value;
             }
         }
-        
+
         return $sanitized;
     }
 }
