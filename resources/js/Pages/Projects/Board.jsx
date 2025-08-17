@@ -937,12 +937,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     </h5>
                                                 </div>
 
-                                                {/* Описание */}
-                                                {task.description && (
-                                                    <p className="text-text-secondary text-caption mb-4 line-clamp-2 leading-relaxed">
-                                                        {task.description}
-                                                    </p>
-                                                )}
+                                                {/* Убираем отображение описания */}
 
                                                 {/* Мета-информация */}
                                                 <div className="space-y-3">

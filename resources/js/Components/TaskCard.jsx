@@ -23,11 +23,7 @@ export default function TaskCard({ task }) {
                         {task.title}
                     </h3>
                 </Link>
-                {task.description && (
-                    <div className="text-body-small text-text-secondary mb-4 line-clamp-2 leading-relaxed">
-                        <HtmlRenderer content={task.description} />
-                    </div>
-                )}
+                {/* Убираем отображение описания */}
             </div>
 
             {/* Мета-информация */}

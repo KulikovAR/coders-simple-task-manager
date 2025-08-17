@@ -163,11 +163,7 @@ export default function Show({ auth, project, sprint }) {
                                                         </span>
                                                     </div>
                                                     
-                                                    {task.description && (
-                                                        <p className="text-text-secondary text-sm mb-3 line-clamp-2">
-                                                            {task.description}
-                                                        </p>
-                                                    )}
+                                                    {/* Убираем отображение описания */}
 
                                                     <div className="flex items-center space-x-4 text-sm text-text-muted">
                                                         {task.priority && (

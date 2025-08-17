@@ -447,11 +447,7 @@ export default function Show({ auth, project, tasks }) {
                                                     {task.title}
                                                 </Link>
                                             </h4>
-                                            {task.description && (
-                                                <p className="text-text-secondary text-body-small mb-3 line-clamp-2">
-                                                    {task.description}
-                                                </p>
-                                            )}
+                                            {/* Убираем отображение описания */}
                                             <div className="flex flex-wrap items-center gap-3 text-body-small text-text-secondary">
                                                 <span className={`status-badge ${getTaskStatusClass(task.status?.name || 'To Do')}`}>
                                                     {getTaskStatusText(task.status?.name || 'To Do')}
