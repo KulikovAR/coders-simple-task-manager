@@ -62,7 +62,7 @@ class SprintController extends Controller
             );
         }
 
-        $sprint->load(['tasks.assignee', 'tasks.reporter', 'tasks.status']);
+        $sprint->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id']);
         
         return response()->json(
             ApiResponse::success($sprint, 'Спринт успешно загружен')

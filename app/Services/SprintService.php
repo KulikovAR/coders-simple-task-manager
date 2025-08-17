@@ -12,7 +12,7 @@ class SprintService
     public function getProjectSprints(Project $project): Collection
     {
         return $project->sprints()
-            ->with(['tasks'])
+            ->with(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id'])
             ->orderBy('start_date', 'desc')
             ->get();
     }
@@ -39,7 +39,7 @@ class SprintService
             'status' => $data['status'] ?? $sprint->status,
         ]);
 
-        return $sprint->load(['tasks']);
+        return $sprint->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id']);
     }
 
     public function deleteSprint(Sprint $sprint): bool

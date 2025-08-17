@@ -158,7 +158,12 @@ export default function Show({ auth, project, sprint }) {
                                                                 {task.title}
                                                             </Link>
                                                         </h4>
-                                                        <span className={`status-badge ${getStatusClass(task.status?.name)}`}>
+                                                        <span className={`status-badge ${getStatusClass(task.status?.name)}`}
+                                                              style={task.status?.color ? {
+                                                                  backgroundColor: `${task.status.color}20`,
+                                                                  color: task.status.color,
+                                                                  border: `1px solid ${task.status.color}30`
+                                                              } : {}}>
                                                             {getStatusLabel(task.status?.name)}
                                                         </span>
                                                     </div>
