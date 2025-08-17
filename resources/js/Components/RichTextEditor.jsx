@@ -4,7 +4,7 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Mention from '@tiptap/extension-mention';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { 
     Bold, 
     Italic, 
@@ -28,6 +28,9 @@ export default function RichTextEditor({
     rows = 4,
     ...props
 }) {
+    // Проверяем, является ли устройство мобильным
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     // CSS стили для редактора
     const editorStyles = `
         .ProseMirror {
@@ -145,35 +148,56 @@ export default function RichTextEditor({
     // Функция для скрытия mention popup'а
     const hideMentionPopup = useCallback(() => {
         if (currentMentionPopup.current) {
-            if (currentMentionPopup.current._clickOutsideHandler) {
-                document.removeEventListener('mousedown', currentMentionPopup.current._clickOutsideHandler);
+            try {
+                if (currentMentionPopup.current._clickOutsideHandler) {
+                    document.removeEventListener('mousedown', currentMentionPopup.current._clickOutsideHandler);
+                }
+                currentMentionPopup.current.remove();
+                currentMentionPopup.current = null;
+            } catch (error) {
+                console.warn('Ошибка при скрытии mention popup:', error);
+                currentMentionPopup.current = null;
             }
-            currentMentionPopup.current.remove();
-            currentMentionPopup.current = null;
         }
     }, []);
 
     // Нормализуем массив пользователей для упоминаний
-    const normalizedUsers = users.map(user => {
-        // Если это ProjectMember, получаем пользователя из связи
-        if (user.user) {
-            return {
-                id: user.user.id,
-                name: user.user.name || 'Неизвестный пользователь',
-                email: user.user.email || 'unknown@example.com'
-            };
+    const normalizedUsers = useMemo(() => {
+        try {
+            if (!users || !Array.isArray(users)) {
+                console.warn('RichTextEditor: users не является массивом:', users);
+                return [];
+            }
+            
+            return users.map(user => {
+                // Если это ProjectMember, получаем пользователя из связи
+                if (user && user.user) {
+                    return {
+                        id: user.user.id,
+                        name: user.user.name || 'Неизвестный пользователь',
+                        email: user.user.email || 'unknown@example.com'
+                    };
+                }
+                // Если это обычный User
+                if (user && user.id) {
+                    return {
+                        id: user.id,
+                        name: user.name || 'Неизвестный пользователь',
+                        email: user.email || 'unknown@example.com'
+                    };
+                }
+                return null;
+            }).filter(user => user && user.name && user.name !== 'Неизвестный пользователь');
+        } catch (error) {
+            console.error('Ошибка при нормализации пользователей:', error);
+            return [];
         }
-        // Если это обычный User
-        return {
-            id: user.id,
-            name: user.name || 'Неизвестный пользователь',
-            email: user.email || 'unknown@example.com'
-        };
-    }).filter(user => user.name && user.name !== 'Неизвестный пользователь');
+    }, [users]);
 
     // Отладочная информация
     console.log('RichTextEditor - исходные пользователи:', users);
     console.log('RichTextEditor - нормализованные пользователи:', normalizedUsers);
+    console.log('RichTextEditor - мобильное устройство:', isMobile);
 
     // Создание экземпляра редактора
     const editor = useEditor({
