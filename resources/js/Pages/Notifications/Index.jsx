@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
-import { 
-    getNotificationText, 
-    getNotificationIcon, 
-    getNotificationColor, 
+import {
+    getNotificationText,
+    getNotificationIcon,
+    getNotificationColor,
     getNotificationLink,
-    formatNotificationDateWithYear 
+    formatNotificationDateWithYear
 } from '@/utils/notificationUtils';
 
 export default function NotificationsIndex({ auth, notifications, unreadCount }) {
@@ -17,15 +17,15 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
     const markAsRead = async (notificationId) => {
         try {
             await axios.post(route('notifications.mark-as-read', notificationId));
-            
-            setLocalNotifications(prev => 
-                prev.map(notification => 
-                    notification.id === notificationId 
+
+            setLocalNotifications(prev =>
+                prev.map(notification =>
+                    notification.id === notificationId
                         ? { ...notification, read: true, read_at: new Date().toISOString() }
                         : notification
                 )
             );
-            
+
             setLocalUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Ошибка пометки уведомления:', error);
@@ -35,11 +35,11 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
     const markAllAsRead = async () => {
         try {
             await axios.post(route('notifications.mark-all-as-read'));
-            
-            setLocalNotifications(prev => 
+
+            setLocalNotifications(prev =>
                 prev.map(notification => ({ ...notification, read: true, read_at: new Date().toISOString() }))
             );
-            
+
             setLocalUnreadCount(0);
         } catch (error) {
             console.error('Ошибка пометки всех уведомлений:', error);
@@ -49,11 +49,11 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
     const deleteNotification = async (notificationId) => {
         try {
             await axios.delete(route('notifications.destroy', notificationId));
-            
-            setLocalNotifications(prev => 
+
+            setLocalNotifications(prev =>
                 prev.filter(notification => notification.id !== notificationId)
             );
-            
+
             // Уменьшаем счетчик непрочитанных, если уведомление было непрочитанным
             const notification = localNotifications.find(n => n.id === notificationId);
             if (notification && !notification.read) {
@@ -67,8 +67,8 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
     const deleteReadNotifications = async () => {
         try {
             await axios.delete(route('notifications.destroy-read'));
-            
-            setLocalNotifications(prev => 
+
+            setLocalNotifications(prev =>
                 prev.filter(notification => !notification.read)
             );
         } catch (error) {
@@ -83,7 +83,7 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold text-text-primary">Уведомления</h1>
-                    
+
                     <div className="flex items-center gap-3">
                         {localUnreadCount > 0 && (
                             <button
@@ -93,13 +93,6 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                 Прочитать все
                             </button>
                         )}
-                        
-                        <button
-                            onClick={deleteReadNotifications}
-                            className="btn btn-danger text-sm"
-                        >
-                            Удалить прочитанные
-                        </button>
                     </div>
                 </div>
 
@@ -107,13 +100,13 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                     <div className="space-y-4">
                         {localNotifications.map((notification) => {
                             const link = getNotificationLink(notification);
-                            
+
                             return (
                                 <div
                                     key={notification.id}
                                     className={`card transition-all duration-200 ${
-                                        !notification.read 
-                                            ? 'border-accent-blue/30 bg-accent-blue/5' 
+                                        !notification.read
+                                            ? 'border-accent-blue/30 bg-accent-blue/5'
                                             : 'hover:bg-secondary-bg'
                                     }`}
                                 >
@@ -121,25 +114,25 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                         <div className={`text-2xl ${getNotificationColor(notification.type)}`}>
                                             {getNotificationIcon(notification.type)}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex-1">
                                                     <p className="text-text-primary font-medium mb-1">
                                                         {getNotificationText(notification)}
                                                     </p>
-                                                    
+
                                                     <div className="flex items-center gap-4 text-sm text-text-muted">
                                                         <span>
                                                             {formatNotificationDateWithYear(notification.created_at)}
                                                         </span>
-                                                        
+
                                                         {notification.from_user && (
                                                             <span>
                                                                 от {notification.from_user.name}
                                                             </span>
                                                         )}
-                                                        
+
                                                         {!notification.read && (
                                                             <span className="text-accent-blue font-medium">
                                                                 Новое
@@ -147,7 +140,7 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                                         )}
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="flex items-center gap-2">
                                                     {link && (
                                                         <Link
@@ -157,7 +150,7 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                                             Перейти
                                                         </Link>
                                                     )}
-                                                    
+
                                                     {!notification.read && (
                                                         <button
                                                             onClick={() => markAsRead(notification.id)}
@@ -166,7 +159,7 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
                                                             Прочитать
                                                         </button>
                                                     )}
-                                                    
+
                                                     <button
                                                         onClick={() => deleteNotification(notification.id)}
                                                         className="text-accent-red hover:text-red-600 transition-colors text-sm"
@@ -201,4 +194,4 @@ export default function NotificationsIndex({ auth, notifications, unreadCount })
             </div>
         </AuthenticatedLayout>
     );
-} 
+}

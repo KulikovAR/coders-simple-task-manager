@@ -36,6 +36,34 @@ export default function RichTextEditor({
             padding: 0;
             cursor: text;
         }
+        
+        /* Стили для popup'а упоминаний */
+        .mention-suggestions {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-height: 200px;
+            overflow-y: auto;
+            min-width: 250px;
+        }
+        
+        .mention-suggestions::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .mention-suggestions::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .mention-suggestions::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        
+        .mention-suggestions::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
         .ProseMirror p {
             margin: 0.5em 0;
             min-height: 1.5em;
@@ -127,7 +155,7 @@ export default function RichTextEditor({
             }),
             Mention.configure({
                 HTMLAttributes: {
-                    class: 'bg-blue-100 px-1 rounded',
+                    class: 'bg-accent-blue/10 text-accent-blue px-1.5 py-0.5 rounded text-sm font-medium',
                 },
                 suggestion: {
                     items: ({ query }) => {
@@ -136,6 +164,22 @@ export default function RichTextEditor({
                             user.name.toLowerCase().includes(query.toLowerCase()) ||
                             user.email.toLowerCase().includes(query.toLowerCase())
                         ).slice(0, 5);
+                    },
+                    renderItem: (item) => {
+                        return {
+                            id: item.id,
+                            label: item.name,
+                            email: item.email,
+                        };
+                    },
+                    command: ({ editor, range, props }) => {
+                        // Вставляем упоминание с именем пользователя
+                        editor
+                            .chain()
+                            .focus()
+                            .deleteRange(range)
+                            .insertContent(`@${props.label}`)
+                            .run();
                     },
                     render: () => {
                         let component;
@@ -255,6 +299,11 @@ export default function RichTextEditor({
                                     document.addEventListener('mousedown', handleClickOutside);
                                     popup._clickOutsideHandler = handleClickOutside;
                                 }, 100);
+                                
+                                // Вызываем колбэк для родительского компонента
+                                if (onMentionSelect) {
+                                    onMentionSelect(props.items[props.index]);
+                                }
                             },
                             onUpdate(props) {
                                 component.updateProps(props);
@@ -607,7 +656,7 @@ class MentionList {
                         </span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium truncate">${item.name}</div>
+                        <div class="text-sm font-medium truncate text-text-primary">${item.name}</div>
                         <div class="text-xs text-text-muted truncate">${item.email}</div>
                     </div>
                 </div>
