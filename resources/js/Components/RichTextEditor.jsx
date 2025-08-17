@@ -42,16 +42,18 @@ export default function RichTextEditor({
         console.warn('RichTextEditor: users должен быть массивом, получено:', typeof users);
     }
     
-    // CSS стили для редактора
+    // CSS стили для редактора с адаптивностью
     const editorStyles = `
         .ProseMirror {
             min-height: 280px;
             outline: none;
             padding: 0;
             cursor: text;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
-        /* Стили для popup'а упоминаний */
+        /* Стили для popup'а упоминаний с адаптивностью */
         .mention-suggestions {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -59,7 +61,8 @@ export default function RichTextEditor({
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             max-height: 200px;
             overflow-y: auto;
-            min-width: 250px;
+            min-width: 200px;
+            max-width: calc(100vw - 32px);
             z-index: 9999;
         }
         
@@ -79,6 +82,7 @@ export default function RichTextEditor({
         .mention-suggestions::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
         }
+        
         .ProseMirror p {
             margin: 0.5em 0;
             min-height: 1.5em;
@@ -738,7 +742,7 @@ export default function RichTextEditor({
             <style>{editorStyles}</style>
             <div className={`border border-border-color rounded-lg ${className}`}>
                 {/* Панель инструментов */}
-            <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg">
+            <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg overflow-x-auto">
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBold().run()}
