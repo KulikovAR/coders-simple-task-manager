@@ -22,7 +22,7 @@ export default function Authenticated({ user, header, children, flash }) {
         if (typeof window !== 'undefined') {
             // Удаляем атрибут data-page, если он был установлен на лендинге
             document.body.removeAttribute('data-page');
-            
+
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         }
@@ -33,7 +33,7 @@ export default function Authenticated({ user, header, children, flash }) {
         if (typeof window !== 'undefined') {
             // Удаляем атрибут data-page, если он был установлен на лендинге
             document.body.removeAttribute('data-page');
-            
+
             // Восстанавливаем сохраненную тему пользователя
             const savedTheme = localStorage.getItem('theme') || 'dark';
             setTheme(savedTheme);
@@ -74,7 +74,7 @@ export default function Authenticated({ user, header, children, flash }) {
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
+                                    Главная
                                 </NavLink>
                                 <NavLink href={route('projects.index')} active={route().current('projects.*')}>
                                     Проекты
@@ -232,7 +232,7 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="animate-fade-in">
                         {/* Отображаем flash-сообщения глобально */}
                         <FlashMessages flash={flash} />
-                        
+
                         {children}
                     </div>
                 </div>

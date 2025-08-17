@@ -47,14 +47,14 @@ export default function Show({ auth, task }) {
 
             <div className="space-y-6">
                 {/* Заголовок и действия */}
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-3xl font-bold text-text-primary mb-2">{task.title}</h1>
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2 break-words">{task.title}</h1>
                         {task.code && (
-                            <div className="text-xs font-mono text-accent-blue mb-2">{task.code}</div>
+                            <div className="text-xs font-mono text-accent-blue mb-2 break-all">{task.code}</div>
                         )}
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
-                            <span className={`status-badge ${getStatusClass(task.status?.name)}`} 
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-text-secondary">
+                            <span className={`status-badge ${getStatusClass(task.status?.name)} flex-shrink-0`} 
                                   style={task.status?.color ? {
                                       backgroundColor: `${task.status.color}20`,
                                       color: task.status.color,
@@ -63,48 +63,51 @@ export default function Show({ auth, task }) {
                                 {getStatusLabel(task.status?.name)}
                             </span>
                             {task.priority && (
-                                <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                                <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium ${getPriorityColor(task.priority)} flex-shrink-0`}>
                                     <span>{getPriorityIcon(task.priority)}</span>
-                                    <span>Приоритет: {getPriorityText(task.priority)}</span>
+                                    <span className="hidden sm:inline">Приоритет: {getPriorityText(task.priority)}</span>
+                                    <span className="sm:hidden">{getPriorityText(task.priority)}</span>
                                 </span>
                             )}
-                            <span>Код: {task.code}</span>
-                            <span>Создана: {new Date(task.created_at).toLocaleDateString('ru-RU')}</span>
+                            <span className="flex-shrink-0">Код: {task.code}</span>
+                            <span className="flex-shrink-0">Создана: {new Date(task.created_at).toLocaleDateString('ru-RU')}</span>
                             {task.project?.deadline && (
-                                <span>Дедлайн проекта: {new Date(task.project.deadline).toLocaleDateString('ru-RU')}</span>
+                                <span className="flex-shrink-0">Дедлайн проекта: {new Date(task.project.deadline).toLocaleDateString('ru-RU')}</span>
                             )}
                         </div>
                     </div>
-                    <div className="flex space-x-3">
+                    <div className="flex flex-col sm:flex-row gap-2 lg:gap-3 lg:flex-shrink-0">
                         <Link
                             href={route('tasks.edit', task.id)}
-                            className="btn btn-secondary"
+                            className="btn btn-secondary text-center"
                         >
-                            Редактировать
+                            <span className="hidden sm:inline">Редактировать</span>
+                            <span className="sm:hidden">Изменить</span>
                         </Link>
                         <button
                             type="button"
-                            className="btn btn-danger"
+                            className="btn btn-danger text-center"
                             onClick={() => setShowDeleteModal(true)}
                         >
                             Удалить
                         </button>
                         <Link
                             href={route('tasks.index')}
-                            className="btn btn-primary"
+                            className="btn btn-primary text-center"
                         >
-                            К списку
+                            <span className="hidden sm:inline">К списку</span>
+                            <span className="sm:hidden">Список</span>
                         </Link>
                     </div>
                 </div>
 
                 {/* Основная информация */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
+                    <div className="xl:col-span-2 space-y-4 lg:space-y-6">
                         {/* Описание */}
                         {task.description && (
                             <div className="card">
-                                <h3 className="card-title mb-4">Описание</h3>
+                                <h3 className="card-title mb-3 lg:mb-4">Описание</h3>
                                 <div className="prose prose-sm max-w-none">
                                     <HtmlRenderer content={task.description} />
                                 </div>
@@ -114,7 +117,7 @@ export default function Show({ auth, task }) {
                         {/* Результат */}
                         {task.result && (
                             <div className="card">
-                                <h3 className="card-title mb-4">Результат выполнения</h3>
+                                <h3 className="card-title mb-3 lg:mb-4">Результат выполнения</h3>
                                 <div className="prose prose-sm max-w-none">
                                     <HtmlRenderer content={task.result} />
                                 </div>
@@ -124,15 +127,15 @@ export default function Show({ auth, task }) {
                         {/* Ссылки */}
                         {task.merge_request && (
                             <div className="card">
-                                <h3 className="card-title mb-4">Ссылки</h3>
+                                <h3 className="card-title mb-3 lg:mb-4">Ссылки</h3>
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                         <span className="text-sm text-text-muted">Merge Request:</span>
                                         <a
                                             href={task.merge_request}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors truncate ml-2"
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors break-all sm:break-normal sm:truncate sm:ml-2"
                                         >
                                             Открыть
                                         </a>
@@ -161,28 +164,28 @@ export default function Show({ auth, task }) {
                     </div>
 
                     {/* Боковая панель */}
-                    <div className="space-y-6">
+                    <div className="space-y-4 lg:space-y-6">
                         {/* Детали задачи */}
                         <div className="card">
-                            <h3 className="card-title mb-4">Детали задачи</h3>
+                            <h3 className="card-title mb-3 lg:mb-4">Детали задачи</h3>
                             <div className="space-y-3">
                                 {/* ID */}
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                     <span className="text-sm text-text-muted">ID:</span>
-                                    <span className="text-sm text-text-primary font-medium">{task.id}</span>
+                                    <span className="text-sm text-text-primary font-medium break-all sm:break-normal">{task.id}</span>
                                 </div>
                                 {/* Код */}
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                     <span className="text-sm text-text-muted">Код:</span>
-                                    <span className="text-sm text-text-primary font-medium">{task.code}</span>
+                                    <span className="text-sm text-text-primary font-medium break-all sm:break-normal">{task.code}</span>
                                 </div>
                                 {/* Проект */}
                                 {task.project && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Проект:</span>
                                         <Link
                                             href={route('projects.show', task.project.id)}
-                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors"
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors break-all sm:break-normal text-right sm:text-left"
                                         >
                                             {task.project.name}
                                         </Link>
@@ -191,19 +194,19 @@ export default function Show({ auth, task }) {
 
                                 {/* Статус проекта */}
                                 {task.project && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Статус проекта:</span>
-                                        <span className="text-sm text-text-primary font-medium">{getProjectStatusText(task.project.status)}</span>
+                                        <span className="text-sm text-text-primary font-medium text-right sm:text-left">{getProjectStatusText(task.project.status)}</span>
                                     </div>
                                 )}
 
                                 {/* Спринт */}
                                 {task.sprint && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Спринт:</span>
                                         <Link
                                             href={route('sprints.show', [task.project.id, task.sprint.id])}
-                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors"
+                                            className="text-sm text-accent-blue hover:text-accent-green transition-colors break-all sm:break-normal text-right sm:text-left"
                                         >
                                             {task.sprint.name}
                                         </Link>
@@ -211,9 +214,9 @@ export default function Show({ auth, task }) {
                                 )}
                                 {/* Период спринта */}
                                 {task.sprint && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Период спринта:</span>
-                                        <span className="text-sm text-text-primary font-medium">
+                                        <span className="text-sm text-text-primary font-medium text-right sm:text-left">
                                             {new Date(task.sprint.start_date).toLocaleDateString('ru-RU')} — {new Date(task.sprint.end_date).toLocaleDateString('ru-RU')}
                                         </span>
                                     </div>
@@ -221,35 +224,35 @@ export default function Show({ auth, task }) {
 
                                 {/* Исполнитель */}
                                 {task.assignee && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Исполнитель:</span>
-                                        <span className="text-right">
-                                            <span className="block text-sm text-text-primary font-medium">{task.assignee.name}</span>
+                                        <div className="text-right sm:text-left">
+                                            <span className="block text-sm text-text-primary font-medium break-all sm:break-normal">{task.assignee.name}</span>
                                             {task.assignee.email && (
-                                                <span className="block text-xs text-text-muted">{task.assignee.email}</span>
+                                                <span className="block text-xs text-text-muted break-all sm:break-normal">{task.assignee.email}</span>
                                             )}
-                                        </span>
+                                        </div>
                                     </div>
                                 )}
 
                                 {/* Автор */}
                                 {task.reporter && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Автор:</span>
-                                        <span className="text-right">
-                                            <span className="block text-sm text-text-primary font-medium">{task.reporter.name}</span>
+                                        <div className="text-right sm:text-left">
+                                            <span className="block text-sm text-text-primary font-medium break-all sm:break-normal">{task.reporter.name}</span>
                                             {task.reporter.email && (
-                                                <span className="block text-xs text-text-muted">{task.reporter.email}</span>
+                                                <span className="block text-xs text-text-muted break-all sm:break-normal">{task.reporter.email}</span>
                                             )}
-                                        </span>
+                                        </div>
                                     </div>
                                 )}
 
                                 {/* Дедлайн проекта */}
                                 {task.project?.deadline && (
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                         <span className="text-sm text-text-muted">Дедлайн проекта:</span>
-                                        <span className="text-sm text-text-primary font-medium">
+                                        <span className="text-sm text-text-primary font-medium text-right sm:text-left">
                                             {new Date(task.project.deadline).toLocaleDateString('ru-RU')}
                                         </span>
                                     </div>
@@ -259,17 +262,17 @@ export default function Show({ auth, task }) {
 
                         {/* Статистика */}
                         <div className="card">
-                            <h3 className="card-title mb-4">Статистика</h3>
+                            <h3 className="card-title mb-3 lg:mb-4">Статистика</h3>
                             <div className="space-y-3">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                     <span className="text-sm text-text-muted">Комментариев:</span>
-                                    <span className="text-sm text-text-primary font-medium">
+                                    <span className="text-sm text-text-primary font-medium text-right sm:text-left">
                                         {task.comments?.length || 0}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                                     <span className="text-sm text-text-muted">Обновлена:</span>
-                                    <span className="text-sm text-text-primary font-medium">
+                                    <span className="text-sm text-text-primary font-medium text-right sm:text-left">
                                         {new Date(task.updated_at).toLocaleDateString('ru-RU')}
                                     </span>
                                 </div>
@@ -281,19 +284,19 @@ export default function Show({ auth, task }) {
 
             {/* Модальное окно подтверждения удаления */}
             {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-card-bg border border-border-color rounded-xl p-6 w-full max-w-md shadow-2xl">
-                        <h2 className="text-lg font-bold mb-4">Удалить задачу?</h2>
-                        <p className="mb-6">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p>
-                        <div className="flex justify-end space-x-3">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-card-bg border border-border-color rounded-xl p-4 sm:p-6 w-full max-w-md shadow-2xl">
+                        <h2 className="text-lg font-bold mb-3 sm:mb-4">Удалить задачу?</h2>
+                        <p className="mb-4 sm:mb-6 text-sm sm:text-base">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
                             <button
-                                className="btn btn-secondary"
+                                className="btn btn-secondary text-center order-2 sm:order-1"
                                 onClick={() => setShowDeleteModal(false)}
                             >
                                 Отмена
                             </button>
                             <button
-                                className="btn btn-danger"
+                                className="btn btn-danger text-center order-1 sm:order-2"
                                 onClick={handleDelete}
                             >
                                 Удалить

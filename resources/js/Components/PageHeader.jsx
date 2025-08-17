@@ -90,10 +90,18 @@ export default function PageHeader({
                         return (
                             <button
                                 key={action.key || index}
-                                onClick={action.onClick}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Button clicked:', action.text, action.onClick);
+                                    if (action.onClick) {
+                                        action.onClick(e);
+                                    }
+                                }}
                                 className={buttonClasses}
                                 disabled={action.disabled}
                                 style={action.variant === 'gradient' ? { color: 'white' } : {}}
+                                type="button"
                             >
                                 {action.icon && (
                                     <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

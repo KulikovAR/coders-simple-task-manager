@@ -27,17 +27,21 @@ export default function FilterPanel({
     children,
     className = ''
 }) {
+    // Отладочная информация
+    console.log('FilterPanel render:', { isVisible, filtersCount: filters.length });
+    
     if (!isVisible) {
+        console.log('FilterPanel: not visible, returning null');
         return null;
     }
 
     return (
         <div className={`card ${className}`}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
                 <h3 className="card-title">Фильтры поиска</h3>
                 <button
                     onClick={onClearFilters}
-                    className="text-sm text-accent-red hover:text-accent-red/80 transition-colors"
+                    className="text-sm text-accent-red hover:text-accent-red/80 transition-colors text-center sm:text-left"
                 >
                     Очистить все
                 </button>
@@ -46,7 +50,7 @@ export default function FilterPanel({
             <div className="space-y-4">
                 {/* Поиск */}
                 {searchConfig && (
-                    <div>
+                    <div className="min-w-0">
                         <label className="form-label">
                             {searchConfig.label || 'Поиск'}
                         </label>
@@ -61,9 +65,9 @@ export default function FilterPanel({
 
                 {/* Сетка фильтров */}
                 {filters.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                         {filters.map((filter, index) => (
-                            <div key={index}>
+                            <div key={index} className="min-w-0">
                                 <label className="form-label">
                                     {filter.label}
                                 </label>
@@ -71,7 +75,7 @@ export default function FilterPanel({
                                     <select
                                         value={filter.value}
                                         onChange={filter.onChange}
-                                        className="form-select"
+                                        className="form-select w-full"
                                         disabled={filter.disabled}
                                     >
                                         {filter.options?.map((option, optionIndex) => (
@@ -86,7 +90,7 @@ export default function FilterPanel({
                                             type="checkbox"
                                             checked={filter.checked}
                                             onChange={filter.onChange}
-                                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200"
+                                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg rounded-lg transition-all duration-200 flex-shrink-0"
                                         />
                                         <span className="ml-1">{filter.checkboxLabel}</span>
                                     </label>

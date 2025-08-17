@@ -2,7 +2,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import ProjectCard from '@/Components/ProjectCard';
-import StatsGrid from '@/Components/StatsGrid';
 import FilterPanel from '@/Components/FilterPanel';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
@@ -12,6 +11,9 @@ export default function Index({ auth, projects, filters }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status));
+
+    // Отладочная информация для фильтров
+    console.log('Filter state:', { showFilters, search, status, filters });
 
     // Поиск и фильтрация на лету с дебаунсом
     useEffect(() => {
@@ -40,19 +42,7 @@ export default function Index({ auth, projects, filters }) {
         });
     };
 
-    // Статистика проектов
-    const getProjectStats = () => {
-        const allProjects = projects.data;
-        return {
-            total: allProjects.length,
-            active: allProjects.filter(p => p.status === 'active').length,
-            completed: allProjects.filter(p => p.status === 'completed').length,
-            onHold: allProjects.filter(p => p.status === 'on_hold').length,
-            cancelled: allProjects.filter(p => p.status === 'cancelled').length,
-        };
-    };
 
-    const stats = getProjectStats();
 
     return (
         <AuthenticatedLayout
@@ -70,9 +60,12 @@ export default function Index({ auth, projects, filters }) {
                         {
                             type: 'button',
                             variant: 'secondary',
-                            text: 'Фильтры',
+                            text: showFilters ? 'Скрыть фильтры' : 'Показать фильтры',
                             icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',
-                            onClick: () => setShowFilters(!showFilters),
+                            onClick: () => {
+                                console.log('Toggle filters clicked, current state:', showFilters);
+                                setShowFilters(!showFilters);
+                            },
                             mobileOrder: 2
                         },
                         {
@@ -86,17 +79,7 @@ export default function Index({ auth, projects, filters }) {
                     ]}
                 />
 
-                {/* Статистика */}
-                <StatsGrid 
-                    columns={5}
-                    stats={[
-                        { label: 'Всего', value: stats.total, color: 'text-text-primary' },
-                        { label: 'Активных', value: stats.active, color: 'text-accent-green' },
-                        { label: 'Завершенных', value: stats.completed, color: 'text-accent-blue' },
-                        { label: 'Приостановленных', value: stats.onHold, color: 'text-accent-yellow' },
-                        { label: 'Отмененных', value: stats.cancelled, color: 'text-accent-red' },
-                    ]}
-                />
+
 
                 {/* Фильтры */}
                 <FilterPanel
