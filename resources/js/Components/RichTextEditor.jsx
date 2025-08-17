@@ -213,13 +213,13 @@ export default function RichTextEditor({
                         console.log('Mention command - props.label:', props.label);
                         console.log('Mention command - props.name:', props.name);
                         
-                        // Вставляем упоминание с именем пользователя
-                        const userName = props.label || props.name || 'Неизвестный пользователь';
+                        // Вставляем упоминание с email пользователя
+                        const userEmail = props.email || 'unknown@example.com';
                         editor
                             .chain()
                             .focus()
                             .deleteRange(range)
-                            .insertContent(`@${userName}`)
+                            .insertContent(`@${userEmail}`)
                             .run();
                         
                         // Вызываем колбэк для родительского компонента с правильным пользователем
