@@ -8,7 +8,7 @@
         <title inertia>{{ config('app.name', '379ТМ - Система управления задачами с ИИ-ассистентом') }}</title>
 
         <!-- SEO Meta Tags -->
-        <meta name="description" content="Современная система управления задачами с уникальным ИИ-ассистентом. Управляйте проектами, спринтами и задачами на естественном языке. Создано для разработчиков.">
+        <meta name="description" content="Современная система управления задачами с уникальным ИИ-ассистентом. Управляйте проектами, спринтами и задачами на естественном языке.">
         <meta name="keywords" content="управление задачами, таск менеджер, ИИ ассистент, управление проектами, спринты, разработка, команда, продуктивность, Laravel, React">
         <meta name="author" content="379ТМ">
         <meta name="robots" content="index, follow">
@@ -27,7 +27,7 @@
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="379ТМ - Система управления задачами с ИИ-ассистентом">
-        <meta name="twitter:description" content="Современная система управления задачами с уникальным ИИ-ассистентом для разработчиков">
+        <meta name="twitter:description" content="Современная система управления задачами с уникальным ИИ-ассистентом.">
         <meta name="twitter:image" content="{{ asset('og-image.jpg') }}">
         
         <!-- Дополнительные SEO мета-теги -->
@@ -60,7 +60,7 @@
             '@context' => 'https://schema.org',
             '@type' => 'SoftwareApplication',
             'name' => '379ТМ',
-            'description' => 'Система управления задачами с ИИ-ассистентом для разработчиков',
+            'description' => 'Система управления задачами с ИИ-ассистентом.',
             'applicationCategory' => 'BusinessApplication',
             'operatingSystem' => 'Web',
             'url' => request()->url(),
