@@ -25,12 +25,12 @@ class TaskStatusController extends Controller
      */
     public function projectIndex(Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
         $taskStatuses = $this->taskStatusService->getProjectStatuses($project);
-        
+
         return Inertia::render('Projects/StatusManagement', [
             'project' => $project->load('owner'),
             'taskStatuses' => $taskStatuses,
@@ -43,7 +43,7 @@ class TaskStatusController extends Controller
      */
     public function sprintIndex(Project $project, Sprint $sprint)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -54,7 +54,7 @@ class TaskStatusController extends Controller
         $taskStatuses = $this->taskStatusService->getSprintStatuses($sprint);
         $hasCustomStatuses = $this->taskStatusService->hasCustomStatuses($sprint);
         $projectStatuses = $this->taskStatusService->getProjectStatuses($project);
-        
+
         return Inertia::render('Projects/StatusManagement', [
             'project' => $project->load('owner'),
             'sprint' => $sprint,
@@ -70,7 +70,7 @@ class TaskStatusController extends Controller
      */
     public function updateProject(Request $request, Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -115,7 +115,7 @@ class TaskStatusController extends Controller
      */
     public function createSprintStatuses(Request $request, Project $project, Sprint $sprint)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -141,7 +141,7 @@ class TaskStatusController extends Controller
      */
     public function updateSprint(Request $request, Project $project, Sprint $sprint)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -189,7 +189,7 @@ class TaskStatusController extends Controller
      */
     public function deleteSprintStatuses(Request $request, Project $project, Sprint $sprint)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -230,7 +230,7 @@ class TaskStatusController extends Controller
      */
     public function getStatuses(Project $project, Sprint $sprint = null)
     {
-        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -248,14 +248,14 @@ class TaskStatusController extends Controller
      */
     public function getContextualStatuses(Request $request, Project $project)
     {
-        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
         // Получаем параметры контекста
         $sprintId = $request->get('sprint_id');
         $taskId = $request->get('task_id');
-        
+
         $sprint = null;
         $task = null;
 

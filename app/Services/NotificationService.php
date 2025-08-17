@@ -20,7 +20,7 @@ class NotificationService
      */
     public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
     {
-        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+        if ($task->assignee_id && $task->assignee_id === Auth::id()) {
             return;
         }
 

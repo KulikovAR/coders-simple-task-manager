@@ -57,7 +57,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $owner = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $owner->id, 'status' => 'active']);
-        
+
         ProjectMember::factory()->create([
             'project_id' => $project->id,
             'user_id' => $user->id,
@@ -82,8 +82,8 @@ class DashboardTest extends TestCase
     {
         $user = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $user->id, 'status' => 'active']);
-        $status = TaskStatus::factory()->create(['name' => 'In Progress']);
-        
+        $status = TaskStatus::factory()->create(['name' => 'В работе']);
+
         Task::factory()->create([
             'project_id' => $project->id,
             'status_id' => $status->id,
@@ -121,12 +121,12 @@ class DashboardTest extends TestCase
     public function test_dashboard_limits_projects_to_six(): void
     {
         $user = User::factory()->create();
-        
+
         // Создаем 7 проектов
         for ($i = 0; $i < 7; $i++) {
             Project::factory()->create(['owner_id' => $user->id, 'status' => 'active']);
         }
-        
+
         TaskStatus::factory()->create(['name' => 'In Progress']);
 
         $response = $this
@@ -145,7 +145,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $activeProject = Project::factory()->create(['owner_id' => $user->id, 'status' => 'active']);
         $inactiveProject = Project::factory()->create(['owner_id' => $user->id, 'status' => 'on_hold']);
-        
+
         TaskStatus::factory()->create(['name' => 'In Progress']);
 
         $response = $this
@@ -157,7 +157,7 @@ class DashboardTest extends TestCase
             ->component('Dashboard')
             ->where('projects.0.id', $activeProject->id)
             ->has('projects', 1)
-            ->where('projects', fn ($projects) => 
+            ->where('projects', fn ($projects) =>
                 collect($projects)->every(fn ($project) => $project['status'] === 'active')
             )
         );
