@@ -203,7 +203,7 @@ export default function Authenticated({ user, header, children, flash }) {
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden w-full max-w-full overflow-hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
+                            Главная
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('projects.index')} active={route().current('projects.*')}>
                             Проекты
