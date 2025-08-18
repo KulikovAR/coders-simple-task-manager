@@ -117,6 +117,13 @@ class TaskController extends Controller
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
 
+
+        // Проверяем, это Inertia запрос или обычный
+        if ($request->header('X-Inertia')) {
+            return redirect()->route('tasks.show', $task)
+                ->with('success', 'Задача успешно создана.');
+        }
+
         // Проверяем, это AJAX запрос или обычный
         if ($request->ajax() || $request->wantsJson()) {
             // Возвращаем JSON ответ для AJAX запросов
