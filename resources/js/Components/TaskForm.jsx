@@ -3,6 +3,7 @@ import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtil
 import { useState, useEffect } from 'react';
 import TaskComments from '@/Components/TaskComments';
 import RichTextEditor from '@/Components/RichTextEditor';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 
 export default function TaskForm({
     task = null,

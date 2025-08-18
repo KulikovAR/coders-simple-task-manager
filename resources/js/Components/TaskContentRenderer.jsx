@@ -1,104 +1,119 @@
 import React from 'react';
 
-export default function HtmlRenderer({ content, className = '' }) {
+export default function TaskContentRenderer({ content, className = '' }) {
     if (!content) return null;
 
-    const rendererStyles = `
-        .html-content {
+    const contentStyles = `
+        .task-content {
             color: var(--text-primary);
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
-        .html-content p {
-            margin: 0.5em 0;
+        .task-content p {
+            margin: 0.75em 0;
             min-height: 1.5em;
         }
-        .html-content p:first-child {
+        .task-content p:first-child {
             margin-top: 0;
         }
-        .html-content p:last-child {
+        .task-content p:last-child {
             margin-bottom: 0;
         }
-        .html-content h1, .html-content h2, .html-content h3, .html-content h4, .html-content h5, .html-content h6 {
-            margin: 1em 0 0.5em 0;
+        .task-content h1, .task-content h2, .task-content h3, .task-content h4, .task-content h5, .task-content h6 {
+            margin: 1.5em 0 0.75em 0;
             color: var(--text-primary);
             font-weight: 600;
+            line-height: 1.25;
         }
-        .html-content ul {
-            margin: 0.5em 0;
+        .task-content h1:first-child, .task-content h2:first-child, .task-content h3:first-child,
+        .task-content h4:first-child, .task-content h5:first-child, .task-content h6:first-child {
+            margin-top: 0;
+        }
+        .task-content ul {
+            margin: 0.75em 0;
             padding-left: 1.5em;
             list-style-type: disc !important;
         }
-        .html-content ol {
-            margin: 0.5em 0;
+        .task-content ol {
+            margin: 0.75em 0;
             padding-left: 1.5em;
             list-style-type: decimal !important;
         }
-        .html-content li {
-            margin: 0.25em 0;
+        .task-content li {
+            margin: 0.375em 0;
             display: list-item !important;
         }
-        .html-content li > ul {
+        .task-content li > ul {
             list-style-type: circle !important;
+            margin: 0.25em 0;
         }
-        .html-content li > ol {
+        .task-content li > ol {
             list-style-type: lower-alpha !important;
+            margin: 0.25em 0;
         }
-        .html-content li > ul > li > ul {
+        .task-content li > ul > li > ul {
             list-style-type: square !important;
         }
-        .html-content li > ol > li > ol {
+        .task-content li > ol > li > ol {
             list-style-type: lower-roman !important;
         }
-        .html-content blockquote {
+        .task-content blockquote {
             margin: 1em 0;
-            padding-left: 1em;
+            padding: 0.75em 1.25em;
             border-left: 3px solid var(--border-color);
             font-style: italic;
             color: var(--text-muted);
             background-color: var(--blockquote-bg, rgba(0, 0, 0, 0.03));
+            border-radius: 0.375rem;
         }
-        .html-content code {
+        .task-content code {
             background-color: var(--code-bg, #f3f4f6);
             color: var(--text-primary);
             padding: 0.125em 0.25em;
             border-radius: 0.25em;
             font-family: monospace;
+            font-size: 0.875em;
         }
-        .html-content pre {
+        .task-content pre {
             background-color: var(--pre-bg, #1f2937);
             color: var(--pre-text, #f9fafb);
-            padding: 1em;
+            padding: 1em 1.25em;
             border-radius: 0.5em;
             overflow-x: auto;
             margin: 1em 0;
+            font-size: 0.875em;
+            line-height: 1.5;
         }
-        .html-content pre code {
+        .task-content pre code {
             background-color: transparent;
             color: inherit;
             padding: 0;
+            font-size: inherit;
         }
-        .html-content img {
+        .task-content img {
             max-width: 100%;
             height: auto;
             border-radius: 0.5em;
             margin: 1em 0;
         }
-        .html-content a {
+        .task-content a {
             color: var(--accent-blue, #3b82f6);
             text-decoration: underline;
+            transition: color 0.2s ease;
         }
-        .html-content a:hover {
+        .task-content a:hover {
             color: var(--accent-blue-hover, #2563eb);
         }
 
         /* Темная тема */
-        :root[data-theme="dark"] .html-content {
+        :root[data-theme="dark"] .task-content {
             --code-bg: #374151;
             --pre-bg: #111827;
             --pre-text: #f9fafb;
             --blockquote-bg: rgba(255, 255, 255, 0.05);
         }
         /* Светлая тема */
-        :root[data-theme="light"] .html-content {
+        :root[data-theme="light"] .task-content {
             --code-bg: #f3f4f6;
             --pre-bg: #1f2937;
             --pre-text: #f9fafb;
@@ -108,9 +123,9 @@ export default function HtmlRenderer({ content, className = '' }) {
 
     return (
         <>
-            <style>{rendererStyles}</style>
+            <style>{contentStyles}</style>
             <div 
-                className={`prose prose-sm max-w-none html-content ${className}`}
+                className={`task-content ${className}`}
                 dangerouslySetInnerHTML={{ __html: content }}
             />
         </>

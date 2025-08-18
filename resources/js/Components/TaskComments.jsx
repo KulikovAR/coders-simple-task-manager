@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import RichTextEditor from '@/Components/RichTextEditor';
-import HtmlRenderer from '@/Components/HtmlRenderer';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 import { 
     getCommentTypeLabel, 
     getCommentTypeIcon, 
@@ -410,7 +410,7 @@ export default function TaskComments({
                                 </div>
                             </div>
                             <div className="text-text-secondary text-sm">
-                                <HtmlRenderer content={comment.content} />
+                                <TaskContentRenderer content={comment.content} />
                             </div>
                         </div>
                     ))

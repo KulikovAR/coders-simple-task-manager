@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 import { useState, useEffect, useRef } from 'react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import TaskForm from '@/Components/TaskForm';

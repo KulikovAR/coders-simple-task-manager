@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import RichTextEditor from '@/Components/RichTextEditor';
-import HtmlRenderer from '@/Components/HtmlRenderer';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 
 export default function RichEditorDemo() {
     const [content, setContent] = useState('');
@@ -86,7 +86,7 @@ export default function RichEditorDemo() {
                         <h2 className="text-xl font-semibold text-text-primary mb-4">
                             Предпросмотр
                         </h2>
-                        <HtmlRenderer content={content} />
+                        <TaskContentRenderer content={content} />
                     </div>
                 )}
 

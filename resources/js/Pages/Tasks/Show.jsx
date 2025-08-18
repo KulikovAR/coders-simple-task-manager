@@ -3,7 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, getPriorityIcon } from '@/utils/statusUtils';
 import TaskComments from '@/Components/TaskComments';
-import HtmlRenderer from '@/Components/HtmlRenderer';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 
 export default function Show({ auth, task }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -109,7 +109,7 @@ export default function Show({ auth, task }) {
                             <div className="card">
                                 <h3 className="card-title mb-3 lg:mb-4">Описание</h3>
                                 <div className="prose prose-sm max-w-none">
-                                    <HtmlRenderer content={task.description} />
+                                    <TaskContentRenderer content={task.description} />
                                 </div>
                             </div>
                         )}
@@ -119,7 +119,7 @@ export default function Show({ auth, task }) {
                             <div className="card">
                                 <h3 className="card-title mb-3 lg:mb-4">Результат выполнения</h3>
                                 <div className="prose prose-sm max-w-none">
-                                    <HtmlRenderer content={task.result} />
+                                    <TaskContentRenderer content={task.result} />
                                 </div>
                             </div>
                         )}
