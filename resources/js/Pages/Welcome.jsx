@@ -10,12 +10,12 @@ export default function Welcome({ auth }) {
         // Принудительно устанавливаем темную тему для лендинга
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
-        
+
         // Устанавливаем атрибут data-page для CSS правил
         document.body.setAttribute('data-page', 'Welcome');
-        
+
         setIsLoaded(true);
-        
+
         // Очищаем атрибут при размонтировании компонента
         return () => {
             document.body.removeAttribute('data-page');
@@ -104,7 +104,7 @@ export default function Welcome({ auth }) {
                                     beta
                                 </span>
                             </div>
-                            
+
                             {/* Desktop Navigation */}
                             <div className="hidden md:flex space-x-8 items-center">
                                 <a
@@ -201,27 +201,27 @@ export default function Welcome({ auth }) {
                 </header>
 
                 {/* Main Content */}
-                <main className="pt-24 relative z-10">
+                <main className="pt-20 relative z-10">
                     {/* Hero Section */}
-                    <section className="max-w-4xl mx-auto px-6 py-20 pb-32 text-center">
+                    <section className="max-w-4xl mx-auto px-6 py-12 pb-16 text-center">
                         <div className={`mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <span className="inline-block bg-accent-blue/20 text-accent-blue px-4 py-2 rounded-full text-sm font-medium mb-6 animate-pulse">
                                 ИИ-ассистент включен
                             </span>
                         </div>
 
-                        <h1 className={`text-6xl md:text-8xl font-bold mb-8 leading-tight tracking-tight transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                        <h1 className={`text-6xl md:text-8xl font-bold mb-6 leading-tight tracking-tight transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                             Управление задачами
                             <br />
-                            <span className="text-text-secondary">с ИИ-ассистентом</span>
+                            <span className="text-text-secondary">с 379tm</span>
                         </h1>
 
-                        <p className={`text-xl md:text-2xl text-text-secondary mb-12 max-w-3xl mx-auto leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <p className={`text-xl md:text-2xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Система управления задачами для любых команд. Создавайте проекты, планируйте спринты,
                             назначайте задачи и отслеживайте прогресс. ИИ-ассистент помогает управлять всем через чат.
                         </p>
 
-                        <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-12 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             {!auth.user ? (
                                 <>
                                     <Link
@@ -247,28 +247,12 @@ export default function Welcome({ auth }) {
                             )}
                         </div>
 
-                        {/* Stats */}
-                        <div className={`grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto mb-16 transition-all duration-1000 delay-1100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            {[
-                                { number: "10,000+", label: "Активных пользователей" },
-                                { number: "50,000+", label: "Выполненных задач" },
-                                { number: "24/7", label: "Доступность системы" }
-                            ].map((stat, index) => (
-                                <div key={index} className="text-center group">
-                                    <div className="text-4xl font-bold text-text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
-                                        {stat.number}
-                                    </div>
-                                    <div className="text-text-secondary text-sm group-hover:text-text-primary transition-colors duration-300">
-                                        {stat.label}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        
                     </section>
 
                     {/* Features Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-32">
-                        <div className={`text-center mb-16 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    <section className="max-w-6xl mx-auto px-6 py-20">
+                        <div className={`text-center mb-12 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Возможности платформы
                             </h2>
@@ -314,8 +298,8 @@ export default function Welcome({ auth }) {
                     </section>
 
                     {/* Teams Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-32">
-                        <div className={`text-center mb-16 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    <section className="max-w-6xl mx-auto px-6 py-20">
+                        <div className={`text-center mb-12 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Для любых команд
                             </h2>
@@ -358,13 +342,13 @@ export default function Welcome({ auth }) {
                                 </div>
                             ))}
                         </div>
-                        <div className="mb-16"></div>
+                        <div className="mb-8"></div>
                     </section>
 
                     {/* AI Assistant Section */}
-                    <section className="max-w-6xl mx-auto px-6 py-32">
+                    <section className="max-w-6xl mx-auto px-6 py-20">
                         <div className={`bg-secondary-bg/50 rounded-3xl p-12 md:p-16 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            <div className="text-center mb-12">
+                            <div className="text-center mb-8">
                                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                     ИИ-ассистент
                                 </h2>
@@ -389,28 +373,39 @@ export default function Welcome({ auth }) {
                                     ))}
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <div className={`relative transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                                        <div className="w-40 h-40 bg-accent-blue/20 rounded-full flex items-center justify-center animate-pulse">
-                                            <svg className="w-20 h-20 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                            </svg>
-                                        </div>
-                                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                                            <div className="w-4 h-4 bg-white rounded-full"></div>
+                                    <div className={`bg-card-bg/50 border border-border-color rounded-2xl p-6 w-full max-w-md transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                                        <div className="space-y-4">
+                                            <div className="flex gap-3 items-start">
+                                                <div className="w-8 h-8 rounded-full bg-accent-blue/20 flex items-center justify-center text-accent-blue text-xs font-semibold">ИИ</div>
+                                                <div className="bg-secondary-bg/60 border border-border-color rounded-xl px-4 py-3 text-sm text-text-primary">
+                                                    Здравствуйте! Чем помочь?
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3 items-start justify-end">
+                                                <div className="bg-accent-blue text-white rounded-xl px-4 py-3 text-sm max-w-[80%]">
+                                                    Создай проект «Лендинг»
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3 items-start">
+                                                <div className="w-8 h-8 rounded-full bg-accent-blue/20 flex items-center justify-center text-accent-blue text-xs font-semibold">ИИ</div>
+                                                <div className="bg-secondary-bg/60 border border-border-color rounded-xl px-4 py-3 text-sm text-text-primary">
+                                                    Готово! Проект создан.
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="mb-16"></div>
+                        <div className="mb-8"></div>
                     </section>
 
                     {/* CTA Section */}
-                    <section className="max-w-4xl mx-auto px-6 py-32 text-center">
-                        <h2 className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                    <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+                        <h2 className={`text-4xl md:text-5xl font-bold mb-6 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Готовы начать?
                         </h2>
-                        <p className={`text-xl text-text-secondary mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <p className={`text-xl text-text-secondary mb-8 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Присоединяйтесь к командам, которые уже используют 379ТМ для управления проектами
                         </p>
                         <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -438,12 +433,12 @@ export default function Welcome({ auth }) {
                                 </Link>
                             )}
                         </div>
-                        <div className="mb-16"></div>
+                        <div className="mb-8"></div>
                     </section>
                 </main>
 
                 {/* Footer */}
-                <footer className={`border-t border-border-color py-12 transition-all duration-1000 delay-900 relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <footer className={`border-t border-border-color py-8 transition-all duration-1000 delay-900 relative z-10 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
                             <div className="text-text-secondary mb-4 md:mb-0">
