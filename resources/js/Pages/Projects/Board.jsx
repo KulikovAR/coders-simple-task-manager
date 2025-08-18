@@ -642,11 +642,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       <span className={`px-3 py-1.5 rounded-full text-caption font-medium shadow-sm ${getStatusColor(project.status)} text-center`}>
                           {getStatusText(project.status)}
                       </span>
-                      {project.deadline && (
-                        <span className="text-caption text-text-muted text-center sm:text-left">
-                          Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}
-                        </span>
-                      )}
+                                                            {project.deadline && project.deadline !== '0000-00-00' && (
+                                        <span className="text-caption text-text-muted text-center sm:text-left">
+                                          Дедлайн: {new Date(project.deadline).toLocaleDateString('ru-RU')}
+                                        </span>
+                                      )}
                     </div>
                   </div>
                 </div>
@@ -1058,7 +1058,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                         )}
                                                         
                                                         {/* Дедлайн с предупреждением */}
-                                                        {task.deadline && (
+                                                        {task.deadline && task.deadline !== '0000-00-00' && (
                                                             <div className={`flex items-center space-x-2 text-caption px-3 py-1.5 rounded-lg ${
                                                                 new Date(task.deadline) < new Date()
                                                                     ? 'bg-accent-red/10 text-accent-red font-medium border border-accent-red/30'
@@ -1179,7 +1179,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                    <span>{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
+                                                    <span>{selectedTask.deadline && selectedTask.deadline !== '0000-00-00' ? new Date(selectedTask.deadline).toLocaleDateString('ru-RU') : 'Нет дедлайна'}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -1268,7 +1268,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     <span className="truncate max-w-[120px] drop-shadow-sm">{selectedTask.assignee.name}</span>
                                                 </div>
                                             )}
-                                            {selectedTask.deadline && (
+                                            {selectedTask.deadline && selectedTask.deadline !== '0000-00-00' && (
                                                 <div className="flex items-center gap-1 drop-shadow-sm">
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1332,41 +1332,29 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     isModal={true}
                                     processing={processing}
                                     auth={auth}
-                                    onCommentAdded={(newComment) => {
-                                        console.log('Comment added:', newComment);
-                                        console.log('Current selectedTask:', selectedTask);
-                                        // Обновляем комментарии в локальной задаче
-                                        if (selectedTask) {
-                                            setSelectedTask(prev => {
-                                                const updated = {
-                                                    ...prev,
-                                                    comments: [newComment, ...(prev.comments || [])]
-                                                };
-                                                console.log('Updated selectedTask:', updated);
-                                                return updated;
-                                            });
-                                        }
-                                    }}
-                                    onCommentUpdated={(updatedComment) => {
-                                        // Обновляем комментарии в локальной задаче
-                                        if (selectedTask) {
-                                            setSelectedTask(prev => ({
-                                                ...prev,
-                                                comments: prev.comments?.map(comment =>
-                                                    comment.id === updatedComment.id ? updatedComment : comment
-                                                ) || []
-                                            }));
-                                        }
-                                    }}
-                                    onCommentDeleted={(deletedCommentId) => {
-                                        // Удаляем комментарий из локальной задачи
-                                        if (selectedTask) {
-                                            setSelectedTask(prev => ({
-                                                ...prev,
-                                                comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
-                                            }));
-                                        }
-                                    }}
+                                    onCommentAdded={selectedTask?.id ? (newComment) => {
+                                        // Обновляем комментарии в локальной задаче только для существующей задачи
+                                        setSelectedTask(prev => ({
+                                            ...prev,
+                                            comments: [newComment, ...(prev.comments || [])]
+                                        }));
+                                    } : undefined}
+                                    onCommentUpdated={selectedTask?.id ? (updatedComment) => {
+                                        // Обновляем комментарии в локальной задаче только для существующей задачи
+                                        setSelectedTask(prev => ({
+                                            ...prev,
+                                            comments: prev.comments?.map(comment =>
+                                                comment.id === updatedComment.id ? updatedComment : comment
+                                            ) || []
+                                        }));
+                                    } : undefined}
+                                    onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
+                                        // Удаляем комментарий из локальной задачи только для существующей задачи
+                                        setSelectedTask(prev => ({
+                                            ...prev,
+                                            comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
+                                        }));
+                                    } : undefined}
                                 />
                             </div>
                         </div>
