@@ -102,7 +102,7 @@ class TaskController extends Controller
     {
         $project = Project::findOrFail($request->validated()['project_id']);
 
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -145,7 +145,7 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -172,7 +172,7 @@ class TaskController extends Controller
 
     public function update(TaskRequest $request, Task $task)
     {
-        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -237,7 +237,7 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
-        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -249,7 +249,7 @@ class TaskController extends Controller
 
     public function updateStatus(Request $request, Task $task)
     {
-        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -286,7 +286,7 @@ class TaskController extends Controller
 
     public function updatePriority(Request $request, Task $task)
     {
-        if (!$this->taskService->canUserManageTask(Auth::user(), $task)) {
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
 
