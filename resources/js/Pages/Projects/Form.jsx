@@ -1,54 +1,41 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { useFormWithDocs } from '@/utils/hooks/useFormWithDocs';
 
 export default function Form({ auth, project = null, errors = {} }) {
     const isEditing = !!project;
-    const [docs, setDocs] = useState(() => {
-        if (project?.docs && Array.isArray(project.docs) && project.docs.length > 0) {
-            // Убеждаемся, что все элементы являются строками
-            return project.docs.map(doc => typeof doc === 'string' ? doc : '');
+    
+    const {
+        form: { data, setData, post, put, processing, errors: formErrors },
+        docs,
+        showTips,
+        setShowTips,
+        addDoc,
+        removeDoc,
+        updateDoc,
+        handleSubmit,
+    } = useFormWithDocs(
+        {
+            name: project?.name || '',
+            description: project?.description || '',
+            status: project?.status || 'active',
+            deadline: project?.deadline ? project.deadline.split('T')[0] : '',
+        },
+        {
+            docs: project?.docs || [''],
+            isEditing,
         }
-        return [''];
-    });
-    const [showTips, setShowTips] = useState(!isEditing);
+    );
 
-    const { data, setData, post, put, processing, errors: formErrors } = useForm({
-        name: project?.name || '',
-        description: project?.description || '',
-        status: project?.status || 'active',
-        deadline: project?.deadline ? project.deadline.split('T')[0] : '',
-        docs: (() => {
-            if (project?.docs && Array.isArray(project.docs) && project.docs.length > 0) {
-                return project.docs.map(doc => typeof doc === 'string' ? doc : '');
+    const onSubmit = (e) => {
+        handleSubmit(e, (formData) => {
+            if (isEditing) {
+                put(route('projects.update', project.id), formData);
+            } else {
+                post(route('projects.store'), formData);
             }
-            return [];
-        })(),
-    });
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        const formData = {
-            ...data,
-            docs: docs.filter(doc => typeof doc === 'string' && doc.trim() !== ''),
-        };
-
-        if (isEditing) {
-            put(route('projects.update', project.id), formData);
-        } else {
-            post(route('projects.store'), formData);
-        }
+        });
     };
-
-    const addDoc = () => {
-        const newDocs = [...docs, ''];
-        setDocs(newDocs);
-        // Синхронизируем с данными формы
-        setData('docs', newDocs);
-    };
-
-    const removeDoc = (index) => {
         const newDocs = docs.filter((_, i) => i !== index);
         setDocs(newDocs);
         // Синхронизируем с данными формы

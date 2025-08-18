@@ -811,33 +811,33 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     <div className="flex justify-between items-center mb-6">
                         <div /> {/* пустой div для выравнивания */}
                     </div>
-                    {/* Горизонтальный скролл для колонок, ограничение по высоте */}
+                    {/* Горизонтальный скролл для колонок, занимает весь экран */}
                     <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
-                         style={{ maxHeight: 'calc(100vh - 260px)', minHeight: '320px' }}>
+                         style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}>
                         {taskStatuses.map((status) => {
                             const statusTasks = getFilteredStatusTasks(status.id);
                             return (
                                 <div
                                     key={status.id}
-                                    className={`bg-secondary-bg border rounded-xl p-4 flex-shrink-0 w-56 md:w-64 lg:w-72 min-h-[300px] max-h-full flex flex-col transition-all duration-300 ${
+                                    className={`bg-secondary-bg border rounded-xl p-5 flex-shrink-0 w-64 md:w-72 lg:w-80 min-h-full max-h-full flex flex-col transition-all duration-300 ${
                                         dragOverStatusId === status.id
                                             ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue'
-                                            : 'border-border-color'
+                                            : 'border-border-color shadow-md hover:shadow-lg'
                                     }`}
                                     onDragOver={(e) => handleDragOver(e, status.id)}
                                     onDragLeave={(e) => handleDragLeave(e, status.id)}
                                     onDrop={(e) => handleDrop(e, status.id)}
                                 >
-                                    {/* Заголовок колонки с индикатором */}
-                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-color">
+                                    {/* Улучшенный заголовок колонки с индикатором */}
+                                    <div className="flex items-center justify-between mb-5 pb-3 border-b border-border-color">
                                         <div className="flex items-center space-x-3">
                                             <div
-                                                className="w-3 h-3 rounded-full shadow-sm"
+                                                className="w-4 h-4 rounded-full shadow-md"
                                                 style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
                                             ></div>
-                                            <h4 className="text-text-primary font-semibold">{status.name}</h4>
+                                            <h4 className="text-text-primary font-semibold text-lg">{status.name}</h4>
                                         </div>
-                                        <span className="bg-card-bg text-text-primary text-caption px-2.5 py-1 rounded-full font-medium shadow-sm">
+                                        <span className="bg-card-bg text-text-primary text-caption px-3 py-1.5 rounded-full font-medium shadow-md">
                                             {statusTasks.length}
                                         </span>
                                     </div>
@@ -899,19 +899,25 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                         </div>
                                     )}
 
-                                    {/* Скроллируемая область с задачами */}
-                                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-3">
+                                    {/* Улучшенная скроллируемая область с задачами */}
+                                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4">
                                         {statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
-                                            <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5">
+                                            <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5 h-40 flex flex-col items-center justify-center">
                                                 <div className="text-accent-blue/50 text-4xl mb-3">📋</div>
                                                 <p className="text-accent-blue/50 text-body-small font-medium">Отпустите задачу здесь</p>
+                                            </div>
+                                        )}
+                                        {statusTasks.length === 0 && dragOverStatusId !== status.id && (
+                                            <div className="border-2 border-dashed border-border-color rounded-xl p-8 text-center bg-secondary-bg/30 h-40 flex flex-col items-center justify-center">
+                                                <div className="text-text-muted text-4xl mb-3">✨</div>
+                                                <p className="text-text-muted text-body-small font-medium">Нет задач</p>
                                             </div>
                                         )}
                                         {statusTasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className={`task-card bg-card-bg border rounded-xl p-4 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-300 ${
-                                                    draggedTask?.id === task.id ? 'dragging' : ''
+                                                className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
+                                                    draggedTask?.id === task.id ? 'dragging opacity-50' : ''
                                                 }`}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task)}
@@ -923,15 +929,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                             >
                                                 {/* Код задачи */}
                                                 {task.code && (
-                                                    <div className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center">
+                                                    <div className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center bg-accent-blue/5 px-2 py-1 rounded-lg inline-block">
                                                         <span className="mr-2">🔗</span>
                                                         {task.code}
                                                     </div>
                                                 )}
 
                                                 {/* Заголовок задачи */}
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <h5 className="text-text-primary font-semibold text-body-small leading-tight">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <h5 className="text-text-primary font-semibold text-body leading-tight">
                                                         <a
                                                             href={route('tasks.show', task.id)}
                                                             className="hover:text-accent-blue transition-colors duration-200"
@@ -948,8 +954,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                 {/* Статус задачи */}
                                                 {task.status && (
-                                                    <div className="mb-3">
-                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+                                                    <div className="mb-4">
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium shadow-md"
                                                               style={task.status.color ? {
                                                                   backgroundColor: `${task.status.color}20`,
                                                                   color: task.status.color,
@@ -961,46 +967,49 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 )}
 
                                                 {/* Мета-информация */}
-                                                <div className="space-y-3">
-                                                    {/* Приоритет с цветным фоном */}
-                                                    {task.priority && (
-                                                        <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-sm ${
-                                                            task.priority === 'high'
-                                                                ? 'bg-accent-red/20 text-accent-red border border-accent-red/30'
-                                                                : task.priority === 'medium'
-                                                                    ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30'
-                                                                    : 'bg-accent-green/20 text-accent-green border border-accent-green/30'
-                                                        }`}>
-                                                            <span className="text-sm">
-                                                                {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
-                                                            </span>
-                                                            <span>{getPriorityText(task.priority)}</span>
-                                                        </div>
-                                                    )}
+                                                <div className="space-y-3 mt-2">
+                                                    {/* Верхняя строка: приоритет и дедлайн */}
+                                                    <div className="flex items-center justify-between">
+                                                        {/* Приоритет с цветным фоном */}
+                                                        {task.priority && (
+                                                            <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-md ${
+                                                                task.priority === 'high'
+                                                                    ? 'bg-accent-red/20 text-accent-red border border-accent-red/30'
+                                                                    : task.priority === 'medium'
+                                                                        ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30'
+                                                                        : 'bg-accent-green/20 text-accent-green border border-accent-green/30'
+                                                            }`}>
+                                                                <span className="text-sm">
+                                                                    {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
+                                                                </span>
+                                                                <span>{getPriorityText(task.priority)}</span>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {/* Дедлайн с предупреждением */}
+                                                        {task.deadline && (
+                                                            <div className={`flex items-center space-x-2 text-caption px-3 py-1.5 rounded-lg ${
+                                                                new Date(task.deadline) < new Date()
+                                                                    ? 'bg-accent-red/10 text-accent-red font-medium border border-accent-red/30'
+                                                                    : 'bg-secondary-bg text-text-secondary border border-border-color'
+                                                            }`}>
+                                                                <span>{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
+                                                                <span>
+                                                                    {new Date(task.deadline).toLocaleDateString('ru-RU')}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
 
                                                     {/* Исполнитель */}
                                                     {task.assignee && (
-                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary">
-                                                            <div className="w-5 h-5 bg-accent-blue/20 rounded-lg flex items-center justify-center">
+                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary bg-secondary-bg px-3 py-2 rounded-lg border border-border-color">
+                                                            <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center">
                                                                 <span className="text-caption font-semibold text-accent-blue">
                                                                     {task.assignee.name.charAt(0).toUpperCase()}
                                                                 </span>
                                                             </div>
-                                                            <span>{task.assignee.name}</span>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Дедлайн с предупреждением */}
-                                                    {task.deadline && (
-                                                        <div className="flex items-center space-x-2 text-caption">
-                                                            <span className="text-text-secondary">📅</span>
-                                                            <span className={`${
-                                                                new Date(task.deadline) < new Date()
-                                                                    ? 'text-accent-red font-medium'
-                                                                    : 'text-text-secondary'
-                                                            }`}>
-                                                                {new Date(task.deadline).toLocaleDateString('ru-RU')}
-                                                            </span>
+                                                            <span className="font-medium">{task.assignee.name}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1008,14 +1017,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 {/* Информация о спринте */}
                                                 {task.sprint && (
                                                     <div className="mt-4 pt-3 border-t border-border-color">
-                                                        <div className="flex items-center justify-between text-caption">
+                                                        <div className="flex items-center justify-between text-caption bg-secondary-bg/50 px-3 py-2 rounded-lg">
                                                             <span className="text-text-secondary flex items-center">
                                                                 <span className="mr-2">🏃</span>
                                                                 Спринт:
                                                             </span>
                                                             <Link
                                                                 href={route('sprints.show', [project.id, task.sprint.id])}
-                                                                className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
+                                                                className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200 font-medium"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {task.sprint.name}

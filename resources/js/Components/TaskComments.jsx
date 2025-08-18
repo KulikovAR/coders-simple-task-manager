@@ -36,7 +36,6 @@ export default function TaskComments({
 
     // Синхронизируем локальные комментарии с пропсами
     useEffect(() => {
-        console.log('TaskComments: comments prop changed:', comments);
         setLocalComments(comments);
     }, [comments]);
 
@@ -118,14 +117,12 @@ export default function TaskComments({
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('Comment response:', result);
-                    // Добавляем новый комментарий в начало списка
+                        // Добавляем новый комментарий в начало списка
                     setLocalComments(prev => [result.comment, ...prev]);
                     reset();
                     setCommentType(COMMENT_TYPES.GENERAL);
                     setShowCommentForm(false);
                     if (onCommentAdded) {
-                        console.log('Calling onCommentAdded with:', result.comment);
                         onCommentAdded(result.comment);
                     }
                 } else {
@@ -338,9 +335,7 @@ export default function TaskComments({
                             value={data.content}
                             onChange={(newValue) => setData('content', newValue)}
                             onMentionSelect={(user) => {
-                                console.log('TaskComments - User mentioned:', user);
-                                console.log('TaskComments - User name:', user?.name);
-                                console.log('TaskComments - User email:', user?.email);
+
                             }}
                             users={users}
                             placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"

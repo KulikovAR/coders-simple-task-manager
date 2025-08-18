@@ -1,45 +1,33 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ProjectCard from '@/Components/ProjectCard';
 import FilterPanel from '@/Components/FilterPanel';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
 import PageHeader from '@/Components/PageHeader';
+import { useFilters } from '@/utils/hooks/useFilters';
 
 export default function Index({ auth, projects, filters }) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [status, setStatus] = useState(filters.status || '');
-    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status));
-
-    // Отладочная информация для фильтров
-    console.log('Filter state:', { showFilters, search, status, filters });
-
-    // Поиск и фильтрация на лету с дебаунсом
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            router.get(route('projects.index'), { search, status }, {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            });
-        }, 300);
-
-        return () => clearTimeout(timeoutId);
-    }, [search, status]);
+    const {
+        search,
+        status,
+        showFilters,
+        setShowFilters,
+        updateFilter,
+        clearFilters,
+        setSearch,
+        setStatus,
+    } = useFilters(
+        {
+            search: filters.search || '',
+            status: filters.status || '',
+        },
+        'projects.index'
+    );
 
     const handleStatusChange = (e) => {
         setStatus(e.target.value);
-    };
-
-    const clearFilters = () => {
-        setSearch('');
-        setStatus('');
-        setShowFilters(false);
-        router.get(route('projects.index'), {}, {
-            preserveState: true,
-            preserveScroll: true,
-        });
     };
 
 
