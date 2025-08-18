@@ -184,13 +184,14 @@ class TaskController extends Controller
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        // Уведомляем о назначении задачи, если изменился исполнитель
-        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId && $task->assignee_id !== Auth::id()) {
+        // Уведомляем о назначении задачи, только если изменился исполнитель на нового человека
+        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
-        // Если исполнитель не изменился, но изменились другие поля, отправляем уведомление об изменении
-        elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id && $task->assignee_id !== Auth::id()) {
+        // Если исполнитель не изменился, отправляем уведомление об обновлении
+        // NotificationService сам проверит необходимость отправки уведомления
+        elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id) {
             $this->notificationService->taskUpdated($task, Auth::user());
         }
 
