@@ -248,8 +248,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         project: result.task.project || prev.project
                     }));
                 } else {
-                    // Добавляем новую задачу в локальное состояние
-                    setLocalTasks(prevTasks => [...prevTasks, result.task]);
+                    // Нормализуем ID новой задачи и добавляем её в локальное состояние
+                    const normalizedTask = {
+                        ...result.task,
+                        status_id: parseInt(result.task.status_id),
+                        sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : result.task.sprint_id,
+                        assignee_id: result.task.assignee_id ? parseInt(result.task.assignee_id) : result.task.assignee_id,
+                        project_id: parseInt(result.task.project_id)
+                    };
+                    setLocalTasks(prevTasks => [...prevTasks, normalizedTask]);
                     // Закрываем модалку после создания
                     closeTaskModal();
                 }
