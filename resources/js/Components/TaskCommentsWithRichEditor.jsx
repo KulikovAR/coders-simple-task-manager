@@ -49,6 +49,15 @@ export default function TaskCommentsWithRichEditor({
         setProcessing(true);
         
         try {
+            // Получаем актуальный CSRF токен
+            let csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            
+            if (!csrfToken) {
+                console.error('CSRF токен не найден');
+                setProcessing(false);
+                return;
+            }
+
             if (editingComment) {
                 // Обновление комментария
                 const response = await fetch(route('comments.update', editingComment.id), {
@@ -57,10 +66,18 @@ export default function TaskCommentsWithRichEditor({
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': csrfToken,
                     },
                     body: JSON.stringify(data),
+                    credentials: 'same-origin', // Важно для передачи cookies
                 });
+
+                if (response.status === 419) {
+                    // CSRF токен истек, обновляем страницу
+                    console.log('CSRF токен истек, обновляем страницу');
+                    window.location.reload();
+                    return;
+                }
 
                 if (response.ok) {
                     const result = await response.json();
@@ -70,13 +87,14 @@ export default function TaskCommentsWithRichEditor({
                     ));
                     reset();
                     setCommentType(COMMENT_TYPES.GENERAL);
-                    setData('type', COMMENT_TYPES.GENERAL);
-                    setCommentContent('');
                     setShowCommentForm(false);
                     setEditingComment(null);
                     if (onCommentUpdated) {
                         onCommentUpdated(result.comment);
                     }
+                } else {
+                    const errorData = await response.json();
+                    console.error('Ошибка обновления комментария:', errorData);
                 }
             } else {
                 // Создание нового комментария
@@ -86,10 +104,18 @@ export default function TaskCommentsWithRichEditor({
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': csrfToken,
                     },
                     body: JSON.stringify(data),
+                    credentials: 'same-origin', // Важно для передачи cookies
                 });
+
+                if (response.status === 419) {
+                    // CSRF токен истек, обновляем страницу
+                    console.log('CSRF токен истек, обновляем страницу');
+                    window.location.reload();
+                    return;
+                }
 
                 if (response.ok) {
                     const result = await response.json();
@@ -105,10 +131,24 @@ export default function TaskCommentsWithRichEditor({
                         console.log('Calling onCommentAdded with:', result.comment);
                         onCommentAdded(result.comment);
                     }
+                } else {
+                    const errorData = await response.json();
+                    console.error('Ошибка создания комментария:', errorData);
+                    
+                    // Если ошибка связана с CSRF, показываем сообщение пользователю
+                    if (errorData.message && errorData.message.includes('CSRF')) {
+                        alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
+                        window.location.reload();
+                    }
                 }
             }
         } catch (error) {
             console.error('Error submitting comment:', error);
+            
+            // Если ошибка сети, показываем сообщение пользователю
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                alert('Ошибка сети. Проверьте подключение к интернету и попробуйте снова.');
+            }
         } finally {
             setProcessing(false);
         }
