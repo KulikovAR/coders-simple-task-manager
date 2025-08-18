@@ -36,19 +36,6 @@ export default function Form({ auth, project = null, errors = {} }) {
             }
         });
     };
-        const newDocs = docs.filter((_, i) => i !== index);
-        setDocs(newDocs);
-        // Синхронизируем с данными формы
-        setData('docs', newDocs);
-    };
-
-    const updateDoc = (index, value) => {
-        const newDocs = [...docs];
-        newDocs[index] = typeof value === 'string' ? value : '';
-        setDocs(newDocs);
-        // Синхронизируем с данными формы
-        setData('docs', newDocs);
-    };
 
     const getStatusColor = (status) => {
         switch (status) {
