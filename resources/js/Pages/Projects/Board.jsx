@@ -104,26 +104,31 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
 
-        // Загружаем задачу с комментариями
-        fetch(route('tasks.show', task.id) + '?modal=1', {
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.props && data.props.task) {
-                setSelectedTask(data.props.task);
-            } else {
+        if (task.id) {
+            // Загружаем существующую задачу с комментариями
+            fetch(route('tasks.show', task.id) + '?modal=1', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.props && data.props.task) {
+                    setSelectedTask(data.props.task);
+                } else {
+                    setSelectedTask(task);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки задачи:', error);
                 setSelectedTask(task);
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки задачи:', error);
+            });
+        } else {
+            // Для новой задачи просто устанавливаем начальные данные
             setSelectedTask(task);
-        });
+        }
 
         setShowTaskModal(true);
         setErrors({});
@@ -170,7 +175,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         document.body.classList.remove('modal-open');
     };
 
-    const handleTaskUpdate = async (data) => {
+    const handleTaskSubmit = async (data) => {
         setProcessing(true);
         setErrors({});
 
@@ -185,13 +190,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 }
             });
 
-            // Добавляем метод для Laravel
-            formData.append('_method', 'PUT');
-
             // Получаем CSRF токен
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            const response = await fetch(route('tasks.update', selectedTask.id), {
+            // Определяем URL и метод в зависимости от того, создаем или обновляем задачу
+            const isUpdate = selectedTask?.id;
+            const url = isUpdate ? route('tasks.update', selectedTask.id) : route('tasks.store');
+            
+            if (isUpdate) {
+                formData.append('_method', 'PUT');
+            }
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -205,54 +215,58 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             const result = await response.json();
 
             if (response.ok && result.success) {
-                // Обновляем задачу в локальном состоянии с данными, полученными от сервера
-                setLocalTasks(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === selectedTask.id
-                            ? {
-                                ...task,
-                                ...result.task,
-                                // Убеждаемся, что связанные объекты правильно обновляются
-                                assignee: result.task.assignee || task.assignee,
-                                status: result.task.status || task.status,
-                                sprint: result.task.sprint || task.sprint,
-                                project: result.task.project || task.project,
-                                // Обновляем поля статуса для совместимости, приводим к числу для единообразия
-                                status_id: parseInt(result.task.status_id || result.task.status?.id || task.status_id),
-                                sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : (result.task.sprint?.id ? parseInt(result.task.sprint.id) : task.sprint_id),
-                                assignee_id: result.task.assignee_id ? parseInt(result.task.assignee_id) : (result.task.assignee?.id ? parseInt(result.task.assignee.id) : task.assignee_id),
-                                project_id: parseInt(result.task.project_id || result.task.project?.id || task.project_id)
-                            }
-                            : task
-                    )
-                );
+                if (isUpdate) {
+                    // Обновляем задачу в локальном состоянии
+                    setLocalTasks(prevTasks =>
+                        prevTasks.map(task =>
+                            task.id === selectedTask.id
+                                ? {
+                                    ...task,
+                                    ...result.task,
+                                    // Убеждаемся, что связанные объекты правильно обновляются
+                                    assignee: result.task.assignee || task.assignee,
+                                    status: result.task.status || task.status,
+                                    sprint: result.task.sprint || task.sprint,
+                                    project: result.task.project || task.project,
+                                    // Обновляем поля статуса для совместимости, приводим к числу для единообразия
+                                    status_id: parseInt(result.task.status_id || result.task.status?.id || task.status_id),
+                                    sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : (result.task.sprint?.id ? parseInt(result.task.sprint.id) : task.sprint_id),
+                                    assignee_id: result.task.assignee_id ? parseInt(result.task.assignee_id) : (result.task.assignee?.id ? parseInt(result.task.assignee.id) : task.assignee_id),
+                                    project_id: parseInt(result.task.project_id || result.task.project?.id || task.project_id)
+                                }
+                                : task
+                        )
+                    );
 
-                // Обновляем выбранную задачу для отображения в модалке
-                setSelectedTask(prev => ({
-                    ...prev,
-                    ...result.task,
-                    assignee: result.task.assignee || prev.assignee,
-                    status: result.task.status || prev.status,
-                    sprint: result.task.sprint || prev.sprint,
-                    project: result.task.project || prev.project
-                }));
-
-                // НЕ закрываем модалку автоматически
-                // closeTaskModal();
+                    // Обновляем выбранную задачу для отображения в модалке
+                    setSelectedTask(prev => ({
+                        ...prev,
+                        ...result.task,
+                        assignee: result.task.assignee || prev.assignee,
+                        status: result.task.status || prev.status,
+                        sprint: result.task.sprint || prev.sprint,
+                        project: result.task.project || prev.project
+                    }));
+                } else {
+                    // Добавляем новую задачу в локальное состояние
+                    setLocalTasks(prevTasks => [...prevTasks, result.task]);
+                    // Закрываем модалку после создания
+                    closeTaskModal();
+                }
 
                 // Показываем сообщение об успехе
-                setSuccessMessage(result.message || 'Задача успешно обновлена');
+                setSuccessMessage(result.message || (isUpdate ? 'Задача успешно обновлена' : 'Задача успешно создана'));
             } else {
                 // Обрабатываем ошибки валидации
                 if (result.errors) {
                     setErrors(result.errors);
                 } else {
-                    setErrors({ general: result.message || 'Произошла ошибка при обновлении задачи' });
+                    setErrors({ general: result.message || (isUpdate ? 'Произошла ошибка при обновлении задачи' : 'Произошла ошибка при создании задачи') });
                 }
             }
         } catch (error) {
-            console.error('Ошибка при обновлении задачи:', error);
-            setErrors({ general: 'Произошла ошибка при обновлении задачи' });
+            console.error('Ошибка при обработке задачи:', error);
+            setErrors({ general: selectedTask?.id ? 'Произошла ошибка при обновлении задачи' : 'Произошла ошибка при создании задачи' });
         } finally {
             setProcessing(false);
         }
@@ -862,16 +876,34 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 >
                                     {/* Улучшенный заголовок колонки с индикатором */}
                                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-border-color">
-                                        <div className="flex items-center space-x-3">
-                                            <div
-                                                className="w-4 h-4 rounded-full shadow-md"
-                                                style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
-                                            ></div>
-                                            <h4 className="text-text-primary font-semibold text-lg">{status.name}</h4>
-                                        </div>
-                                        <span className="bg-card-bg text-text-primary text-caption px-3 py-1.5 rounded-full font-medium shadow-md">
-                                            {statusTasks.length}
-                                        </span>
+                                                                                    <div className="flex items-center space-x-3">
+                                                <div
+                                                    className="w-4 h-4 rounded-full shadow-md"
+                                                    style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
+                                                ></div>
+                                                <h4 className="text-text-primary font-semibold text-lg">{status.name}</h4>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openTaskModal({
+                                                            status_id: status.id,
+                                                            project_id: project.id,
+                                                            sprint_id: currentSprintId !== 'none' ? currentSprintId : null
+                                                        });
+                                                    }}
+                                                    className="p-1.5 hover:bg-secondary-bg rounded-lg transition-colors"
+                                                    title="Создать задачу"
+                                                >
+                                                    <svg className="w-4 h-4 text-text-muted hover:text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                    </svg>
+                                                </button>
+                                                <span className="bg-card-bg text-text-primary text-caption px-3 py-1.5 rounded-full font-medium shadow-md">
+                                                    {statusTasks.length}
+                                                </span>
+                                            </div>
                                     </div>
 
                                     {/* Фиксированные зоны приоритетов при перетаскивании в том же статусе */}
@@ -1178,7 +1210,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     Сохранение...
                                                 </>
                                             ) : (
-                                                'Обновить задачу'
+                                                selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
                                             )}
                                         </button>
                                     </div>
@@ -1272,7 +1304,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     Сохранение...
                                                 </>
                                             ) : (
-                                                'Обновить задачу'
+                                                selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
                                             )}
                                         </button>
                                     </div>
@@ -1288,7 +1320,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     taskStatuses={taskStatuses}
                                     members={members}
                                     errors={errors}
-                                    onSubmit={handleTaskUpdate}
+                                    onSubmit={handleTaskSubmit}
                                     onCancel={closeTaskModal}
                                     isModal={true}
                                     processing={processing}

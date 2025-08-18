@@ -117,6 +117,24 @@ class TaskController extends Controller
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
 
+        // Проверяем, это AJAX запрос или обычный
+        if ($request->ajax() || $request->wantsJson()) {
+            // Возвращаем JSON ответ для AJAX запросов
+            return response()->json([
+                'success' => true,
+                'message' => 'Задача успешно создана.',
+                'task' => $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
+            ]);
+        }
+
+        // Проверяем, пришел ли запрос с доски проекта
+        $referer = $request->header('Referer');
+        if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+            // Возвращаемся на доску проекта
+            return redirect()->route('projects.board', $project)
+                ->with('success', 'Задача успешно создана.');
+        }
+
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Задача успешно создана.');
     }

@@ -129,7 +129,7 @@ class TaskService
             'reporter_id' => $reporter->id,
             'priority' => $data['priority'] ?? 'medium',
             'status_id' => $statusId,
-            'deadline' => $data['deadline'] ?: null,
+            'deadline' => isset($data['deadline']) ? $data['deadline'] : null,
         ]);
 
         return $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
@@ -208,7 +208,7 @@ class TaskService
 
         // Обрабатываем поле deadline отдельно, так как оно может быть пустой строкой
         if (array_key_exists('deadline', $data)) {
-            $updateData['deadline'] = $data['deadline'] ?: null;
+            $updateData['deadline'] = !empty($data['deadline']) ? $data['deadline'] : null;
         } else {
             $updateData['deadline'] = $task->deadline;
         }
