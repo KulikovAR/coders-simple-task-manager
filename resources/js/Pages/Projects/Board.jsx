@@ -497,10 +497,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         touchStartPointRef.current = { x: touch.clientX, y: touch.clientY };
         longPressTriggeredRef.current = false;
         cancelLongPressTimer();
+        
+        // Увеличиваем время до 600мс для более надежного срабатывания
         longPressTimerRef.current = setTimeout(() => {
             longPressTriggeredRef.current = true;
             openStatusOverlay(task);
-        }, 500);
+        }, 600);
     };
 
     const handleTaskTouchMove = (e) => {
@@ -509,7 +511,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         const dx = touch.clientX - touchStartPointRef.current.x;
         const dy = touch.clientY - touchStartPointRef.current.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > 12) {
+        
+        // Уменьшаем порог движения для более надежного отслеживания
+        if (distance > 8) {
             cancelLongPressTimer();
         }
     };
@@ -517,6 +521,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const handleTaskTouchEnd = (e) => {
         if (longPressTriggeredRef.current) {
             e.preventDefault();
+            e.stopPropagation(); // Предотвращаем всплытие события
         }
         cancelLongPressTimer();
         longPressTriggeredRef.current = false;
@@ -969,7 +974,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 {/* Мета-информация */}
                                                 <div className="space-y-3 mt-2">
                                                     {/* Верхняя строка: приоритет и дедлайн */}
-                                                    <div className="flex items-center justify-between">
+                                                    <div className="flex flex-wrap items-center gap-2">
                                                         {/* Приоритет с цветным фоном */}
                                                         {task.priority && (
                                                             <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-md ${
@@ -991,7 +996,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                             <div className={`flex items-center space-x-2 text-caption px-3 py-1.5 rounded-lg ${
                                                                 new Date(task.deadline) < new Date()
                                                                     ? 'bg-accent-red/10 text-accent-red font-medium border border-accent-red/30'
-                                                                    : 'bg-secondary-bg text-text-secondary border border-border-color'
+                                                                    : 'text-text-secondary'
                                                             }`}>
                                                                 <span>{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
                                                                 <span>
@@ -1003,7 +1008,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
                                                     {/* Исполнитель */}
                                                     {task.assignee && (
-                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary bg-secondary-bg px-3 py-2 rounded-lg border border-border-color">
+                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary">
                                                             <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center">
                                                                 <span className="text-caption font-semibold text-accent-blue">
                                                                     {task.assignee.name.charAt(0).toUpperCase()}
@@ -1309,25 +1314,40 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 onClose={closePaymentModal}
             />
 
-            {/* Мобильный оверлей выбора статуса при лонгтапе */}
+            {/* Улучшенный мобильный оверлей выбора статуса при лонгтапе */}
             {isStatusOverlayOpen && statusOverlayTask && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 select-none" onClick={closeStatusOverlay}>
-                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 select-none" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-text-primary font-semibold">Переместить задачу</h3>
-                            <button className="text-text-muted hover:text-text-primary" onClick={closeStatusOverlay}>×</button>
+                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in" onClick={closeStatusOverlay}>
+                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        {/* Индикатор свайпа для мобильных */}
+                        <div className="w-12 h-1 bg-border-color rounded-full mx-auto mb-4 sm:hidden"></div>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-text-primary font-semibold text-lg">Переместить задачу</h3>
+                            <button className="text-text-muted hover:text-text-primary p-2 rounded-full hover:bg-secondary-bg" onClick={closeStatusOverlay}>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                        <div className="text-sm text-text-secondary mb-4">{statusOverlayTask.title}</div>
+                        
+                        <div className="text-sm text-text-secondary mb-5 font-medium border-l-2 pl-3" style={{ borderColor: getStatusIndicatorColor(statusOverlayTask.status_id) }}>
+                            {statusOverlayTask.title}
+                        </div>
+                        
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {taskStatuses.map((status) => (
                                 <button
                                     key={status.id}
-                                    className={`border rounded-xl p-3 text-left transition-all ${parseInt(statusOverlayTask.status_id) === parseInt(status.id) ? 'border-accent-blue bg-accent-blue/10' : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'}`}
+                                    className={`border rounded-xl p-4 text-left transition-all ${
+                                        parseInt(statusOverlayTask.status_id) === parseInt(status.id) 
+                                        ? 'border-accent-blue bg-accent-blue/10 shadow-glow-blue' 
+                                        : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'
+                                    }`}
                                     onClick={() => handleStatusSelect(status.id)}
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                         <div
-                                            className="w-2.5 h-2.5 rounded-full"
+                                            className="w-3 h-3 rounded-full"
                                             style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
                                         ></div>
                                         <div className="text-sm text-text-primary font-medium">{status.name}</div>
