@@ -115,7 +115,7 @@ class ProjectController extends Controller
 
     public function edit(Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -124,7 +124,7 @@ class ProjectController extends Controller
 
     public function update(ProjectRequest $request, Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -136,7 +136,7 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        if (!$this->projectService->canUserContributeToProject(Auth::user(), $project)) {
             abort(403, 'Доступ запрещен');
         }
 
