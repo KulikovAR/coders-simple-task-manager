@@ -107,31 +107,58 @@ export default function RichTextEditor({
         .ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
             margin: 1em 0 0.5em 0;
         }
-        .ProseMirror ul, .ProseMirror ol {
+        .ProseMirror ul {
             margin: 0.5em 0;
             padding-left: 1.5em;
+            list-style-type: disc !important;
+        }
+        .ProseMirror ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+            list-style-type: decimal !important;
         }
         .ProseMirror li {
             margin: 0.25em 0;
+            display: list-item !important;
+        }
+        .ProseMirror li > ul {
+            list-style-type: circle !important;
+        }
+        .ProseMirror li > ol {
+            list-style-type: lower-alpha !important;
+        }
+        .ProseMirror li > ul > li > ul {
+            list-style-type: square !important;
+        }
+        .ProseMirror li > ol > li > ol {
+            list-style-type: lower-roman !important;
         }
         .ProseMirror blockquote {
             margin: 1em 0;
             padding-left: 1em;
-            border-left: 3px solid #e5e7eb;
+            border-left: 3px solid var(--border-color);
             font-style: italic;
+            color: var(--text-muted);
+            background-color: var(--blockquote-bg, rgba(0, 0, 0, 0.03));
         }
         .ProseMirror code {
-            background-color: #f3f4f6;
+            background-color: var(--code-bg, #f3f4f6);
+            color: var(--text-primary);
             padding: 0.125em 0.25em;
             border-radius: 0.25em;
             font-family: monospace;
         }
         .ProseMirror pre {
-            background-color: #1f2937;
-            color: #f9fafb;
+            background-color: var(--pre-bg, #1f2937);
+            color: var(--pre-text, #f9fafb);
             padding: 1em;
             border-radius: 0.5em;
             overflow-x: auto;
+        }
+        .ProseMirror pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
         }
         .ProseMirror img {
             max-width: 100%;
@@ -139,15 +166,32 @@ export default function RichTextEditor({
             border-radius: 0.5em;
         }
         .ProseMirror a {
-            color: #3b82f6;
+            color: var(--accent-blue, #3b82f6);
             text-decoration: underline;
+        }
+        .ProseMirror a:hover {
+            color: var(--accent-blue-hover, #2563eb);
         }
         .is-editor-empty:first-child::before {
             content: attr(data-placeholder);
             float: left;
-            color: #9ca3af;
+            color: var(--text-muted, #9ca3af);
             pointer-events: none;
             height: 0;
+        }
+        /* Темная тема */
+        :root[data-theme="dark"] .ProseMirror {
+            --code-bg: #374151;
+            --pre-bg: #111827;
+            --pre-text: #f9fafb;
+            --blockquote-bg: rgba(255, 255, 255, 0.05);
+        }
+        /* Светлая тема */
+        :root[data-theme="light"] .ProseMirror {
+            --code-bg: #f3f4f6;
+            --pre-bg: #1f2937;
+            --pre-text: #f9fafb;
+            --blockquote-bg: rgba(0, 0, 0, 0.03);
         }
     `;
     const [showLinkInput, setShowLinkInput] = useState(false);
@@ -690,9 +734,13 @@ export default function RichTextEditor({
         }
     }, [linkUrl, editor]);
 
+    // Состояние для отслеживания перетаскивания
+    const [isDragging, setIsDragging] = useState(false);
+
     // Обработка drag & drop файлов
     const handleDrop = useCallback((event) => {
         event.preventDefault();
+        setIsDragging(false);
         const files = Array.from(event.dataTransfer.files);
         
         files.forEach(file => {
@@ -746,7 +794,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBold().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('bold') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Жирный"
@@ -757,7 +805,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleItalic().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('italic') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Курсив"
@@ -768,7 +816,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleCode().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('code') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Код"
@@ -779,7 +827,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('blockquote') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Цитата"
@@ -792,7 +840,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('bulletList') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Маркированный список"
@@ -803,7 +851,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('orderedList') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Нумерованный список"
@@ -816,7 +864,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => setShowLinkInput(true)}
-                    className={`p-2 rounded hover:bg-accent-blue/10 ${
+                    className={`p-2 rounded hover:bg-accent-blue/10 transition-colors duration-200 ease-in-out ${
                         editor.isActive('link') ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }`}
                     title="Добавить ссылку"
@@ -874,7 +922,7 @@ export default function RichTextEditor({
                             value={linkUrl}
                             onChange={(e) => setLinkUrl(e.target.value)}
                             placeholder="Введите URL ссылки"
-                            className="flex-1 px-3 py-1 text-sm border border-border-color rounded bg-card-bg text-text-primary"
+                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') addLink();
                                 if (e.key === 'Escape') setShowLinkInput(false);
@@ -882,13 +930,13 @@ export default function RichTextEditor({
                         />
                         <button
                             onClick={addLink}
-                            className="px-3 py-1 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90"
+                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                         >
                             Добавить
                         </button>
                         <button
                             onClick={() => setShowLinkInput(false)}
-                            className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
                         >
                             Отмена
                         </button>
@@ -905,7 +953,7 @@ export default function RichTextEditor({
                             value={imageUrl}
                             onChange={(e) => setImageUrl(e.target.value)}
                             placeholder="Введите URL изображения"
-                            className="flex-1 px-3 py-1 text-sm border border-border-color rounded bg-card-bg text-text-primary"
+                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') addImage();
                                 if (e.key === 'Escape') setShowImageInput(false);
@@ -913,13 +961,13 @@ export default function RichTextEditor({
                         />
                         <button
                             onClick={addImage}
-                            className="px-3 py-1 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90"
+                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                         >
                             Добавить
                         </button>
                         <button
                             onClick={() => setShowImageInput(false)}
-                            className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
                         >
                             Отмена
                         </button>
@@ -930,8 +978,23 @@ export default function RichTextEditor({
             {/* Основная область редактирования */}
             <div
                 onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className="min-h-[300px] p-3 bg-card-bg"
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    if (!isDragging) setIsDragging(true);
+                }}
+                onDragEnter={(e) => {
+                    e.preventDefault();
+                    if (!isDragging) setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                    e.preventDefault();
+                    if (!e.currentTarget.contains(e.relatedTarget)) {
+                        setIsDragging(false);
+                    }
+                }}
+                className={`min-h-[300px] p-4 bg-card-bg transition-colors duration-200 ${
+                    isDragging ? 'ring-2 ring-accent-blue/20 bg-accent-blue/5' : ''
+                }`}
             >
                 <EditorContent 
                     editor={editor} 
