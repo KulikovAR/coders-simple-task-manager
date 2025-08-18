@@ -539,7 +539,7 @@ export default function TaskForm({
                     </div>
 
                     {/* Комментарии - на всю ширину */}
-                    {isEditing && auth && (
+                    {task?.id && auth && (
                         <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
                             <div className="mb-4">
                                 <h3 className="text-lg font-semibold text-white dark:text-white">Комментарии</h3>
