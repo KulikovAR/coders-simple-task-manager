@@ -228,7 +228,7 @@ export default function Welcome({ auth }) {
                                         href={route('register')}
                                         className="bg-accent-blue text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
-                                        Начать бесплатно
+                                        Начать
                                     </Link>
                                     <Link
                                         href={route('ai-features')}
@@ -247,7 +247,7 @@ export default function Welcome({ auth }) {
                             )}
                         </div>
 
-                        
+
                     </section>
 
                     {/* Features Section */}
@@ -415,7 +415,7 @@ export default function Welcome({ auth }) {
                                         href={route('register')}
                                         className="bg-accent-blue text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto min-w-[180px] text-center"
                                     >
-                                        Начать бесплатно
+                                        Начать
                                     </Link>
                                     <Link
                                         href={route('login')}

@@ -5,6 +5,7 @@ export default function Faq() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
+        document.documentElement.setAttribute('data-theme', 'light');
         setIsLoaded(true);
     }, []);
 
@@ -54,17 +55,17 @@ export default function Faq() {
                 </script>
             </Head>
             
-            <div className="min-h-screen bg-black text-white">
+            <div className="min-h-screen bg-primary-bg text-text-primary">
                 {/* Header */}
-                <header className={`border-b border-white/10 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                <header className={`border-b border-border-color transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
                         <div className="flex justify-between items-center">
-                            <Link href="/" className="text-2xl font-semibold text-white hover:text-gray-300 transition-colors duration-300">
+                            <Link href="/" className="text-2xl font-semibold text-text-primary hover:text-text-secondary transition-colors duration-300">
                                 379ТМ
                             </Link>
                             <Link
                                 href="/"
-                                className="text-white hover:text-gray-300 transition-colors duration-300 font-medium"
+                                className="text-text-primary hover:text-text-secondary transition-colors duration-300 font-medium"
                             >
                                 На главную
                             </Link>
@@ -75,10 +76,10 @@ export default function Faq() {
                 <main className="max-w-4xl mx-auto px-6 py-20">
                     {/* Hero Section */}
                     <div className={`text-center mb-20 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                        <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight">
+                        <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight text-text-primary">
                             FAQ
                         </h1>
-                        <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
+                        <p className="text-xl md:text-2xl text-text-secondary max-w-2xl mx-auto leading-relaxed font-light">
                             Ответы на вопросы о системе управления задачами 379ТМ и ИИ-ассистенте
                         </p>
                     </div>
@@ -119,31 +120,31 @@ export default function Faq() {
                                 answer: "Если у вас есть вопросы или проблемы, вы можете обратиться к нашей команде поддержки. Мы стремимся помочь вам максимально эффективно использовать систему."
                             }
                         ].map((item, index) => (
-                            <div key={index} className={`bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 delay-${index * 100} hover:scale-105 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                                <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-gray-200 transition-colors duration-300">{item.question}</h3>
-                                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">{item.answer}</p>
+                            <div key={index} className={`bg-card-bg/50 border border-border-color rounded-2xl p-8 hover:bg-card-bg/70 transition-all duration-500 delay-${index * 100} hover:scale-105 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                                <h3 className="text-xl font-semibold text-text-primary mb-4 group-hover:text-text-secondary transition-colors duration-300">{item.question}</h3>
+                                <p className="text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">{item.answer}</p>
                             </div>
                         ))}
                     </div>
 
                     {/* CTA Section */}
                     <div className={`text-center mt-20 transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                        <h2 className="text-4xl md:text-5xl font-bold mb-8">
+                        <h2 className="text-4xl md:text-5xl font-bold mb-8 text-text-primary">
                             Не нашли ответ?
                         </h2>
-                        <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+                        <p className="text-xl text-text-secondary mb-12 max-w-2xl mx-auto">
                             Если у вас есть вопросы, обращайтесь к нам
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Link
                                 href="/register"
-                                className="bg-blue-500 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
+                                className="bg-accent-blue text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105"
                             >
                                 Попробовать бесплатно
                             </Link>
                             <Link
                                 href="/ai-features"
-                                className="border border-white/20 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                                className="border border-border-color text-text-primary px-10 py-4 rounded-full font-semibold text-lg hover:bg-secondary-bg transition-all duration-300 transform hover:scale-105"
                             >
                                 Узнать об ИИ-ассистенте
                             </Link>
@@ -152,17 +153,17 @@ export default function Faq() {
                 </main>
 
                 {/* Footer */}
-                <footer className={`border-t border-white/10 py-12 mt-20 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <footer className={`border-t border-border-color py-12 mt-20 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-gray-400 mb-4 md:mb-0">
+                            <div className="text-text-secondary mb-4 md:mb-0">
                                 © 2025 379ТМ. Создано для профессионалов
                             </div>
                             <div className="flex space-x-8">
-                                <Link href="/" className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href="/" className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     Главная
                                 </Link>
-                                <Link href="/ai-features" className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href="/ai-features" className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     ИИ-ассистент
                                 </Link>
                             </div>

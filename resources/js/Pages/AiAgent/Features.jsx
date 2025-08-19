@@ -5,6 +5,7 @@ export default function AiFeatures() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
+        document.documentElement.setAttribute('data-theme', 'light');
         setIsLoaded(true);
     }, []);
 
@@ -49,17 +50,17 @@ export default function AiFeatures() {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-black text-white">
+            <div className="min-h-screen bg-white text-black">
                 {/* Header */}
-                <header className={`border-b border-white/10 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                <header className={`border-b border-border-color transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
                         <div className="flex justify-between items-center">
-                            <Link href="/" className="text-2xl font-semibold text-white hover:text-gray-300 transition-colors duration-300">
+                            <Link href="/" className="text-2xl font-semibold text-text-primary hover:text-text-secondary transition-colors duration-300">
                                 379ТМ
                             </Link>
                             <Link
                                 href="/"
-                                className="text-white hover:text-gray-300 transition-colors duration-300 font-medium"
+                                className="text-text-primary hover:text-text-secondary transition-colors duration-300 font-medium"
                             >
                                 На главную
                             </Link>
@@ -70,13 +71,8 @@ export default function AiFeatures() {
                 <main className="max-w-6xl mx-auto px-6 py-20">
                     {/* Hero Section */}
                     <div className={`text-center mb-20 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                        <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight">
-                            ИИ-ассистент
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed font-light">
-                            Управляйте проектами через чат. Пишите команды на русском языке,
-                            и система автоматически создаст проекты, задачи и спринты.
-                        </p>
+                        <h1 className="text-6xl md:text-7xl font-bold mb-8 tracking-tight text-text-primary">ИИ-ассистент</h1>
+                        <p className="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed font-light">Управляйте проектами через чат. Пишите команды на русском языке, и система автоматически создаст проекты, задачи и спринты.</p>
                     </div>
 
                     {/* Features Grid */}
@@ -114,13 +110,13 @@ export default function AiFeatures() {
                             }
                         ].map((feature, index) => (
                             <div key={index} className={`text-center group transition-all duration-1000 delay-${500 + index * 100} ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                                    <svg className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-16 h-16 bg-accent-blue/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-accent-blue/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                    <svg className="w-8 h-8 text-accent-blue transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={feature.icon} />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-gray-200 transition-colors duration-300">{feature.title}</h3>
-                                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">{feature.description}</p>
+                                <h3 className="text-xl font-semibold text-text-primary mb-4 group-hover:text-text-secondary transition-colors duration-300">{feature.title}</h3>
+                                <p className="text-text-secondary leading-relaxed group-hover:text-text-primary transition-colors duration-300">{feature.description}</p>
                             </div>
                         ))}
                     </div>
@@ -133,7 +129,7 @@ export default function AiFeatures() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                             <div className="space-y-6">
-                                <h3 className="text-2xl font-semibold text-white mb-8">Управление проектами</h3>
+                                <h3 className="text-2xl font-semibold text-text-primary mb-8">Управление проектами</h3>
                                 {[
                                     'Создай новый проект "Веб-сайт компании"',
                                     'Покажи все мои проекты',
@@ -141,15 +137,15 @@ export default function AiFeatures() {
                                     'Удали проект "Тестовый проект"',
                                     'Добавь участника john@example.com в проект "Веб-сайт"'
                                 ].map((command, index) => (
-                                    <div key={index} className={`bg-white/5 border border-white/10 p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-white/10 hover:border-white/20 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                                        <div className="text-white text-sm mb-2">{command}</div>
-                                        <div className="text-gray-400 text-sm">ИИ автоматически выполнит команду</div>
+                                    <div key={index} className={`bg-card-bg/50 border border-border-color p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-card-bg/70 hover:border-accent-blue/30 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
+                                        <div className="text-text-primary text-sm mb-2">{command}</div>
+                                        <div className="text-text-secondary text-sm">ИИ автоматически выполнит команду</div>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="space-y-6">
-                                <h3 className="text-2xl font-semibold text-white mb-8">Управление задачами</h3>
+                                <h3 className="text-2xl font-semibold text-text-primary mb-8">Управление задачами</h3>
                                 {[
                                     'Создай задачу "Исправить баг в форме"',
                                     'Назначь задачу "Дизайн главной страницы" на меня',
@@ -157,9 +153,9 @@ export default function AiFeatures() {
                                     'Покажи все задачи в проекте "Веб-сайт"',
                                     'Добавь комментарий "Исправлено" к задаче "Баг #123"'
                                 ].map((command, index) => (
-                                    <div key={index} className={`bg-white/5 border border-white/10 p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-white/10 hover:border-white/20 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
-                                        <div className="text-white text-sm mb-2">{command}</div>
-                                        <div className="text-gray-400 text-sm">ИИ автоматически выполнит команду</div>
+                                    <div key={index} className={`bg-card-bg/50 border border-border-color p-6 rounded-2xl transition-all duration-500 delay-${index * 100} hover:bg-card-bg/70 hover:border-accent-blue/30 hover:scale-105 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+                                        <div className="text-text-primary text-sm mb-2">{command}</div>
+                                        <div className="text-text-secondary text-sm">ИИ автоматически выполнит команду</div>
                                     </div>
                                 ))}
                             </div>
@@ -168,22 +164,22 @@ export default function AiFeatures() {
 
                     {/* CTA Section */}
                     <div className="text-center">
-                        <h2 className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <h2 className={`text-4xl md:text-5xl font-bold mb-8 text-text-primary transition-all duration-1000 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Готовы попробовать?
                         </h2>
-                        <p className={`text-xl text-gray-400 mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <p className={`text-xl text-text-secondary mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             Присоединяйтесь к разработчикам, которые уже используют ИИ-ассистент для управления проектами
                         </p>
                         <div className={`flex flex-col sm:flex-row gap-6 justify-center transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                             <Link
                                 href="/register"
-                                className="bg-blue-500 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
+                                className="bg-accent-blue text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-accent-blue/80 transition-all duration-300 transform hover:scale-105"
                             >
-                                Начать бесплатно
+                                Начать
                             </Link>
                             <Link
                                 href="/"
-                                className="border border-white/20 text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                                className="border border-border-color text-text-primary px-10 py-4 rounded-full font-semibold text-lg hover:bg-secondary-bg transition-all duration-300 transform hover:scale-105"
                             >
                                 На главную
                             </Link>
@@ -192,17 +188,17 @@ export default function AiFeatures() {
                 </main>
 
                 {/* Footer */}
-                <footer className={`border-t border-white/10 py-12 mt-20 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <footer className={`border-t border-border-color py-12 mt-20 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-gray-400 mb-4 md:mb-0">
+                            <div className="text-text-secondary mb-4 md:mb-0">
                                 © 2025 379ТМ. Создано для профессионалов
                             </div>
                             <div className="flex space-x-8">
-                                <Link href="/" className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href="/" className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     Главная
                                 </Link>
-                                <Link href="/faq" className="text-gray-400 hover:text-white transition-colors duration-300">
+                                <Link href="/faq" className="text-text-secondary hover:text-text-primary transition-colors duration-300">
                                     FAQ
                                 </Link>
                             </div>
