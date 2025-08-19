@@ -213,7 +213,7 @@ class TaskService
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
             'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,
-            'tags' => isset($data['tags']) ? TagHelper::normalize($data['tags']) : $task->tags,
+            'tags' => array_key_exists('tags', $data) ? TagHelper::normalize($data['tags']) : $task->tags,
         ];
 
         if (array_key_exists('deadline', $data)) {
