@@ -314,24 +314,42 @@ export default function RichTextEditor({
                         };
                     },
                     command: ({ editor, range, props }) => {
-                        // Отладочная информация
-                        console.log('Mention command - props:', props);
-                        console.log('Mention command - props.label:', props.label);
-                        console.log('Mention command - props.name:', props.name);
-                        
-                        // Вставляем упоминание с email пользователя
-                        const userEmail = props.email || 'unknown@example.com';
-                        editor
-                            .chain()
-                            .focus()
-                            .deleteRange(range)
-                            .insertContent(`@${userEmail}`)
-                            .run();
-                        
-                        // Вызываем колбэк для родительского компонента с правильным пользователем
-                        if (onMentionSelect) {
-                            console.log('Mention command - вызываем onMentionSelect с:', props);
-                            onMentionSelect(props);
+                        try {
+                            // Отладочная информация
+                            console.log('Mention command - props:', props);
+                            console.log('Mention command - props.label:', props.label);
+                            console.log('Mention command - props.name:', props.name);
+                            
+                            // Вставляем упоминание с email пользователя
+                            const userEmail = props.email || 'unknown@example.com';
+                            
+                            // Создаем HTML-элемент для упоминания
+                            const mentionHTML = `<span class="mention" data-user-id="${props.id}" data-user-email="${userEmail}">@${props.name}</span>`;
+                            
+                            editor
+                                .chain()
+                                .focus()
+                                .deleteRange(range)
+                                .insertContent(mentionHTML)
+                                .run();
+                            
+                            // Вызываем колбэк для родительского компонента с правильным пользователем
+                            if (onMentionSelect) {
+                                console.log('Mention command - вызываем onMentionSelect с:', props);
+                                onMentionSelect({
+                                    id: props.id,
+                                    name: props.name,
+                                    email: userEmail
+                                });
+                            }
+                            
+                            // Закрываем popup после выбора
+                            const popup = document.querySelector('.mention-suggestions');
+                            if (popup) {
+                                popup.remove();
+                            }
+                        } catch (error) {
+                            console.error('Ошибка при выполнении команды mention:', error);
                         }
                     },
                     render: () => {
@@ -1025,7 +1043,10 @@ export default function RichTextEditor({
 // Компонент для отображения списка упоминаний
 class MentionList {
     constructor({ props, editor, onExit }) {
-        this.props = props;
+        this.props = {
+            ...props,
+            index: props.index || 0 // Устанавливаем начальный индекс, если он не определен
+        };
         this.editor = editor;
         this.element = document.createElement('div');
         this.element.className = 'w-full bg-transparent';
@@ -1156,7 +1177,25 @@ class MentionList {
             if (item) {
                 console.log('MentionList select - выбран элемент:', item);
                 console.log('MentionList select - индекс:', this.props.index);
-                this.props.command(item);
+                
+                // Проверяем наличие всех необходимых данных
+                if (!item.id || !item.name || !item.email) {
+                    console.warn('MentionList select - неполные данные пользователя:', item);
+                    return;
+                }
+                
+                // Вызываем команду с полными данными пользователя
+                this.props.command({
+                    id: item.id,
+                    name: item.name,
+                    email: item.email,
+                    label: item.name
+                });
+                
+                // Закрываем popup
+                if (this.onExit) {
+                    this.onExit();
+                }
             }
         } catch (error) {
             console.error('Ошибка при выборе элемента в MentionList:', error);
