@@ -30,9 +30,17 @@ export default function Form({ auth, project = null, errors = {} }) {
     const onSubmit = (e) => {
         handleSubmit(e, (formData) => {
             if (isEditing) {
-                put(route('projects.update', project.id), formData);
+                put(route('projects.update', project.id), formData, {
+                    onError: (errors) => {
+                        console.error('Ошибка при обновлении проекта:', errors);
+                    }
+                });
             } else {
-                post(route('projects.store'), formData);
+                post(route('projects.store'), formData, {
+                    onError: (errors) => {
+                        console.error('Ошибка при создании проекта:', errors);
+                    }
+                });
             }
         });
     };
@@ -73,7 +81,7 @@ export default function Form({ auth, project = null, errors = {} }) {
                     {/* Основная форма */}
                     <div className="lg:col-span-2">
                         <div className="card">
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={onSubmit} className="space-y-6">
                                 {/* Название */}
                                 <div>
                                     <label htmlFor="name" className="form-label">

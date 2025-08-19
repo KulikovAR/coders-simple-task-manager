@@ -54,6 +54,16 @@ export function useFormWithDocs(initialData = {}, options = {}) {
             docs: docs.filter(doc => typeof doc === 'string' && doc.trim() !== ''),
         };
 
+        // Проверяем обязательные поля
+        if (!formData.name) {
+            form.setError('name', 'Название проекта обязательно для заполнения');
+            return;
+        }
+
+        if (!formData.status) {
+            formData.status = 'active'; // Устанавливаем значение по умолчанию
+        }
+
         submitCallback(formData);
     };
 
