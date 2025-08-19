@@ -66,6 +66,45 @@ export default function RichTextEditor({
             z-index: 9999;
         }
         
+        /* Стили для мобильной версии */
+        @media (max-width: 768px) {
+            .mention-suggestions {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: calc(100% - 32px) !important;
+                max-height: 300px !important;
+                background: var(--card-bg);
+                border-radius: 1rem;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Затемнение фона */
+            .mention-suggestions::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: -1;
+            }
+            
+            /* Заголовок модального окна */
+            .mention-suggestions::after {
+                content: 'Выберите пользователя';
+                display: block;
+                padding: 1rem;
+                font-size: 1rem;
+                font-weight: 600;
+                text-align: center;
+                border-bottom: 1px solid var(--border-color);
+                color: var(--text-primary);
+            }
+        }
+        
         .mention-suggestions::-webkit-scrollbar {
             width: 6px;
         }
@@ -389,6 +428,19 @@ export default function RichTextEditor({
                                     popup.className = 'mention-suggestions';
                                     popup.style.position = 'fixed';
                                     popup.style.zIndex = '9999';
+                                    
+                                    // Добавляем кнопку закрытия для мобильной версии
+                                    if (isMobile) {
+                                        const closeButton = document.createElement('button');
+                                        closeButton.innerHTML = '✕';
+                                        closeButton.className = 'absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-primary rounded-full hover:bg-accent-blue/10 transition-colors duration-150';
+                                        closeButton.onclick = () => {
+                                            popup.remove();
+                                            currentMentionPopup.current = null;
+                                        };
+                                        popup.appendChild(closeButton);
+                                    }
+                                    
                                     document.body.appendChild(popup);
                                     popup.appendChild(component.element);
                                     
@@ -1071,18 +1123,19 @@ class MentionList {
             
             this.element.innerHTML = `
                 ${this.props.items.map((item, index) => `
-                    <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 transition-colors duration-150 ${
+                    <div class="px-4 py-3 cursor-pointer flex items-center space-x-4 hover:bg-accent-blue/10 active:bg-accent-blue/20 transition-colors duration-150 ${
                         index === this.props.index ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }" data-index="${index}">
-                        <div class="w-8 h-8 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-sm font-semibold text-accent-blue">
+                        <div class="w-10 h-10 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-base font-semibold text-accent-blue">
                                 ${item.name.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-sm font-medium truncate text-text-primary">${item.name}</div>
-                            <div class="text-xs text-text-muted truncate">${item.email}</div>
+                            <div class="text-base font-medium truncate text-text-primary">${item.name}</div>
+                            <div class="text-sm text-text-muted truncate">${item.email}</div>
                         </div>
+                        ${index === this.props.index ? '<div class="text-accent-blue ml-2">✓</div>' : ''}
                     </div>
                 `).join('')}
             `;
