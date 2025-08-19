@@ -19,7 +19,8 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
     const [assigneeId, setAssigneeId] = useState(filters.assignee_id || '');
     const [reporterId, setReporterId] = useState(filters.reporter_id || '');
     const [myTasks, setMyTasks] = useState(filters.my_tasks === '1');
-    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.sprint_id || filters.assignee_id || filters.reporter_id || filters.my_tasks));
+    const [tags, setTags] = useState(filters.tags || '');
+    const [showFilters, setShowFilters] = useState(!!(filters.search || filters.status || filters.priority || filters.project_id || filters.sprint_id || filters.assignee_id || filters.reporter_id || filters.my_tasks || filters.tags));
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -35,6 +36,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                 assignee_id: assigneeId,
                 reporter_id: reporterId,
                 my_tasks: myTasks ? '1' : '',
+                tags,
             };
 
             router.get(route('tasks.index'), newFilters, {
@@ -79,6 +81,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         if (filter === 'assignee_id') setAssigneeId(value);
         if (filter === 'reporter_id') setReporterId(value);
         if (filter === 'my_tasks') setMyTasks(value === '1');
+        if (filter === 'tags') setTags(value);
 
         const newFilters = {
             search,
@@ -89,6 +92,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
             assignee_id: filter === 'assignee_id' ? value : assigneeId,
             reporter_id: filter === 'reporter_id' ? value : reporterId,
             my_tasks: filter === 'my_tasks' ? value : (myTasks ? '1' : ''),
+            tags: filter === 'tags' ? value : tags,
         };
 
         router.get(route('tasks.index'), newFilters, {
@@ -107,6 +111,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
         setAssigneeId('');
         setReporterId('');
         setMyTasks(false);
+        setTags('');
         setShowFilters(false);
         router.get(route('tasks.index'), {}, {
             preserveState: true,
@@ -262,6 +267,13 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                             ]
                         },
                         {
+                            type: 'text',
+                            label: 'Теги',
+                            value: tags,
+                            onChange: (e) => handleFilterChange('tags', e.target.value),
+                            placeholder: 'Введите теги через пробел'
+                        },
+                        {
                             type: 'checkbox',
                             label: '',
                             checked: myTasks,
@@ -304,6 +316,7 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                                 {assigneeId && ` • Исполнитель: ${users.find(u => u.id == assigneeId)?.name}`}
                                 {reporterId && ` • Создатель: ${users.find(u => u.id == reporterId)?.name}`}
                                 {myTasks && ' • Мои задачи'}
+                                {tags && ` • Теги: ${tags}`}
                             </div>
                         </div>
                         <div className="grid-cards">
@@ -314,15 +327,15 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                     </div>
                 ) : (
                     <EmptyState
-                        title={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks ? 'Задачи не найдены' : 'Задачи отсутствуют'}
-                        description={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks
+                        title={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks || tags ? 'Задачи не найдены' : 'Задачи отсутствуют'}
+                        description={search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks || tags
                             ? 'Попробуйте изменить параметры поиска или очистить фильтры'
                             : 'Создайте первую задачу для начала работы'
                         }
                         icon="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                        hasFilters={!!(search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks)}
+                        hasFilters={!!(search || status || priority || projectId || sprintId || assigneeId || reporterId || myTasks || tags)}
                         onClearFilters={clearFilters}
-                        action={!search && !status && !priority && !projectId && !sprintId && !assigneeId && !reporterId && !myTasks ? {
+                        action={!search && !status && !priority && !projectId && !sprintId && !assigneeId && !reporterId && !myTasks && !tags ? {
                             href: route('tasks.create'),
                             text: 'Создать задачу',
                             icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'

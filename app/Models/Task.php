@@ -25,13 +25,15 @@ class Task extends Model
         'reporter_id',
         'priority',
         'status_id',
-        'deadline'
+        'deadline',
+        'tags'
     ];
 
     protected $casts = [
         'result' => 'string',
         'merge_request' => 'string',
         'deadline' => 'date',
+        'tags' => 'array',
     ];
 
     public function project(): BelongsTo

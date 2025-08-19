@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Task;
 
+use App\Rules\ValidTags;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTaskRequest extends FormRequest
@@ -29,6 +30,7 @@ class StoreTaskRequest extends FormRequest
             'sprint_id' => 'nullable|exists:sprints,id',
             'assignee_id' => 'nullable|exists:users,id',
             'priority' => 'nullable|in:low,medium,high,critical',
+            'tags' => ['nullable', 'string', new ValidTags],
         ];
     }
 

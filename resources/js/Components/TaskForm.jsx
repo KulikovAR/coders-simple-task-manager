@@ -34,6 +34,7 @@ export default function TaskForm({
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
+        tags: task?.tags ? task.tags.join(' ') : '',
     });
 
     // Устанавливаем значения по умолчанию для project_id и sprint_id при создании
@@ -509,6 +510,20 @@ export default function TaskForm({
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     />
                                 </div>
+
+                                {/* Теги */}
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Теги
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.tags}
+                                        onChange={(e) => setData('tags', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        placeholder="Введите теги через пробел"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -689,6 +704,11 @@ export default function TaskForm({
 
                             {/* Дедлайн */}
                             {renderField('deadline', 'Дедлайн', 'date')}
+
+                            {/* Теги */}
+                            {renderField('tags', 'Теги', 'text', {
+                                placeholder: 'Введите теги через пробел'
+                            })}
                         </div>
                     </div>
 

@@ -32,6 +32,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     }, [selectedSprintId, currentSprintId]);
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
+    const [tags, setTags] = useState('');
     const [showTaskModal, setShowTaskModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [processing, setProcessing] = useState(false);
@@ -197,7 +198,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             // Определяем URL и метод в зависимости от того, создаем или обновляем задачу
             const isUpdate = selectedTask?.id;
             const url = isUpdate ? route('tasks.update', selectedTask.id) : route('tasks.store');
-            
+
             if (isUpdate) {
                 formData.append('_method', 'PUT');
             }
@@ -519,7 +520,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         touchStartPointRef.current = { x: touch.clientX, y: touch.clientY };
         longPressTriggeredRef.current = false;
         cancelLongPressTimer();
-        
+
         // Увеличиваем время до 600мс для более надежного срабатывания
         longPressTimerRef.current = setTimeout(() => {
             longPressTriggeredRef.current = true;
@@ -533,7 +534,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         const dx = touch.clientX - touchStartPointRef.current.x;
         const dy = touch.clientY - touchStartPointRef.current.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         // Уменьшаем порог движения для более надежного отслеживания
         if (distance > 8) {
             cancelLongPressTimer();
@@ -566,7 +567,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         });
     };
 
-    // Фильтрация задач по спринту и исполнителю
+    // Фильтрация задач по спринту, исполнителю и тегам
     const filteredTasks = localTasks.filter(task => {
         let sprintOk = false;
         if (currentSprintId === 'none') {
@@ -577,7 +578,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
         const assigneeOk = assigneeId ? parseInt(task.assignee_id) === parseInt(assigneeId) : true;
         const myOk = myTasks ? parseInt(task.assignee_id) === parseInt(auth.user.id) : true;
-        return sprintOk && assigneeOk && myOk;
+
+        // Фильтрация по тегам
+        let tagsOk = true;
+        if (tags) {
+            const searchTags = tags.toLowerCase().split(' ').filter(tag => tag);
+            tagsOk = searchTags.every(searchTag =>
+                task.tags && task.tags.some(taskTag =>
+                    taskTag.toLowerCase().includes(searchTag)
+                )
+            );
+        }
+
+        return sprintOk && assigneeOk && myOk && tagsOk;
     });
 
     // Функция для получения порядка приоритетов
@@ -706,6 +719,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         </select>
                       </div>
 
+                      {/* Теги */}
+                      <div className="min-w-0">
+                        <label className="block text-xs font-medium text-text-secondary mb-1">Теги</label>
+                        <input
+                          type="text"
+                          value={tags}
+                          onChange={e => setTags(e.target.value)}
+                          placeholder="Фильтр по тегам"
+                          className="form-input w-full"
+                        />
+                      </div>
+
                       {/* Мои задачи */}
                       <div className="flex items-end">
                         <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
@@ -831,7 +856,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Показываем информацию о том, что активный спринт доступен, только если пользователь не выбрал "Без спринта" явно */}
                         {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
                             <div className="card">
@@ -1038,6 +1063,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     </div>
                                                 )}
 
+                                                {/* Теги */}
+                                                {task.tags && task.tags.length > 0 && (
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        {task.tags.map((tag, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
+                                                            >
+                                                                #{tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+
                                                 {/* Мета-информация */}
                                                 <div className="space-y-3 mt-2">
                                                     {/* Верхняя строка: приоритет и дедлайн */}
@@ -1057,7 +1096,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                                 <span>{getPriorityText(task.priority)}</span>
                                                             </div>
                                                         )}
-                                                        
+
                                                         {/* Дедлайн с предупреждением */}
                                                         {task.deadline && task.deadline !== '0000-00-00' && (
                                                             <div className={`flex items-center space-x-2 text-caption px-3 py-1.5 rounded-lg ${
@@ -1375,7 +1414,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         {/* Индикатор свайпа для мобильных */}
                         <div className="w-12 h-1 bg-border-color rounded-full mx-auto mb-4 sm:hidden"></div>
-                        
+
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-text-primary font-semibold text-lg">Переместить задачу</h3>
                             <button className="text-text-muted hover:text-text-primary p-2 rounded-full hover:bg-secondary-bg" onClick={closeStatusOverlay}>
@@ -1384,18 +1423,18 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                 </svg>
                             </button>
                         </div>
-                        
+
                         <div className="text-sm text-text-secondary mb-5 font-medium border-l-2 pl-3" style={{ borderColor: getStatusIndicatorColor(statusOverlayTask.status_id) }}>
                             {statusOverlayTask.title}
                         </div>
-                        
+
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {taskStatuses.map((status) => (
                                 <button
                                     key={status.id}
                                     className={`border rounded-xl p-4 text-left transition-all ${
-                                        parseInt(statusOverlayTask.status_id) === parseInt(status.id) 
-                                        ? 'border-accent-blue bg-accent-blue/10 shadow-glow-blue' 
+                                        parseInt(statusOverlayTask.status_id) === parseInt(status.id)
+                                        ? 'border-accent-blue bg-accent-blue/10 shadow-glow-blue'
                                         : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'
                                     }`}
                                     onClick={() => handleStatusSelect(status.id)}

@@ -201,28 +201,20 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        // Загружаем связанные данные
         $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id']);
 
         $oldAssigneeId = $task->assignee_id;
-        $oldData = $task->toArray();
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        // Уведомляем о назначении задачи, только если изменился исполнитель на нового человека
         if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
-        // Если исполнитель не изменился, отправляем уведомление об обновлении
-        // NotificationService сам проверит необходимость отправки уведомления
         elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id) {
             $this->notificationService->taskUpdated($task, Auth::user());
         }
 
-        // Не дублируем уведомление о создании при обновлении задачи
-
-        // Проверяем, это Inertia запрос или обычный
         if ($request->header('X-Inertia')) {
             // Для Inertia запросов проверяем, откуда пришел запрос
             $referer = $request->header('Referer');

@@ -23,7 +23,19 @@ export default function TaskCard({ task }) {
                         {task.title}
                     </h3>
                 </Link>
-                {/* Убираем отображение описания */}
+                {/* Теги */}
+                {task.tags && task.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        {task.tags.map((tag, index) => (
+                            <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
+                            >
+                                #{tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Мета-информация */}

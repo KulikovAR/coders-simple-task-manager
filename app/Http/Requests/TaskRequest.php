@@ -26,14 +26,13 @@ class TaskRequest extends FormRequest
             'deadline' => 'nullable|date',
             'result' => 'nullable|string',
             'merge_request' => 'nullable|url',
+            'tags' => 'nullable|max:255'
         ];
 
-        // project_id обязателен только при создании
         if ($this->isMethod('POST')) {
             $rules['project_id'] = 'required|exists:projects,id';
         }
-        
-        // Валидация статуса - проверяем либо status_id, либо status
+
         $rules['status_id'] = 'nullable|exists:task_statuses,id';
         $rules['status'] = 'nullable|string';
 
@@ -84,4 +83,4 @@ class TaskRequest extends FormRequest
             }
         });
     }
-} 
+}

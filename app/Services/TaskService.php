@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
 use App\Services\HtmlContentService;
+use App\Helpers\TagHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -62,6 +63,18 @@ class TaskService
             $query->where('assignee_id', $user->id);
         }
 
+        // Фильтрация по тегам
+        if (!empty($filters['tags'])) {
+            $tags = TagHelper::normalize($filters['tags']);
+            if (!empty($tags)) {
+                $query->where(function($q) use ($tags) {
+                    foreach ($tags as $tag) {
+                        $q->orWhereJsonContains('tags', $tag);
+                    }
+                });
+            }
+        }
+
         return $query->with(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project'])
             ->orderBy('created_at', 'desc')
             ->paginate(12)
@@ -80,7 +93,7 @@ class TaskService
     {
         // Определяем статус задачи
         $statusId = null;
-        
+
         // Сначала проверяем, передан ли status_id напрямую
         if (isset($data['status_id']) && $data['status_id']) {
             $statusId = $data['status_id'];
@@ -92,7 +105,7 @@ class TaskService
                 $statusId = $status->id;
             }
         }
-        
+
         // Если статус не найден, берем первый статус проекта как статус по умолчанию
         if (!$statusId) {
             $defaultStatus = $project->taskStatuses()->orderBy('order')->first();
@@ -101,7 +114,7 @@ class TaskService
 
         // Обрабатываем HTML контент с изображениями
         $htmlContentService = app(HtmlContentService::class);
-        
+
         $processedDescription = null;
         if (!empty($data['description'])) {
             $processedDescription = $htmlContentService->processContent($data['description'], [
@@ -109,7 +122,7 @@ class TaskService
                 'disk' => 'public'
             ]);
         }
-        
+
         $processedResult = null;
         if (!empty($data['result'])) {
             $processedResult = $htmlContentService->processContent($data['result'], [
@@ -130,6 +143,7 @@ class TaskService
             'priority' => $data['priority'] ?? 'medium',
             'status_id' => $statusId,
             'deadline' => isset($data['deadline']) ? $data['deadline'] : null,
+            'tags' => isset($data['tags']) ? TagHelper::normalize($data['tags']) : null,
         ]);
 
         return $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
@@ -137,9 +151,8 @@ class TaskService
 
     public function updateTask(Task $task, array $data): Task
     {
-        // Обрабатываем HTML контент с изображениями
         $htmlContentService = app(HtmlContentService::class);
-        
+
         $processedDescription = null;
         if (isset($data['description'])) {
             if (!empty($data['description'])) {
@@ -151,15 +164,13 @@ class TaskService
                         'disk' => 'public'
                     ]
                 );
-                
-                // Удаляем неиспользуемые изображения
+
                 $htmlContentService->cleanupUnusedImages(
                     $task->description ?? '',
                     $processedDescription['html'],
                     ['disk' => 'public']
                 );
             } else {
-                // Если описание пустое, удаляем старые изображения
                 $htmlContentService->cleanupUnusedImages(
                     $task->description ?? '',
                     '',
@@ -167,7 +178,7 @@ class TaskService
                 );
             }
         }
-        
+
         $processedResult = null;
         if (isset($data['result'])) {
             if (!empty($data['result'])) {
@@ -179,15 +190,13 @@ class TaskService
                         'disk' => 'public'
                     ]
                 );
-                
-                // Удаляем неиспользуемые изображения
+
                 $htmlContentService->cleanupUnusedImages(
                     $task->result ?? '',
                     $processedResult['html'],
                     ['disk' => 'public']
                 );
             } else {
-                // Если результат пустой, удаляем старые изображения
                 $htmlContentService->cleanupUnusedImages(
                     $task->result ?? '',
                     '',
@@ -204,16 +213,16 @@ class TaskService
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
             'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,
+            'tags' => isset($data['tags']) ? TagHelper::normalize($data['tags']) : $task->tags,
         ];
 
-        // Обрабатываем поле deadline отдельно, так как оно может быть пустой строкой
         if (array_key_exists('deadline', $data)) {
             $updateData['deadline'] = !empty($data['deadline']) ? $data['deadline'] : null;
         } else {
             $updateData['deadline'] = $task->deadline;
         }
 
-        // Обновляем статус, если он передан
+
         if (isset($data['status_id']) && $data['status_id']) {
             // Проверяем, что status_id принадлежит проекту задачи
             $status = $task->project->taskStatuses()->where('id', $data['status_id'])->first();
@@ -280,4 +289,4 @@ class TaskService
         $projectService = app(ProjectService::class);
         return $projectService->canUserAccessProject($user, $task->project);
     }
-} 
+}
