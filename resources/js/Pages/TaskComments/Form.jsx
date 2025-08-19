@@ -111,7 +111,7 @@ export default function Form({ auth, comment, task }) {
                                             array.findIndex(u => u.id === user.id) === index
                                           )
                                           // Проверяем наличие необходимых полей
-                                          .filter(user => user && user.id && user.name && user.email);
+                                          .filter(user => user && user.id && user.name && user.email)
                                     
                                     console.log('TaskComments/Form - task.project:', task.project);
                                     console.log('TaskComments/Form - task.project.owner:', task.project?.owner);
