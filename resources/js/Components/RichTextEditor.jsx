@@ -1109,17 +1109,17 @@ class MentionList {
             
             this.element.innerHTML = `
                 ${this.props.items.map((item, index) => `
-                    <div class="px-4 py-3 cursor-pointer flex items-center space-x-4 hover:bg-accent-blue/10 active:bg-accent-blue/20 transition-colors duration-150 ${
+                    <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 active:bg-accent-blue/20 transition-colors duration-150 ${
                         index === this.props.index ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
                     }" data-index="${index}">
-                        <div class="w-10 h-10 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-base font-semibold text-accent-blue">
+                        <div class="w-8 h-8 bg-accent-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-semibold text-accent-blue">
                                 ${item.name.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-base font-medium truncate text-text-primary">${item.name}</div>
-                            <div class="text-sm text-text-muted truncate">${item.email}</div>
+                            <div class="text-sm font-medium truncate text-text-primary">${item.name}</div>
+                            <div class="text-xs text-text-muted truncate">${item.email}</div>
                         </div>
                         ${index === this.props.index ? '<div class="text-accent-blue ml-2">✓</div>' : ''}
                     </div>
