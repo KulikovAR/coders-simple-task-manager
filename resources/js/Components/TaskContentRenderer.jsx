@@ -104,6 +104,28 @@ export default function TaskContentRenderer({ content, className = '' }) {
         .task-content a:hover {
             color: var(--accent-blue-hover, #2563eb);
         }
+        .task-content .mention {
+            display: inline-flex;
+            align-items: center;
+            background-color: rgba(var(--accent-blue-rgb), 0.1);
+            color: var(--accent-blue);
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: default;
+            white-space: nowrap;
+            margin: 0 0.125rem;
+        }
+        .task-content .mention:hover {
+            background-color: rgba(var(--accent-blue-rgb), 0.15);
+        }
+        .task-content .mention::after {
+            content: attr(data-user-email);
+            margin-left: 0.375rem;
+            font-size: 0.75rem;
+            opacity: 0.75;
+        }
 
         /* Темная тема */
         :root[data-theme="dark"] .task-content {

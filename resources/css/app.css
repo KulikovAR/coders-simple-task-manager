@@ -134,10 +134,24 @@ input[type="url"],
 input[type="number"],
 textarea,
 select {
-    font-size: 16px !important;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+}
+
+/* Размер шрифта для мобильных устройств */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
 }
 
 /* Для очень маленьких экранов можно использовать медиа-запрос */
@@ -152,6 +166,13 @@ select {
     textarea,
     select {
         font-size: 16px !important;
+    }
+}
+
+/* Размер шрифта для ПК */
+@media screen and (min-width: 769px) {
+    select {
+        font-size: 0.875rem !important;
     }
 }
 
