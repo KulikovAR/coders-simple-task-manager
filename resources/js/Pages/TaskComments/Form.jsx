@@ -100,14 +100,18 @@ export default function Form({ auth, comment, task }) {
                                     Комментарий
                                 </label>
                                 {(() => {
+                                    // Собираем всех пользователей проекта
                                     const projectUsers = task.project 
                                         ? [
                                             ...(task.project.owner ? [task.project.owner] : []), 
                                             ...(task.project.users || [])
-                                          ].filter((user, index, array) => 
+                                          ]
+                                          // Убираем дубликаты по ID
+                                          .filter((user, index, array) => 
                                             array.findIndex(u => u.id === user.id) === index
                                           )
-                                        : [];
+                                          // Проверяем наличие необходимых полей
+                                          .filter(user => user && user.id && user.name && user.email);
                                     
                                     console.log('TaskComments/Form - task.project:', task.project);
                                     console.log('TaskComments/Form - task.project.owner:', task.project?.owner);
@@ -119,9 +123,11 @@ export default function Form({ auth, comment, task }) {
                                             value={data.content}
                                             onChange={(value) => setData('content', value)}
                                             onMentionSelect={(user) => {
-                                                console.log('TaskComments/Form - User mentioned:', user);
-                                                console.log('TaskComments/Form - User name:', user?.name);
-                                                console.log('TaskComments/Form - User email:', user?.email);
+                                                if (user && user.email) {
+                                                    // Обновляем содержимое с упоминанием
+                                                    const mention = `@${user.email}`;
+                                                    console.log('TaskComments/Form - Добавляем упоминание:', mention);
+                                                }
                                             }}
                                             users={projectUsers}
                                             placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"

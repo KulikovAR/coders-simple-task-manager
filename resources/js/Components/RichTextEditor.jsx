@@ -275,25 +275,13 @@ export default function RichTextEditor({
                 return [];
             }
             
-            return users.map(user => {
-                // Если это ProjectMember, получаем пользователя из связи
-                if (user && user.user) {
-                    return {
-                        id: user.user.id,
-                        name: user.user.name || 'Неизвестный пользователь',
-                        email: user.user.email || 'unknown@example.com'
-                    };
-                }
-                // Если это обычный User
-                if (user && user.id) {
-                    return {
-                        id: user.id,
-                        name: user.name || 'Неизвестный пользователь',
-                        email: user.email || 'unknown@example.com'
-                    };
-                }
-                return null;
-            }).filter(user => user && user.name && user.name !== 'Неизвестный пользователь');
+            return users
+                .filter(user => user && user.id && user.name && user.email) // Проверяем наличие всех необходимых полей
+                .map(user => ({
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                }));
         } catch (error) {
             console.error('Ошибка при нормализации пользователей:', error);
             return [];
@@ -362,14 +350,12 @@ export default function RichTextEditor({
                             // Вставляем упоминание с email пользователя
                             const userEmail = props.email || 'unknown@example.com';
                             
-                            // Создаем HTML-элемент для упоминания
-                            const mentionHTML = `<span class="mention" data-user-id="${props.id}" data-user-email="${userEmail}">@${props.name}</span>`;
-                            
+                            // Вставляем упоминание в формате @email
                             editor
                                 .chain()
                                 .focus()
                                 .deleteRange(range)
-                                .insertContent(mentionHTML)
+                                .insertContent(`@${userEmail}`)
                                 .run();
                             
                             // Вызываем колбэк для родительского компонента с правильным пользователем
