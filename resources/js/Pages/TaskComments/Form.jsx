@@ -105,13 +105,14 @@ export default function Form({ auth, comment, task }) {
                                         ? [
                                             ...(task.project.owner ? [task.project.owner] : []), 
                                             ...(task.project.users || [])
-                                          ]
-                                          // Убираем дубликаты по ID
-                                          .filter((user, index, array) => 
+                                        ]
+                                        // Убираем дубликаты по ID
+                                        .filter((user, index, array) => 
                                             array.findIndex(u => u.id === user.id) === index
-                                          )
-                                          // Проверяем наличие необходимых полей
-                                          .filter(user => user && user.id && user.name && user.email)
+                                        )
+                                        // Проверяем наличие необходимых полей
+                                        .filter(user => user && user.id && user.name && user.email)
+                                        : [];
                                     
                                     console.log('TaskComments/Form - task.project:', task.project);
                                     console.log('TaskComments/Form - task.project.owner:', task.project?.owner);
