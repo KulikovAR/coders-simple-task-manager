@@ -117,21 +117,25 @@ class ProjectService
 
     public function canUserAccessProject(User $user, Project $project): bool
     {
-        return $project->owner_id === $user->id || 
+        return $project->owner_id === $user->id ||
                $project->members()->where('user_id', $user->id)->exists();
     }
 
     public function canUserManageProject(User $user, Project $project): bool
     {
-        return $project->owner_id === $user->id;
+//        return $project->owner_id === $user->id;
+        // Временно
+        return $project->owner_id === $user->id ||
+            $project->members()->where('user_id', $user->id)
+                ->whereIn('role', ['member'])->exists();
     }
 
     public function canUserContributeToProject(User $user, Project $project): bool
     {
-        return $project->owner_id === $user->id || 
+        return $project->owner_id === $user->id ||
                $project->members()->where('user_id', $user->id)
                    ->whereIn('role', ['member'])->exists();
     }
 
 
-} 
+}
