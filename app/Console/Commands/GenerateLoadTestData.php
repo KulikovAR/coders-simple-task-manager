@@ -7,6 +7,7 @@ use App\Models\Sprint;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
+use App\Enums\TaskStatusType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -33,9 +34,6 @@ class GenerateLoadTestData extends Command
 
         DB::beginTransaction();
         try {
-            // Создаем базовые статусы для задач, если их нет
-            $statuses = $this->ensureTaskStatuses($user->id);
-            
             // Генерируем проекты
             for ($p = 0; $p < $projectsCount; $p++) {
                 $project = Project::create([
@@ -43,6 +41,9 @@ class GenerateLoadTestData extends Command
                     'description' => "Проект для нагрузочного тестирования #" . ($p + 1),
                     'owner_id' => $user->id,
                 ]);
+
+                // Создаем статусы для проекта
+                $statuses = $this->ensureTaskStatuses($project);
 
                 // Создаем спринты для проекта
                 $sprints = [];
@@ -107,30 +108,21 @@ class GenerateLoadTestData extends Command
         return 0;
     }
 
-    private function ensureTaskStatuses($userId)
+    private function ensureTaskStatuses($project)
     {
-        $statusNames = ['Новая', 'В работе', 'На проверке', 'Готово'];
         $statusIds = [];
+        $defaultStatuses = TaskStatusType::getDefaultStatuses();
 
-        // Получаем первый проект пользователя или создаем новый
-        $project = Project::firstOrCreate(
-            ['owner_id' => $userId],
-            [
-                'name' => 'Основной проект',
-                'description' => 'Проект для базовых статусов'
-            ]
-        );
-
-        foreach ($statusNames as $index => $name) {
+        foreach ($defaultStatuses as $statusData) {
             $status = TaskStatus::firstOrCreate(
                 [
-                    'name' => $name,
-                    'project_id' => $project->id
+                    'project_id' => $project->id,
+                    'name' => $statusData['name']
                 ],
                 [
-                    'color' => '#' . dechex(rand(0x000000, 0xFFFFFF)),
-                    'order' => $index,
-                    'created_by' => $userId,
+                    'color' => $statusData['color'],
+                    'order' => $statusData['order'],
+                    'created_by' => $project->owner_id,
                 ]
             );
             $statusIds[] = $status->id;
