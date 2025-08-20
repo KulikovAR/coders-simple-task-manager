@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import Waves from '@/Components/Waves';
 
 export default function Landing({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -51,7 +52,21 @@ export default function Landing({ auth }) {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-primary-bg text-text-primary">
+            <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-hidden">
+                <Waves
+                    lineColor="rgba(0, 0, 0, 0.05)"
+                    backgroundColor="transparent"
+                    waveSpeedX={0.012}
+                    waveSpeedY={0.006}
+                    waveAmpX={22}
+                    waveAmpY={12}
+                    xGap={18}
+                    yGap={48}
+                    friction={0.94}
+                    tension={0.006}
+                    maxCursorMove={60}
+                    style={{ zIndex: 1 }}
+                />
                 <header className={`fixed top-0 left-0 right-0 z-50 bg-primary-bg/80 backdrop-blur-xl border-b border-border-color transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
                     <nav className="max-w-7xl mx-auto px-6 py-4">
                         <div className="flex items-center justify-between">

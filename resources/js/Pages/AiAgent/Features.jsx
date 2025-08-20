@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import Waves from '@/Components/Waves';
 
 export default function AiFeatures() {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -50,7 +51,21 @@ export default function AiFeatures() {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-white text-black">
+            <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-hidden">
+                <Waves
+                    lineColor="rgba(0, 0, 0, 0.05)"
+                    backgroundColor="transparent"
+                    waveSpeedX={0.012}
+                    waveSpeedY={0.006}
+                    waveAmpX={22}
+                    waveAmpY={12}
+                    xGap={18}
+                    yGap={48}
+                    friction={0.94}
+                    tension={0.006}
+                    maxCursorMove={60}
+                    style={{ zIndex: 1 }}
+                />
                 {/* Header */}
                 <header className={`border-b border-border-color transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
