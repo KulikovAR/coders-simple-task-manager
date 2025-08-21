@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
-import UpdateEmailNotificationsForm from './Partials/UpdateEmailNotificationsForm';
+
 import PaymentModal from '@/Components/PaymentModal';
 import { useState } from 'react';
 
@@ -121,23 +121,6 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                     </div>
                 </div>
 
-                {/* Email уведомления */}
-                <div className="card">
-                    <div className="card-header">
-                        <h3 className="card-title flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Email уведомления
-                        </h3>
-                        <p className="text-text-secondary text-sm">
-                            Настройте получение уведомлений на email
-                        </p>
-                    </div>
-                    <div className="card-body">
-                        <UpdateEmailNotificationsForm className="max-w-xl" user={user} />
-                    </div>
-                </div>
 
                 {/* Смена пароля */}
                 <div className="card">

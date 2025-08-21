@@ -2,6 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import Checkbox from '@/Components/Checkbox';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 
@@ -17,6 +18,7 @@ export default function UpdateProfileInformation({
             name: user.name,
             email: user.email,
             telegram_chat_id: user.telegram_chat_id || '',
+            email_notifications: user.email_notifications ?? true,
         });
 
     const submit = (e) => {
@@ -76,6 +78,29 @@ export default function UpdateProfileInformation({
                     </div>
 
                     <InputError className="mt-2" message={errors.telegram_chat_id} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="email_notifications" value="Email уведомления" />
+                    
+                    <div className="mt-2">
+                        <label className="flex items-center">
+                            <Checkbox
+                                name="email_notifications"
+                                checked={data.email_notifications}
+                                onChange={(e) => setData('email_notifications', e.target.checked)}
+                            />
+                            <span className="ml-2 text-sm text-text-secondary">
+                                Получать уведомления на email
+                            </span>
+                        </label>
+                    </div>
+
+                    <div className="mt-2 text-xs text-text-muted">
+                        Когда включено, вы будете получать email уведомления о новых задачах, комментариях и других событиях в проектах.
+                    </div>
+
+                    <InputError message={errors.email_notifications} className="mt-2" />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
