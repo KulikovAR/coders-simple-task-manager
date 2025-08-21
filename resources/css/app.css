@@ -445,6 +445,11 @@ body[data-page="Welcome"] {
     border-color: var(--accent-blue) !important;
     box-shadow: var(--shadow-sm);
 }
+[data-theme='light'] .board-modal {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
 [data-theme='light'] .btn-primary:hover, [data-theme='light'] .btn-primary:focus {
     background-color: #1d4ed8 !important;
     color: #ffffff !important;

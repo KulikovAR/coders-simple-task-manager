@@ -1238,7 +1238,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         onClick={closeTaskModal}
                     >
                         <div
-                            className="w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl white:bg-gray-400/60 dark:bg-black/60  bg-card-bg/70 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-md"
+                            className="board-modal w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-black/60 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-md"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Заголовок модалки с градиентом и кнопками */}
