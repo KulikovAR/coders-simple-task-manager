@@ -657,8 +657,8 @@ export default function TaskForm({
                                 placeholder: 'Введите теги через пробел'
                             })}
                             
-                            {/* Проект */}
-                            {renderField('project_id', 'Проект *', 'select', {
+                            {/* Проект - показываем только при создании */}
+                            {!isEditing && renderField('project_id', 'Проект *', 'select', {
                                 options: [
                                     { value: '', label: 'Выберите проект' },
                                     ...projects.map((project) => ({
