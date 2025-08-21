@@ -24,12 +24,12 @@ export default function StatusColumn({
     handleTaskTouchStart,
     handleTaskTouchMove,
     handleTaskTouchEnd,
-    isCompactView
+    viewMode
 }) {
     return (
         <div
             className={`bg-secondary-bg border rounded-xl transition-all duration-300 ${
-                isCompactView 
+                viewMode === 'list' 
                     ? 'p-4 w-full' 
                     : 'p-5 flex-shrink-0 w-64 md:w-72 lg:w-80 min-h-full max-h-full'
             } flex flex-col ${
@@ -85,9 +85,11 @@ export default function StatusColumn({
 
             {/* Улучшенная скроллируемая область с задачами */}
             <div className={`${
-                isCompactView 
+                viewMode === 'list' 
                     ? 'space-y-2' 
-                    : 'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4'
+                    : viewMode === 'compact-board'
+                        ? 'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-2'
+                        : 'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4'
             }`}>
                 {tasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
                     <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5 h-40 flex flex-col items-center justify-center">
@@ -114,7 +116,7 @@ export default function StatusColumn({
                         handleTaskTouchMove={handleTaskTouchMove}
                         handleTaskTouchEnd={handleTaskTouchEnd}
                         openTaskModal={openTaskModal}
-                        isCompactView={isCompactView}
+                        viewMode={viewMode}
                     />
                 ))}
             </div>

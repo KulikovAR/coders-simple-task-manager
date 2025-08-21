@@ -17,8 +17,8 @@ export default function BoardFilters({
     setTags,
     auth,
     openPaymentModal,
-    isCompactView,
-    toggleCompactView
+    viewMode,
+    toggleViewMode
 }) {
     return (
         <div className="card">
@@ -103,24 +103,31 @@ export default function BoardFilters({
                     <div className="flex flex-col sm:flex-row gap-3 flex-1">
                         {/* Кнопка переключения вида */}
                         <button
-                            onClick={toggleCompactView}
+                            onClick={toggleViewMode}
                             className="btn btn-secondary btn-mobile-stack order-0 text-center flex items-center justify-center gap-2"
-                            title={isCompactView ? 'Переключиться на карточный вид' : 'Переключиться на списочный вид'}
+                            title={
+                                viewMode === 'cards' ? 'Переключиться на компактную доску' :
+                                viewMode === 'compact-board' ? 'Переключиться на список' :
+                                'Переключиться на карточки'
+                            }
                         >
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                {isCompactView ? (
+                                {viewMode === 'cards' ? (
                                     // Иконка сетки (карточки)
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                ) : viewMode === 'compact-board' ? (
+                                    // Иконка доски с линиями (компактная доска)
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0h2a2 2 0 002-2V7a2 2 0 00-2-2H9m0 8V5" />
                                 ) : (
                                     // Иконка списка (строки)
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                 )}
                             </svg>
                             <span className="hidden sm:inline">
-                                {isCompactView ? 'Карточки' : 'Список'}
+                                {viewMode === 'cards' ? 'Карточки' : viewMode === 'compact-board' ? 'Компактная доска' : 'Список'}
                             </span>
                             <span className="sm:hidden">
-                                {isCompactView ? 'Карточки' : 'Список'}
+                                {viewMode === 'cards' ? 'Карточки' : viewMode === 'compact-board' ? 'Компактно' : 'Список'}
                             </span>
                         </button>
                         <Link

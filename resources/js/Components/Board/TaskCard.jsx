@@ -11,7 +11,7 @@ export default function TaskCard({
     handleTaskTouchMove,
     handleTaskTouchEnd,
     openTaskModal,
-    isCompactView
+    viewMode
 }) {
     const getPriorityText = (priority) => {
         switch (priority) {
@@ -26,8 +26,8 @@ export default function TaskCard({
         }
     };
 
-    // Компактный списочный вид
-    if (isCompactView) {
+    // Компактный вид - строки в режимах 'list' или 'compact-board'
+    if (viewMode === 'list' || viewMode === 'compact-board') {
         return (
             <div
                 className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
