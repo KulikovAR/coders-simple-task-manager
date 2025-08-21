@@ -16,6 +16,18 @@ use Illuminate\Support\Facades\Mail;
 class NotificationService
 {
     /**
+     * Перевести приоритет на русский язык
+     */
+    private function translatePriority(string $priority): string
+    {
+        return match($priority) {
+            'low' => 'Низкий',
+            'medium' => 'Средний', 
+            'high' => 'Высокий',
+            default => $priority
+        };
+    }
+    /**
      * Создать уведомление о назначении задачи
      */
     public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
@@ -159,8 +171,8 @@ class NotificationService
                 notifiable: $task,
                 data: [
                     'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                    'priority' => $this->sanitizeUtf8($newPriority),
-                    'old_priority' => $this->sanitizeUtf8($oldPriority),
+                    'priority' => $this->sanitizeUtf8($this->translatePriority($newPriority)),
+                    'old_priority' => $this->sanitizeUtf8($this->translatePriority($oldPriority)),
                 ]
             );
         }
@@ -174,8 +186,8 @@ class NotificationService
                 notifiable: $task,
                 data: [
                     'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                    'priority' => $this->sanitizeUtf8($newPriority),
-                    'old_priority' => $this->sanitizeUtf8($oldPriority),
+                    'priority' => $this->sanitizeUtf8($this->translatePriority($newPriority)),
+                    'old_priority' => $this->sanitizeUtf8($this->translatePriority($oldPriority)),
                 ]
             );
         }
