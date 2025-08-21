@@ -846,7 +846,7 @@ export default function RichTextEditor({
             <style>{editorStyles}</style>
             <div className={`border border-border-color rounded-lg ${className}`}>
                 {/* Панель инструментов */}
-            <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg overflow-x-auto">
+            <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg overflow-x-auto rounded-t-lg">
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBold().run()}
@@ -971,14 +971,14 @@ export default function RichTextEditor({
 
             {/* Поле ввода ссылки */}
             {showLinkInput && (
-                <div className="p-2 border-b border-border-color bg-secondary-bg">
+                <div className={`p-2 border-b border-border-color bg-secondary-bg ${!showImageInput ? 'rounded-b-lg' : ''}`}>
                     <div className="flex gap-2">
                         <input
                             type="url"
                             value={linkUrl}
                             onChange={(e) => setLinkUrl(e.target.value)}
                             placeholder="Введите URL ссылки"
-                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
+                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded-lg bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') addLink();
                                 if (e.key === 'Escape') setShowLinkInput(false);
@@ -986,13 +986,13 @@ export default function RichTextEditor({
                         />
                         <button
                             onClick={addLink}
-                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                         >
                             Добавить
                         </button>
                         <button
                             onClick={() => setShowLinkInput(false)}
-                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
+                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
                         >
                             Отмена
                         </button>
@@ -1002,14 +1002,14 @@ export default function RichTextEditor({
 
             {/* Поле ввода изображения */}
             {showImageInput && (
-                <div className="p-2 border-b border-border-color bg-secondary-bg">
+                <div className="p-2 border-b border-border-color bg-secondary-bg rounded-b-lg">
                     <div className="flex gap-2">
                         <input
                             type="url"
                             value={imageUrl}
                             onChange={(e) => setImageUrl(e.target.value)}
                             placeholder="Введите URL изображения"
-                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
+                            className="flex-1 px-3 py-1.5 text-sm border border-border-color rounded-lg bg-card-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all duration-200"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') addImage();
                                 if (e.key === 'Escape') setShowImageInput(false);
@@ -1017,13 +1017,13 @@ export default function RichTextEditor({
                         />
                         <button
                             onClick={addImage}
-                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                            className="px-3 py-1.5 text-sm bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                         >
                             Добавить
                         </button>
                         <button
                             onClick={() => setShowImageInput(false)}
-                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
+                            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400/20"
                         >
                             Отмена
                         </button>
@@ -1049,8 +1049,8 @@ export default function RichTextEditor({
                     }
                 }}
                 className={`min-h-[300px] p-4 bg-card-bg transition-colors duration-200 ${
-                    isDragging ? 'ring-2 ring-accent-blue/20 bg-accent-blue/5' : ''
-                }`}
+                    !showLinkInput && !showImageInput ? 'rounded-b-lg' : ''
+                } ${isDragging ? 'ring-2 ring-accent-blue/20 bg-accent-blue/5' : ''}`}
             >
                 <EditorContent 
                     editor={editor} 
