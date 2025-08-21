@@ -55,6 +55,11 @@ class TaskRequest extends FormRequest
         ];
     }
 
+    public function wantsJson(): bool
+    {
+        return $this->ajax() || $this->wantsJson() || $this->header('Accept') === 'application/json';
+    }
+
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {

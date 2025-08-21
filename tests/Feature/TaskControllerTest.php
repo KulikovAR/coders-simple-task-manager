@@ -10,10 +10,23 @@ use App\Models\Sprint;
 use App\Models\ProjectMember;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Feature\Traits\OptimizedTestResponse;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TaskControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, OptimizedTestResponse;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutExceptionHandling();
+
+        // Очищаем кэш после каждого теста для освобождения памяти
+        $this->afterApplicationCreated(function () {
+            $this->app['cache']->flush();
+        });
+    }
 
     public function test_index_page_is_displayed_for_authenticated_user(): void
     {
@@ -33,6 +46,8 @@ class TaskControllerTest extends TestCase
             ->has('taskStatuses')
             ->has('filters')
         );
+
+        $this->optimizeResponse($response);
     }
 
     public function test_index_shows_user_tasks(): void
@@ -169,7 +184,7 @@ class TaskControllerTest extends TestCase
             ->actingAs($user)
             ->post('/tasks', [
                 'title' => 'Test Task',
-                'description' => 'Test Description',
+                'description' => '<p>Test Description</p>',
                 'project_id' => $project->id,
                 'status_id' => $status->id,
                 'priority' => 'medium',
@@ -180,7 +195,7 @@ class TaskControllerTest extends TestCase
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Test Task',
-            'description' => 'Test Description',
+            'description' => '<p>Test Description</p>',
             'project_id' => $project->id,
             'status_id' => $status->id,
             'priority' => 'medium',
@@ -198,7 +213,7 @@ class TaskControllerTest extends TestCase
             ->actingAs($user)
             ->post('/tasks', [
                 'title' => 'Test Task',
-                'description' => 'Test Description',
+                'description' => '<p>Test Description</p>',
                 'project_id' => $project->id,
                 'status_id' => $status->id,
             ]);
@@ -229,7 +244,7 @@ class TaskControllerTest extends TestCase
         $owner = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $owner->id]);
         $task = Task::factory()->create(['project_id' => $project->id]);
-        
+
         ProjectMember::factory()->create([
             'project_id' => $project->id,
             'user_id' => $user->id,
@@ -288,7 +303,7 @@ class TaskControllerTest extends TestCase
         $owner = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $owner->id]);
         $task = Task::factory()->create(['project_id' => $project->id]);
-        
+
         ProjectMember::factory()->create([
             'project_id' => $project->id,
             'user_id' => $user->id,
@@ -331,7 +346,7 @@ class TaskControllerTest extends TestCase
             ->actingAs($user)
             ->put("/tasks/{$task->id}", [
                 'title' => 'Updated Task',
-                'description' => 'Updated Description',
+                'description' => '<p>Updated Description</p>',
                 'status_id' => $status->id,
                 'priority' => 'high',
             ]);
@@ -342,7 +357,7 @@ class TaskControllerTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
             'title' => 'Updated Task',
-            'description' => 'Updated Description',
+            'description' => '<p>Updated Description</p>',
             'status_id' => $status->id,
             'priority' => 'high',
         ]);
@@ -359,7 +374,7 @@ class TaskControllerTest extends TestCase
             ->actingAs($user)
             ->put("/tasks/{$task->id}", [
                 'title' => 'Updated Task',
-                'description' => 'Updated Description',
+                'description' => '<p>Updated Description</p>',
             ]);
 
         $response->assertForbidden();

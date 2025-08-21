@@ -80,7 +80,7 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->post("/tasks/{$task->id}/comments", [
-                'content' => 'Test comment content',
+                'content' => '<p>Test comment content</p>',
                 'type' => 'general'
             ]);
 
@@ -88,7 +88,7 @@ class TaskCommentControllerTest extends TestCase
         $response->assertSessionHas('success', 'Комментарий успешно добавлен.');
 
         $this->assertDatabaseHas('task_comments', [
-            'content' => 'Test comment content',
+            'content' => '<p>Test comment content</p>',
             'type' => 'general',
             'user_id' => $user->id,
             'task_id' => $task->id,
@@ -105,7 +105,7 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->post("/tasks/{$task->id}/comments", [
-                'content' => 'Test comment content',
+                'content' => '<p>Test comment content</p>',
                 'type' => 'general'
             ]);
 
@@ -118,7 +118,7 @@ class TaskCommentControllerTest extends TestCase
         $task = Task::factory()->create(['project_id' => $project->id]);
 
         $response = $this->post("/tasks/{$task->id}/comments", [
-            'content' => 'Test comment content',
+            'content' => '<p>Test comment content</p>',
             'type' => 'general'
         ]);
 
@@ -137,7 +137,7 @@ class TaskCommentControllerTest extends TestCase
             $response = $this
                 ->actingAs($user)
                 ->post("/tasks/{$task->id}/comments", [
-                    'content' => "Test {$type} content",
+                    'content' => "<p>Test {$type} content</p>",
                     'type' => $type
                 ]);
 
@@ -145,7 +145,7 @@ class TaskCommentControllerTest extends TestCase
             $response->assertSessionHas('success', 'Комментарий успешно добавлен.');
 
             $this->assertDatabaseHas('task_comments', [
-                'content' => "Test {$type} content",
+                'content' => "<p>Test {$type} content</p>",
                 'type' => $type,
                 'user_id' => $user->id,
                 'task_id' => $task->id,
@@ -229,7 +229,7 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->put("/comments/{$comment->id}", [
-                'content' => 'Updated content',
+                'content' => '<p>Updated content</p>',
                 'type' => 'testing_feedback'
             ]);
 
@@ -237,7 +237,7 @@ class TaskCommentControllerTest extends TestCase
         $response->assertSessionHas('success', 'Комментарий успешно обновлен.');
 
         $comment->refresh();
-        $this->assertEquals('Updated content', $comment->content);
+        $this->assertEquals('<p>Updated content</p>', $comment->content);
         $this->assertEquals('testing_feedback', $comment->type->value);
     }
 
@@ -255,7 +255,7 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->put("/comments/{$comment->id}", [
-                'content' => 'Updated content',
+                'content' => '<p>Updated content</p>',
                 'type' => 'general'
             ]);
 
@@ -267,7 +267,7 @@ class TaskCommentControllerTest extends TestCase
         $comment = TaskComment::factory()->create();
 
         $response = $this->put("/comments/{$comment->id}", [
-            'content' => 'Updated content',
+            'content' => '<p>Updated content</p>',
             'type' => 'general'
         ]);
 
@@ -331,19 +331,19 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->post("/tasks/{$task1->id}/comments", [
-                'content' => 'Comment for task 1',
+                'content' => '<p>Comment for task 1</p>',
                 'type' => 'general'
             ]);
 
         $response->assertRedirect();
 
         $this->assertDatabaseHas('task_comments', [
-            'content' => 'Comment for task 1',
+            'content' => '<p>Comment for task 1</p>',
             'task_id' => $task1->id,
         ]);
 
         $this->assertDatabaseMissing('task_comments', [
-            'content' => 'Comment for task 1',
+            'content' => '<p>Comment for task 1</p>',
             'task_id' => $task2->id,
         ]);
     }
@@ -365,14 +365,14 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user2)
             ->post("/tasks/{$task->id}/comments", [
-                'content' => 'Comment from user 2',
+                'content' => '<p>Comment from user 2</p>',
                 'type' => 'general'
             ]);
 
         $response->assertRedirect();
 
         $this->assertDatabaseHas('task_comments', [
-            'content' => 'Comment from user 2',
+            'content' => '<p>Comment from user 2</p>',
             'user_id' => $user2->id,
             'task_id' => $task->id,
         ]);
@@ -389,14 +389,14 @@ class TaskCommentControllerTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->post("/tasks/{$task->id}/comments", [
-                'content' => $longContent,
+                'content' => '<p>' . $longContent . '</p>',
                 'type' => 'general'
             ]);
 
         $response->assertRedirect();
 
         $this->assertDatabaseHas('task_comments', [
-            'content' => $longContent,
+            'content' => '<p>' . $longContent . '</p>',
             'user_id' => $user->id,
             'task_id' => $task->id,
         ]);
