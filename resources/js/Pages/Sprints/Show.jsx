@@ -190,36 +190,6 @@ export default function Show({ auth, project, sprint }) {
                             </div>
                         </div>
 
-                        {/* Статистика */}
-                        <div className="card">
-                            <h3 className="card-title mb-4">Статистика</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-text-muted">Всего задач:</span>
-                                    <span className="text-sm text-text-primary font-medium">
-                                        {sprint.tasks?.length || 0}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-text-muted">Завершено:</span>
-                                    <span className="text-sm text-accent-green font-medium">
-                                        {sprint.tasks?.filter(t => t.status?.name === 'Done').length || 0}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-text-muted">В работе:</span>
-                                    <span className="text-sm text-accent-blue font-medium">
-                                        {sprint.tasks?.filter(t => t.status?.name === 'In Progress').length || 0}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-text-muted">К выполнению:</span>
-                                    <span className="text-sm text-accent-yellow font-medium">
-                                        {sprint.tasks?.filter(t => t.status?.name === 'To Do').length || 0}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Быстрые действия */}
                         <div className="card">
