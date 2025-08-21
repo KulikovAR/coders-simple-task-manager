@@ -113,10 +113,14 @@ export default function Authenticated({ user, header, children, flash }) {
                                             type="button"
                                             className="inline-flex items-center px-4 py-2 border border-border-color text-sm leading-4 font-medium text-text-primary hover:text-text-secondary hover:bg-secondary-bg focus:outline-none transition-all duration-200 bg-secondary-bg rounded-xl shadow-sm hover:shadow-md"
                                         >
-                                            <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center mr-2">
-                                                <span className="text-xs font-semibold text-accent-blue">
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </span>
+                                            <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center mr-2 overflow-hidden">
+                                                {user.avatar ? (
+                                                    <img src={`/storage/${user.avatar}`} alt="avatar" className="object-cover w-full h-full" />
+                                                ) : (
+                                                    <span className="text-xs font-semibold text-accent-blue">
+                                                        {user.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                )}
                                             </div>
                                             {user.name}
                                             <svg

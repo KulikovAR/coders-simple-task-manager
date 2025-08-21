@@ -34,7 +34,19 @@ class ProfileController extends Controller
         $user = $request->user();
         $originalChatId = $user->telegram_chat_id;
 
-        $user->fill($request->validated());
+        // Обработка аватарки
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $path = $avatar->store('avatars', 'public');
+            $user->avatar = $path;
+        }
+
+        // Обновляем только те поля, которые реально пришли (кроме avatar)
+        $fields = collect($request->except('avatar'))->filter(fn($v) => !is_null($v))->all();
+
+        if (!empty($fields)) {
+            $user->fill($fields);
+        }
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

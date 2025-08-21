@@ -5,6 +5,7 @@ import TextInput from '@/Components/TextInput';
 import Checkbox from '@/Components/Checkbox';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { useState, useRef } from 'react';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -13,18 +14,48 @@ export default function UpdateProfileInformation({
 }) {
     const user = usePage().props.auth.user;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
+    const { data, setData, patch, post, errors, processing, recentlySuccessful, reset } =
         useForm({
             name: user.name,
             email: user.email,
             telegram_chat_id: user.telegram_chat_id || '',
             email_notifications: user.email_notifications ?? true,
+            avatar: null,
         });
+
+    const [preview, setPreview] = useState(user.avatar ? `/storage/${user.avatar}` : null);
+    const fileInputRef = useRef();
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        setData('avatar', file);
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => setPreview(ev.target.result);
+            reader.readAsDataURL(file);
+        } else {
+            setPreview(user.avatar ? `/storage/${user.avatar}` : null);
+        }
+    };
+
+    const handleAvatarButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleAvatarRemove = () => {
+        setData('avatar', null);
+        setPreview(null);
+    };
 
     const submit = (e) => {
         e.preventDefault();
-
-        patch(route('profile.update'));
+        post(route('profile.update'), {
+            forceFormData: true,
+            onSuccess: () => {
+                if (data.avatar) reset('avatar');
+            },
+            _method: 'patch',
+        });
     };
 
     return (
@@ -78,6 +109,38 @@ export default function UpdateProfileInformation({
                     </div>
 
                     <InputError className="mt-2" message={errors.telegram_chat_id} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="avatar" value="Аватарка" />
+                    <div className="flex items-center gap-6 mt-2">
+                        <div className="w-20 h-20 rounded-full bg-accent-blue/10 flex items-center justify-center overflow-hidden border border-border-color relative">
+                            {preview ? (
+                                <img src={preview} alt="Аватарка" className="object-cover w-full h-full" />
+                            ) : (
+                                <span className="text-3xl font-bold text-accent-blue">{user.name.charAt(0).toUpperCase()}</span>
+                            )}
+                            {preview && (
+                                <button type="button" onClick={handleAvatarRemove} className="absolute top-0 right-0 bg-white/80 hover:bg-white text-accent-red rounded-full p-1 shadow transition-all" title="Удалить аватарку">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <button type="button" onClick={handleAvatarButtonClick} className="btn btn-secondary px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                {preview ? 'Изменить аватарку' : 'Загрузить аватарку'}
+                            </button>
+                            <input
+                                id="avatar"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleAvatarChange}
+                            />
+                            <InputError className="mt-2" message={errors.avatar} />
+                        </div>
+                    </div>
                 </div>
 
                 <div>

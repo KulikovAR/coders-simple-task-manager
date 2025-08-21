@@ -44,7 +44,7 @@ Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'inde
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Уведомления
@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'deleteSprintStatuses'])->name('sprints.statuses.delete');
     Route::get('/projects/{project}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('projects.statuses.api');
     Route::get('/projects/{project}/sprints/{sprint}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('sprints.statuses.api');
-    
+
     // Новый универсальный роут для получения контекстных статусов
     Route::get('/projects/{project}/contextual-statuses', [TaskStatusController::class, 'getContextualStatuses'])->name('projects.contextual-statuses');
 
@@ -120,7 +120,7 @@ Route::middleware(['auth', 'ai.agent'])->group(function () {
         ->name('ai-agent.process');
     Route::get('/ai-agent/commands', [App\Http\Controllers\AiAgentController::class, 'getCommands'])
         ->name('ai-agent.commands');
-    
+
     // История диалогов ИИ-агента
     Route::get('/ai-agent/conversations', [App\Http\Controllers\AiAgentController::class, 'getConversations'])
         ->name('ai-agent.conversations');

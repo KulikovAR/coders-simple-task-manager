@@ -69,7 +69,14 @@ export default function BoardFilters({
                         >
                             <option value="">Все исполнители</option>
                             {members.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
+                                <option key={user.id} value={user.id}>
+                                    {user.avatar ? (
+                                        <img src={`/storage/${user.avatar}`} alt="avatar" className="inline-block w-4 h-4 rounded-full mr-1 align-middle" />
+                                    ) : (
+                                        <span className="inline-block w-4 h-4 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold mr-1 align-middle text-center">{user.name.charAt(0).toUpperCase()}</span>
+                                    )}
+                                    {user.name}
+                                </option>
                             ))}
                         </select>
                     </div>

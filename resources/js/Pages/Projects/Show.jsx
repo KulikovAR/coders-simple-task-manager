@@ -297,8 +297,12 @@ export default function Show({ auth, project }) {
                         {/* Владелец проекта */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-secondary-bg border border-border-color rounded-lg p-3 sm:p-4 gap-3 sm:gap-0">
                             <div className="flex items-center min-w-0 flex-1">
-                                <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0">
-                                    {project.owner?.name?.charAt(0) || 'U'}
+                                <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0 overflow-hidden">
+                                    {project.owner?.avatar ? (
+                                        <img src={`/storage/${project.owner.avatar}`} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+                                    ) : (
+                                        <span>{project.owner?.name?.charAt(0) || 'U'}</span>
+                                    )}
                                 </div>
                                 <div className="ml-3 min-w-0 flex-1">
                                     <p className="text-text-primary font-medium break-words">{project.owner?.name || 'Неизвестно'}</p>
@@ -314,8 +318,12 @@ export default function Show({ auth, project }) {
                         {project.members?.filter(member => member.user_id !== project.owner_id).map((member) => (
                             <div key={member.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-secondary-bg border border-border-color rounded-lg p-3 sm:p-4 gap-3 sm:gap-0">
                                 <div className="flex items-center min-w-0 flex-1">
-                                    <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0">
-                                        {member.user?.name?.charAt(0) || 'U'}
+                                    <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0 overflow-hidden">
+                                        {member.user?.avatar ? (
+                                            <img src={`/storage/${member.user.avatar}`} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+                                        ) : (
+                                            <span>{member.user?.name?.charAt(0) || 'U'}</span>
+                                        )}
                                     </div>
                                     <div className="ml-3 min-w-0 flex-1">
                                         <p className="text-text-primary font-medium break-words">{member.user?.name || 'Неизвестно'}</p>
