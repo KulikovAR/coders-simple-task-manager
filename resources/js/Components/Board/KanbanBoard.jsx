@@ -22,16 +22,20 @@ export default function KanbanBoard({
     handleDragEnd,
     handleTaskTouchStart,
     handleTaskTouchMove,
-    handleTaskTouchEnd
+    handleTaskTouchEnd,
+    isCompactView
 }) {
     return (
         <div className="card">
             <div className="flex justify-between items-center mb-6">
                 <div /> {/* пустой div для выравнивания */}
             </div>
-            {/* Горизонтальный скролл для колонок, занимает весь экран */}
-            <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
-                 style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}>
+            {/* Горизонтальный скролл для колонок в режиме карточек, вертикальная стопка в компактном режиме */}
+            <div className={isCompactView ? 
+                "space-y-4" : 
+                "flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
+            }
+                 style={!isCompactView ? { height: 'calc(100vh - 200px)', minHeight: '500px' } : {}}>
                 {taskStatuses.map((status) => {
                     const statusTasks = getFilteredStatusTasks(status.id);
                     return (
@@ -59,6 +63,7 @@ export default function KanbanBoard({
                             handleTaskTouchStart={handleTaskTouchStart}
                             handleTaskTouchMove={handleTaskTouchMove}
                             handleTaskTouchEnd={handleTaskTouchEnd}
+                            isCompactView={isCompactView}
                         />
                     );
                 })}

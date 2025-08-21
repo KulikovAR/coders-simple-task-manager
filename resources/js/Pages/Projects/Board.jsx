@@ -45,6 +45,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [dragOverPriority, setDragOverPriority] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    // Переключение между карточным и списочным видом
+    const [isCompactView, setIsCompactView] = useState(() => {
+        const saved = localStorage.getItem('kanban-compact-view');
+        return saved ? JSON.parse(saved) : false;
+    });
     // Мобильный лонгтап для смены статуса
     const [isStatusOverlayOpen, setIsStatusOverlayOpen] = useState(false);
     const [statusOverlayTask, setStatusOverlayTask] = useState(null);
@@ -544,6 +549,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         }
     };
 
+    // Функция переключения вида
+    const toggleCompactView = () => {
+        const newValue = !isCompactView;
+        setIsCompactView(newValue);
+        localStorage.setItem('kanban-compact-view', JSON.stringify(newValue));
+    };
+
     const handleTaskTouchStart = (e, task) => {
         if (!e.touches || e.touches.length === 0) return;
 
@@ -741,6 +753,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     setTags={setTags}
                     auth={auth}
                     openPaymentModal={openPaymentModal}
+                    isCompactView={isCompactView}
+                    toggleCompactView={toggleCompactView}
                 />
 
                 {/* Информация о статусах */}
@@ -776,6 +790,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     handleTaskTouchStart={handleTaskTouchStart}
                     handleTaskTouchMove={handleTaskTouchMove}
                     handleTaskTouchEnd={handleTaskTouchEnd}
+                    isCompactView={isCompactView}
                 />
 
 

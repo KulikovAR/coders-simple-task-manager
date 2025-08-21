@@ -23,11 +23,16 @@ export default function StatusColumn({
     handleDragEnd,
     handleTaskTouchStart,
     handleTaskTouchMove,
-    handleTaskTouchEnd
+    handleTaskTouchEnd,
+    isCompactView
 }) {
     return (
         <div
-            className={`bg-secondary-bg border rounded-xl p-5 flex-shrink-0 w-64 md:w-72 lg:w-80 min-h-full max-h-full flex flex-col transition-all duration-300 ${
+            className={`bg-secondary-bg border rounded-xl transition-all duration-300 ${
+                isCompactView 
+                    ? 'p-4 w-full' 
+                    : 'p-5 flex-shrink-0 w-64 md:w-72 lg:w-80 min-h-full max-h-full'
+            } flex flex-col ${
                 dragOverStatusId === status.id
                     ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue'
                     : 'border-border-color shadow-md hover:shadow-lg'
@@ -79,7 +84,11 @@ export default function StatusColumn({
             )}
 
             {/* Улучшенная скроллируемая область с задачами */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4">
+            <div className={`${
+                isCompactView 
+                    ? 'space-y-2' 
+                    : 'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4'
+            }`}>
                 {tasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
                     <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5 h-40 flex flex-col items-center justify-center">
                         <div className="text-accent-blue/50 text-4xl mb-3">📋</div>
@@ -105,6 +114,7 @@ export default function StatusColumn({
                         handleTaskTouchMove={handleTaskTouchMove}
                         handleTaskTouchEnd={handleTaskTouchEnd}
                         openTaskModal={openTaskModal}
+                        isCompactView={isCompactView}
                     />
                 ))}
             </div>

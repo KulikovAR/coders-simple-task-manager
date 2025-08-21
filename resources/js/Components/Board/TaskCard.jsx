@@ -10,7 +10,8 @@ export default function TaskCard({
     handleTaskTouchStart,
     handleTaskTouchMove,
     handleTaskTouchEnd,
-    openTaskModal
+    openTaskModal,
+    isCompactView
 }) {
     const getPriorityText = (priority) => {
         switch (priority) {
@@ -25,6 +26,121 @@ export default function TaskCard({
         }
     };
 
+    // Компактный списочный вид
+    if (isCompactView) {
+        return (
+            <div
+                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
+                    draggedTask?.id === task.id ? 'dragging opacity-50' : ''
+                }`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, task)}
+                onDragEnd={handleDragEnd}
+                onClick={(e) => {
+                    if (longPressTriggeredRef.current) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    openTaskModal(task);
+                }}
+                onTouchStart={(e) => handleTaskTouchStart(e, task)}
+                onTouchMove={handleTaskTouchMove}
+                onTouchEnd={handleTaskTouchEnd}
+            >
+                <div className="flex items-center justify-between gap-3">
+                    {/* Левая часть: код, заголовок и основная информация */}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            {/* Код задачи */}
+                            {task.code && (
+                                <span className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold flex-shrink-0">
+                                    {task.code}
+                                </span>
+                            )}
+                            {/* Заголовок задачи */}
+                            <h5 className="text-text-primary font-medium text-sm leading-tight truncate">
+                                <a
+                                    href={route('tasks.show', task.id)}
+                                    className="hover:text-accent-blue transition-colors duration-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {task.title}
+                                </a>
+                            </h5>
+                        </div>
+                        
+                        {/* Вторая строка: теги */}
+                        {task.tags && task.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-1">
+                                {task.tags.slice(0, 3).map((tag, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-accent-blue/10 text-accent-blue"
+                                    >
+                                        #{tag}
+                                    </span>
+                                ))}
+                                {task.tags.length > 3 && (
+                                    <span className="text-xs text-text-muted">+{task.tags.length - 3}</span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Правая часть: приоритет, дедлайн, исполнитель */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Приоритет */}
+                        {task.priority && (
+                            <div className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                task.priority === 'high'
+                                    ? 'bg-accent-red/20 text-accent-red'
+                                    : task.priority === 'medium'
+                                        ? 'bg-accent-yellow/20 text-accent-yellow'
+                                        : 'bg-accent-green/20 text-accent-green'
+                            }`}>
+                                <span className="text-xs mr-1">
+                                    {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Дедлайн */}
+                        {task.deadline && task.deadline !== '0000-00-00' && (
+                            <div className={`flex items-center text-xs px-2 py-1 rounded ${
+                                new Date(task.deadline) < new Date()
+                                    ? 'bg-accent-red/10 text-accent-red font-medium'
+                                    : 'text-text-secondary bg-secondary-bg'
+                            }`}>
+                                <span className="mr-1">{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
+                                <span className="hidden sm:inline">
+                                    {new Date(task.deadline).toLocaleDateString('ru-RU', { 
+                                        day: '2-digit', 
+                                        month: '2-digit' 
+                                    })}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Исполнитель */}
+                        {task.assignee && (
+                            <div className="flex items-center">
+                                <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center">
+                                    <span className="text-xs font-semibold text-accent-blue">
+                                        {task.assignee.name.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Обычный карточный вид
     return (
         <div
             className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
