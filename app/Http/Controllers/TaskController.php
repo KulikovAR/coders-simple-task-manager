@@ -27,7 +27,7 @@ class TaskController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'status', 'priority', 'project_id', 'sprint_id', 'assignee_id', 'reporter_id', 'my_tasks']);
+        $filters = $request->only(['search', 'status', 'priority', 'project_id', 'sprint_id', 'assignee_id', 'reporter_id', 'my_tasks', 'tags']);
         $tasks = $this->taskService->getUserTasks(Auth::user(), $filters);
         $projects = $this->projectService->getUserProjectsList(Auth::user());
 

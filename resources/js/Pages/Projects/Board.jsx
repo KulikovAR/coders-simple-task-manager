@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import TaskForm from '@/Components/TaskForm';
 import PaymentModal from '@/Components/PaymentModal';
+import TagsInput from '@/Components/TagsInput';
 
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'none', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
@@ -722,12 +723,10 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                       {/* Теги */}
                       <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">Теги</label>
-                        <input
-                          type="text"
+                        <TagsInput
                           value={tags}
-                          onChange={e => setTags(e.target.value)}
-                          placeholder="Фильтр по тегам"
-                          className="form-input w-full"
+                          onChange={value => setTags(value)}
+                          placeholder="Фильтр по тегам..."
                         />
                       </div>
 

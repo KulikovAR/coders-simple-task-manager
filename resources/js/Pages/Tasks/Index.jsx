@@ -267,11 +267,11 @@ export default function Index({ auth, tasks, filters, projects, users = [], task
                             ]
                         },
                         {
-                            type: 'text',
+                            type: 'tags',
                             label: 'Теги',
                             value: tags,
-                            onChange: (e) => handleFilterChange('tags', e.target.value),
-                            placeholder: 'Введите теги через пробел'
+                            onChange: (value) => handleFilterChange('tags', value),
+                            placeholder: 'Введите теги...'
                         },
                         {
                             type: 'checkbox',

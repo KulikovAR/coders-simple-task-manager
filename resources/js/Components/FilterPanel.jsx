@@ -1,4 +1,5 @@
 import SearchInput from './SearchInput';
+import TagsInput from './TagsInput';
 
 /**
  * Компонент панели фильтров
@@ -94,6 +95,12 @@ export default function FilterPanel({
                                         />
                                         <span className="ml-1">{filter.checkboxLabel}</span>
                                     </label>
+                                ) : filter.type === 'tags' ? (
+                                    <TagsInput
+                                        value={filter.value}
+                                        onChange={filter.onChange}
+                                        placeholder={filter.placeholder}
+                                    />
                                 ) : null}
                             </div>
                         ))}
