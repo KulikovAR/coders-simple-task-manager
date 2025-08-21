@@ -22,7 +22,32 @@ export function useFilters(initialFilters = {}, routeName, options = {}) {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            router.get(route(routeName), filters, {
+            // Получаем все текущие параметры URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentParams = {};
+            
+            // Сохраняем все существующие параметры URL
+            for (const [key, value] of urlParams.entries()) {
+                if (key !== 'page' && !filters.hasOwnProperty(key)) {
+                    currentParams[key] = value;
+                }
+            }
+            
+            // Объединяем текущие фильтры с сохраненными параметрами
+            const params = { 
+                ...currentParams,
+                ...filters,
+                page: urlParams.get('page') || '1'
+            };
+
+            // Удаляем пустые значения
+            Object.keys(params).forEach(key => {
+                if (!params[key]) {
+                    delete params[key];
+                }
+            });
+
+            router.get(route(routeName), params, {
                 preserveState,
                 preserveScroll,
                 replace: true,
@@ -39,9 +64,11 @@ export function useFilters(initialFilters = {}, routeName, options = {}) {
     const clearFilters = () => {
         setFilters({});
         setShowFilters(false);
+        // При очистке фильтров также сбрасываем страницу
         router.get(route(routeName), {}, {
             preserveState,
             preserveScroll,
+            replace: true
         });
     };
 
