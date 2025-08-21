@@ -45,7 +45,7 @@ export default function TaskModal({
     }
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-50 overflow-hidden" style={{margin: 0}}>
             {/* Modal container - полноэкранная на мобильных */}
             <div
                 className="relative z-50 flex min-h-full lg:items-center lg:justify-center lg:p-4 bg-white/60 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300"
