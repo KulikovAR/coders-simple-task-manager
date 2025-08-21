@@ -25,7 +25,7 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
 
     const getGreetingEmoji = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return '🌅';
+        if (hour < 12) return '☀';
         if (hour < 18) return '☀️';
         return '🌙';
     };
