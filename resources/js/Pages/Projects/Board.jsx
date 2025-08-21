@@ -112,7 +112,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.width = '';
-            
+
             // Восстанавливаем позицию скролла если была сохранена
             if (window.statusOverlayScrollY !== undefined) {
                 window.scrollTo(0, window.statusOverlayScrollY);
@@ -512,7 +512,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openStatusOverlay = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
-        
+
         // Сохраняем позицию для восстановления
         window.statusOverlayScrollY = scrollY;
 
@@ -529,13 +529,13 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const closeStatusOverlay = () => {
         setIsStatusOverlayOpen(false);
         setStatusOverlayTask(null);
-        
+
         // Восстанавливаем скролл и позицию
         document.body.style.overflow = '';
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';
-        
+
         // Восстанавливаем позицию скролла
         if (window.statusOverlayScrollY !== undefined) {
             window.scrollTo(0, window.statusOverlayScrollY);
@@ -545,7 +545,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     const handleTaskTouchStart = (e, task) => {
         if (!e.touches || e.touches.length === 0) return;
-        
+
         const touch = e.touches[0];
         touchStartPointRef.current = { x: touch.clientX, y: touch.clientY };
         longPressTriggeredRef.current = false;
@@ -554,12 +554,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         // Оптимальное время 500мс для лонгтапа
         longPressTimerRef.current = setTimeout(() => {
             longPressTriggeredRef.current = true;
-            
+
             // Добавляем вибрацию для тактильной обратной связи (если поддерживается)
             if (navigator.vibrate) {
                 navigator.vibrate(50);
             }
-            
+
             openStatusOverlay(task);
         }, 500);
     };
@@ -579,28 +579,28 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     const handleTaskTouchEnd = (e) => {
         cancelLongPressTimer();
-        
+
         if (longPressTriggeredRef.current) {
             e.preventDefault();
             e.stopPropagation(); // Предотвращаем всплытие события и клик
-            
+
             // Сбрасываем флаг с задержкой, чтобы предотвратить случайный клик
             setTimeout(() => {
                 longPressTriggeredRef.current = false;
             }, 100);
             return; // Важно: выходим из функции, чтобы не сбросить флаг преждевременно
         }
-        
+
         longPressTriggeredRef.current = false;
     };
 
     const handleStatusSelect = (statusId) => {
         if (!statusOverlayTask) return;
         const taskId = statusOverlayTask.id;
-        
+
         // Сохраняем позицию скролла перед запросом
         const savedScrollY = window.statusOverlayScrollY;
-        
+
         router.put(route('tasks.status.update', taskId), {
             status_id: statusId
         }, {
@@ -608,7 +608,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             onSuccess: () => {
                 setLocalTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status_id: parseInt(statusId) } : t));
                 closeStatusOverlay();
-                
+
                 // Дополнительно восстанавливаем позицию после обновления
                 if (savedScrollY !== undefined) {
                     setTimeout(() => window.scrollTo(0, savedScrollY), 50);
@@ -616,7 +616,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             },
             onError: () => {
                 closeStatusOverlay();
-                
+
                 // Восстанавливаем позицию даже при ошибке
                 if (savedScrollY !== undefined) {
                     setTimeout(() => window.scrollTo(0, savedScrollY), 50);
@@ -1040,7 +1040,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 } else {
                                                     activeBorderColor = 'border-accent-green';
                                                 }
-                                                
+
                                                 return (
                                                 <div
                                                     key={priority}
@@ -1486,19 +1486,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Улучшенный мобильный оверлей выбора статуса при лонгтапе */}
             {isStatusOverlayOpen && statusOverlayTask && (
-                <div 
-                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in" 
+                <div
+                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in"
                     onClick={closeStatusOverlay}
                     style={{ pointerEvents: 'auto' }}
                 >
-                    <div 
-                        className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up" 
+                    <div
+                        className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up"
                         onClick={(e) => e.stopPropagation()}
                         style={{ pointerEvents: 'auto' }}
                     >
-                        {/* Индикатор свайпа для мобильных */}
-                        <div className="w-12 h-1 bg-border-color rounded-full mx-auto mb-4 sm:hidden"></div>
-
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-text-primary font-semibold text-lg">Переместить задачу</h3>
                             <button className="text-text-muted hover:text-text-primary p-2 rounded-full hover:bg-secondary-bg" onClick={closeStatusOverlay}>
