@@ -112,8 +112,9 @@ export default function TaskModal({
                                 </div>
                             </div>
 
-                            {/* Кнопка действия справа на десктопе */}
-                            <div className="flex items-center ml-4">
+                            {/* Кнопки справа на десктопе */}
+                            <div className="flex items-center gap-2 ml-4">
+                                {/* Кнопка действия */}
                                 <button
                                     type="button"
                                     disabled={processing}
@@ -140,11 +141,37 @@ export default function TaskModal({
                                         selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
                                     )}
                                 </button>
+                                
+                                {/* Кнопка закрытия */}
+                                <button
+                                    type="button"
+                                    onClick={closeTaskModal}
+                                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                                    title="Закрыть"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
                         {/* Мобильная версия - кнопки под информацией */}
                         <div className="lg:hidden">
+                            {/* Заголовок с кнопкой закрытия */}
+                            <div className="flex justify-end mb-2">
+                                <button
+                                    type="button"
+                                    onClick={closeTaskModal}
+                                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                                    title="Закрыть"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            
                             {/* Компактная информация о задаче */}
                             <div className="mb-3">
                                 {/* Компактная версия заголовка - все элементы в одной строке */}
