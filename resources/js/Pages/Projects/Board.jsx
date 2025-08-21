@@ -1,11 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import TaskContentRenderer from '@/Components/TaskContentRenderer';
+import { Head, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
-import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
-import TaskForm from '@/Components/TaskForm';
 import PaymentModal from '@/Components/PaymentModal';
-import TagsInput from '@/Components/TagsInput';
+import BoardFilters from '@/Components/Board/BoardFilters';
+import StatusInfo from '@/Components/Board/StatusInfo';
+import KanbanBoard from '@/Components/Board/KanbanBoard';
+import TaskModal from '@/Components/Board/TaskModal';
+import MobileStatusOverlay from '@/Components/Board/MobileStatusOverlay';
 
 export default function Board({ auth, project, tasks, taskStatuses, sprints = [], members = [], selectedSprintId = 'none', hasCustomStatuses = false }) {
     const [draggedTask, setDraggedTask] = useState(null);
@@ -723,741 +724,77 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                   </div>
                 </div>
 
-                {/* Улучшенные фильтры и кнопки */}
-                <div className="card">
-                  <div className="space-y-4">
-                    {/* Первая строка: основные фильтры */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {/* Спринты */}
-                      <div className="min-w-0">
-                        <label className="block text-xs font-medium text-text-secondary mb-1">
-                          Спринт
-                          {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
-                            <span className="ml-2 text-accent-green text-xs">(Активный)</span>
-                          )}
-                        </label>
-                        <select
-                          value={currentSprintId}
-                          onChange={e => {
-                            const newSprintId = e.target.value;
-                            setCurrentSprintId(newSprintId);
-                            // Всегда используем параметр sprint_id для единообразия
-                            const url = route('projects.board', project.id) + '?sprint_id=' + newSprintId;
-                            router.visit(url, { preserveState: false });
-                          }}
-                          className="form-select w-full"
-                        >
-                          <option value="none">Без спринта</option>
-                          {sprints.map(sprint => (
-                            <option key={sprint.id} value={sprint.id}>
-                              {sprint.name} {sprint.status === 'active' ? '(Активный)' : ''}
-                              {sprint.id == selectedSprintId && sprint.status === 'active' && isDefaultSprint ? ' (по умолчанию)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                        {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
-                          <p className="text-xs text-text-muted mt-1 break-words">
-                            💡 Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Исполнитель */}
-                      <div className="min-w-0">
-                        <label className="block text-xs font-medium text-text-secondary mb-1">Исполнитель</label>
-                        <select
-                          value={assigneeId}
-                          onChange={e => setAssigneeId(e.target.value)}
-                          className="form-select w-full"
-                        >
-                          <option value="">Все исполнители</option>
-                          {members.map(user => (
-                            <option key={user.id} value={user.id}>{user.name}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Теги */}
-                      <div className="min-w-0">
-                        <label className="block text-xs font-medium text-text-secondary mb-1">Теги</label>
-                        <TagsInput
-                          value={tags}
-                          onChange={value => setTags(value)}
-                          placeholder="Фильтр по тегам..."
-                        />
-                      </div>
-
-                      {/* Мои задачи */}
-                      <div className="flex items-end">
-                        <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
-                          <input
-                            type="checkbox"
-                            checked={myTasks}
-                            onChange={e => setMyTasks(e.target.checked)}
-                            className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200 flex-shrink-0"
-                          />
-                          <span className="break-words">Мои задачи</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Вторая строка: кнопки действий */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-border-color">
-                      <div className="flex flex-col sm:flex-row gap-3 flex-1">
-                        <Link
-                          href={route('sprints.create', project.id)}
-                          className="btn btn-secondary btn-mobile-stack order-3 sm:order-1 text-center"
-                        >
-                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          <span className="hidden sm:inline">Создать спринт</span>
-                          <span className="sm:hidden">Спринт</span>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
-                            if (!isPaid) {
-                              openPaymentModal();
-                            } else {
-                              router.visit(route('ai-agent.index'));
-                            }
-                          }}
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm text-white btn-mobile-stack order-2 sm:order-2 text-center"
-                        >
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
-                          <span className="hidden sm:inline">Задача с ИИ</span>
-                          <span className="sm:hidden">ИИ задача</span>
-                        </button>
-                        <Link
-                          href={route('tasks.create', { project_id: project.id })}
-                          className="btn btn-primary btn-mobile-stack btn-mobile-priority order-1 sm:order-3 text-center"
-                        >
-                          <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          <span className="hidden sm:inline">Новая задача</span>
-                          <span className="sm:hidden">Задача</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Фильтры и кнопки действий */}
+                <BoardFilters
+                    project={project}
+                    sprints={sprints}
+                    members={members}
+                    currentSprintId={currentSprintId}
+                    setCurrentSprintId={setCurrentSprintId}
+                    selectedSprintId={selectedSprintId}
+                    isDefaultSprint={isDefaultSprint}
+                    assigneeId={assigneeId}
+                    setAssigneeId={setAssigneeId}
+                    myTasks={myTasks}
+                    setMyTasks={setMyTasks}
+                    tags={tags}
+                    setTags={setTags}
+                    auth={auth}
+                    openPaymentModal={openPaymentModal}
+                />
 
                 {/* Информация о статусах */}
-                {currentSprintId !== 'none' ? (
-                    <div className="card">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full flex-shrink-0 ${currentSprintHasCustomStatuses ? 'bg-accent-blue' : 'bg-accent-slate'}`}></div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="text-body-small text-text-secondary">
-                                        {currentSprintHasCustomStatuses
-                                            ? 'Спринт использует кастомные статусы'
-                                            : 'Спринт использует статусы проекта'
-                                        }
-                                        {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
-                                            <span className="ml-2 text-accent-green font-medium">• Активный спринт (выбран по умолчанию)</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-3 lg:flex-shrink-0">
-                                <Link
-                                    href={route('sprints.statuses', [project.id, currentSprintId])}
-                                    className="btn btn-secondary btn-sm text-center"
-                                >
-                                    <span className="hidden sm:inline">Настроить статусы</span>
-                                    <span className="sm:hidden">Статусы</span>
-                                </Link>
-                                {sprints.find(s => s.id == currentSprintId)?.status === 'active' && isDefaultSprint && (
-                                    <button
-                                        onClick={() => {
-                                            router.visit(route('projects.board', project.id) + '?sprint_id=none', { preserveState: false });
-                                        }}
-                                        className="btn btn-outline btn-sm text-center"
-                                    >
-                                        <span className="hidden sm:inline">Переключиться на "Без спринта"</span>
-                                        <span className="sm:hidden">Без спринта</span>
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        {/* Плашка для фильтра "Без спринта" */}
-                        {currentSprintId === 'none' && (
-                            <div className="card">
-                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full flex-shrink-0 bg-accent-slate"></div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="text-body-small text-text-secondary">
-                                                Проект использует собственные статусы
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-3 lg:flex-shrink-0">
-                                        <Link
-                                            href={route('projects.statuses', project.id)}
-                                            className="btn btn-secondary btn-sm text-center"
-                                        >
-                                            <span className="hidden sm:inline">Настроить статусы</span>
-                                            <span className="sm:hidden">Статусы</span>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                <StatusInfo
+                    project={project}
+                    sprints={sprints}
+                    currentSprintId={currentSprintId}
+                    currentSprintHasCustomStatuses={currentSprintHasCustomStatuses}
+                    isDefaultSprint={isDefaultSprint}
+                />
 
-                        {/* Показываем информацию о том, что активный спринт доступен, только если пользователь не выбрал "Без спринта" явно */}
-                        {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
-                            <div className="card">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-3 h-3 rounded-full bg-accent-green flex-shrink-0"></div>
-                                        <div className="min-w-0 flex-1">
-                                            <span className="text-body-small text-text-secondary">
-                                                Есть активный спринт. <button
-                                                    onClick={() => {
-                                                        const activeSprint = sprints.find(s => s.status === 'active');
-                                                        if (activeSprint) {
-                                                            router.visit(route('projects.board', project.id) + '?sprint_id=' + activeSprint.id, { preserveState: false });
-                                                        }
-                                                    }}
-                                                    className="text-accent-blue hover:text-accent-blue/80 underline font-medium"
-                                                >
-                                                    Переключиться на него
-                                                </button>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
+                {/* Kanban доска */}
+                <KanbanBoard
+                    taskStatuses={taskStatuses}
+                    getFilteredStatusTasks={getFilteredStatusTasks}
+                    project={project}
+                    currentSprintId={currentSprintId}
+                    dragOverStatusId={dragOverStatusId}
+                    draggedTask={draggedTask}
+                    showPriorityDropZones={showPriorityDropZones}
+                    dragOverPriority={dragOverPriority}
+                    getStatusIndicatorColor={getStatusIndicatorColor}
+                    handleDragOver={handleDragOver}
+                    handleDragLeave={handleDragLeave}
+                    handleDrop={handleDrop}
+                    handlePriorityDragOver={handlePriorityDragOver}
+                    handlePriorityDragLeave={handlePriorityDragLeave}
+                    handlePriorityDrop={handlePriorityDrop}
+                    openTaskModal={openTaskModal}
+                    longPressTriggeredRef={longPressTriggeredRef}
+                    handleDragStart={handleDragStart}
+                    handleDragEnd={handleDragEnd}
+                    handleTaskTouchStart={handleTaskTouchStart}
+                    handleTaskTouchMove={handleTaskTouchMove}
+                    handleTaskTouchEnd={handleTaskTouchEnd}
+                />
 
-                {/* Kanban доска с ограничением по высоте */}
-                <div className="card">
-                    <div className="flex justify-between items-center mb-6">
-                        <div /> {/* пустой div для выравнивания */}
-                    </div>
-                    {/* Горизонтальный скролл для колонок, занимает весь экран */}
-                    <div className="flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
-                         style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}>
-                        {taskStatuses.map((status) => {
-                            const statusTasks = getFilteredStatusTasks(status.id);
-                            return (
-                                <div
-                                    key={status.id}
-                                    className={`bg-secondary-bg border rounded-xl p-5 flex-shrink-0 w-64 md:w-72 lg:w-80 min-h-full max-h-full flex flex-col transition-all duration-300 ${
-                                        dragOverStatusId === status.id
-                                            ? 'border-accent-blue bg-accent-blue/5 shadow-glow-blue'
-                                            : 'border-border-color shadow-md hover:shadow-lg'
-                                    }`}
-                                    onDragOver={(e) => handleDragOver(e, status.id)}
-                                    onDragLeave={(e) => handleDragLeave(e, status.id)}
-                                    onDrop={(e) => handleDrop(e, status.id)}
-                                >
-                                    {/* Улучшенный заголовок колонки с индикатором */}
-                                    <div className="flex items-center justify-between mb-5 pb-3 border-b border-border-color">
-                                                                                    <div className="flex items-center space-x-3">
-                                                <div
-                                                    className="w-4 h-4 rounded-full shadow-md"
-                                                    style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
-                                                ></div>
-                                                <h4 className="text-text-primary font-semibold text-lg">{status.name}</h4>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openTaskModal({
-                                                            status_id: status.id,
-                                                            project_id: project.id,
-                                                            sprint_id: currentSprintId !== 'none' ? currentSprintId : null
-                                                        });
-                                                    }}
-                                                    className="p-1.5 hover:bg-secondary-bg rounded-lg transition-colors"
-                                                    title="Создать задачу"
-                                                >
-                                                    <svg className="w-4 h-4 text-text-muted hover:text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                    </svg>
-                                                </button>
-                                                <span className="bg-card-bg text-text-primary text-caption px-3 py-1.5 rounded-full font-medium shadow-md">
-                                                    {statusTasks.length}
-                                                </span>
-                                            </div>
-                                    </div>
 
-                                    {/* Фиксированные зоны приоритетов при перетаскивании в том же статусе */}
-                                    {showPriorityDropZones && parseInt(dragOverStatusId) === parseInt(status.id) && parseInt(draggedTask?.status_id) === parseInt(status.id) && (
-                                        <div className="space-y-3 mb-4 flex-shrink-0">
-                                            <div className="text-caption text-text-muted font-medium mb-3 text-center">Выберите приоритет:</div>
-                                            {[
-                                                {
-                                                    priority: 'high',
-                                                    label: 'Высокий',
-                                                    bgColor: 'bg-accent-red/10',
-                                                    borderColor: 'border-accent-red/50',
-                                                    hoverBg: 'hover:bg-accent-red/20',
-                                                    activeBg: 'bg-accent-red/20',
-                                                    textColor: 'text-accent-red',
-                                                    shadowColor: 'shadow-glow-red'
-                                                },
-                                                {
-                                                    priority: 'medium',
-                                                    label: 'Средний',
-                                                    bgColor: 'bg-accent-yellow/10',
-                                                    borderColor: 'border-accent-yellow/50',
-                                                    hoverBg: 'hover:bg-accent-yellow/20',
-                                                    activeBg: 'bg-accent-yellow/20',
-                                                    textColor: 'text-accent-yellow',
-                                                    shadowColor: 'shadow-glow-yellow'
-                                                },
-                                                {
-                                                    priority: 'low',
-                                                    label: 'Низкий',
-                                                    bgColor: 'bg-accent-green/10',
-                                                    borderColor: 'border-accent-green/50',
-                                                    hoverBg: 'hover:bg-accent-green/20',
-                                                    activeBg: 'bg-accent-green/20',
-                                                    textColor: 'text-accent-green',
-                                                    shadowColor: 'shadow-glow-green'
-                                                }
-                                            ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor, shadowColor }) => {
-                                                // Создаем активную версию borderColor для каждого приоритета
-                                                let activeBorderColor;
-                                                if (priority === 'high') {
-                                                    activeBorderColor = 'border-accent-red';
-                                                } else if (priority === 'medium') {
-                                                    activeBorderColor = 'border-accent-yellow';
-                                                } else {
-                                                    activeBorderColor = 'border-accent-green';
-                                                }
-
-                                                return (
-                                                <div
-                                                    key={priority}
-                                                    className={`priority-zone border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 ${
-                                                        dragOverPriority === priority
-                                                            ? `${activeBg} ${activeBorderColor} ${shadowColor} active`
-                                                            : `${bgColor} ${borderColor} ${hoverBg}`
-                                                    }`}
-                                                    onDragOver={(e) => handlePriorityDragOver(e, priority)}
-                                                    onDragLeave={handlePriorityDragLeave}
-                                                    onDrop={(e) => handlePriorityDrop(e, priority)}
-                                                >
-                                                    <div className={`text-xl font-bold mb-2 ${textColor}`}>
-                                                        {priority === 'high' ? '🔥' : priority === 'medium' ? '⚡' : '🌱'}
-                                                    </div>
-                                                    <div className={`text-body-small font-semibold ${textColor}`}>{label}</div>
-                                                    <div className="text-caption text-text-muted mt-1">приоритет</div>
-                                                </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {/* Улучшенная скроллируемая область с задачами */}
-                                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent space-y-4">
-                                        {statusTasks.length === 0 && dragOverStatusId === status.id && !showPriorityDropZones && (
-                                            <div className="border-2 border-dashed border-accent-blue/30 rounded-xl p-8 text-center bg-accent-blue/5 h-40 flex flex-col items-center justify-center">
-                                                <div className="text-accent-blue/50 text-4xl mb-3">📋</div>
-                                                <p className="text-accent-blue/50 text-body-small font-medium">Отпустите задачу здесь</p>
-                                            </div>
-                                        )}
-                                        {statusTasks.length === 0 && dragOverStatusId !== status.id && (
-                                            <div className="border-2 border-dashed border-border-color rounded-xl p-8 text-center bg-secondary-bg/30 h-40 flex flex-col items-center justify-center">
-                                                <div className="text-text-muted text-4xl mb-3">✨</div>
-                                                <p className="text-text-muted text-body-small font-medium">Нет задач</p>
-                                            </div>
-                                        )}
-                                        {statusTasks.map((task) => (
-                                            <div
-                                                key={task.id}
-                                                className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
-                                                    draggedTask?.id === task.id ? 'dragging opacity-50' : ''
-                                                }`}
-                                                draggable
-                                                onDragStart={(e) => handleDragStart(e, task)}
-                                                onDragEnd={handleDragEnd}
-                                                onClick={(e) => {
-                                                    // Предотвращаем открытие модалки, если только что был лонгтап
-                                                    if (longPressTriggeredRef.current) {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        return;
-                                                    }
-                                                    openTaskModal(task);
-                                                }}
-                                                onTouchStart={(e) => handleTaskTouchStart(e, task)}
-                                                onTouchMove={handleTaskTouchMove}
-                                                onTouchEnd={handleTaskTouchEnd}
-                                            >
-                                                {/* Код задачи */}
-                                                {task.code && (
-                                                    <div className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center bg-accent-blue/5 px-2 py-1 rounded-lg inline-block">
-                                                        <span className="mr-2">🔗</span>
-                                                        {task.code}
-                                                    </div>
-                                                )}
-
-                                                {/* Заголовок задачи */}
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <h5 className="text-text-primary font-semibold text-body leading-tight">
-                                                        <a
-                                                            href={route('tasks.show', task.id)}
-                                                            className="hover:text-accent-blue transition-colors duration-200"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                        >
-                                                            {task.title}
-                                                        </a>
-                                                    </h5>
-                                                </div>
-
-                                                {/* Убираем отображение описания */}
-
-                                                {/* Статус задачи */}
-                                                {task.status && (
-                                                    <div className="mb-4">
-                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium shadow-md"
-                                                              style={task.status.color ? {
-                                                                  backgroundColor: `${task.status.color}20`,
-                                                                  color: task.status.color,
-                                                                  border: `1px solid ${task.status.color}30`
-                                                              } : {}}>
-                                                            {task.status.name}
-                                                        </span>
-                                                    </div>
-                                                )}
-
-                                                {/* Теги */}
-                                                {task.tags && task.tags.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        {task.tags.map((tag, index) => (
-                                                            <span
-                                                                key={index}
-                                                                className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
-                                                            >
-                                                                #{tag}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                {/* Мета-информация */}
-                                                <div className="space-y-3 mt-2">
-                                                    {/* Верхняя строка: приоритет и дедлайн */}
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        {/* Приоритет с цветным фоном */}
-                                                        {task.priority && (
-                                                            <div className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-caption font-medium shadow-md ${
-                                                                task.priority === 'high'
-                                                                    ? 'bg-accent-red/20 text-accent-red border border-accent-red/30'
-                                                                    : task.priority === 'medium'
-                                                                        ? 'bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/30'
-                                                                        : 'bg-accent-green/20 text-accent-green border border-accent-green/30'
-                                                            }`}>
-                                                                <span className="text-sm">
-                                                                    {task.priority === 'high' ? '🔥' : task.priority === 'medium' ? '⚡' : '🌱'}
-                                                                </span>
-                                                                <span>{getPriorityText(task.priority)}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {/* Дедлайн с предупреждением */}
-                                                        {task.deadline && task.deadline !== '0000-00-00' && (
-                                                            <div className={`flex items-center space-x-2 text-caption px-3 py-1.5 rounded-lg ${
-                                                                new Date(task.deadline) < new Date()
-                                                                    ? 'bg-accent-red/10 text-accent-red font-medium border border-accent-red/30'
-                                                                    : 'text-text-secondary'
-                                                            }`}>
-                                                                <span>{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
-                                                                <span>
-                                                                    {new Date(task.deadline).toLocaleDateString('ru-RU')}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Исполнитель */}
-                                                    {task.assignee && (
-                                                        <div className="flex items-center space-x-2 text-caption text-text-secondary">
-                                                            <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center">
-                                                                <span className="text-caption font-semibold text-accent-blue">
-                                                                    {task.assignee.name.charAt(0).toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                            <span className="font-medium">{task.assignee.name}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Информация о спринте */}
-                                                {task.sprint && (
-                                                    <div className="mt-4 pt-3 border-t border-border-color">
-                                                        <div className="flex items-center justify-between text-caption bg-secondary-bg/50 px-3 py-2 rounded-lg">
-                                                            <span className="text-text-secondary flex items-center">
-                                                                <span className="mr-2">🏃</span>
-                                                                Спринт:
-                                                            </span>
-                                                            <Link
-                                                                href={route('sprints.show', [project.id, task.sprint.id])}
-                                                                className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200 font-medium"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                {task.sprint.name}
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
 
             {/* Модальное окно для просмотра и редактирования задачи */}
-            {showTaskModal && selectedTask && (
-                <div className="fixed inset-0 z-50 overflow-hidden">
-                    {/* Modal container - полноэкранная на мобильных */}
-                    <div
-                        className="relative z-50 flex min-h-full lg:items-center lg:justify-center lg:p-4 bg-white/60 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-                        onClick={closeTaskModal}
-                    >
-                        <div
-                            className="board-modal w-full h-full lg:h-auto lg:max-h-[90vh] lg:rounded-2xl lg:max-w-6xl bg-black/60 border border-slate-200 dark:border-border-color shadow-2xl transform transition-all duration-300 ease-out overflow-hidden backdrop-blur-md"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Заголовок модалки с градиентом и кнопками */}
-                            <div className="bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 dark:border-border-color border-b border-slate-200 backdrop-blur-md p-4 lg:p-6">
-                                {/* Десктопная версия - кнопки справа */}
-                                <div className="hidden lg:flex justify-between items-start">
-                                    <div className="flex-1 min-w-0">
-                                        {/* Адаптивная версия заголовка */}
-                                        <div className="flex items-center gap-3 mb-2">
-                                            {selectedTask.code && (
-                                                <span className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm">
-                                                    {selectedTask.code}
-                                                </span>
-                                            )}
-                                            <div className="flex items-center gap-2">
-                                                {selectedTask.priority && (
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedTask.priority)} shadow-sm`}>
-                                                        {getPriorityText(selectedTask.priority)}
-                                                    </span>
-                                                )}
-                                                {selectedTask.status && (
-                                                    <span className="px-2 py-1 rounded-full text-xs font-medium border shadow-sm"
-                                                          style={selectedTask.status.color ? {
-                                                              backgroundColor: `${selectedTask.status.color}20`,
-                                                              color: selectedTask.status.color,
-                                                              border: `1px solid ${selectedTask.status.color}30`
-                                                          } : {
-                                                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                              color: '#1e293b',
-                                                              border: '1px solid #cbd5e1'
-                                                          }}>
-                                                        {selectedTask.status.name}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-wrap items-center gap-2 lg:gap-4 !text-white text-xs lg:text-sm">
-                                            {selectedTask.assignee && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                                        <span className="text-xs font-medium text-slate-800 dark:text-white">
-                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                                        </span>
-                                                    </div>
-                                                    <span className="truncate max-w-[120px] lg:max-w-none drop-shadow-sm">{selectedTask.assignee.name}</span>
-                                                </div>
-                                            )}
-                                            {selectedTask.deadline && (
-                                                <div className="flex items-center gap-1 drop-shadow-sm">
-                                                    <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span>{selectedTask.deadline && selectedTask.deadline !== '0000-00-00' ? new Date(selectedTask.deadline).toLocaleDateString('ru-RU') : 'Нет дедлайна'}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Кнопка действия справа на десктопе */}
-                                    <div className="flex items-center ml-4">
-                                        <button
-                                            type="button"
-                                            disabled={processing}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                // Вызываем submit формы TaskForm
-                                                const form = document.querySelector('#task-form');
-                                                if (form) {
-                                                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                                    form.dispatchEvent(submitEvent);
-                                                }
-                                            }}
-                                            className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center gap-2 shadow-md"
-                                        >
-                                            {processing ? (
-                                                <>
-                                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Сохранение...
-                                                </>
-                                            ) : (
-                                                selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Мобильная версия - кнопки под информацией */}
-                                <div className="lg:hidden">
-                                    {/* Компактная информация о задаче */}
-                                    <div className="mb-3">
-                                        {/* Компактная версия заголовка - все элементы в одной строке */}
-                                        <div className="flex items-center flex-wrap gap-1.5 mb-2">
-                                            {selectedTask.code && (
-                                                <span className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0">
-                                                    {selectedTask.code}
-                                                </span>
-                                            )}
-                                            {selectedTask.priority && (
-                                                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getPriorityColor(selectedTask.priority)} shadow-sm flex-shrink-0`}>
-                                                    {selectedTask.priority === 'high' ? '🔥' : selectedTask.priority === 'medium' ? '⚡' : '🌱'}
-                                                </span>
-                                            )}
-                                            {selectedTask.status && (
-                                                <span className="px-1.5 py-0.5 rounded text-xs font-medium border shadow-sm flex-shrink-0"
-                                                      style={selectedTask.status.color ? {
-                                                          backgroundColor: `${selectedTask.status.color}20`,
-                                                          color: selectedTask.status.color,
-                                                          border: `1px solid ${selectedTask.status.color}30`
-                                                      } : {
-                                                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                          color: '#1e293b',
-                                                          border: '1px solid #cbd5e1'
-                                                      }}>
-                                                    {selectedTask.status.name}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-wrap items-center gap-2 !text-white text-xs">
-                                            {selectedTask.assignee && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className="w-4 h-4 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                                        <span className="text-xs font-medium text-slate-800 dark:text-white">
-                                                            {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                                        </span>
-                                                    </div>
-                                                    <span className="truncate max-w-[100px] drop-shadow-sm text-xs">{selectedTask.assignee.name}</span>
-                                                </div>
-                                            )}
-                                            {selectedTask.deadline && selectedTask.deadline !== '0000-00-00' && (
-                                                <div className="flex items-center gap-1 drop-shadow-sm">
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span className="text-xs">{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Кнопка действия на мобильных */}
-                                    <div className="flex">
-                                        <button
-                                            type="button"
-                                            disabled={processing}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                // Вызываем submit формы TaskForm
-                                                const form = document.querySelector('#task-form');
-                                                if (form) {
-                                                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                                    form.dispatchEvent(submitEvent);
-                                                }
-                                            }}
-                                            className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md flex-1"
-                                        >
-                                            {processing ? (
-                                                <>
-                                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Сохранение...
-                                                </>
-                                            ) : (
-                                                selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Содержимое модалки с корректной высотой */}
-                            <div className="overflow-y-auto scrollbar-thin h-[calc(100vh-200px)] lg:max-h-[calc(90vh-200px)]">
-                                <TaskForm
-                                    task={selectedTask}
-                                    projects={[project]}
-                                    sprints={sprints}
-                                    taskStatuses={taskStatuses}
-                                    members={members}
-                                    errors={errors}
-                                    onSubmit={handleTaskSubmit}
-                                    onCancel={closeTaskModal}
-                                    isModal={true}
-                                    processing={processing}
-                                    auth={auth}
-                                    onCommentAdded={selectedTask?.id ? (newComment) => {
-                                        // Обновляем комментарии в локальной задаче только для существующей задачи
-                                        setSelectedTask(prev => ({
-                                            ...prev,
-                                            comments: [newComment, ...(prev.comments || [])]
-                                        }));
-                                    } : undefined}
-                                    onCommentUpdated={selectedTask?.id ? (updatedComment) => {
-                                        // Обновляем комментарии в локальной задаче только для существующей задачи
-                                        setSelectedTask(prev => ({
-                                            ...prev,
-                                            comments: prev.comments?.map(comment =>
-                                                comment.id === updatedComment.id ? updatedComment : comment
-                                            ) || []
-                                        }));
-                                    } : undefined}
-                                    onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
-                                        // Удаляем комментарий из локальной задачи только для существующей задачи
-                                        setSelectedTask(prev => ({
-                                            ...prev,
-                                            comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
-                                        }));
-                                    } : undefined}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <TaskModal
+                showTaskModal={showTaskModal}
+                selectedTask={selectedTask}
+                processing={processing}
+                errors={errors}
+                project={project}
+                sprints={sprints}
+                taskStatuses={taskStatuses}
+                members={members}
+                auth={auth}
+                handleTaskSubmit={handleTaskSubmit}
+                closeTaskModal={closeTaskModal}
+                setSelectedTask={setSelectedTask}
+            />
 
             {/* Модалка оплаты подписки */}
             <PaymentModal
@@ -1465,55 +802,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 onClose={closePaymentModal}
             />
 
-            {/* Улучшенный мобильный оверлей выбора статуса при лонгтапе */}
-            {isStatusOverlayOpen && statusOverlayTask && (
-                <div
-                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in"
-                    onClick={closeStatusOverlay}
-                    style={{ pointerEvents: 'auto' }}
-                >
-                    <div
-                        className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up"
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ pointerEvents: 'auto' }}
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-text-primary font-semibold text-lg">Переместить задачу</h3>
-                            <button className="text-text-muted hover:text-text-primary p-2 rounded-full hover:bg-secondary-bg" onClick={closeStatusOverlay}>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="text-sm text-text-secondary mb-5 font-medium border-l-2 pl-3" style={{ borderColor: getStatusIndicatorColor(statusOverlayTask.status_id) }}>
-                            {statusOverlayTask.title}
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {taskStatuses.map((status) => (
-                                <button
-                                    key={status.id}
-                                    className={`border rounded-xl p-4 text-left transition-all ${
-                                        parseInt(statusOverlayTask.status_id) === parseInt(status.id)
-                                        ? 'border-accent-blue bg-accent-blue/10 shadow-glow-blue'
-                                        : 'border-border-color hover:border-accent-blue/50 hover:bg-secondary-bg'
-                                    }`}
-                                    onClick={() => handleStatusSelect(status.id)}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-3 h-3 rounded-full"
-                                            style={{ backgroundColor: getStatusIndicatorColor(status.id) }}
-                                        ></div>
-                                        <div className="text-sm text-text-primary font-medium">{status.name}</div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Мобильный оверлей выбора статуса при лонгтапе */}
+            <MobileStatusOverlay
+                isOpen={isStatusOverlayOpen}
+                statusOverlayTask={statusOverlayTask}
+                taskStatuses={taskStatuses}
+                getStatusIndicatorColor={getStatusIndicatorColor}
+                handleStatusSelect={handleStatusSelect}
+                onClose={closeStatusOverlay}
+            />
+            </div>
         </AuthenticatedLayout>
     );
 }
