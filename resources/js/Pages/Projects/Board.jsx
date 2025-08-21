@@ -973,12 +973,23 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     textColor: 'text-accent-green',
                                                     shadowColor: 'shadow-glow-green'
                                                 }
-                                            ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor, shadowColor }) => (
+                                            ].map(({ priority, label, bgColor, borderColor, hoverBg, activeBg, textColor, shadowColor }) => {
+                                                // Создаем активную версию borderColor для каждого приоритета
+                                                let activeBorderColor;
+                                                if (priority === 'high') {
+                                                    activeBorderColor = 'border-accent-red';
+                                                } else if (priority === 'medium') {
+                                                    activeBorderColor = 'border-accent-yellow';
+                                                } else {
+                                                    activeBorderColor = 'border-accent-green';
+                                                }
+                                                
+                                                return (
                                                 <div
                                                     key={priority}
                                                     className={`priority-zone border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 ${
                                                         dragOverPriority === priority
-                                                            ? `${activeBg} ${borderColor.replace('/50', '')} ${shadowColor} active`
+                                                            ? `${activeBg} ${activeBorderColor} ${shadowColor} active`
                                                             : `${bgColor} ${borderColor} ${hoverBg}`
                                                     }`}
                                                     onDragOver={(e) => handlePriorityDragOver(e, priority)}
@@ -991,7 +1002,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                     <div className={`text-body-small font-semibold ${textColor}`}>{label}</div>
                                                     <div className="text-caption text-text-muted mt-1">приоритет</div>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
 
