@@ -103,6 +103,24 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         }
     }, [localTasks, draggedTask]);
 
+    // Очистка таймеров при размонтировании компонента
+    useEffect(() => {
+        return () => {
+            cancelLongPressTimer();
+            // Восстанавливаем скролл при размонтировании
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            
+            // Восстанавливаем позицию скролла если была сохранена
+            if (window.statusOverlayScrollY !== undefined) {
+                window.scrollTo(0, window.statusOverlayScrollY);
+                delete window.statusOverlayScrollY;
+            }
+        };
+    }, []);
+
     const openTaskModal = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
@@ -494,39 +512,56 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openStatusOverlay = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
+        
+        // Сохраняем позицию для восстановления
+        window.statusOverlayScrollY = scrollY;
 
         setStatusOverlayTask(task);
         setIsStatusOverlayOpen(true);
 
-        // Блокируем скролл страницы, но сохраняем позицию
+        // Блокируем скролл страницы без класса modal-open
         document.body.style.overflow = 'hidden';
-        document.body.classList.add('modal-open');
-
-        // Восстанавливаем позицию скролла после блокировки
-        requestAnimationFrame(() => {
-            window.scrollTo(0, scrollY);
-        });
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
     };
 
     const closeStatusOverlay = () => {
         setIsStatusOverlayOpen(false);
         setStatusOverlayTask(null);
-        // Разблокируем скролл страницы
+        
+        // Восстанавливаем скролл и позицию
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        
+        // Восстанавливаем позицию скролла
+        if (window.statusOverlayScrollY !== undefined) {
+            window.scrollTo(0, window.statusOverlayScrollY);
+            delete window.statusOverlayScrollY;
+        }
     };
 
     const handleTaskTouchStart = (e, task) => {
         if (!e.touches || e.touches.length === 0) return;
+        
         const touch = e.touches[0];
         touchStartPointRef.current = { x: touch.clientX, y: touch.clientY };
         longPressTriggeredRef.current = false;
         cancelLongPressTimer();
 
-        // Увеличиваем время до 600мс для более надежного срабатывания
+        // Оптимальное время 500мс для лонгтапа
         longPressTimerRef.current = setTimeout(() => {
             longPressTriggeredRef.current = true;
+            
+            // Добавляем вибрацию для тактильной обратной связи (если поддерживается)
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
             openStatusOverlay(task);
-        }, 600);
+        }, 500);
     };
 
     const handleTaskTouchMove = (e) => {
@@ -543,17 +578,29 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     const handleTaskTouchEnd = (e) => {
+        cancelLongPressTimer();
+        
         if (longPressTriggeredRef.current) {
             e.preventDefault();
-            e.stopPropagation(); // Предотвращаем всплытие события
+            e.stopPropagation(); // Предотвращаем всплытие события и клик
+            
+            // Сбрасываем флаг с задержкой, чтобы предотвратить случайный клик
+            setTimeout(() => {
+                longPressTriggeredRef.current = false;
+            }, 100);
+            return; // Важно: выходим из функции, чтобы не сбросить флаг преждевременно
         }
-        cancelLongPressTimer();
+        
         longPressTriggeredRef.current = false;
     };
 
     const handleStatusSelect = (statusId) => {
         if (!statusOverlayTask) return;
         const taskId = statusOverlayTask.id;
+        
+        // Сохраняем позицию скролла перед запросом
+        const savedScrollY = window.statusOverlayScrollY;
+        
         router.put(route('tasks.status.update', taskId), {
             status_id: statusId
         }, {
@@ -561,9 +608,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             onSuccess: () => {
                 setLocalTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status_id: parseInt(statusId) } : t));
                 closeStatusOverlay();
+                
+                // Дополнительно восстанавливаем позицию после обновления
+                if (savedScrollY !== undefined) {
+                    setTimeout(() => window.scrollTo(0, savedScrollY), 50);
+                }
             },
             onError: () => {
                 closeStatusOverlay();
+                
+                // Восстанавливаем позицию даже при ошибке
+                if (savedScrollY !== undefined) {
+                    setTimeout(() => window.scrollTo(0, savedScrollY), 50);
+                }
             }
         });
     };
@@ -1030,7 +1087,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task)}
                                                 onDragEnd={handleDragEnd}
-                                                onClick={() => openTaskModal(task)}
+                                                onClick={(e) => {
+                                                    // Предотвращаем открытие модалки, если только что был лонгтап
+                                                    if (longPressTriggeredRef.current) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        return;
+                                                    }
+                                                    openTaskModal(task);
+                                                }}
                                                 onTouchStart={(e) => handleTaskTouchStart(e, task)}
                                                 onTouchMove={handleTaskTouchMove}
                                                 onTouchEnd={handleTaskTouchEnd}
@@ -1421,8 +1486,16 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             {/* Улучшенный мобильный оверлей выбора статуса при лонгтапе */}
             {isStatusOverlayOpen && statusOverlayTask && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in" onClick={closeStatusOverlay}>
-                    <div className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                <div 
+                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 select-none animate-fade-in" 
+                    onClick={closeStatusOverlay}
+                    style={{ pointerEvents: 'auto' }}
+                >
+                    <div 
+                        className="w-full max-w-lg bg-card-bg border border-border-color rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 select-none animate-slide-up" 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ pointerEvents: 'auto' }}
+                    >
                         {/* Индикатор свайпа для мобильных */}
                         <div className="w-12 h-1 bg-border-color rounded-full mx-auto mb-4 sm:hidden"></div>
 
