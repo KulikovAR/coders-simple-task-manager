@@ -97,12 +97,15 @@ class TaskStatusService
 
             foreach ($statusesData as $index => $statusData) {
                 $statusId = $statusData['id'] ?? null;
+
+                // Используем order из данных или индекс + 1
+                $order = $statusData['order'] ?? ($index + 1);
                 
                 if ($statusId && $status = $existingStatuses->find($statusId)) {
                     // Обновляем существующий статус
                     $status->update([
                         'name' => $statusData['name'],
-                        'order' => $index + 1,
+                        'order' => $order,
                         'color' => $statusData['color'],
                     ]);
                 } else {
@@ -111,7 +114,7 @@ class TaskStatusService
                         'project_id' => $sprint->project_id,
                         'sprint_id' => $sprint->id,
                         'name' => $statusData['name'],
-                        'order' => $index + 1,
+                        'order' => $order,
                         'color' => $statusData['color'],
                         'is_custom' => true,
                     ]);
@@ -137,7 +140,7 @@ class TaskStatusService
             if (!empty($statusesWithTasks)) {
                 throw new StatusHasTasksException($statusesWithTasks);
             }
-
+   
             // Удаляем статусы только если в них нет задач
             foreach ($statusesToDelete as $status) {
                 $status->delete();
@@ -158,12 +161,14 @@ class TaskStatusService
 
             foreach ($statusesData as $index => $statusData) {
                 $statusId = $statusData['id'] ?? null;
+
+                // Используем order из данных или индекс + 1
+                $order = $statusData['order'] ?? ($index + 1);
                 
                 if ($statusId && $status = $projectStatuses->find($statusId)) {
-                    // Обновляем существующий статус
                     $status->update([
                         'name' => $statusData['name'],
-                        'order' => $index + 1,
+                        'order' => $order,
                         'color' => $statusData['color'],
                     ]);
                 } else {
@@ -172,7 +177,7 @@ class TaskStatusService
                         'project_id' => $project->id,
                         'sprint_id' => null,
                         'name' => $statusData['name'],
-                        'order' => $index + 1,
+                        'order' => $order,
                         'color' => $statusData['color'],
                         'is_custom' => false,
                     ]);
@@ -217,7 +222,7 @@ class TaskStatusService
         // Проверяем статусы спринта перед удалением
         $sprintStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
         $statusesWithTasks = [];
-        
+
         foreach ($sprintStatuses as $status) {
             if (!$this->canDeleteStatus($status)) {
                 $statusesWithTasks[] = $status->name;
@@ -264,7 +269,7 @@ class TaskStatusService
             if ($task->sprint_id && $task->sprint) {
                 return $this->getSprintStatuses($task->sprint);
             }
-            
+
             // Если у задачи нет спринта, используем статусы проекта
             return $this->getProjectStatuses($task->project ?? $project);
         }
@@ -292,7 +297,7 @@ class TaskStatusService
         if ($sprint) {
             // Статус должен принадлежать либо спринту, либо проекту (если у спринта нет кастомных статусов)
             $hasCustomStatuses = $this->hasCustomStatuses($sprint);
-            
+
             if ($hasCustomStatuses) {
                 // У спринта есть кастомные статусы - статус должен принадлежать спринту
                 return $status->sprint_id === $sprint->id;

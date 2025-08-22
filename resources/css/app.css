@@ -1061,6 +1061,11 @@ input::placeholder, textarea::placeholder {
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeInCenter {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 @keyframes slideUp {
     0% {
         opacity: 0;
@@ -1170,6 +1175,10 @@ input::placeholder, textarea::placeholder {
 
 .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fade-in-center {
+    animation: fadeInCenter 0.15s ease-out;
 }
 
 .animate-slide-up {
@@ -1811,4 +1820,43 @@ input::placeholder, textarea::placeholder {
         left: 1rem !important;
         right: 1rem !important;
     }
+}
+
+/* ===== АНИМАЦИЯ ТРЯСКИ ДЛЯ КОЛОНОК ===== */
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(-1px) rotate(-0.2deg);
+    }
+    50% {
+        transform: translateX(1px) rotate(0.2deg);
+    }
+    75% {
+        transform: translateX(-0.5px) rotate(-0.1deg);
+    }
+}
+
+.shake-animation {
+    animation: shake 1.2s ease-in-out infinite;
+    transform-origin: center center;
+}
+
+.shake-animation:hover {
+    animation-duration: 0.8s;
+}
+
+/* Стили для режима перетаскивания колонок */
+.drag-mode .shake-animation {
+    cursor: move;
+    user-select: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.drag-mode .shake-animation:active {
+    animation-play-state: paused;
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
 }

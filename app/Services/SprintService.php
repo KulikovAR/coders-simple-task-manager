@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use App\Services\TaskStatusService;
 
 class SprintService
 {
@@ -19,7 +20,7 @@ class SprintService
 
     public function createSprint(array $data, Project $project): Sprint
     {
-        return Sprint::create([
+        $sprint = Sprint::create([
             'project_id' => $project->id,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
@@ -27,6 +28,9 @@ class SprintService
             'end_date' => $data['end_date'],
             'status' => $data['status'] ?? 'planned',
         ]);
+        // Создаём кастомные статусы для спринта сразу после создания
+        app(TaskStatusService::class)->createCustomSprintStatuses($sprint);
+        return $sprint;
     }
 
     public function updateSprint(Sprint $sprint, array $data): Sprint
