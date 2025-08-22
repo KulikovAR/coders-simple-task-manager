@@ -161,7 +161,7 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
             
             if (result.success) {
                 // Обрабатываем сообщения, добавляя timestamp если его нет
-                const processedMessages = result.messages.data.map(message => ({
+                const processedMessages = result.messages.map(message => ({
                     ...message,
                     timestamp: message.timestamp || message.created_at || new Date().toISOString(),
                 }));
@@ -221,7 +221,7 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
             
             if (result.success) {
                 // Обрабатываем диалоги, добавляя updated_at если его нет
-                const processedConversations = result.conversations.data.map(conversation => ({
+                const processedConversations = result.conversations.map(conversation => ({
                     ...conversation,
                     updated_at: conversation.updated_at || conversation.created_at || new Date().toISOString(),
                 }));
