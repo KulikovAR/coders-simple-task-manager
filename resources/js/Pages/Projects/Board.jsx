@@ -35,6 +35,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [assigneeId, setAssigneeId] = useState('');
     const [myTasks, setMyTasks] = useState(false);
     const [tags, setTags] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [showTaskModal, setShowTaskModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [processing, setProcessing] = useState(false);
@@ -641,7 +642,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         });
     };
 
-    // Фильтрация задач по спринту, исполнителю и тегам
+    // Фильтрация задач по спринту, исполнителю, тегам и поисковому запросу
     const filteredTasks = localTasks.filter(task => {
         let sprintOk = false;
         if (currentSprintId === 'none') {
@@ -664,7 +665,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             );
         }
 
-        return sprintOk && assigneeOk && myOk && tagsOk;
+        // Фильтрация по поисковому запросу (названию задачи)
+        let searchOk = true;
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase().trim();
+            searchOk = task.name && task.name.toLowerCase().includes(query);
+        }
+
+        return sprintOk && assigneeOk && myOk && tagsOk && searchOk;
     });
 
     // Функция для получения порядка приоритетов
@@ -758,6 +766,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     openPaymentModal={openPaymentModal}
                     viewMode={viewMode}
                     toggleViewMode={toggleViewMode}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                 />
 
                 {/* Информация о статусах */}

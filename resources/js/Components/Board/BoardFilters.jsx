@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import TagsInput from '@/Components/TagsInput';
+import SearchInput from '@/Components/SearchInput';
 
 export default function BoardFilters({
     project,
@@ -18,13 +19,27 @@ export default function BoardFilters({
     auth,
     openPaymentModal,
     viewMode,
-    toggleViewMode
+    toggleViewMode,
+    searchQuery,
+    setSearchQuery
 }) {
     return (
         <div className="card">
             <div className="space-y-4">
                 {/* Первая строка: основные фильтры */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {/* Поиск по названию задачи */}
+                    <div className="min-w-0">
+                        <label className="block text-xs font-medium text-text-secondary mb-1">
+                            Поиск задачи
+                        </label>
+                        <SearchInput
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder="Поиск по названию..."
+                        />
+                    </div>
+                    
                     {/* Спринты */}
                     <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">
