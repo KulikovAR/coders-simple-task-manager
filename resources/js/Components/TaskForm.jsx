@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import TaskComments from '@/Components/TaskComments';
 import RichTextEditor from '@/Components/RichTextEditor';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
+import TagsInput from '@/Components/TagsInput';
 
 export default function TaskForm({
     task = null,
@@ -428,12 +429,11 @@ export default function TaskForm({
                                     <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
                                         Теги
                                     </label>
-                                    <input
-                                        type="text"
+                                    <TagsInput
                                         value={data.tags}
-                                        onChange={(e) => setData('tags', e.target.value)}
-                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
-                                        placeholder="Введите теги через пробел"
+                                        onChange={(value) => setData('tags', value)}
+                                        placeholder="Введите теги..."
+                                        className="bg-secondary-bg border-border-color text-sm"
                                     />
                                 </div>
 
@@ -653,9 +653,20 @@ export default function TaskForm({
                         <h3 className={modalStyles.cardTitle}>Параметры задачи</h3>
                         <div className="space-y-4">
                             {/* Теги */}
-                            {renderField('tags', 'Теги', 'text', {
-                                placeholder: 'Введите теги через пробел'
-                            })}
+                            <div>
+                                <label htmlFor="tags" className={modalStyles.label}>
+                                    Теги
+                                </label>
+                                <TagsInput
+                                    value={data.tags}
+                                    onChange={(value) => setData('tags', value)}
+                                    placeholder="Введите теги..."
+                                    className=""
+                                />
+                                {(formErrors.tags || errors.tags) && (
+                                    <p className={modalStyles.error}>{formErrors.tags || errors.tags}</p>
+                                )}
+                            </div>
                             
                             {/* Проект - показываем только при создании */}
                             {!isEditing && renderField('project_id', 'Проект *', 'select', {

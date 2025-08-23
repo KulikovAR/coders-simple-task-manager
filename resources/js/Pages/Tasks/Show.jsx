@@ -53,6 +53,19 @@ export default function Show({ auth, task }) {
                         {task.code && (
                             <div className="text-xs font-mono text-accent-blue mb-2 break-all">{task.code}</div>
                         )}
+                        {/* Теги */}
+                        {task.tags && task.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {task.tags.map((tag, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
+                                    >
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-text-secondary">
                             <span className={`status-badge ${getStatusClass(task.status?.name)} flex-shrink-0`} 
                                   style={task.status?.color ? {
