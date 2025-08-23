@@ -669,7 +669,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         let searchOk = true;
         if (searchQuery) {
             const query = searchQuery.toLowerCase().trim();
-            searchOk = task.name && task.name.toLowerCase().includes(query);
+            searchOk = task.title && task.title.toLowerCase().includes(query);
         }
 
         return sprintOk && assigneeOk && myOk && tagsOk && searchOk;
