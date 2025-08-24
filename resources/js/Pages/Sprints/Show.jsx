@@ -1,9 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { 
-    getSprintStatusLabel, 
-    getSprintStatusClass, 
+import {
+    getSprintStatusLabel,
+    getSprintStatusClass,
     getSprintStatusIcon,
     formatSprintDates,
     getSprintProgress,
@@ -98,7 +98,7 @@ export default function Show({ auth, project, sprint }) {
                                     </span>
                                 </div>
                                 <div className="w-full bg-secondary-bg rounded-full h-3">
-                                    <div 
+                                    <div
                                         className="bg-accent-blue h-3 rounded-full transition-all duration-500"
                                         style={{ width: `${getSprintProgress(sprint)}%` }}
                                     ></div>
@@ -106,21 +106,21 @@ export default function Show({ auth, project, sprint }) {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div className="text-center">
                                         <div className="text-2xl font-bold text-accent-green mb-1">
-                                            {sprint.tasks?.filter(t => t.status?.name === 'Done').length || 0}
+                                            {sprint.tasks?.length || 0}
                                         </div>
-                                        <div className="text-text-secondary">Завершено</div>
+                                        <div className="text-text-secondary">Задач</div>
                                     </div>
                                     <div className="text-center">
                                         <div className="text-2xl font-bold text-accent-blue mb-1">
-                                            {sprint.tasks?.filter(t => t.status?.name === 'In Progress').length || 0}
+                                            {sprint.tasks?.filter(t => t.status?.name === 'В работе').length || 0}
                                         </div>
                                         <div className="text-text-secondary">В работе</div>
                                     </div>
                                     <div className="text-center">
                                         <div className="text-2xl font-bold text-accent-yellow mb-1">
-                                            {sprint.tasks?.filter(t => t.status?.name === 'To Do').length || 0}
+                                            {sprint.tasks?.filter(t => t.status?.name === 'Завершено').length || 0}
                                         </div>
-                                        <div className="text-text-secondary">К выполнению</div>
+                                        <div className="text-text-secondary">Завершено</div>
                                     </div>
                                 </div>
                             </div>
@@ -138,7 +138,7 @@ export default function Show({ auth, project, sprint }) {
                                 <p className="text-text-muted mb-4">
                                     Просматривайте и управляйте задачами спринта
                                 </p>
-                                
+
                                 <div className="flex justify-center">
                                     <Link
                                         href={route('tasks.index', { project_id: project.id, sprint_id: sprint.id })}
@@ -238,4 +238,4 @@ export default function Show({ auth, project, sprint }) {
             )}
         </AuthenticatedLayout>
     );
-} 
+}
