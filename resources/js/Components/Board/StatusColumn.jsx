@@ -209,9 +209,10 @@ export default function StatusColumn({
         >
             {/* Улучшенный заголовок колонки с индикатором */}
             <div className="flex items-center justify-between mb-5 pb-3 border-b border-border-color">
-                <div className="flex items-center space-x-3">
+                {/* Левая часть с цветом и названием */}
+                <div className="flex items-center min-w-0 flex-1">
                     <div
-                        className="w-5 h-5 rounded-full shadow-md relative flex items-center justify-center"
+                        className="w-5 h-5 flex-shrink-0 rounded-full shadow-md relative flex items-center justify-center mr-3"
                         style={{ backgroundColor: isEditing ? editableColor : getStatusIndicatorColor(status.id), border: isEditing ? '2px solid #d1d5db' : 'none', cursor: isEditing ? 'pointer' : 'default' }}
                     >
                         {isEditing && (
@@ -241,52 +242,9 @@ export default function StatusColumn({
                             disabled={loading}
                         />
                     ) : (
-                        <h4 className="text-text-primary font-semibold text-lg">{status.name}</h4>
+                        <h4 className="text-text-primary font-semibold text-lg truncate">{status.name}</h4>
                     )}
-                    {/* Меню управления статусом - скрыто во время редактирования */}
-                    {!isEditing && (
-                        <div className="relative" ref={menuRef}>
-                            <button
-                                className="ml-1 p-1 rounded hover:bg-secondary-bg transition-colors"
-                                title="Меню статуса"
-                                onClick={() => setMenuOpen(v => !v)}
-                                disabled={loading}
-                            >
-                                <svg className="w-5 h-5 text-text-muted hover:text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <circle cx="5" cy="12" r="2" />
-                                    <circle cx="12" cy="12" r="2" />
-                                    <circle cx="19" cy="12" r="2" />
-                                </svg>
-                            </button>
-                        {menuOpen && !isEditing && (
-                            <div className="absolute left-1/2 transform -translate-x-1/2 z-50 mt-2 w-52 bg-secondary-bg border border-border-color rounded-lg shadow-lg py-1 animate-fade-in-center">
-                                <button
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
-                                    onClick={() => { setMenuOpen(false); startEditing(); }}
-                                    disabled={loading}
-                                >
-                                    <span>✏️</span> <span>Редактировать</span>
-                                </button>
-                                <button
-                                    className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
-                                    onClick={() => { setMenuOpen(false); onStartDragReorder(); }}
-                                    disabled={loading}
-                                >
-                                    <span>🔄</span> <span>Изменить порядок</span>
-                                </button>
-                                {tasks.length === 0 && (
-                                    <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 flex items-center gap-2"
-                                        onClick={handleDelete}
-                                        disabled={loading}
-                                    >
-                                        <span>🗑</span> <span>Удалить</span>
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                        </div>
-                    )}
+                    {/* Кнопки редактирования */}
                     {isEditing && (
                         <div className="flex items-center gap-1 ml-2">
                             <button
@@ -312,7 +270,10 @@ export default function StatusColumn({
                         </div>
                     )}
                 </div>
-                <div className="flex items-center gap-2">
+                
+                {/* Правая часть с кнопками и счетчиком */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    {/* Кнопка добавления задачи */}
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -329,9 +290,56 @@ export default function StatusColumn({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                     </button>
-                    <span className="bg-card-bg text-text-primary text-caption px-3 py-1.5 rounded-full font-medium shadow-md">
+                    
+                    {/* Счетчик задач */}
+                    <span className="bg-card-bg text-text-primary text-caption px-2 py-1 rounded-full font-medium shadow-md">
                         {tasks.length}
                     </span>
+                    
+                    {/* Меню управления статусом - скрыто во время редактирования */}
+                    {!isEditing && (
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                className="p-1 rounded hover:bg-secondary-bg transition-colors ml-1"
+                                title="Меню статуса"
+                                onClick={() => setMenuOpen(v => !v)}
+                                disabled={loading}
+                            >
+                                <svg className="w-4 h-4 text-text-muted hover:text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="5" cy="12" r="2" />
+                                    <circle cx="12" cy="12" r="2" />
+                                    <circle cx="19" cy="12" r="2" />
+                                </svg>
+                            </button>
+                            {menuOpen && !isEditing && (
+                                <div className="absolute right-0 z-50 mt-2 w-52 bg-secondary-bg border border-border-color rounded-lg shadow-lg py-1 animate-fade-in-center">
+                                    <button
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
+                                        onClick={() => { setMenuOpen(false); startEditing(); }}
+                                        disabled={loading}
+                                    >
+                                        <span>✏️</span> <span>Редактировать</span>
+                                    </button>
+                                    <button
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
+                                        onClick={() => { setMenuOpen(false); onStartDragReorder(); }}
+                                        disabled={loading}
+                                    >
+                                        <span>🔄</span> <span>Изменить порядок</span>
+                                    </button>
+                                    {tasks.length === 0 && (
+                                        <button
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 flex items-center gap-2"
+                                            onClick={handleDelete}
+                                            disabled={loading}
+                                        >
+                                            <span>🗑</span> <span>Удалить</span>
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
