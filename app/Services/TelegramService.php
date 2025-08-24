@@ -31,12 +31,7 @@ class TelegramService
         }
 
         try {
-            $payload = array_merge([
-                'chat_id' => (string) $chatId,
-                'text' => $text,
-                'parse_mode' => 'HTML',
-                'disable_web_page_preview' => true,
-            ], $options);
+            $payload = ['chat_id' => (string)$chatId, 'text' => $text, 'parse_mode' => 'HTML', 'disable_web_page_preview' => true, ...$options];
 
             $response = Http::post($this->apiUrl('sendMessage'), $payload);
             if (!$response->ok() || !($response->json('ok') === true)) {
@@ -60,9 +55,7 @@ class TelegramService
         }
 
         try {
-            $payload = [
-                'commands' => $commands,
-            ];
+            $payload = compact('commands');
 
             if ($scope !== null) {
                 $payload['scope'] = $scope;

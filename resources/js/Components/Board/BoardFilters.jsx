@@ -1,4 +1,5 @@
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
+import { useState, useRef, useEffect } from 'react';
 import TagsInput from '@/Components/TagsInput';
 import SearchInput from '@/Components/SearchInput';
 
@@ -16,18 +17,51 @@ export default function BoardFilters({
     setMyTasks,
     tags,
     setTags,
-    auth,
-    openPaymentModal,
     viewMode,
     toggleViewMode,
     searchQuery,
     setSearchQuery
 }) {
+    const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false);
+    const assigneeDropdownRef = useRef(null);
+
+    // Закрываем дропдаун при клике вне его
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (assigneeDropdownRef.current && !assigneeDropdownRef.current.contains(event.target)) {
+                setIsAssigneeDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Получаем выбранного исполнителя
+    const selectedAssignee = members.find(m => m.id == assigneeId);
+
+    // Функция для отображения аватарки
+    const renderAvatar = (user) => {
+        if (user.avatar) {
+            return (
+                <img 
+                    src={`/storage/${user.avatar}`} 
+                    alt={`${user.name} avatar`} 
+                    className="w-5 h-5 rounded-full object-cover"
+                />
+            );
+        }
+        return (
+            <div className="w-5 h-5 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center">
+                {user.name.charAt(0).toUpperCase()}
+            </div>
+        );
+    };
     return (
         <div className="card">
             <div className="space-y-4">
                 {/* Первая строка: основные фильтры */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     {/* Поиск по названию задачи */}
                     <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -74,26 +108,85 @@ export default function BoardFilters({
                         )}
                     </div>
 
-                    {/* Исполнитель */}
-                    <div className="min-w-0">
+                    {/* Исполнитель с аватарками */}
+                    <div className="min-w-0" ref={assigneeDropdownRef}>
                         <label className="block text-xs font-medium text-text-secondary mb-1">Исполнитель</label>
-                        <select
-                            value={assigneeId}
-                            onChange={e => setAssigneeId(e.target.value)}
-                            className="form-select w-full"
-                        >
-                            <option value="">Все исполнители</option>
-                            {members.map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.avatar ? (
-                                        <img src={`/storage/${user.avatar}`} alt="avatar" className="inline-block w-4 h-4 rounded-full mr-1 align-middle" />
-                                    ) : (
-                                        <span className="inline-block w-4 h-4 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold mr-1 align-middle text-center">{user.name.charAt(0).toUpperCase()}</span>
-                                    )}
-                                    {user.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsAssigneeDropdownOpen(!isAssigneeDropdownOpen)}
+                                className="form-select w-full text-left flex items-center gap-2"
+                            >
+                                {selectedAssignee ? (
+                                    <>
+                                        {renderAvatar(selectedAssignee)}
+                                        <span className="flex-1 truncate">{selectedAssignee.name}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-5 h-5 rounded-full bg-accent-slate/20 text-accent-slate text-xs font-bold flex items-center justify-center">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        </div>
+                                        <span className="flex-1 text-text-muted">Все исполнители</span>
+                                    </>
+                                )}
+                                <svg className={`w-4 h-4 text-text-muted transition-transform ${isAssigneeDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {/* Дропдаун с исполнителями */}
+                            {isAssigneeDropdownOpen && (
+                                <div className="absolute z-10 w-full mt-1 bg-white border border-border-color rounded-lg shadow-lg max-h-60 overflow-auto">
+                                    <div className="py-1">
+                                        {/* Опция "Все исполнители" */}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setAssigneeId('');
+                                                setIsAssigneeDropdownOpen(false);
+                                            }}
+                                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent-slate/5 transition-colors"
+                                        >
+                                            <div className="w-5 h-5 rounded-full bg-accent-slate/20 text-accent-slate text-xs font-bold flex items-center justify-center">
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-text-muted">Все исполнители</span>
+                                        </button>
+
+                                        {/* Разделитель */}
+                                        <div className="border-t border-border-color my-1"></div>
+
+                                        {/* Список исполнителей */}
+                                        {members.map(user => (
+                                            <button
+                                                key={user.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setAssigneeId(user.id);
+                                                    setIsAssigneeDropdownOpen(false);
+                                                }}
+                                                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent-slate/5 transition-colors ${
+                                                    assigneeId == user.id ? 'bg-accent-blue/10 text-accent-blue' : ''
+                                                }`}
+                                            >
+                                                {renderAvatar(user)}
+                                                <span className="flex-1 truncate">{user.name}</span>
+                                                {assigneeId == user.id && (
+                                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Теги */}
@@ -120,7 +213,7 @@ export default function BoardFilters({
                     </div>
                 </div>
 
-                {/* Вторая строка: кнопки действий */}
+                {/* Вторая строка: только переключение вида */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-border-color">
                     <div className="flex flex-col sm:flex-row gap-3 flex-1">
                         {/* Кнопка переключения вида */}
@@ -152,43 +245,6 @@ export default function BoardFilters({
                                 {viewMode === 'cards' ? 'Карточки' : viewMode === 'compact-board' ? 'Компактно' : 'Список'}
                             </span>
                         </button>
-                        <Link
-                            href={route('sprints.create', project.id)}
-                            className="btn btn-secondary btn-mobile-stack order-3 sm:order-2 text-center"
-                        >
-                            <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            <span className="hidden sm:inline">Создать спринт</span>
-                            <span className="sm:hidden">Спринт</span>
-                        </Link>
-                        <button
-                            onClick={() => {
-                                const isPaid = auth.user?.paid && (!auth.user?.expires_at || new Date(auth.user.expires_at) > new Date());
-                                if (!isPaid) {
-                                    openPaymentModal();
-                                } else {
-                                    router.visit(route('ai-agent.index'));
-                                }
-                            }}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-medium px-4 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm text-white btn-mobile-stack order-2 sm:order-3 text-center"
-                        >
-                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            <span className="hidden sm:inline">Задача с ИИ</span>
-                            <span className="sm:hidden">ИИ задача</span>
-                        </button>
-                        <Link
-                            href={route('tasks.create', { project_id: project.id })}
-                            className="btn btn-primary btn-mobile-stack btn-mobile-priority order-1 sm:order-4 text-center"
-                        >
-                            <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            <span className="hidden sm:inline">Новая задача</span>
-                            <span className="sm:hidden">Задача</span>
-                        </Link>
                     </div>
                 </div>
             </div>

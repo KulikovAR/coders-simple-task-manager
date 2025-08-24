@@ -767,7 +767,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                   </div>
                 </div>
 
-                {/* Фильтры и кнопки действий */}
+                {/* Фильтры */}
                 <BoardFilters
                     project={project}
                     sprints={sprints}
@@ -782,8 +782,6 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     setMyTasks={setMyTasks}
                     tags={tags}
                     setTags={setTags}
-                    auth={auth}
-                    openPaymentModal={openPaymentModal}
                     viewMode={viewMode}
                     toggleViewMode={toggleViewMode}
                     searchQuery={searchQuery}

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Ai\AiAgentService;
 use App\Services\Ai\FlexibleAiAgentService;
 use App\Services\Ai\CommandRegistry;
 use App\Services\Ai\ContextProviders\UserContextProvider;
@@ -36,7 +35,7 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         return Inertia::render('AiAgent/Index', [
             'user' => $user,
             'conversations' => $conversationService->getUserConversations($user, 5),
@@ -71,9 +70,9 @@ class AiAgentController extends Controller
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
         $perPage = $request->get('per_page', 10);
-        
+
         $paginatedConversations = $conversationService->getUserConversations($user, $perPage);
-        
+
         return response()->json([
             'success' => true,
             'conversations' => $paginatedConversations->items(),
@@ -94,13 +93,13 @@ class AiAgentController extends Controller
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
         $perPage = $request->get('per_page', 20);
-        
+
         $conversation = \App\Models\AiConversation::where('id', $conversationId)
             ->where('user_id', $user->id)
             ->firstOrFail();
-        
+
         $paginatedMessages = $conversationService->getConversationMessages($conversation, $perPage);
-        
+
         return response()->json([
             'success' => true,
             'conversation' => $conversation,
@@ -121,9 +120,9 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         $conversation = $conversationService->createNewConversation($user);
-        
+
         return response()->json([
             'success' => true,
             'conversation' => $conversation,
@@ -137,13 +136,13 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         $conversation = \App\Models\AiConversation::where('id', $conversationId)
             ->where('user_id', $user->id)
             ->firstOrFail();
-        
+
         $conversationService->deleteConversation($conversation);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Диалог удален',
@@ -157,7 +156,7 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         return response()->json([
             'success' => true,
             'stats' => $conversationService->getUserStats($user),
@@ -170,7 +169,7 @@ class AiAgentController extends Controller
     public function getCommands()
     {
         $commandRegistry = $this->createCommandRegistry();
-        
+
         return response()->json([
             'commands' => $commandRegistry->getCommandsForAi(),
             'categories' => $commandRegistry->getCommandsByCategory(),
@@ -183,7 +182,7 @@ class AiAgentController extends Controller
     private function createFlexibleAiAgentService(): FlexibleAiAgentService
     {
         $commandRegistry = $this->createCommandRegistry();
-        
+
         $contextProviders = [
             new UserContextProvider(),
             new ProjectContextProvider(app(ProjectService::class)),
@@ -207,4 +206,4 @@ class AiAgentController extends Controller
             app(CommentService::class)
         );
     }
-} 
+}
