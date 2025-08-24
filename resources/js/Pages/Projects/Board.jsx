@@ -172,6 +172,26 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     const closeTaskModal = () => {
+        // Проверяем, есть ли несохраненные изменения
+        if (window.taskFormHasChanges && selectedTask?.id && !processing) {
+            // Запускаем сохранение перед закрытием
+            const form = document.querySelector('#task-form');
+            if (form) {
+                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                form.dispatchEvent(submitEvent);
+            }
+            
+            // Даем небольшую задержку на сохранение перед закрытием
+            setTimeout(() => {
+                setShowTaskModal(false);
+                setSelectedTask(null);
+                setErrors({});
+                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
+            }, 300);
+            return;
+        }
+        
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});

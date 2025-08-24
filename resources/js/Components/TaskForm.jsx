@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TaskComments from '@/Components/TaskComments';
 import RichTextEditor from '@/Components/RichTextEditor';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
@@ -20,11 +20,23 @@ export default function TaskForm({
     auth = null,
     onCommentAdded = null,
     onCommentUpdated = null,
-    onCommentDeleted = null
+    onCommentDeleted = null,
+    autoSave = false
 }) {
     const isEditing = !!task;
 
-    const { data, setData, errors: formErrors } = useForm({
+    // Таймер для дебаунса автосохранения
+const autoSaveTimerRef = useRef(null);
+// Флаг для отслеживания изменений
+const [hasChanges, setHasChanges] = useState(false);
+// Делаем флаг доступным для внешнего доступа
+if (typeof window !== 'undefined') {
+    window.taskFormHasChanges = hasChanges;
+}
+// Флаг для отслеживания процесса автосохранения
+const [autoSaving, setAutoSaving] = useState(false);
+
+const { data, setData, errors: formErrors } = useForm({
         title: task?.title || '',
         description: task?.description || '',
         status_id: task?.status_id || '',
@@ -222,10 +234,49 @@ export default function TaskForm({
         }
     }, [data.sprint_id]);
 
+    // Функция для автосохранения с дебаунсом
+    const triggerAutoSave = () => {
+        if (!autoSave || !task?.id) return;
+        
+        // Очищаем предыдущий таймер
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+        }
+        
+        // Устанавливаем новый таймер (дебаунс 500мс)
+        setHasChanges(true); // Отмечаем, что есть изменения
+        if (typeof window !== 'undefined') {
+            window.taskFormHasChanges = true;
+        }
+        
+        autoSaveTimerRef.current = setTimeout(() => {
+            if (onSubmit && !processing && !autoSaving) {
+                setAutoSaving(true); // Показываем индикатор загрузки только при фактическом сохранении
+                onSubmit(data);
+                
+                // Сбрасываем флаги после сохранения
+                setTimeout(() => {
+                    setHasChanges(false);
+                    setAutoSaving(false);
+                    if (typeof window !== 'undefined') {
+                        window.taskFormHasChanges = false;
+                    }
+                }, 1000); // Увеличиваем время отображения индикатора загрузки
+            }
+        }, 500); // Уменьшаем время дебаунса для более быстрой реакции
+    };
+
+    // Модифицированный setData для автоматического сохранения
+    const setDataWithAutoSave = (key, value) => {
+        setData(key, value);
+        triggerAutoSave();
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (onSubmit) {
             onSubmit(data);
+            setHasChanges(false);
         }
     };
 
@@ -277,7 +328,7 @@ export default function TaskForm({
                     (fieldName === 'description' || fieldName === 'result') ? (
                         <RichTextEditor
                             value={data[fieldName]}
-                            onChange={(value) => setData(fieldName, value)}
+                            onChange={(value) => setDataWithAutoSave(fieldName, value)}
                             placeholder={options.placeholder || ''}
                             className={`w-full ${
                                 hasError ? 'border-accent-red' : ''
@@ -287,7 +338,7 @@ export default function TaskForm({
                         <textarea
                             id={fieldName}
                             value={data[fieldName]}
-                            onChange={(e) => setData(fieldName, e.target.value)}
+                            onChange={(e) => setDataWithAutoSave(fieldName, e.target.value)}
                             rows={options.rows || 4}
                             className={`${modalStyles.textarea} ${
                                 hasError ? 'border-accent-red focus:ring-accent-red' : ''
@@ -300,7 +351,7 @@ export default function TaskForm({
                     <select
                         id={fieldName}
                         value={data[fieldName]}
-                        onChange={(e) => setData(fieldName, e.target.value)}
+                        onChange={(e) => setDataWithAutoSave(fieldName, e.target.value)}
                         className={`${modalStyles.select} ${
                             hasError ? 'border-accent-red focus:ring-accent-red' : ''
                         }`}
@@ -317,7 +368,7 @@ export default function TaskForm({
                         id={fieldName}
                         type={type}
                         value={data[fieldName]}
-                        onChange={(e) => setData(fieldName, e.target.value)}
+                        onChange={(e) => setDataWithAutoSave(fieldName, e.target.value)}
                         className={`${modalStyles.input} ${
                             hasError ? 'border-accent-red focus:ring-accent-red' : ''
                         }`}
@@ -354,10 +405,10 @@ export default function TaskForm({
                         <div className="md:col-span-2 space-y-4 md:space-y-6">
                         {/* Название задачи */}
                         <div>
-                            <input
+                                                            <input
                                 type="text"
                                 value={data.title}
-                                onChange={(e) => setData('title', e.target.value)}
+                                onChange={(e) => setDataWithAutoSave('title', e.target.value)}
                                 className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 !text-white placeholder-white/70 focus:outline-none focus:ring-0"
                                 placeholder="Введите название задачи..."
                                 required
@@ -373,12 +424,12 @@ export default function TaskForm({
                             <label className="block text-sm font-medium !text-white mb-3">
                                 Описание
                             </label>
-                            <RichTextEditor
-                                value={data.description}
-                                onChange={(value) => setData('description', value)}
-                                placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения и ссылки)"
-                                className="w-full"
-                            />
+                                                            <RichTextEditor
+                                    value={data.description}
+                                    onChange={(value) => setDataWithAutoSave('description', value)}
+                                    placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения и ссылки)"
+                                    className="w-full"
+                                />
                             {(formErrors.description || errors.description) && (
                                 <p className="mt-1 text-sm text-accent-red">{formErrors.description || errors.description}</p>
                             )}
@@ -394,7 +445,7 @@ export default function TaskForm({
                                     </label>
                                     <RichTextEditor
                                         value={data.result}
-                                        onChange={(value) => setData('result', value)}
+                                        onChange={(value) => setDataWithAutoSave('result', value)}
                                         placeholder="Опишите что было сделано... (поддерживается форматирование, изображения и ссылки)"
                                         className="w-full"
                                     />
@@ -408,7 +459,7 @@ export default function TaskForm({
                                     <input
                                         type="url"
                                         value={data.merge_request}
-                                        onChange={(e) => setData('merge_request', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('merge_request', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                         placeholder="https://github.com/..."
                                     />
@@ -431,7 +482,7 @@ export default function TaskForm({
                                     </label>
                                     <TagsInput
                                         value={data.tags}
-                                        onChange={(value) => setData('tags', value)}
+                                        onChange={(value) => setDataWithAutoSave('tags', value)}
                                         placeholder="Введите теги..."
                                         className="bg-secondary-bg border-border-color text-sm"
                                     />
@@ -444,7 +495,7 @@ export default function TaskForm({
                                     </label>
                                     <select
                                         value={data.status_id}
-                                        onChange={(e) => setData('status_id', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('status_id', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all duration-150"
                                     >
                                         <option value="">Выберите статус</option>
@@ -463,7 +514,7 @@ export default function TaskForm({
                                     </label>
                                     <select
                                         value={data.priority}
-                                        onChange={(e) => setData('priority', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('priority', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     >
                                         {priorities.map((priority) => (
@@ -481,7 +532,7 @@ export default function TaskForm({
                                     </label>
                                     <select
                                         value={data.assignee_id}
-                                        onChange={(e) => setData('assignee_id', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     >
                                         <option value="">Не назначен</option>
@@ -500,7 +551,7 @@ export default function TaskForm({
                                     </label>
                                     <select
                                         value={data.sprint_id}
-                                        onChange={(e) => setData('sprint_id', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('sprint_id', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     >
                                         <option value="">Без спринта</option>
@@ -520,7 +571,7 @@ export default function TaskForm({
                                     <input
                                         type="date"
                                         value={data.deadline}
-                                        onChange={(e) => setData('deadline', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('deadline', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     />
                                 </div>
@@ -537,7 +588,7 @@ export default function TaskForm({
                                     </label>
                                     <select
                                         value={data.project_id}
-                                        onChange={(e) => setData('project_id', e.target.value)}
+                                        onChange={(e) => setDataWithAutoSave('project_id', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                         required
                                     >
@@ -579,6 +630,17 @@ export default function TaskForm({
                         <div className="h-20 lg:h-0"></div>
                     )}
                 </div>
+
+                {/* Индикатор автосохранения - показываем только при активном сохранении */}
+                {autoSave && task?.id && autoSaving && (
+                    <div className="fixed bottom-4 right-4 bg-accent-blue/90 text-white px-2 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-50 animate-fade-in">
+                        <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="text-xs font-medium">Сохранение...</span>
+                    </div>
+                )}
             </form>
         );
     }
@@ -659,7 +721,7 @@ export default function TaskForm({
                                 </label>
                                 <TagsInput
                                     value={data.tags}
-                                    onChange={(value) => setData('tags', value)}
+                                    onChange={(value) => setDataWithAutoSave('tags', value)}
                                     placeholder="Введите теги..."
                                     className=""
                                 />

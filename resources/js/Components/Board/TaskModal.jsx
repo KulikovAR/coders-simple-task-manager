@@ -114,33 +114,35 @@ export default function TaskModal({
 
                             {/* Кнопки справа на десктопе */}
                             <div className="flex items-center gap-2 ml-4">
-                                {/* Кнопка действия */}
-                                <button
-                                    type="button"
-                                    disabled={processing}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        // Вызываем submit формы TaskForm
-                                        const form = document.querySelector('#task-form');
-                                        if (form) {
-                                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                            form.dispatchEvent(submitEvent);
-                                        }
-                                    }}
-                                    className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center gap-2 shadow-md"
-                                >
-                                    {processing ? (
-                                        <>
-                                            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Сохранение...
-                                        </>
-                                    ) : (
-                                        selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
-                                    )}
-                                </button>
+                                {/* Кнопка действия - показываем только для новых задач */}
+                                {!selectedTask?.id && (
+                                    <button
+                                        type="button"
+                                        disabled={processing}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            // Вызываем submit формы TaskForm
+                                            const form = document.querySelector('#task-form');
+                                            if (form) {
+                                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                                form.dispatchEvent(submitEvent);
+                                            }
+                                        }}
+                                        className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center gap-2 shadow-md"
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Сохранение...
+                                            </>
+                                        ) : (
+                                            'Создать задачу'
+                                        )}
+                                    </button>
+                                )}
                                 
                                 {/* Кнопка закрытия */}
                                 <button
@@ -224,52 +226,55 @@ export default function TaskModal({
                                 </div>
                             </div>
 
-                            {/* Кнопка действия на мобильных */}
-                            <div className="flex">
-                                <button
-                                    type="button"
-                                    disabled={processing}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        // Вызываем submit формы TaskForm
-                                        const form = document.querySelector('#task-form');
-                                        if (form) {
-                                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                            form.dispatchEvent(submitEvent);
-                                        }
-                                    }}
-                                    className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md flex-1"
-                                >
-                                    {processing ? (
-                                        <>
-                                            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Сохранение...
-                                        </>
-                                    ) : (
-                                        selectedTask?.id ? 'Обновить задачу' : 'Создать задачу'
-                                    )}
-                                </button>
-                            </div>
+                            {/* Кнопка действия на мобильных - только для новых задач */}
+                            {!selectedTask?.id && (
+                                <div className="flex">
+                                    <button
+                                        type="button"
+                                        disabled={processing}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            // Вызываем submit формы TaskForm
+                                            const form = document.querySelector('#task-form');
+                                            if (form) {
+                                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                                form.dispatchEvent(submitEvent);
+                                            }
+                                        }}
+                                        className="bg-accent-blue hover:bg-accent-blue/80 disabled:bg-accent-blue/50 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md flex-1"
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Сохранение...
+                                            </>
+                                        ) : (
+                                            'Создать задачу'
+                                        )}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     {/* Содержимое модалки с корректной высотой */}
                     <div className="overflow-y-auto scrollbar-thin h-[calc(100vh-200px)] lg:max-h-[calc(90vh-200px)]">
-                        <TaskForm
-                            task={selectedTask}
-                            projects={[project]}
-                            sprints={sprints}
-                            taskStatuses={taskStatuses}
-                            members={members}
-                            errors={errors}
-                            onSubmit={handleTaskSubmit}
-                            onCancel={closeTaskModal}
-                            isModal={true}
-                            processing={processing}
-                            auth={auth}
+                                                    <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                taskStatuses={taskStatuses}
+                                members={members}
+                                errors={errors}
+                                onSubmit={handleTaskSubmit}
+                                onCancel={closeTaskModal}
+                                isModal={true}
+                                processing={processing}
+                                auth={auth}
+                                autoSave={true}
                             onCommentAdded={selectedTask?.id ? (newComment) => {
                                 // Обновляем комментарии в локальной задаче только для существующей задачи
                                 setSelectedTask(prev => ({
