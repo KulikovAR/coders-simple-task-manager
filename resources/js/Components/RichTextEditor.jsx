@@ -5,12 +5,12 @@ import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Mention from '@tiptap/extension-mention';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { 
-    Bold, 
-    Italic, 
-    List, 
-    ListOrdered, 
-    Link as LinkIcon, 
+import {
+    Bold,
+    Italic,
+    List,
+    ListOrdered,
+    Link as LinkIcon,
     Image as ImageIcon,
     Undo,
     Redo,
@@ -30,18 +30,18 @@ export default function RichTextEditor({
 }) {
     // Проверяем, является ли устройство мобильным
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
+
     // Проверяем обязательные пропсы
     if (typeof onChange !== 'function') {
         console.error('RichTextEditor: onChange должен быть функцией');
         return null;
     }
-    
+
     // Проверяем, что users является массивом
     if (!Array.isArray(users)) {
         console.warn('RichTextEditor: users должен быть массивом, получено:', typeof users);
     }
-    
+
     // CSS стили для редактора с адаптивностью
     const editorStyles = `
         .ProseMirror {
@@ -52,7 +52,7 @@ export default function RichTextEditor({
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
-        
+
         /* Стили для popup'а упоминаний с адаптивностью */
         .mention-suggestions {
             background: var(--card-bg);
@@ -65,7 +65,7 @@ export default function RichTextEditor({
             max-width: calc(100vw - 32px);
             z-index: 9999;
         }
-        
+
         /* Стили для мобильной версии */
         @media (max-width: 768px) {
             .mention-suggestions {
@@ -79,7 +79,7 @@ export default function RichTextEditor({
                 border-radius: 1rem;
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
             }
-            
+
             /* Затемнение фона */
             .mention-suggestions::before {
                 content: '';
@@ -91,7 +91,7 @@ export default function RichTextEditor({
                 background: rgba(0, 0, 0, 0.5);
                 z-index: -1;
             }
-            
+
             /* Заголовок модального окна */
             .mention-suggestions::after {
                 content: 'Выберите пользователя';
@@ -104,24 +104,24 @@ export default function RichTextEditor({
                 color: var(--text-primary);
             }
         }
-        
+
         .mention-suggestions::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .mention-suggestions::-webkit-scrollbar-track {
             background: transparent;
         }
-        
+
         .mention-suggestions::-webkit-scrollbar-thumb {
             background: var(--border-color);
             border-radius: 3px;
         }
-        
+
         .mention-suggestions::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
         }
-        
+
         .ProseMirror p {
             margin: 0.5em 0;
             min-height: 1.5em;
@@ -239,7 +239,7 @@ export default function RichTextEditor({
     const [imageUrl, setImageUrl] = useState('');
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
-    
+
     // Реф для хранения текущего popup'а упоминаний
     const currentMentionPopup = useRef(null);
 
@@ -274,7 +274,7 @@ export default function RichTextEditor({
                 console.warn('RichTextEditor: users не является массивом:', users);
                 return [];
             }
-            
+
             return users
                 .filter(user => user && user.id && user.name && user.email) // Проверяем наличие всех необходимых полей
                 .map(user => ({
@@ -287,11 +287,6 @@ export default function RichTextEditor({
             return [];
         }
     }, [users]);
-
-    // Отладочная информация
-    console.log('RichTextEditor - исходные пользователи:', users);
-    console.log('RichTextEditor - нормализованные пользователи:', normalizedUsers);
-    console.log('RichTextEditor - мобильное устройство:', isMobile);
 
     // Создание экземпляра редактора
     const editor = useEditor({
@@ -309,27 +304,21 @@ export default function RichTextEditor({
                 },
                 suggestion: {
                     items: ({ query }) => {
-                        console.log('Mention items - query:', query);
-                        console.log('Mention items - normalizedUsers:', normalizedUsers);
-                        
                         // Проверяем, что массив пользователей не пустой
                         if (!normalizedUsers || normalizedUsers.length === 0) {
-                            console.log('Mention items - нет пользователей для упоминания');
                             return [];
                         }
-                        
+
                         if (!query) {
                             const result = normalizedUsers.slice(0, 5);
-                            console.log('Mention items - без запроса, результат:', result);
                             return result;
                         }
-                        
-                        const result = normalizedUsers.filter(user => 
+
+                        const result = normalizedUsers.filter(user =>
                             user.name.toLowerCase().includes(query.toLowerCase()) ||
                             user.email.toLowerCase().includes(query.toLowerCase())
                         ).slice(0, 5);
-                        
-                        console.log('Mention items - с запросом, результат:', result);
+
                         return result;
                     },
                     renderItem: (item) => {
@@ -342,14 +331,9 @@ export default function RichTextEditor({
                     },
                     command: ({ editor, range, props }) => {
                         try {
-                            // Отладочная информация
-                            console.log('Mention command - props:', props);
-                            console.log('Mention command - props.label:', props.label);
-                            console.log('Mention command - props.name:', props.name);
-                            
                             // Вставляем упоминание с email пользователя
                             const userEmail = props.email || 'unknown@example.com';
-                            
+
                             // Вставляем упоминание в формате @email
                             editor
                                 .chain()
@@ -357,17 +341,16 @@ export default function RichTextEditor({
                                 .deleteRange(range)
                                 .insertContent(`@${userEmail}`)
                                 .run();
-                            
+
                             // Вызываем колбэк для родительского компонента с правильным пользователем
                             if (onMentionSelect) {
-                                console.log('Mention command - вызываем onMentionSelect с:', props);
                                 onMentionSelect({
                                     id: props.id,
                                     name: props.name,
                                     email: userEmail
                                 });
                             }
-                            
+
                             // Закрываем popup после выбора
                             const popup = document.querySelector('.mention-suggestions');
                             if (popup) {
@@ -414,7 +397,7 @@ export default function RichTextEditor({
                                     popup.className = 'mention-suggestions';
                                     popup.style.position = 'fixed';
                                     popup.style.zIndex = '9999';
-                                    
+
                                     // Добавляем кнопку закрытия для мобильной версии
                                     if (isMobile) {
                                         const closeButton = document.createElement('button');
@@ -426,46 +409,46 @@ export default function RichTextEditor({
                                         };
                                         popup.appendChild(closeButton);
                                     }
-                                    
+
                                     document.body.appendChild(popup);
                                     popup.appendChild(component.element);
-                                    
+
                                     // Сохраняем ссылку на текущий popup
                                     currentMentionPopup.current = popup;
-                                    
+
                                     // Позиционируем popup
                                     const rect = props.clientRect();
                                     if (rect) {
                                         // Простое позиционирование под курсором
                                         popup.style.left = `${rect.left}px`;
                                         popup.style.top = `${rect.bottom + 8}px`;
-                                        
+
                                         // Проверяем, не выходит ли popup за границы экрана
                                         const popupRect = popup.getBoundingClientRect();
                                         const viewportWidth = window.innerWidth;
                                         const viewportHeight = window.innerHeight;
-                                        
+
                                         // Если popup выходит за правый край
                                         if (popupRect.right > viewportWidth - 16) {
                                             popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
                                         }
-                                        
+
                                         // Если popup выходит за нижний край
                                         if (popupRect.bottom > viewportHeight - 16) {
                                             popup.style.top = `${rect.top - popupRect.height - 8}px`;
                                         }
-                                        
+
                                         // Если popup выходит за левый край
                                         if (popupRect.left < 16) {
                                             popup.style.left = '16px';
                                         }
-                                        
+
                                         // Если popup выходит за верхний край
                                         if (popupRect.top < 16) {
                                             popup.style.top = '16px';
                                         }
                                     }
-                                    
+
                                     // Обработчик клика вне popup
                                     const handleClickOutside = (event) => {
                                         if (popup && !popup.contains(event.target) && !props.editor.isDestroyed) {
@@ -483,7 +466,7 @@ export default function RichTextEditor({
                                             }
                                         }
                                     };
-                                    
+
                                     setTimeout(() => {
                                         try {
                                             document.addEventListener('mousedown', handleClickOutside);
@@ -492,11 +475,6 @@ export default function RichTextEditor({
                                             console.warn('Ошибка при добавлении обработчика клика вне popup:', error);
                                         }
                                     }, 100);
-                                    
-                                    // Убираем дублирующий вызов onMentionSelect
-                                    // if (onMentionSelect) {
-                                    //     onMentionSelect(props.items[props.index]);
-                                    // }
                                 } catch (error) {
                                     console.error('Ошибка при создании mention popup:', error);
                                     if (popup) {
@@ -507,7 +485,7 @@ export default function RichTextEditor({
                             },
                             onUpdate(props) {
                                 if (!component) return;
-                                
+
                                 try {
                                     component.updateProps(props);
 
@@ -521,27 +499,27 @@ export default function RichTextEditor({
                                         // Простое позиционирование под курсором
                                         popup.style.left = `${rect.left}px`;
                                         popup.style.top = `${rect.bottom + 8}px`;
-                                        
+
                                         // Проверяем, не выходит ли popup за границы экрана
                                         const popupRect = popup.getBoundingClientRect();
                                         const viewportWidth = window.innerWidth;
                                         const viewportHeight = window.innerHeight;
-                                        
+
                                         // Если popup выходит за правый край
                                         if (popupRect.right > viewportWidth - 16) {
                                             popup.style.left = `${viewportWidth - popupRect.width - 16}px`;
                                         }
-                                        
+
                                         // Если popup выходит за нижний край
                                         if (popupRect.bottom > viewportHeight - 16) {
                                             popup.style.top = `${rect.top - popupRect.height - 8}px`;
                                         }
-                                        
+
                                         // Если popup выходит за левый край
                                         if (popupRect.left < 16) {
                                             popup.style.left = '16px';
                                         }
-                                        
+
                                         // Если popup выходит за верхний край
                                         if (popupRect.top < 16) {
                                             popup.style.top = '16px';
@@ -679,7 +657,7 @@ export default function RichTextEditor({
                     if (editor.view && editor.view.dom && !editor.isDestroyed) {
                         const editorElement = editor.view.dom;
                         editorElement.addEventListener('blur', handleBlur);
-                        
+
                         return () => {
                             try {
                                 if (editorElement && !editor.isDestroyed) {
@@ -798,7 +776,7 @@ export default function RichTextEditor({
         event.preventDefault();
         setIsDragging(false);
         const files = Array.from(event.dataTransfer.files);
-        
+
         files.forEach(file => {
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -857,7 +835,7 @@ export default function RichTextEditor({
                 >
                     <Bold size={16} />
                 </button>
-                
+
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -1052,8 +1030,8 @@ export default function RichTextEditor({
                     !showLinkInput && !showImageInput ? 'rounded-b-lg' : ''
                 } ${isDragging ? 'ring-2 ring-accent-blue/20 bg-accent-blue/5' : ''}`}
             >
-                <EditorContent 
-                    editor={editor} 
+                <EditorContent
+                    editor={editor}
                     className="prose prose-sm max-w-none focus:outline-none min-h-[280px]"
                 />
             </div>
@@ -1094,9 +1072,6 @@ class MentionList {
 
     render() {
         try {
-            console.log('MentionList render - props.items:', this.props.items);
-            console.log('MentionList render - props.index:', this.props.index);
-            
             // Проверяем, что есть элементы для отображения
             if (!this.props.items || this.props.items.length === 0) {
                 this.element.innerHTML = `
@@ -1106,7 +1081,7 @@ class MentionList {
                 `;
                 return;
             }
-            
+
             this.element.innerHTML = `
                 ${this.props.items.map((item, index) => `
                     <div class="px-3 py-2 cursor-pointer flex items-center space-x-3 hover:bg-accent-blue/10 active:bg-accent-blue/20 transition-colors duration-150 ${
@@ -1131,8 +1106,6 @@ class MentionList {
                 if (item) {
                     const index = parseInt(item.dataset.index);
                     const selectedItem = this.props.items[index];
-                    console.log('MentionList click - выбран элемент:', selectedItem);
-                    console.log('MentionList click - индекс:', index);
                     this.props.command(selectedItem);
                 }
             });
@@ -1214,15 +1187,12 @@ class MentionList {
         try {
             const item = this.props.items[this.props.index];
             if (item) {
-                console.log('MentionList select - выбран элемент:', item);
-                console.log('MentionList select - индекс:', this.props.index);
-                
                 // Проверяем наличие всех необходимых данных
                 if (!item.id || !item.name || !item.email) {
                     console.warn('MentionList select - неполные данные пользователя:', item);
                     return;
                 }
-                
+
                 // Вызываем команду с полными данными пользователя
                 this.props.command({
                     id: item.id,
@@ -1230,7 +1200,7 @@ class MentionList {
                     email: item.email,
                     label: item.name
                 });
-                
+
                 // Закрываем popup
                 if (this.onExit) {
                     this.onExit();
