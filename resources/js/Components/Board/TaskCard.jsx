@@ -13,6 +13,37 @@ export default function TaskCard({
     openTaskModal,
     viewMode
 }) {
+    // Функция для копирования ссылки на задачу
+    const copyTaskLink = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const taskUrl = route('tasks.show', task.id);
+        navigator.clipboard.writeText(taskUrl)
+            .then(() => {
+                // Показываем временное уведомление, проверяя наличие элемента
+                const element = e.currentTarget;
+                if (element) {
+                    const originalText = element.textContent || task.code;
+                    
+                    // Сохраняем оригинальное содержимое
+                    const originalContent = element.innerHTML;
+                    
+                    // Заменяем содержимое на уведомление о копировании
+                    element.innerHTML = '<span>Скопировано!</span>';
+                    
+                    setTimeout(() => {
+                        // Проверяем, существует ли еще элемент перед восстановлением
+                        if (element && element.isConnected) {
+                            element.innerHTML = originalContent;
+                        }
+                    }, 1500);
+                }
+            })
+            .catch(err => {
+                console.error('Ошибка при копировании: ', err);
+            });
+    };
     const getPriorityText = (priority) => {
         switch (priority) {
             case 'low':
@@ -52,9 +83,14 @@ export default function TaskCard({
                     {/* Левая часть: код, заголовок и основная информация */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            {/* Код задачи */}
+                            {/* Код задачи с возможностью копирования */}
                             {task.code && (
-                                <span className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold flex-shrink-0">
+                                <span 
+                                    className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold flex-shrink-0 cursor-pointer hover:bg-accent-blue/10 transition-colors inline-flex items-center"
+                                    onClick={copyTaskLink}
+                                    title="Нажмите, чтобы скопировать ссылку на задачу"
+                                >
+                                    <span className="mr-1">🔗</span>
                                     {task.code}
                                 </span>
                             )}
@@ -166,10 +202,15 @@ export default function TaskCard({
                 onTouchMove={handleTaskTouchMove}
                 onTouchEnd={handleTaskTouchEnd}
             >
-                {/* Первая строка: код задачи */}
+                {/* Первая строка: код задачи с возможностью копирования */}
                 {task.code && (
                     <div className="mb-2">
-                        <span className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold">
+                        <span 
+                            className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-accent-blue/10 transition-colors inline-flex items-center"
+                            onClick={copyTaskLink}
+                            title="Нажмите, чтобы скопировать ссылку на задачу"
+                        >
+                            <span className="mr-1">🔗</span>
                             {task.code}
                         </span>
                     </div>
@@ -286,9 +327,13 @@ export default function TaskCard({
             onTouchMove={handleTaskTouchMove}
             onTouchEnd={handleTaskTouchEnd}
         >
-            {/* Код задачи */}
+            {/* Код задачи с возможностью копирования ссылки */}
             {task.code && (
-                <div className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center bg-accent-blue/5 px-2 py-1 rounded-lg inline-block">
+                <div 
+                    className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center bg-accent-blue/5 px-2 py-1 rounded-lg inline-block cursor-pointer hover:bg-accent-blue/10 transition-colors"
+                    onClick={copyTaskLink}
+                    title="Нажмите, чтобы скопировать ссылку на задачу"
+                >
                     <span className="mr-2">🔗</span>
                     {task.code}
                 </div>

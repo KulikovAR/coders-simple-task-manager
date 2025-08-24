@@ -14,6 +14,39 @@ export default function TaskModal({
     closeTaskModal,
     setSelectedTask
 }) {
+    // Функция для копирования ссылки на задачу
+    const copyTaskLink = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!selectedTask?.id) return;
+        
+        const taskUrl = route('tasks.show', selectedTask.id);
+        navigator.clipboard.writeText(taskUrl)
+            .then(() => {
+                // Показываем временное уведомление, проверяя наличие элемента
+                const element = e.currentTarget;
+                if (element) {
+                    const originalText = element.textContent || selectedTask.code;
+                    
+                    // Сохраняем оригинальное содержимое
+                    const originalContent = element.innerHTML;
+                    
+                    // Заменяем содержимое на уведомление о копировании
+                    element.innerHTML = '<span>Скопировано!</span>';
+                    
+                    setTimeout(() => {
+                        // Проверяем, существует ли еще элемент перед восстановлением
+                        if (element && element.isConnected) {
+                            element.innerHTML = originalContent;
+                        }
+                    }, 1500);
+                }
+            })
+            .catch(err => {
+                console.error('Ошибка при копировании: ', err);
+            });
+    };
     const getPriorityColor = (priority) => {
         switch (priority) {
             case 'low':
@@ -63,7 +96,12 @@ export default function TaskModal({
                                 {/* Адаптивная версия заголовка */}
                                 <div className="flex items-center gap-3 mb-2">
                                     {selectedTask.code && (
-                                        <span className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm">
+                                        <span 
+                                            className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 transition-colors inline-flex items-center"
+                                            onClick={copyTaskLink}
+                                            title="Нажмите, чтобы скопировать ссылку на задачу"
+                                        >
+                                            <span className="mr-1">🔗</span>
                                             {selectedTask.code}
                                         </span>
                                     )}
@@ -179,7 +217,12 @@ export default function TaskModal({
                                 {/* Компактная версия заголовка - все элементы в одной строке */}
                                 <div className="flex items-center flex-wrap gap-1.5 mb-2">
                                     {selectedTask.code && (
-                                        <span className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0">
+                                        <span 
+                                            className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0 cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 transition-colors inline-flex items-center"
+                                            onClick={copyTaskLink}
+                                            title="Нажмите, чтобы скопировать ссылку на задачу"
+                                        >
+                                            <span className="mr-1">🔗</span>
                                             {selectedTask.code}
                                         </span>
                                     )}
