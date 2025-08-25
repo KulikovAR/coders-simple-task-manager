@@ -20,15 +20,73 @@ export default function Form({ auth, task = null, projects = [], selectedProject
     } : null;
 
     const handleSubmit = (data) => {
+        // Извлекаем данные чек-листов
+        const { checklists, ...taskData } = data;
+        
         if (isEditing) {
             // Используем router.visit для корректной обработки ответа от сервера
             router.visit(route('tasks.update', task.id), {
                 method: 'put',
-                data: data,
+                data: taskData,
                 preserveState: false
             });
         } else {
-            router.post(route('tasks.store'), data);
+            router.post(route('tasks.store'), taskData);
+        }
+        
+        // Если есть изменения чек-листов, отправляем их отдельно
+        if (checklists && (checklists.changes.length > 0 || checklists.items.length > 0)) {
+            // Отправляем изменения чек-листов через AJAX
+            if (checklists.changes.length > 0) {
+                checklists.changes.forEach(change => {
+                    if (change.type === 'create') {
+                        fetch(route('tasks.checklists.store', task.id), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                            },
+                            body: JSON.stringify({ title: change.item.title }),
+                            credentials: 'same-origin',
+                        });
+                    } else if (change.type === 'update') {
+                        fetch(route('tasks.checklists.update', [task.id, change.item.id]), {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                            },
+                            body: JSON.stringify({ title: change.item.title }),
+                            credentials: 'same-origin',
+                        });
+                    } else if (change.type === 'toggle') {
+                        fetch(route('tasks.checklists.toggle', [task.id, change.item.id]), {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                            },
+                            credentials: 'same-origin',
+                        });
+                    } else if (change.type === 'delete') {
+                        fetch(route('tasks.checklists.destroy', [task.id, change.item.id]), {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                            },
+                            credentials: 'same-origin',
+                        });
+                    }
+                });
+            }
         }
     };
 

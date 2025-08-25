@@ -280,7 +280,27 @@ const { data, setData, errors: formErrors } = useForm({
     const handleSubmit = (e) => {
         e.preventDefault();
         if (onSubmit) {
-            onSubmit(data);
+            // Получаем изменения чек-листов, если компонент существует
+            let checklistData = null;
+            if (checklistRef.current) {
+                const localChanges = checklistRef.current.getLocalChanges();
+                const currentItems = checklistRef.current.getItems();
+                
+                if (localChanges.length > 0 || currentItems.length > 0) {
+                    checklistData = {
+                        changes: localChanges,
+                        items: currentItems
+                    };
+                }
+            }
+            
+            // Передаем данные формы вместе с чек-листами
+            const formData = {
+                ...data,
+                checklists: checklistData
+            };
+            
+            onSubmit(formData);
             setHasChanges(false);
         }
     };
@@ -821,6 +841,27 @@ const { data, setData, errors: formErrors } = useForm({
                     )}
                 </div>
             </div>
+            
+            {/* Кнопки формы (только для полной формы, не для модалки) */}
+            {!isModal && (
+                <div className={modalStyles.buttonContainer}>
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className={modalStyles.cancelButton}
+                        disabled={processing}
+                    >
+                        Отмена
+                    </button>
+                    <button
+                        type="submit"
+                        className={modalStyles.submitButton}
+                        disabled={processing}
+                    >
+                        {processing ? 'Сохранение...' : (isEditing ? 'Обновить' : 'Создать')}
+                    </button>
+                </div>
+            )}
         </form>
     );
 }
