@@ -707,7 +707,7 @@ const { data, setData, errors: formErrors } = useForm({
                                 placeholder: 'Опишите задачу...',
                                 rows: 4
                             })}
-                            
+
                         </div>
                     </div>
 

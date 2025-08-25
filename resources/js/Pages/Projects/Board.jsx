@@ -180,7 +180,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                 form.dispatchEvent(submitEvent);
             }
-            
+
             // Даем небольшую задержку на сохранение перед закрытием
             setTimeout(() => {
                 setShowTaskModal(false);
@@ -191,7 +191,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             }, 300);
             return;
         }
-        
+
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
@@ -788,14 +788,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     setSearchQuery={setSearchQuery}
                 />
 
-                {/* Информация о статусах */}
-                <StatusInfo
-                    project={project}
-                    sprints={sprints}
-                    currentSprintId={currentSprintId}
-                    currentSprintHasCustomStatuses={currentSprintHasCustomStatuses}
-                    isDefaultSprint={isDefaultSprint}
-                />
+                {/*/!* Информация о статусах *!/*/}
+                {/*<StatusInfo*/}
+                {/*    project={project}*/}
+                {/*    sprints={sprints}*/}
+                {/*    currentSprintId={currentSprintId}*/}
+                {/*    currentSprintHasCustomStatuses={currentSprintHasCustomStatuses}*/}
+                {/*    isDefaultSprint={isDefaultSprint}*/}
+                {/*/>*/}
 
                 {/* Kanban доска */}
                 <KanbanBoard
