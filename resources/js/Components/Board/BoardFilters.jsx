@@ -44,9 +44,9 @@ export default function BoardFilters({
     const renderAvatar = (user) => {
         if (user.avatar) {
             return (
-                <img 
-                    src={`/storage/${user.avatar}`} 
-                    alt={`${user.name} avatar`} 
+                <img
+                    src={`/storage/${user.avatar}`}
+                    alt={`${user.name} avatar`}
                     className="w-5 h-5 rounded-full object-cover"
                 />
             );
@@ -73,7 +73,7 @@ export default function BoardFilters({
                             placeholder="Поиск по названию..."
                         />
                     </div>
-                    
+
                     {/* Спринты */}
                     <div className="min-w-0">
                         <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -197,19 +197,6 @@ export default function BoardFilters({
                             onChange={value => setTags(value)}
                             placeholder="Фильтр по тегам..."
                         />
-                    </div>
-
-                    {/* Мои задачи */}
-                    <div className="flex items-end">
-                        <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
-                            <input
-                                type="checkbox"
-                                checked={myTasks}
-                                onChange={e => setMyTasks(e.target.checked)}
-                                className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200 flex-shrink-0"
-                            />
-                            <span className="break-words">Мои задачи</span>
-                        </label>
                     </div>
                 </div>
 
