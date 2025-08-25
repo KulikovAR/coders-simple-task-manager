@@ -146,16 +146,16 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
 
                 {/* Быстрые действия */}
                 <div className="card">
-                    <h3 className="card-title mb-6">Быстрые действия</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <h3 className="card-title mb-3">Быстрые действия</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                         <Link
                             href={route('ai-agent.index')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-xl p-6 hover:bg-accent-purple/5 transition-all duration-300 hover:shadow-glow-purple border border-border-color hover:border-accent-purple/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-purple/5 transition-all duration-300 hover:shadow-glow-purple border border-border-color hover:border-accent-purple/30"
                         >
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-accent-purple/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300"></div>
+                            <div className="absolute top-0 right-0 w-12 h-12 bg-accent-purple/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
-                                <div className="p-3 bg-accent-purple/20 rounded-xl group-hover:bg-accent-purple/30 transition-colors duration-300 w-fit mb-4">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <div className="p-1.5 bg-accent-purple/20 rounded-lg group-hover:bg-accent-purple/30 transition-colors duration-300 w-fit mb-2">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M15.2353 21.6875C16.7882 16.8601 18.5042 15.1184 23 13.8125C18.5042 12.5066 16.7882 10.7649 15.2353 5.9375C13.6824 10.7649 11.9664 12.5066 7.47059 13.8125C11.9664 15.1184 13.6824 16.8601 15.2353 21.6875ZM4.88235 9.875C5.65882 7.46 6.51682 6.58981 8.76471 5.9375C6.51682 5.28519 5.65882 4.415 4.88235 2C4.10588 4.415 3.24788 5.28519 1 5.9375C3.24788 6.58981 4.10588 7.46 4.88235 9.875ZM6.82353 23C7.21176 21.7925 7.64012 21.3581 8.76471 21.0312C7.64012 20.7044 7.21176 20.27 6.82353 19.0625C6.43529 20.27 6.00694 20.7044 4.88235 21.0312C6.00694 21.3581 6.43529 21.7925 6.82353 23Z" stroke="url(#paint0_linear_2098_17627)" strokeWidth="2" strokeLinejoin="round"/>
                                         <defs>
                                             <linearGradient id="paint0_linear_2098_17627" x1="19.7" y1="2" x2="3.629" y2="23.7242" gradientUnits="userSpaceOnUse">
@@ -165,53 +165,53 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                                         </defs>
                                     </svg>
                                 </div>
-                                <p className="font-semibold text-text-primary mb-1">ИИ-Ассистент</p>
-                                <p className="text-body-small text-text-secondary">Управление через ИИ</p>
+                                <p className="font-semibold text-text-primary mb-0.5 text-xs">ИИ-Ассистент</p>
+                                <p className="text-body-small text-text-secondary text-xs opacity-80">Управление через ИИ</p>
                             </div>
                         </Link>
                         <Link
                             href={route('projects.create')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-xl p-6 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
                         >
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-accent-blue/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300"></div>
+                            <div className="absolute top-0 right-0 w-12 h-12 bg-accent-blue/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
-                                <div className="p-3 bg-accent-blue/20 rounded-xl group-hover:bg-accent-blue/30 transition-colors duration-300 w-fit mb-4">
-                                    <svg className="w-6 h-6 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="p-1.5 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors duration-300 w-fit mb-2">
+                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                 </div>
-                                <p className="font-semibold text-text-primary mb-1">Создать проект</p>
-                                <p className="text-body-small text-text-secondary">Новый проект для команды</p>
+                                <p className="font-semibold text-text-primary mb-0.5 text-xs">Создать проект</p>
+                                <p className="text-body-small text-text-secondary text-xs opacity-80">Новый проект для команды</p>
                             </div>
                         </Link>
                         <Link
                             href={route('tasks.create')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-xl p-6 hover:bg-accent-green/5 transition-all duration-300 hover:shadow-glow-green border border-border-color hover:border-accent-green/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-green/5 transition-all duration-300 hover:shadow-glow-green border border-border-color hover:border-accent-green/30"
                         >
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-accent-green/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300"></div>
+                            <div className="absolute top-0 right-0 w-12 h-12 bg-accent-green/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
-                                <div className="p-3 bg-accent-green/20 rounded-xl group-hover:bg-accent-green/30 transition-colors duration-300 w-fit mb-4">
-                                    <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="p-1.5 bg-accent-green/20 rounded-lg group-hover:bg-accent-green/30 transition-colors duration-300 w-fit mb-2">
+                                    <svg className="w-4 h-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                     </svg>
                                 </div>
-                                <p className="font-semibold text-text-primary mb-1">Создать задачу</p>
-                                <p className="text-body-small text-text-secondary">Новая задача для работы</p>
+                                <p className="font-semibold text-text-primary mb-0.5 text-xs">Создать задачу</p>
+                                <p className="text-body-small text-text-secondary text-xs opacity-80">Новая задача для работы</p>
                             </div>
                         </Link>
                         <Link
                             href={route('projects.index')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-xl p-6 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30"
                         >
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-accent-yellow/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-300"></div>
+                            <div className="absolute top-0 right-0 w-12 h-12 bg-accent-yellow/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
-                                <div className="p-3 bg-accent-yellow/20 rounded-xl group-hover:bg-accent-yellow/30 transition-colors duration-300 w-fit mb-4">
-                                    <svg className="w-6 h-6 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="p-1.5 bg-accent-yellow/20 rounded-lg group-hover:bg-accent-yellow/30 transition-colors duration-300 w-fit mb-2">
+                                    <svg className="w-4 h-4 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
                                 </div>
-                                <p className="font-semibold text-text-primary mb-1">Все проекты</p>
-                                <p className="text-body-small text-text-secondary">Просмотр всех проектов</p>
+                                <p className="font-semibold text-text-primary mb-0.5 text-xs">Все проекты</p>
+                                <p className="text-body-small text-text-secondary text-xs opacity-80">Просмотр всех проектов</p>
                             </div>
                         </Link>
                     </div>
