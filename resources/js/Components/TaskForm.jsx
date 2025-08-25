@@ -36,7 +36,7 @@ const [hasChanges, setHasChanges] = useState(false);
     }
     // Флаг для отслеживания процесса автосохранения
     const [autoSaving, setAutoSaving] = useState(false);
-    
+
     // Состояние для чек-листов
     const [checklists, setChecklists] = useState(task?.checklists || []);
     const checklistRef = useRef(null);
@@ -242,23 +242,23 @@ const { data, setData, errors: formErrors } = useForm({
     // Функция для автосохранения с дебаунсом
     const triggerAutoSave = () => {
         if (!autoSave || !task?.id) return;
-        
+
         // Очищаем предыдущий таймер
         if (autoSaveTimerRef.current) {
             clearTimeout(autoSaveTimerRef.current);
         }
-        
+
         // Устанавливаем новый таймер (дебаунс 500мс)
         setHasChanges(true); // Отмечаем, что есть изменения
         if (typeof window !== 'undefined') {
             window.taskFormHasChanges = true;
         }
-        
+
         autoSaveTimerRef.current = setTimeout(() => {
             if (onSubmit && !processing && !autoSaving) {
                 setAutoSaving(true); // Показываем индикатор загрузки только при фактическом сохранении
                 onSubmit(data);
-                
+
                 // Сбрасываем флаги после сохранения
                 setTimeout(() => {
                     setHasChanges(false);
@@ -285,7 +285,7 @@ const { data, setData, errors: formErrors } = useForm({
             if (checklistRef.current) {
                 const localChanges = checklistRef.current.getLocalChanges();
                 const currentItems = checklistRef.current.getItems();
-                
+
                 if (localChanges.length > 0 || currentItems.length > 0) {
                     checklistData = {
                         changes: localChanges,
@@ -293,13 +293,13 @@ const { data, setData, errors: formErrors } = useForm({
                     };
                 }
             }
-            
+
             // Передаем данные формы вместе с чек-листами
             const formData = {
                 ...data,
                 checklists: checklistData
             };
-            
+
             onSubmit(formData);
             setHasChanges(false);
         }
@@ -708,23 +708,6 @@ const { data, setData, errors: formErrors } = useForm({
                                 rows: 4
                             })}
                             
-                            {/* Чек-лист */}
-                            {isEditing && (
-                                <div>
-                                    <label className={modalStyles.label}>
-                                        Чек-лист
-                                    </label>
-                                    <Checklist
-                                        ref={checklistRef}
-                                        taskId={task.id}
-                                        checklists={checklists}
-                                        onChecklistChange={setChecklists}
-                                        isModal={isModal}
-                                        className="mt-2"
-                                        useAjax={false}
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
 
@@ -772,7 +755,7 @@ const { data, setData, errors: formErrors } = useForm({
                                     <p className={modalStyles.error}>{formErrors.tags || errors.tags}</p>
                                 )}
                             </div>
-                            
+
                             {/* Проект - показываем только при создании */}
                             {!isEditing && renderField('project_id', 'Проект *', 'select', {
                                 options: [
@@ -841,7 +824,7 @@ const { data, setData, errors: formErrors } = useForm({
                     )}
                 </div>
             </div>
-            
+
             {/* Кнопки формы (только для полной формы, не для модалки) */}
             {!isModal && (
                 <div className={modalStyles.buttonContainer}>
