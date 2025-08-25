@@ -233,6 +233,19 @@ export default function BoardFilters({
                             </span>
                         </button>
                     </div>
+
+                    {/* Мои задачи */}
+                    <div className="flex items-end">
+                        <label className="flex items-center gap-2 text-sm text-text-primary select-none cursor-pointer touch-target">
+                            <input
+                                type="checkbox"
+                                checked={myTasks}
+                                onChange={e => setMyTasks(e.target.checked)}
+                                className="form-checkbox h-5 w-5 text-accent-blue border-border-color focus:ring-2 focus:ring-accent-blue rounded-lg transition-all duration-200 flex-shrink-0"
+                            />
+                            <span className="break-words">Мои задачи</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
