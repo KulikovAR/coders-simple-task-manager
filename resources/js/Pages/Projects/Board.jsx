@@ -228,13 +228,34 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setErrors({});
 
         try {
+            // Отладочная информация
+            console.log('Данные для отправки:', data);
+            console.log('Теги в данных:', data.tags);
+
             // Подготавливаем данные для отправки
             const formData = new FormData();
 
             // Добавляем все поля из data
             Object.keys(data).forEach(key => {
                 if (data[key] !== null && data[key] !== undefined) {
-                    formData.append(key, data[key]);
+                    // Специальная обработка для тегов
+                    if (key === 'tags') {
+                        // Проверяем, является ли tags массивом или строкой
+                        if (Array.isArray(data[key])) {
+                            // Если это массив, добавляем каждый тег отдельно
+                            data[key].forEach((tag, index) => {
+                                formData.append(`tags[${index}]`, tag);
+                            });
+                            console.log('Добавлены теги как массив:', data[key]);
+                        } else {
+                            // Если это строка или что-то другое, добавляем как есть
+                            formData.append(key, data[key]);
+                            console.log('Добавлены теги как строка:', data[key]);
+                        }
+                    } else {
+                        formData.append(key, data[key]);
+                        console.log(`Добавлено поле ${key}:`, data[key]);
+                    }
                 }
             });
 
