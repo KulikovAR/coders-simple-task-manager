@@ -18,9 +18,9 @@ export default function TaskModal({
     const copyTaskLink = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (!selectedTask?.id) return;
-        
+
         const taskUrl = route('tasks.show', selectedTask.id);
         navigator.clipboard.writeText(taskUrl)
             .then(() => {
@@ -28,13 +28,13 @@ export default function TaskModal({
                 const element = e.currentTarget;
                 if (element) {
                     const originalText = element.textContent || selectedTask.code;
-                    
+
                     // Сохраняем оригинальное содержимое
                     const originalContent = element.innerHTML;
-                    
+
                     // Заменяем содержимое на уведомление о копировании
                     element.innerHTML = '<span>Скопировано!</span>';
-                    
+
                     setTimeout(() => {
                         // Проверяем, существует ли еще элемент перед восстановлением
                         if (element && element.isConnected) {
@@ -80,14 +80,14 @@ export default function TaskModal({
     return (
         <div className="fixed inset-0 z-50 overflow-hidden" style={{margin: 0}}>
             {/* Затемнение фона */}
-            <div 
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            <div
+                className="absolute inset-0 bg-black/20 backdrop-blur-sm"
                 onClick={closeTaskModal}
             />
-            
+
             {/* Модальное окно снизу */}
-            <div 
-                className="absolute bottom-0 left-0 right-0 w-full bg-white dark:bg-slate-900 rounded-t-2xl border-t border-slate-200 dark:border-border-color shadow-2xl max-h-[90vh] overflow-hidden"
+            <div
+                className="absolute board-modal bottom-0 left-0 right-0 w-full rounded-t-2xl border-t border-slate-200 dark:border-border-color shadow-2xl max-h-[90vh] overflow-hidden"
                 style={{
                     maxHeight: '90vh',
                 }}
@@ -101,8 +101,8 @@ export default function TaskModal({
                             {/* Адаптивная версия заголовка */}
                             <div className="flex items-center gap-3 mb-2">
                                 {selectedTask.code && (
-                                    <span 
-                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                    <span
+                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-black font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >
@@ -186,7 +186,7 @@ export default function TaskModal({
                                     )}
                                 </button>
                             )}
-                            
+
                             {/* Кнопка закрытия */}
                             <button
                                 type="button"
@@ -217,14 +217,14 @@ export default function TaskModal({
                                 </svg>
                             </button>
                         </div>
-                        
+
                         {/* Компактная информация о задаче */}
                         <div className="mb-3">
                             {/* Компактная версия заголовка - все элементы в одной строке */}
                             <div className="flex items-center flex-wrap gap-1.5 mb-2">
                                 {selectedTask.code && (
-                                    <span 
-                                        className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0 cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                    <span
+                                        className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 text-black dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0 cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >
