@@ -161,14 +161,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(true);
         setErrors({});
 
-        // Блокируем скролл страницы, но сохраняем позицию
+        // Блокируем скролл страницы и сохраняем текущую позицию
         document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
         document.body.classList.add('modal-open');
-
-        // Восстанавливаем позицию скролла после блокировки
-        requestAnimationFrame(() => {
-            window.scrollTo(0, scrollY);
-        });
     };
 
     const closeTaskModal = () => {
@@ -186,8 +184,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 setShowTaskModal(false);
                 setSelectedTask(null);
                 setErrors({});
+                // Восстанавливаем скролл и позицию страницы
+                const scrollY = parseInt(document.body.style.top || '0');
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
                 document.body.style.overflow = '';
                 document.body.classList.remove('modal-open');
+                window.scrollTo(0, Math.abs(scrollY));
             }, 300);
             return;
         }
@@ -195,9 +199,15 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
-        // Разблокируем скролл страницы
+        
+        // Восстанавливаем скролл и позицию страницы
+        const scrollY = parseInt(document.body.style.top || '0');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
         document.body.style.overflow = '';
         document.body.classList.remove('modal-open');
+        window.scrollTo(0, Math.abs(scrollY));
     };
 
     const openPaymentModal = () => {
