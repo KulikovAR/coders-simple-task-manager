@@ -228,33 +228,91 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setErrors({});
 
         try {
-            // Отладочная информация
-            console.log('Данные для отправки:', data);
-            console.log('Теги в данных:', data.tags);
+            // Подробная отладочная информация
+            console.group('Отправка задачи');
+            console.log('Все данные:', data);
+            console.log('Теги:', {
+                value: data.tags,
+                type: typeof data.tags,
+                isArray: Array.isArray(data.tags),
+                keys: Object.keys(data),
+                hasTagsProperty: data.hasOwnProperty('tags'),
+                tagsPropDescriptor: Object.getOwnPropertyDescriptor(data, 'tags')
+            });
 
             // Подготавливаем данные для отправки
             const formData = new FormData();
+
+            // Функция для нормализации тегов
+            const normalizeTags = (tags) => {
+                console.log('Входные теги:', {
+                    value: tags,
+                    type: typeof tags,
+                    isArray: Array.isArray(tags),
+                    rawData: JSON.stringify(tags)
+                });
+
+                if (!tags) {
+                    console.log('Теги отсутствуют');
+                    return [];
+                }
+                
+                // Если это уже массив, фильтруем пустые значения
+                if (Array.isArray(tags)) {
+                    console.log('Обработка массива тегов');
+                    const filtered = tags.filter(tag => tag && typeof tag === 'string' && tag.trim());
+                    console.log('Отфильтрованные теги из массива:', filtered);
+                    return filtered;
+                }
+                
+                // Если это строка, пробуем распарсить JSON
+                if (typeof tags === 'string') {
+                    console.log('Обработка строки тегов');
+                    try {
+                        const parsed = JSON.parse(tags);
+                        console.log('Успешно распарсили JSON:', parsed);
+                        if (Array.isArray(parsed)) {
+                            const filtered = parsed.filter(tag => tag && typeof tag === 'string' && tag.trim());
+                            console.log('Отфильтрованные теги из JSON:', filtered);
+                            return filtered;
+                        }
+                        // Если это строка с разделителями
+                        const split = tags.split(/[,\s]+/).filter(tag => tag.trim());
+                        console.log('Разделили строку на теги:', split);
+                        return split;
+                    } catch (e) {
+                        console.log('Не удалось распарсить как JSON, разбиваем строку');
+                        // Если не удалось распарсить как JSON, разбиваем по разделителям
+                        const split = tags.split(/[,\s]+/).filter(tag => tag.trim());
+                        console.log('Разделили строку на теги:', split);
+                        return split;
+                    }
+                }
+                
+                console.log('Не удалось обработать теги, возвращаем пустой массив');
+                return [];
+            };
 
             // Добавляем все поля из data
             Object.keys(data).forEach(key => {
                 if (data[key] !== null && data[key] !== undefined) {
                     // Специальная обработка для тегов
                     if (key === 'tags') {
-                        // Проверяем, является ли tags массивом или строкой
-                        if (Array.isArray(data[key])) {
-                            // Если это массив, добавляем каждый тег отдельно
-                            data[key].forEach((tag, index) => {
-                                formData.append(`tags[${index}]`, tag);
-                            });
-                            console.log('Добавлены теги как массив:', data[key]);
-                        } else {
-                            // Если это строка или что-то другое, добавляем как есть
-                            formData.append(key, data[key]);
-                            console.log('Добавлены теги как строка:', data[key]);
+                        const normalizedTags = normalizeTags(data[key]);
+                        console.log('Нормализованные теги:', normalizedTags);
+                        
+                        // Преобразуем массив тегов в строку, разделенную запятыми
+                        const tagsString = normalizedTags.map(tag => tag.trim()).join(', ');
+                        formData.append('tags', tagsString);
+                        console.log('Добавлены теги как строка:', tagsString);
+                        
+                        // Проверяем содержимое FormData после добавления тегов
+                        console.log('Проверка FormData после добавления тегов:');
+                        for (let [key, value] of formData.entries()) {
+                            console.log(`${key} = ${value}`);
                         }
                     } else {
                         formData.append(key, data[key]);
-                        console.log(`Добавлено поле ${key}:`, data[key]);
                     }
                 }
             });
