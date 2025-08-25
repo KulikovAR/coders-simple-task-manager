@@ -108,7 +108,7 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
-        $task->load(['assignee', 'project.users']);
+        $task->load(['assignee', 'project.users', 'checklists']);
 
         $this->notificationService->taskCreated($task, Auth::user());
 
@@ -152,7 +152,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user']);
+        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user', 'checklists']);
 
         // Если это AJAX запрос из модалки доски, возвращаем JSON
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
@@ -175,7 +175,7 @@ class TaskController extends Controller
         }
 
         // Загружаем задачу со связями
-        $task->load(['status:id,name,color,project_id,sprint_id', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'project', 'checklists']);
 
         $projects = $this->projectService->getUserProjectsList(Auth::user());
         // Получаем спринты, участников и статусы для проекта задачи
@@ -201,7 +201,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id']);
+        $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'checklists']);
 
         $oldAssigneeId = $task->assignee_id;
 

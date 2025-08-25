@@ -5,6 +5,7 @@ import TaskComments from '@/Components/TaskComments';
 import RichTextEditor from '@/Components/RichTextEditor';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
 import TagsInput from '@/Components/TagsInput';
+import Checklist from '@/Components/Checklist';
 
 export default function TaskForm({
     task = null,
@@ -29,12 +30,16 @@ export default function TaskForm({
 const autoSaveTimerRef = useRef(null);
 // Флаг для отслеживания изменений
 const [hasChanges, setHasChanges] = useState(false);
-// Делаем флаг доступным для внешнего доступа
-if (typeof window !== 'undefined') {
-    window.taskFormHasChanges = hasChanges;
-}
-// Флаг для отслеживания процесса автосохранения
-const [autoSaving, setAutoSaving] = useState(false);
+    // Делаем флаг доступным для внешнего доступа
+    if (typeof window !== 'undefined') {
+        window.taskFormHasChanges = hasChanges;
+    }
+    // Флаг для отслеживания процесса автосохранения
+    const [autoSaving, setAutoSaving] = useState(false);
+    
+    // Состояние для чек-листов
+    const [checklists, setChecklists] = useState(task?.checklists || []);
+    const checklistRef = useRef(null);
 
 const { data, setData, errors: formErrors } = useForm({
         title: task?.title || '',
@@ -682,6 +687,24 @@ const { data, setData, errors: formErrors } = useForm({
                                 placeholder: 'Опишите задачу...',
                                 rows: 4
                             })}
+                            
+                            {/* Чек-лист */}
+                            {isEditing && (
+                                <div>
+                                    <label className={modalStyles.label}>
+                                        Чек-лист
+                                    </label>
+                                    <Checklist
+                                        ref={checklistRef}
+                                        taskId={task.id}
+                                        checklists={checklists}
+                                        onChecklistChange={setChecklists}
+                                        isModal={isModal}
+                                        className="mt-2"
+                                        useAjax={false}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 

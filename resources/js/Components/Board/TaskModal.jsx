@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import TaskForm from '@/Components/TaskForm';
+import Checklist from '@/Components/Checklist';
 
 export default function TaskModal({
     showTaskModal,
@@ -14,6 +16,14 @@ export default function TaskModal({
     closeTaskModal,
     setSelectedTask
 }) {
+    // Состояние для чек-листов
+    const [checklists, setChecklists] = useState(selectedTask?.checklists || []);
+    
+    // Синхронизируем чек-листы при изменении задачи
+    useEffect(() => {
+        setChecklists(selectedTask?.checklists || []);
+    }, [selectedTask?.checklists]);
+    
     // Функция для копирования ссылки на задачу
     const copyTaskLink = (e) => {
         e.preventDefault();
@@ -311,6 +321,25 @@ export default function TaskModal({
 
                 {/* Содержимое модалки */}
                 <div className="overflow-y-auto h-[calc(90vh-120px)]">
+                    {/* Чек-лист для существующих задач */}
+                    {selectedTask?.id && (
+                        <div className="p-4 lg:p-6 border-b border-border-color">
+                            <Checklist
+                                taskId={selectedTask.id}
+                                checklists={checklists}
+                                onChecklistChange={(updatedChecklists) => {
+                                    setChecklists(updatedChecklists);
+                                    // Обновляем задачу в локальном состоянии
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        checklists: updatedChecklists
+                                    }));
+                                }}
+                                isModal={true}
+                            />
+                        </div>
+                    )}
+                    
                     <TaskForm
                         task={selectedTask}
                         projects={[project]}

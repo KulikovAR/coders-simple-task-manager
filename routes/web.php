@@ -110,6 +110,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'destroy'])->name('comments.destroy');
 
+    // Чек-листы задач
+    Route::get('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'index'])->name('tasks.checklists.index');
+    Route::post('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'store'])->name('tasks.checklists.store');
+    Route::put('/tasks/{task}/checklists/reorder', [App\Http\Controllers\TaskChecklistController::class, 'reorder'])->name('tasks.checklists.reorder');
+    Route::put('/tasks/{task}/checklists/{checklist}', [App\Http\Controllers\TaskChecklistController::class, 'update'])->name('tasks.checklists.update');
+    Route::delete('/tasks/{task}/checklists/{checklist}', [App\Http\Controllers\TaskChecklistController::class, 'destroy'])->name('tasks.checklists.destroy');
+    Route::put('/tasks/{task}/checklists/{checklist}/toggle', [App\Http\Controllers\TaskChecklistController::class, 'toggleStatus'])->name('tasks.checklists.toggle');
+
     // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
 });

@@ -66,6 +66,11 @@ class Task extends Model
         return $this->hasMany(TaskComment::class)->orderBy('id', 'desc');
     }
 
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(TaskChecklist::class)->orderBy('sort_order', 'asc');
+    }
+
     public function getCodeAttribute(): string
     {
         $project = $this->project;
