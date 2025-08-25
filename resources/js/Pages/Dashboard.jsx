@@ -57,69 +57,92 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                 </div>
 
                 {/* Telegram бот */}
-                <div className="card">
-                    <div className="card-header">
-                        <h3 className="card-title flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                {telegram?.user_connected ? (
+                    // Если пользователь уже подключен - показываем строку
+                    <div className="flex items-center justify-between p-4 bg-secondary-bg rounded-lg border border-border-color">
+                        <div className="flex items-center">
+                            <svg className="w-5 h-5 mr-3 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Telegram-бот
-                        </h3>
+                            <span className="text-text-primary font-medium">Telegram подключен</span>
+                        </div>
+                        {telegram?.bot_link && (
+                            <a
+                                href={telegram.bot_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-accent-blue hover:text-accent-blue/80 transition-colors duration-200 text-sm"
+                            >
+                                Открыть бота →
+                            </a>
+                        )}
                     </div>
-                    <div className="card-body">
-                        <div className="space-y-4">
-                            <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
-                            {/* Информация о боте */}
-                            <div className="text-text-secondary text-sm">
-                                {telegram?.bot_username ? (
-                                    <>
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                                            <span className="text-text-muted">Бот:</span>
-                                            <span className="font-semibold text-text-primary break-all">{telegram.bot_username}</span>
-                                        </div>
-                                        <div className="bg-secondary-bg rounded-lg p-3 border border-border-color">
-                                            <div className="text-xs text-text-muted mb-2">Доступные команды:</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/start</code>
-                                                <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/id</code>
-                                                <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/ai ваш запрос</code>
+                ) : (
+                    // Если пользователь не подключен - показываем полный блок
+                    <div className="card">
+                        <div className="card-header">
+                            <h3 className="card-title flex items-center">
+                                <svg className="w-5 h-5 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Telegram-бот
+                            </h3>
+                        </div>
+                        <div className="card-body">
+                            <div className="space-y-4">
+                                <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
+                                {/* Информация о боте */}
+                                <div className="text-text-secondary text-sm">
+                                    {telegram?.bot_username ? (
+                                        <>
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                                                <span className="text-text-muted">Бот:</span>
+                                                <span className="font-semibold text-text-primary break-all">{telegram.bot_username}</span>
+                                            </div>
+                                            <div className="bg-secondary-bg rounded-lg p-3 border border-border-color">
+                                                <div className="text-xs text-text-muted mb-2">Доступные команды:</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/start</code>
+                                                    <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/id</code>
+                                                    <code className="px-2 py-1 bg-card-bg rounded text-xs font-mono text-text-primary">/ai ваш запрос</code>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="bg-accent-yellow/10 border border-accent-yellow/20 rounded-lg p-3 text-accent-yellow text-sm">
+                                            <div className="flex items-start gap-2">
+                                                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                </svg>
+                                                <div>
+                                                    <div className="font-medium mb-1">Имя бота не настроено</div>
+                                                    <div className="text-xs opacity-80">Укажите TELEGRAM_BOT_USERNAME в .env файле</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="bg-accent-yellow/10 border border-accent-yellow/20 rounded-lg p-3 text-accent-yellow text-sm">
-                                        <div className="flex items-start gap-2">
-                                            <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    )}
+                                </div>
+
+                                {/* Кнопка действия */}
+                                {telegram?.bot_link && (
+                                    <div className="pt-2">
+                                        <a
+                                            href={telegram.bot_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-primary inline-flex items-center justify-center w-full sm:w-auto group"
+                                        >
+                                            <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h6m0 0v6m0-6L10 16l-4-4" />
                                             </svg>
-                                            <div>
-                                                <div className="font-medium mb-1">Имя бота не настроено</div>
-                                                <div className="text-xs opacity-80">Укажите TELEGRAM_BOT_USERNAME в .env файле</div>
-                                            </div>
-                                        </div>
+                                            Открыть в Telegram
+                                        </a>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Кнопка действия */}
-                            {telegram?.bot_link && (
-                                <div className="pt-2">
-                                    <a
-                                        href={telegram.bot_link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-primary inline-flex items-center justify-center w-full sm:w-auto group"
-                                    >
-                                        <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h6m0 0v6m0-6L10 16l-4-4" />
-                                        </svg>
-                                        Открыть в Telegram
-                                    </a>
-                                </div>
-                            )}
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Быстрые действия */}
                 <div className="card">

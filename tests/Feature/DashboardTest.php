@@ -185,6 +185,39 @@ class DashboardTest extends TestCase
             ->component('Dashboard')
             ->has('telegram.bot_username')
             ->has('telegram.bot_link')
+            ->has('telegram.user_connected')
+        );
+    }
+
+    public function test_dashboard_shows_telegram_connected_status(): void
+    {
+        // Пользователь без подключенного телеграма
+        $userWithoutTelegram = User::factory()->create(['telegram_chat_id' => null]);
+        $project = Project::factory()->create(['owner_id' => $userWithoutTelegram->id, 'status' => 'active']);
+        TaskStatus::factory()->create(['name' => 'In Progress']);
+
+        $response = $this
+            ->actingAs($userWithoutTelegram)
+            ->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Dashboard')
+            ->where('telegram.user_connected', false)
+        );
+
+        // Пользователь с подключенным телеграмом
+        $userWithTelegram = User::factory()->create(['telegram_chat_id' => '123456789']);
+        $project2 = Project::factory()->create(['owner_id' => $userWithTelegram->id, 'status' => 'active']);
+
+        $response2 = $this
+            ->actingAs($userWithTelegram)
+            ->get('/dashboard');
+
+        $response2->assertOk();
+        $response2->assertInertia(fn ($page) => $page
+            ->component('Dashboard')
+            ->where('telegram.user_connected', true)
         );
     }
 }
