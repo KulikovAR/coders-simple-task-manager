@@ -2,25 +2,25 @@ import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import RichTextEditor from '@/Components/RichTextEditor';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
-import { 
-    getCommentTypeLabel, 
-    getCommentTypeIcon, 
-    getCommentTypeClass, 
+import {
+    getCommentTypeLabel,
+    getCommentTypeIcon,
+    getCommentTypeClass,
     getCommentTemplate,
     getBasicCommentTypeOptions,
     getSpecialCommentTypeOptions,
     COMMENT_TYPES
 } from '@/utils/commentUtils';
 
-export default function TaskComments({ 
-    task, 
-    comments = [], 
-    auth, 
+export default function TaskComments({
+    task,
+    comments = [],
+    auth,
     users = [], // Список пользователей проекта для упоминаний
     onCommentAdded = null,
     onCommentUpdated = null,
     onCommentDeleted = null,
-    compact = false 
+    compact = false
 }) {
     const [showCommentForm, setShowCommentForm] = useState(false);
     const [commentType, setCommentType] = useState(COMMENT_TYPES.GENERAL);
@@ -28,7 +28,7 @@ export default function TaskComments({
     const [deletingComment, setDeletingComment] = useState(null);
     const [localComments, setLocalComments] = useState(comments);
     const [processing, setProcessing] = useState(false);
-    
+
     const { data, setData, errors, reset } = useForm({
         content: '',
         type: COMMENT_TYPES.GENERAL,
@@ -45,11 +45,11 @@ export default function TaskComments({
         e.preventDefault();
         e.stopPropagation();
         setProcessing(true);
-        
+
         try {
             // Получаем актуальный CSRF токен
             let csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            
+
             if (!csrfToken) {
                 console.error('CSRF токен не найден');
                 setProcessing(false);
@@ -80,7 +80,7 @@ export default function TaskComments({
                 if (response.ok) {
                     const result = await response.json();
                     // Обновляем комментарий в локальном состоянии
-                    setLocalComments(prev => prev.map(comment => 
+                    setLocalComments(prev => prev.map(comment =>
                         comment.id === editingComment.id ? result.comment : comment
                     ));
                     reset();
@@ -128,7 +128,7 @@ export default function TaskComments({
                 } else {
                     const errorData = await response.json();
                     console.error('Ошибка создания комментария:', errorData);
-                    
+
                     // Если ошибка связана с CSRF, показываем сообщение пользователю
                     if (errorData.message && errorData.message.includes('CSRF')) {
                         alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
@@ -138,20 +138,20 @@ export default function TaskComments({
             }
         } catch (error) {
             console.error('Ошибка при отправке комментария:', error);
-            
+
             // Если ошибка сети, показываем сообщение пользователю
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 alert('Ошибка сети. Проверьте подключение к интернету и попробуйте снова.');
             }
         }
-        
+
         setProcessing(false);
     };
 
     const handleCommentTypeChange = (newType) => {
         setCommentType(newType);
         setData('type', newType);
-        
+
         const template = getCommentTemplate(newType);
         if (template && !editingComment) {
             setData('content', template);
@@ -179,7 +179,7 @@ export default function TaskComments({
         try {
             // Получаем актуальный CSRF токен
             let csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            
+
             if (!csrfToken) {
                 console.error('CSRF токен не найден');
                 return;
@@ -212,7 +212,7 @@ export default function TaskComments({
             } else {
                 const errorData = await response.json();
                 console.error('Ошибка удаления комментария:', errorData);
-                
+
                 // Если ошибка связана с CSRF, показываем сообщение пользователю
                 if (errorData.message && errorData.message.includes('CSRF')) {
                     alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
@@ -221,7 +221,7 @@ export default function TaskComments({
             }
         } catch (error) {
             console.error('Ошибка при удалении комментария:', error);
-            
+
             // Если ошибка сети, показываем сообщение пользователю
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 alert('Ошибка сети. Проверьте подключение к интернету и попробуйте снова.');
@@ -230,12 +230,12 @@ export default function TaskComments({
     };
 
     const getCommentCardClass = (commentType) => {
-        const baseClass = compact 
+        const baseClass = compact
             ? 'bg-secondary-bg border border-border-color rounded-lg p-3'
             : 'comment-card';
         const specialClass = commentType !== COMMENT_TYPES.GENERAL ? 'comment-card-special' : '';
         const typeClass = `comment-card-${commentType.replace('_', '-')}`;
-        
+
         return `${baseClass} ${specialClass} ${typeClass}`;
     };
 
@@ -298,7 +298,7 @@ export default function TaskComments({
                                     ))}
                                 </div>
                             </div>
-                            
+
                             {/* Специальные типы - показываем всегда */}
                             <div>
                                 {!compact && (

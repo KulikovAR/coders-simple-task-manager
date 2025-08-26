@@ -347,21 +347,33 @@ export default function TaskModal({
                         taskStatuses={taskStatuses}
                         members={members}
                         errors={errors}
-                        onSubmit={handleTaskSubmit}
+                        onSubmit={(formData) => {
+                            // Обновляем локальное состояние задачи перед отправкой на сервер
+                            const updatedTask = {
+                                ...selectedTask,
+                                ...formData,
+                                // Обновляем связанные объекты
+                                status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
+                                assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
+                                sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : selectedTask.sprint,
+                            };
+                            setSelectedTask(updatedTask);
+                            
+                            // Вызываем оригинальный обработчик
+                            handleTaskSubmit(formData);
+                        }}
                         onCancel={closeTaskModal}
                         isModal={true}
                         processing={processing}
                         auth={auth}
                         autoSave={true}
                         onCommentAdded={selectedTask?.id ? (newComment) => {
-                            // Обновляем комментарии в локальной задаче только для существующей задачи
                             setSelectedTask(prev => ({
                                 ...prev,
                                 comments: [newComment, ...(prev.comments || [])]
                             }));
                         } : undefined}
                         onCommentUpdated={selectedTask?.id ? (updatedComment) => {
-                            // Обновляем комментарии в локальной задаче только для существующей задачи
                             setSelectedTask(prev => ({
                                 ...prev,
                                 comments: prev.comments?.map(comment =>
@@ -370,7 +382,6 @@ export default function TaskModal({
                             }));
                         } : undefined}
                         onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
-                            // Удаляем комментарий из локальной задачи только для существующей задачи
                             setSelectedTask(prev => ({
                                 ...prev,
                                 comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []

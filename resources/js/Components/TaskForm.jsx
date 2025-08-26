@@ -41,7 +41,15 @@ const [hasChanges, setHasChanges] = useState(false);
     const [checklists, setChecklists] = useState(task?.checklists || []);
     const checklistRef = useRef(null);
 
-const { data, setData, errors: formErrors } = useForm({
+// Функция для безопасного преобразования тегов в строку
+    const tagsToString = (tags) => {
+        if (!tags) return '';
+        if (typeof tags === 'string') return tags;
+        if (Array.isArray(tags)) return tags.join(' ');
+        return String(tags);
+    };
+
+    const { data, setData, errors: formErrors } = useForm({
         title: task?.title || '',
         description: task?.description || '',
         status_id: task?.status_id || '',
@@ -52,7 +60,7 @@ const { data, setData, errors: formErrors } = useForm({
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
-        tags: task?.tags ? task.tags.join(' ') : '',
+        tags: tagsToString(task?.tags),
     });
 
     // Устанавливаем значения по умолчанию для project_id и sprint_id при создании
@@ -139,12 +147,20 @@ const { data, setData, errors: formErrors } = useForm({
 
                     // Если нет выбранного статуса и это создание задачи, выбираем первый статус
                     if (!isEditing && !data.status_id && loadedStatuses.length > 0) {
+                        const newData = { ...data, status_id: loadedStatuses[0].id };
                         setData('status_id', loadedStatuses[0].id);
+                        triggerAutoSave(newData);
                     }
                     // Сбрасываем выбранный статус, если он не принадлежит новому проекту
                     else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
+                        const newData = { ...data, status_id: firstStatus };
                         setData('status_id', firstStatus);
+                        triggerAutoSave(newData);
+                    }
+                    // Если все данные загружены, можно сохранить изменения
+                    else if (data.project_id) {
+                        triggerAutoSave(data);
                     }
                 })
                 .catch(error => {
@@ -229,7 +245,13 @@ const { data, setData, errors: formErrors } = useForm({
                     // Сбрасываем выбранный статус, если он не принадлежит новому контексту
                     if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
+                        const newData = { ...data, status_id: firstStatus };
                         setData('status_id', firstStatus);
+                        // Запускаем автосохранение после обновления статуса
+                        triggerAutoSave(newData);
+                    } else {
+                        // Если статус валиден для нового спринта, сохраняем изменения
+                        triggerAutoSave(data);
                     }
                 })
                 .catch(error => {
@@ -239,8 +261,8 @@ const { data, setData, errors: formErrors } = useForm({
         }
     }, [data.sprint_id]);
 
-    // Функция для автосохранения с дебаунсом
-    const triggerAutoSave = () => {
+    // Функция для автосохранения с дебаунсом и обработкой зависимых полей
+    const triggerAutoSave = (newData = null) => {
         if (!autoSave || !task?.id) return;
 
         // Очищаем предыдущий таймер
@@ -248,33 +270,81 @@ const { data, setData, errors: formErrors } = useForm({
             clearTimeout(autoSaveTimerRef.current);
         }
 
-        // Устанавливаем новый таймер (дебаунс 500мс)
-        setHasChanges(true); // Отмечаем, что есть изменения
+        // Устанавливаем новый таймер (дебаунс 1000мс для более стабильной работы)
+        setHasChanges(true);
         if (typeof window !== 'undefined') {
             window.taskFormHasChanges = true;
         }
 
+        // Используем актуальные данные для сохранения
+        const dataToSave = newData || data;
+
         autoSaveTimerRef.current = setTimeout(() => {
             if (onSubmit && !processing && !autoSaving) {
-                setAutoSaving(true); // Показываем индикатор загрузки только при фактическом сохранении
-                onSubmit(data);
+                setAutoSaving(true);
 
-                // Сбрасываем флаги после сохранения
-                setTimeout(() => {
-                    setHasChanges(false);
+                // Проверяем зависимые поля перед сохранением
+                const shouldSave = () => {
+                    // Проверяем, загружены ли все необходимые данные для выбранного проекта
+                    if (dataToSave.project_id) {
+                        const hasValidStatus = !dataToSave.status_id || availableStatuses.some(s => s.id == dataToSave.status_id);
+                        const hasValidSprint = !dataToSave.sprint_id || availableSprints.some(s => s.id == dataToSave.sprint_id);
+                        const hasValidAssignee = !dataToSave.assignee_id || availableMembers.some(m => m.id == dataToSave.assignee_id);
+
+                        return hasValidStatus && hasValidSprint && hasValidAssignee;
+                    }
+                    return true;
+                };
+
+                if (shouldSave()) {
+                    onSubmit(dataToSave);
+
+                    // Сбрасываем флаги после сохранения
+                    setTimeout(() => {
+                        setHasChanges(false);
+                        setAutoSaving(false);
+                        if (typeof window !== 'undefined') {
+                            window.taskFormHasChanges = false;
+                        }
+                    }, 1000);
+                } else {
+                    // Если зависимые данные не готовы, отменяем автосохранение
                     setAutoSaving(false);
+                    setHasChanges(false);
                     if (typeof window !== 'undefined') {
                         window.taskFormHasChanges = false;
                     }
-                }, 1000); // Увеличиваем время отображения индикатора загрузки
+                }
             }
-        }, 500); // Уменьшаем время дебаунса для более быстрой реакции
+        }, 1000);
     };
 
-    // Модифицированный setData для автоматического сохранения
+    // Модифицированный setData для автоматического сохранения с учетом зависимых полей
     const setDataWithAutoSave = (key, value) => {
+        const newData = { ...data, [key]: value };
         setData(key, value);
-        triggerAutoSave();
+
+        // Специальная обработка для зависимых полей
+        if (key === 'project_id') {
+            // При смене проекта сбрасываем зависимые поля
+            newData.sprint_id = '';
+            newData.status_id = '';
+            newData.assignee_id = '';
+            setData(prev => ({
+                ...prev,
+                sprint_id: '',
+                status_id: '',
+                assignee_id: ''
+            }));
+            // Откладываем автосохранение до загрузки зависимых данных
+            return;
+        } else if (key === 'sprint_id') {
+            // При смене спринта ждем обновления статусов
+            return;
+        }
+
+        // Для остальных полей запускаем автосохранение
+        triggerAutoSave(newData);
     };
 
     const handleSubmit = (e) => {

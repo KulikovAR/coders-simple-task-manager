@@ -1,14 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 
 export default function TagsInput({ value = '', onChange, placeholder = 'Введите теги...', className = '' }) {
-    const [tags, setTags] = useState(value.split(' ').filter(Boolean));
+    // Безопасное преобразование value в строку и разделение на теги
+    const safeValueToTags = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val.filter(Boolean);
+        const str = String(val).trim();
+        return str.split(/\s+/).filter(Boolean).map(tag => tag.toLowerCase());
+    };
+
+    const [tags, setTags] = useState(safeValueToTags(value));
     const [inputValue, setInputValue] = useState('');
     const inputRef = useRef(null);
     const containerRef = useRef(null);
 
     useEffect(() => {
         // Обновляем теги при изменении внешнего значения
-        const newTags = value.split(' ').filter(Boolean);
+        const newTags = safeValueToTags(value);
         if (JSON.stringify(newTags) !== JSON.stringify(tags)) {
             setTags(newTags);
         }
@@ -18,9 +26,9 @@ export default function TagsInput({ value = '', onChange, placeholder = 'Вве�
         const newValue = e.target.value;
         setInputValue(newValue);
 
-        // Если введен пробел, добавляем новый тег
-        if (newValue.endsWith(' ')) {
-            const tag = newValue.trim();
+        // Если введен пробел или запятая, добавляем новый тег
+        if (newValue.endsWith(' ') || newValue.endsWith(',')) {
+            const tag = newValue.replace(/[,\s]+$/, '').trim().toLowerCase();
             if (tag && !tags.includes(tag)) {
                 const newTags = [...tags, tag];
                 setTags(newTags);
@@ -36,15 +44,17 @@ export default function TagsInput({ value = '', onChange, placeholder = 'Вве�
             const newTags = tags.slice(0, -1);
             setTags(newTags);
             onChange(newTags.join(' '));
-        } else if (e.key === 'Enter' && inputValue.trim()) {
+        } else if ((e.key === 'Enter' || e.key === ',') && inputValue.trim()) {
             e.preventDefault();
-            const tag = inputValue.trim();
+            const tag = inputValue.trim().toLowerCase();
             if (!tags.includes(tag)) {
                 const newTags = [...tags, tag];
                 setTags(newTags);
                 onChange(newTags.join(' '));
             }
             setInputValue('');
+        } else if (e.key === 'Enter' && !inputValue.trim()) {
+            e.preventDefault(); // Предотвращаем отправку формы при пустом вводе
         }
     };
 
