@@ -18,9 +18,9 @@ const HeroSection = ({ isLoaded, auth, registerRef }) => {
         >
             <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 <h1 className="text-3xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight text-white mb-4">
-                    Таск-менеджер <br className="hidden sm:block" />
+                    Просто удобный<br className="hidden sm:block" />
                     <span className="bg-gradient-to-r from-accent-blue to-accent-purple bg-clip-text text-transparent">
-                        на новом уровне
+                        таск-менеджер
                     </span>
                 </h1>
                 <p className="text-xl md:text-2xl text-gray-300 mt-4 max-w-3xl mx-auto">

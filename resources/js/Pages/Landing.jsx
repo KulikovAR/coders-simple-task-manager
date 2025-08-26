@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState, useRef } from 'react';
-import Waves from '@/Components/Waves';
+// import Waves from '@/Components/Waves';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 // Компоненты лендинга
@@ -92,9 +92,9 @@ export default function Landing({ auth }) {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-hidden">
+            <div className="min-h-screen bg-gradient-to-b from-[#18181c] via-[#131316] to-[#0a0a0a] text-text-primary relative overflow-hidden">
                 {/* Интерактивный фон с волнами */}
-                <Waves
+                {/* <Waves
                     lineColor="rgba(255, 255, 255, 0.03)"
                     backgroundColor="transparent"
                     waveSpeedX={0.008}
@@ -107,7 +107,7 @@ export default function Landing({ auth }) {
                     tension={0.004}
                     maxCursorMove={80}
                     style={{ zIndex: 0 }}
-                />
+                /> */}
 
                 {/* Навигация */}
                 <header className={`fixed top-0 left-0 right-0 z-50 bg-primary-bg/80 backdrop-blur-xl border-b border-border-color transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
