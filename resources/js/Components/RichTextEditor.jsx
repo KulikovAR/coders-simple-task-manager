@@ -51,6 +51,7 @@ export default function RichTextEditor({
             cursor: text;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            color: var(--text-primary);
         }
 
         /* Стили для popup'а упоминаний с адаптивностью */
@@ -231,6 +232,7 @@ export default function RichTextEditor({
             --pre-bg: #1f2937;
             --pre-text: #f9fafb;
             --blockquote-bg: rgba(0, 0, 0, 0.03);
+            color: var(--text-primary);
         }
     `;
     const [showLinkInput, setShowLinkInput] = useState(false);

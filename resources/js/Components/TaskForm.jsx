@@ -434,7 +434,7 @@ const { data, setData, errors: formErrors } = useForm({
                                 type="text"
                                 value={data.title}
                                 onChange={(e) => setDataWithAutoSave('title', e.target.value)}
-                                className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 !text-white placeholder-white/70 focus:outline-none focus:ring-0"
+                                className="w-full text-lg md:text-xl font-semibold bg-transparent border-none px-0 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:ring-0"
                                 placeholder="Введите название задачи..."
                                 required
                             />
@@ -446,7 +446,7 @@ const { data, setData, errors: formErrors } = useForm({
 
                         {/* Описание */}
                         <div>
-                            <label className="block text-sm font-medium !text-white mb-3">
+                            <label className="block text-sm font-medium text-text-primary mb-3">
                                 Описание
                             </label>
                                                             <RichTextEditor
@@ -465,7 +465,7 @@ const { data, setData, errors: formErrors } = useForm({
                             <>
                                 {/* Результат */}
                                 <div>
-                                    <label className="block text-sm font-medium !text-white mb-3">
+                                    <label className="block text-sm font-medium text-text-primary mb-3">
                                         Результат выполнения
                                     </label>
                                     <RichTextEditor
@@ -478,7 +478,7 @@ const { data, setData, errors: formErrors } = useForm({
 
                                 {/* Merge Request */}
                                 <div>
-                                    <label className="block text-sm font-medium !text-white mb-3">
+                                    <label className="block text-sm font-medium text-text-primary mb-3">
                                         Ссылка на Merge Request
                                     </label>
                                     <input
@@ -498,7 +498,7 @@ const { data, setData, errors: formErrors } = useForm({
                     <div className="space-y-4 md:space-y-6">
                         {/* Быстрые действия */}
                         <div className="bg-card-bg border border-border-color rounded-xl p-3 md:p-4">
-                            <h3 className="text-sm font-medium !text-white mb-4">Параметры задачи</h3>
+                            <h3 className="text-sm font-medium text-text-primary mb-4">Параметры задачи</h3>
                             <div className="space-y-4">
                                 {/* Теги */}
                                 <div>
@@ -634,8 +634,8 @@ const { data, setData, errors: formErrors } = useForm({
                     {task?.id && auth && (
                         <div className="bg-secondary-bg border border-border-color rounded-lg p-4">
                             <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-white dark:text-white">Комментарии</h3>
-                                <p className="text-sm text-white dark:text-gray-300">Обсудите задачу с командой</p>
+                                <h3 className="text-lg font-semibold text-text-primary">Комментарии</h3>
+                                <p className="text-sm text-text-secondary">Обсудите задачу с командой</p>
                             </div>
                             <TaskComments
                                 task={task}
@@ -658,7 +658,7 @@ const { data, setData, errors: formErrors } = useForm({
 
                 {/* Индикатор автосохранения - показываем только при активном сохранении */}
                 {autoSave && task?.id && autoSaving && (
-                    <div className="fixed bottom-4 right-4 bg-accent-blue/90 text-white px-2 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-50 animate-fade-in">
+                    <div className="fixed bottom-4 right-4 bg-accent-blue/90 text-text-inverse px-2 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-50 animate-fade-in">
                         <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -714,7 +714,7 @@ const { data, setData, errors: formErrors } = useForm({
                     {/* Дополнительные поля (только для редактирования) */}
                     {isEditing && (
                         <>
-                            {/* Результат */}
+                            {/* Результат*/}
                             <div className={modalStyles.card}>
                                 <h3 className={modalStyles.cardTitle}>Результат выполнения</h3>
                                 {renderField('result', 'Результат', 'textarea', {

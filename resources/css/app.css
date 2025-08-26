@@ -446,13 +446,13 @@ body[data-page="Welcome"] {
     box-shadow: var(--shadow-sm);
 }
 .board-modal {
-    background-color: rgba(0,0,0,0.4) !important;
+    background-color: #1A1A1A !important;
     color: #ffffff !important;
     box-shadow: var(--shadow-md);
 }
 
 [data-theme='light'] .board-modal {
-    background-color: rgba(255,255,255,0.3) !important;
+    background-color: #F3F5F7 !important;
     color: #ffffff !important;
     box-shadow: var(--shadow-md);
 }

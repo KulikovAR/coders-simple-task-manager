@@ -18,12 +18,12 @@ export default function TaskModal({
 }) {
     // Состояние для чек-листов
     const [checklists, setChecklists] = useState(selectedTask?.checklists || []);
-    
+
     // Синхронизируем чек-листы при изменении задачи
     useEffect(() => {
         setChecklists(selectedTask?.checklists || []);
     }, [selectedTask?.checklists]);
-    
+
     // Функция для копирования ссылки на задачу
     const copyTaskLink = (e) => {
         e.preventDefault();
@@ -112,7 +112,7 @@ export default function TaskModal({
                             <div className="flex items-center gap-3 mb-2">
                                 {selectedTask.code && (
                                     <span
-                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 dark:text-white text-black font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 text-black dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >
@@ -339,7 +339,7 @@ export default function TaskModal({
                             />
                         </div>
                     )}
-                    
+
                     <TaskForm
                         task={selectedTask}
                         projects={[project]}
