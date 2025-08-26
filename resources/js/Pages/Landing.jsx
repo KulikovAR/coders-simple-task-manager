@@ -92,68 +92,62 @@ export default function Landing({ auth }) {
                 </script>
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-b from-[#18181c] via-[#131316] to-[#0a0a0a] text-text-primary relative overflow-hidden">
-                {/* Интерактивный фон с волнами */}
-                {/* <Waves
-                    lineColor="rgba(255, 255, 255, 0.03)"
-                    backgroundColor="transparent"
-                    waveSpeedX={0.008}
-                    waveSpeedY={0.004}
-                    waveAmpX={20}
-                    waveAmpY={10}
-                    xGap={24}
-                    yGap={48}
-                    friction={0.96}
-                    tension={0.004}
-                    maxCursorMove={80}
-                    style={{ zIndex: 0 }}
-                /> */}
+            <div className="min-h-screen bg-black text-text-primary relative overflow-hidden">
+                {/* Фоновые элементы дизайна */}
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.06),transparent_60%)]"></div>
+                    <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,rgba(124,58,237,0.06),transparent_60%)]"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl mx-auto">
+                        <div className="absolute top-0 left-0 w-64 h-64 bg-accent-blue/5 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-accent-purple/5 rounded-full blur-3xl"></div>
+                    </div>
+                </div>
 
                 {/* Навигация */}
-                <header className={`fixed top-0 left-0 right-0 z-50 bg-primary-bg/80 backdrop-blur-xl border-b border-border-color transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <header className={`fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
                     <nav className="max-w-7xl mx-auto px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <ApplicationLogo className="h-8 w-auto" />
+                                <ApplicationLogo className="h-9 w-auto" />
                             </div>
                             <div className="hidden md:flex items-center gap-8 text-sm">
                                 <button
                                     onClick={() => navClick('features')}
-                                    className={`${activeSection === 'features' ? 'text-text-primary' : 'text-text-secondary'} hover:text-text-primary transition-colors`}
+                                    className={`${activeSection === 'features' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'features' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
                                 >
                                     Возможности
                                 </button>
                                 <button
-                                    onClick={() => navClick('ai-assistant')}
-                                    className={`${activeSection === 'ai-assistant' ? 'text-text-primary' : 'text-text-secondary'} hover:text-text-primary transition-colors`}
-                                >
-                                    ИИ‑ассистент
-                                </button>
-                                <button
                                     onClick={() => navClick('screenshots')}
-                                    className={`${activeSection === 'screenshots' ? 'text-text-primary' : 'text-text-secondary'} hover:text-text-primary transition-colors`}
+                                    className={`${activeSection === 'screenshots' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'screenshots' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
                                 >
                                     Интерфейс
                                 </button>
                                 <button
+                                    onClick={() => navClick('ai-assistant')}
+                                    className={`${activeSection === 'ai-assistant' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'ai-assistant' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                >
+                                    ИИ‑ассистент
+                                </button>
+                                <button
                                     onClick={() => navClick('benefits')}
-                                    className={`${activeSection === 'benefits' ? 'text-text-primary' : 'text-text-secondary'} hover:text-text-primary transition-colors`}
+                                    className={`${activeSection === 'benefits' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'benefits' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
                                 >
                                     Преимущества
                                 </button>
-                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">
+                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
                                     Поддержка
                                 </a>
                                 {auth.user ? (
-                                    <Link href={route('dashboard')} className="bg-accent-blue text-white px-4 py-2 rounded-full font-medium hover:bg-accent-blue/80 transition-colors shadow-glow">
+                                    <Link href={route('dashboard')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 transform hover:-translate-y-0.5">
                                         Открыть дашборд
                                     </Link>
                                 ) : (
-                                    <div className="flex items-center gap-3">
-                                        <Link href={route('login')} className="text-text-primary hover:text-text-secondary transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <Link href={route('login')} className="text-white hover:text-accent-blue transition-all duration-300">
                                             Вход
                                         </Link>
-                                        <Link href={route('register')} className="bg-accent-blue text-white px-4 py-2 rounded-full font-medium hover:bg-accent-blue/80 transition-colors shadow-glow">
+                                        <Link href={route('register')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 transform hover:-translate-y-0.5">
                                             Начать
                                         </Link>
                                     </div>
@@ -161,40 +155,40 @@ export default function Landing({ auth }) {
                             </div>
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="md:hidden w-10 h-10 grid place-items-center rounded-lg border border-border-color hover:bg-secondary-bg transition-colors"
+                                className="md:hidden w-10 h-10 grid place-items-center rounded-lg border border-border-color/50 hover:border-accent-blue/50 hover:bg-accent-blue/10 transition-all duration-300"
                             >
-                                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d={isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
                                 </svg>
                             </button>
                         </div>
                         {isMobileMenuOpen && (
-                            <div className="md:hidden mt-4 pt-4 border-t border-border-color flex flex-col gap-4">
-                                <button onClick={() => navClick('features')} className="text-left text-text-secondary hover:text-text-primary">
+                            <div className="md:hidden mt-4 pt-4 border-t border-border-color/30 flex flex-col gap-5">
+                                <button onClick={() => navClick('features')} className={`text-left ${activeSection === 'features' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
                                     Возможности
                                 </button>
-                                <button onClick={() => navClick('ai-assistant')} className="text-left text-text-secondary hover:text-text-primary">
+                                <button onClick={() => navClick('ai-assistant')} className={`text-left ${activeSection === 'ai-assistant' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
                                     ИИ‑ассистент
                                 </button>
-                                <button onClick={() => navClick('screenshots')} className="text-left text-text-secondary hover:text-text-primary">
+                                <button onClick={() => navClick('screenshots')} className={`text-left ${activeSection === 'screenshots' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
                                     Интерфейс
                                 </button>
-                                <button onClick={() => navClick('benefits')} className="text-left text-text-secondary hover:text-text-primary">
+                                <button onClick={() => navClick('benefits')} className={`text-left ${activeSection === 'benefits' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
                                     Преимущества
                                 </button>
-                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary">
+                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
                                     Поддержка
                                 </a>
                                 {auth.user ? (
-                                    <Link href={route('dashboard')} className="bg-accent-blue text-white px-4 py-2 rounded-full text-center shadow-glow">
+                                    <Link href={route('dashboard')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300">
                                         Открыть дашборд
                                     </Link>
                                 ) : (
-                                    <div className="flex flex-col gap-3">
-                                        <Link href={route('login')} className="text-text-primary">
+                                    <div className="flex flex-col gap-4">
+                                        <Link href={route('login')} className="text-white hover:text-accent-blue transition-all duration-300">
                                             Вход
                                         </Link>
-                                        <Link href={route('register')} className="bg-accent-blue text-white px-4 py-2 rounded-full text-center shadow-glow">
+                                        <Link href={route('register')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300">
                                             Начать
                                         </Link>
                                     </div>

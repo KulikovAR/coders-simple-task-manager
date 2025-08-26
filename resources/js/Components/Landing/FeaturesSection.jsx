@@ -51,7 +51,7 @@ const FeaturesSection = ({ registerRef }) => {
             title: 'Уведомления',
             description: 'Email и Telegram уведомления о назначениях, комментариях, дедлайнах и изменениях статуса',
             icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
-            color: 'accent-red'
+            color: 'accent-pink'
         },
         {
             title: 'Теги и фильтры',
@@ -61,14 +61,33 @@ const FeaturesSection = ({ registerRef }) => {
         },
     ];
 
+    // Функция для определения цвета иконки
+    const getIconStyles = (color) => {
+        const colorMap = {
+            'accent-blue': 'text-blue-500 bg-blue-500/10 group-hover:bg-blue-500/20',
+            'accent-purple': 'text-purple-500 bg-purple-500/10 group-hover:bg-purple-500/20',
+            'accent-green': 'text-green-500 bg-green-500/10 group-hover:bg-green-500/20',
+            'accent-cyan': 'text-cyan-500 bg-cyan-500/10 group-hover:bg-cyan-500/20',
+            'accent-yellow': 'text-yellow-500 bg-yellow-500/10 group-hover:bg-yellow-500/20',
+            'accent-indigo': 'text-indigo-500 bg-indigo-500/10 group-hover:bg-indigo-500/20',
+            'accent-red': 'text-red-500 bg-red-500/10 group-hover:bg-red-500/20',
+            'accent-emerald': 'text-emerald-500 bg-emerald-500/10 group-hover:bg-emerald-500/20',
+        };
+        return colorMap[color] || 'text-blue-500 bg-blue-500/10';
+    };
+
     return (
         <section
             ref={sectionRef}
             id="features"
-            className="max-w-7xl mx-auto px-6 py-20"
+            className="max-w-7xl mx-auto px-6 py-24 relative"
         >
+            {/* Декоративный элемент */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent-blue/5 rounded-full blur-[120px] -z-10"></div>
+
             <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-accent-blue to-accent-purple px-4 py-1.5 rounded-full text-xs font-semibold inline-block mb-4 text-white">ВОЗМОЖНОСТИ</span>
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
                     Всё необходимое для управления проектами
                 </h2>
                 <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -80,18 +99,21 @@ const FeaturesSection = ({ registerRef }) => {
                 {features.map((feature, index) => (
                     <div
                         key={index}
-                        className="group rounded-2xl border border-border-color bg-[#131313] p-6 text-white hover:bg-[#232323] transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 hover:border-border-color/50"
+                        className="group rounded-2xl border border-white/5 bg-black/40 backdrop-blur-sm p-6 text-white hover:bg-black/60 transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-accent-blue/20"
                     >
-                        <div className={`w-12 h-12 rounded-xl bg-${feature.color}/20 text-${feature.color} grid place-items-center mb-4 group-hover:scale-110 group-hover:bg-${feature.color}/30 transition-all duration-300 shadow-sm`}>
+                        <div className={`w-12 h-12 rounded-xl ${getIconStyles(feature.color)} grid place-items-center mb-5 group-hover:scale-110 transition-all duration-300 shadow-sm`}>
                             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d={feature.icon} />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-semibold mb-2 group-hover:text-accent-blue transition-colors text-white">{feature.title}</h3>
-                        <p className="text-gray-300 text-sm">{feature.description}</p>
+                        <h3 className="text-lg font-semibold mb-3 group-hover:text-accent-blue transition-colors text-white">{feature.title}</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
                     </div>
                 ))}
             </div>
+
+            {/* Декоративный разделитель */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-border-color/30 to-transparent my-24"></div>
 
         </section>
     );
