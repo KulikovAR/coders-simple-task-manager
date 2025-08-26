@@ -11,7 +11,6 @@ import ScreenshotsSection from '@/Components/Landing/ScreenshotsSection';
 import BenefitsSection from '@/Components/Landing/BenefitsSection';
 import CtaSection from '@/Components/Landing/CtaSection';
 import Footer from '@/Components/Landing/Footer';
-import backgroundColor from "../../../demos/tiptap/packages/extension-text-style/src/background-color/index.js";
 
 export default function Landing({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
