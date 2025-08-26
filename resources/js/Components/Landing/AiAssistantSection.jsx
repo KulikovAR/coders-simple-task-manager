@@ -98,7 +98,7 @@ const AiAssistantSection = ({ registerRef }) => {
                 {/* Правая колонка - Описание возможностей */}
                 <div className="order-1 lg:order-2">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-                        Первый русскоязычный<br />ИИ для управления проектами
+                       ИИ для управления проектами
                     </h2>
                     <p className="text-lg text-gray-300 mb-8">
                         Управляйте проектами с помощью естественных команд на русском языке. ИИ-ассистент создаст задачи, назначит исполнителей, изменит статусы и предоставит отчёты по вашему запросу.
