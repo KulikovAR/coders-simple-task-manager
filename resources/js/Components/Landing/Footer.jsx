@@ -32,7 +32,6 @@ const Footer = () => {
     const legalLinks = [
         { title: 'Условия использования', href: '#' },
         { title: 'Политика конфиденциальности', href: '#' },
-        { title: 'Лицензия', href: '#' },
     ];
 
     return (
