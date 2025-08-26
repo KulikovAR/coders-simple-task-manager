@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import Waves from '@/Components/Waves';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Landing({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -71,8 +72,7 @@ export default function Landing({ auth }) {
                     <nav className="max-w-7xl mx-auto px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="text-2xl font-semibold tracking-tight">379ТМ</div>
-                                <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-accent-blue/20 text-accent-blue">beta</span>
+                                <ApplicationLogo />
                             </div>
                             <div className="hidden md:flex items-center gap-8 text-sm">
                                 <button onClick={() => navClick('features')} className="text-text-secondary hover:text-text-primary transition-colors">Возможности</button>

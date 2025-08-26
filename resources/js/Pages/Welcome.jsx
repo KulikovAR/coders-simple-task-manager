@@ -100,9 +100,6 @@ export default function Welcome({ auth }) {
                         <div className="flex justify-between items-center">
                             <div className="text-2xl font-semibold text-text-primary flex items-center gap-2">
                                 <span>379ТМ</span>
-                                <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium">
-                                    beta
-                                </span>
                             </div>
 
                             {/* Desktop Navigation */}

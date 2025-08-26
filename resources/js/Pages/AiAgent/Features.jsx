@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import Waves from '@/Components/Waves';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function AiFeatures() {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -70,8 +71,8 @@ export default function AiFeatures() {
                 <header className={`border-b border-border-color transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <nav className="max-w-6xl mx-auto px-6 py-4">
                         <div className="flex justify-between items-center">
-                            <Link href="/" className="text-2xl font-semibold text-text-primary hover:text-text-secondary transition-colors duration-300">
-                                379ТМ
+                            <Link href="/" className="hover:opacity-80 transition-opacity">
+                                <ApplicationLogo />
                             </Link>
                             <Link
                                 href="/"
