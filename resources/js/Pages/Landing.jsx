@@ -217,14 +217,14 @@ export default function Landing({ auth }) {
                         registerRef={(ref) => registerSection('features', ref)}
                     />
 
-                    {/* Секция ИИ-ассистента */}
-                    <AiAssistantSection
-                        registerRef={(ref) => registerSection('ai-assistant', ref)}
-                    />
-
                     {/* Секция скриншотов */}
                     <ScreenshotsSection
                         registerRef={(ref) => registerSection('screenshots', ref)}
+                    />
+
+                    {/* Секция ИИ-ассистента */}
+                    <AiAssistantSection
+                        registerRef={(ref) => registerSection('ai-assistant', ref)}
                     />
 
                     {/* Секция преимуществ */}
