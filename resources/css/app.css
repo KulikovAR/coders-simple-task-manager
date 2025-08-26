@@ -1035,7 +1035,9 @@ body {
 .rounded-xl {
     border-radius: var(--radius-xl) !important;
 }
-
+.landing-images {
+    width: 90rem !important;
+}
 .rounded-2xl {
     border-radius: var(--radius-2xl) !important;
 }

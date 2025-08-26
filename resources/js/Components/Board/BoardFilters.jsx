@@ -158,9 +158,6 @@ export default function BoardFilters({
                                             <span className="text-text-muted">Все исполнители</span>
                                         </button>
 
-                                        {/* Разделитель */}
-                                        <div className="border-t border-border-color my-1"></div>
-
                                         {/* Список исполнителей */}
                                         {members.map(user => (
                                             <button

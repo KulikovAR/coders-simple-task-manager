@@ -33,6 +33,11 @@ Route::get('/faq', function () {
     return Inertia::render('Faq');
 })->name('faq');
 
+// API документация (заглушка для футера)
+Route::get('/api-docs', function () {
+    return Inertia::render('ApiDocs');
+})->name('api-docs');
+
 // Демо-страница RichTextEditor
 Route::get('/demo/rich-editor', function () {
     return Inertia::render('Demo/RichEditorDemo');
