@@ -112,7 +112,7 @@ export default function TaskModal({
                             <div className="flex items-center gap-3 mb-2">
                                 {selectedTask.code && (
                                     <span
-                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 text-black dark:text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >
@@ -143,15 +143,15 @@ export default function TaskModal({
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2 lg:gap-4 !text-white text-xs lg:text-sm">
+                            <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-slate-800 text-xs lg:text-sm">
                                 {selectedTask.assignee && (
                                     <div className="flex items-center gap-2">
                                         <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                            <span className="text-xs font-medium text-slate-800 dark:text-white">
+                                            <span className="text-xs font-medium text-slate-800 text-white">
                                                 {selectedTask.assignee.name?.charAt(0) || 'U'}
                                             </span>
                                         </div>
-                                        <span className="truncate max-w-[120px] lg:max-w-none drop-shadow-sm">{selectedTask.assignee.name}</span>
+                                        <span className="truncate max-w-[120px] lg:max-w-none  text-white">{selectedTask.assignee.name}</span>
                                     </div>
                                 )}
                                 {selectedTask.deadline && (
