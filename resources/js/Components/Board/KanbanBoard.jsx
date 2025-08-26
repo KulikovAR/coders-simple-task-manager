@@ -241,7 +241,7 @@ export default function KanbanBoard({
     }
     return (
         <div className={`card ${isDragReorderMode ? 'drag-mode' : ''}`}>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-start items-center mb-6">
                 <div className="flex items-center gap-4">
                     {isDragReorderMode && (
                         <div className="flex items-center gap-2">
@@ -249,24 +249,42 @@ export default function KanbanBoard({
                         </div>
                     )}
                     {!isDragReorderMode && (
-                        <button
-                            onClick={() => setShowNewColumnForm(true)}
-                            className="btn btn-primary"
-                            title="Добавить новую колонку"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Новый статус
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => {
+                                    // Получаем первый статус из списка
+                                    const firstStatus = taskStatuses[0];
+                                    if (firstStatus) {
+                                        openTaskModal({
+                                            title: '',
+                                            description: '',
+                                            status_id: firstStatus.id,
+                                            project_id: project.id,
+                                            sprint_id: currentSprintId !== 'none' ? currentSprintId : null,
+                                            priority: 'medium',
+                                            tags: []
+                                        });
+                                    }
+                                }}
+                                className="btn btn-primary bg-accent-purple hover:bg-accent-purple/90"
+                            >
+                                Новая задача
+                            </button>
+                            <button
+                                onClick={() => setShowNewColumnForm(true)}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-text-primary hover:text-accent-blue transition-colors"
+                                title="Добавить новую колонку"
+                            >
+                                Новый статус
+                            </button>
+                        </div>
                     )}
                 </div>
-                <div /> {/* пустой div для выравнивания */}
             </div>
             {/* Форма создания новой колонки */}
             {showNewColumnForm && (
                 <div className="card mb-6">
-                    <h3 className="text-lg font-semibold text-text-primary mb-4">Создать новый статус</h3>
+                    <h3 className="text-lg ml-3 font-semibold text-text-primary mb-4">Создать новый статус</h3>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div className="flex items-center gap-3">
                             <div className="relative">

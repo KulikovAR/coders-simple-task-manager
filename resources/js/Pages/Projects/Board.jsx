@@ -199,7 +199,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
-        
+
         // Восстанавливаем скролл и позицию страницы
         const scrollY = parseInt(document.body.style.top || '0');
         document.body.style.position = '';
@@ -266,7 +266,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     console.log('Теги отсутствуют');
                     return [];
                 }
-                
+
                 // Если это уже массив, фильтруем пустые значения
                 if (Array.isArray(tags)) {
                     console.log('Обработка массива тегов');
@@ -274,7 +274,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     console.log('Отфильтрованные теги из массива:', filtered);
                     return filtered;
                 }
-                
+
                 // Если это строка, пробуем распарсить JSON
                 if (typeof tags === 'string') {
                     console.log('Обработка строки тегов');
@@ -298,7 +298,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         return split;
                     }
                 }
-                
+
                 console.log('Не удалось обработать теги, возвращаем пустой массив');
                 return [];
             };
@@ -310,12 +310,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     if (key === 'tags') {
                         const normalizedTags = normalizeTags(data[key]);
                         console.log('Нормализованные теги:', normalizedTags);
-                        
+
                         // Преобразуем массив тегов в строку, разделенную запятыми
                         const tagsString = normalizedTags.map(tag => tag.trim()).join(', ');
                         formData.append('tags', tagsString);
                         console.log('Добавлены теги как строка:', tagsString);
-                        
+
                         // Проверяем содержимое FormData после добавления тегов
                         console.log('Проверка FormData после добавления тегов:');
                         for (let [key, value] of formData.entries()) {
@@ -857,6 +857,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 </div>
 
                 {/* Фильтры */}
+                {/* Кнопки управления */}
+
+
                 <BoardFilters
                     project={project}
                     sprints={sprints}
