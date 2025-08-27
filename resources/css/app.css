@@ -670,6 +670,14 @@ body {
         letter-spacing: -0.025em;
     }
 
+    [data-theme='light']  .comment-badge, .normalize-theme  {
+        color: black;
+    }
+
+    .normalize-theme {
+        color: white;
+    }
+
     .comment-general {
         background-color: rgba(var(--accent-slate-rgb), 0.2);
         color: var(--accent-slate);
@@ -1867,4 +1875,64 @@ input::placeholder, textarea::placeholder {
     animation-play-state: paused;
     transform: scale(1.05);
     transition: transform 0.2s ease;
+}
+
+/* ===== СТИЛИ ДЛЯ ВЛОЖЕННЫХ ФАЙЛОВ ===== */
+.file-attachment {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background-color: var(--secondary-bg, #f3f4f6);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-attachment:hover {
+    background-color: var(--accent-blue-hover, #2563eb);
+    color: white;
+}
+
+.file-attachment-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-attachment-info {
+    flex: 1;
+}
+
+.file-attachment-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.file-attachment-size {
+    font-size: 0.75rem;
+    color: var(--text-muted, #9ca3af);
+}
+
+.file-attachment:hover .file-attachment-size {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.file-attachment-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--accent-blue, #3b82f6);
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    text-decoration: none;
+}
+
+.file-attachment:hover .file-attachment-link {
+    background-color: white;
+    color: var(--accent-blue, #3b82f6);
 }

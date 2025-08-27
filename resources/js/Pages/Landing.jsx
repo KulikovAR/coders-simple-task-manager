@@ -93,16 +93,6 @@ export default function Landing({ auth }) {
             </Head>
 
             <div className="min-h-screen bg-black text-text-primary relative overflow-hidden">
-                {/* Фоновые элементы дизайна */}
-                <div className="absolute inset-0 z-0">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.06),transparent_60%)]"></div>
-                    <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,rgba(124,58,237,0.06),transparent_60%)]"></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl mx-auto">
-                        <div className="absolute top-0 left-0 w-64 h-64 bg-accent-blue/5 rounded-full blur-3xl"></div>
-                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-accent-purple/5 rounded-full blur-3xl"></div>
-                    </div>
-                </div>
-
                 {/* Навигация */}
                 <header className={`fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
                     <nav className="max-w-7xl mx-auto px-6 py-4">

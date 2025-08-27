@@ -112,7 +112,7 @@ export default function TaskModal({
                             <div className="flex items-center gap-3 mb-2">
                                 {selectedTask.code && (
                                     <span
-                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-slate-800 text-white font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                        className="px-2 lg:px-3 py-1 bg-white/90 dark:bg-transparent rounded-full text-white text-slate-800 font-mono text-xs lg:text-sm border border-slate-300 dark:border-white shadow-sm cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >
@@ -201,7 +201,7 @@ export default function TaskModal({
                             <button
                                 type="button"
                                 onClick={closeTaskModal}
-                                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
+                                className="p-2 text-gray-400/70 hover:text-white hover:bg-white/10 rounded-lg"
                                 title="Закрыть"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,12 +214,11 @@ export default function TaskModal({
                     {/* Мобильная версия - кнопки под информацией */}
                     <div className="lg:hidden">
                         {/* Заголовок с кнопкой закрытия */}
-                        <div className="flex justify-between items-center mb-2">
-                            <div className="w-8 h-1 bg-white/30 rounded-full mx-auto"></div>
+                        <div className="flex justify-end items-center mb-2">
                             <button
                                 type="button"
                                 onClick={closeTaskModal}
-                                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
+                                className="p-2 text-gray-400/70 hover:text-gray-400 hover:bg-white/10 rounded-lg"
                                 title="Закрыть"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +233,7 @@ export default function TaskModal({
                             <div className="flex items-center flex-wrap gap-1.5 mb-2">
                                 {selectedTask.code && (
                                     <span
-                                        className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent rounded text-slate-800 text-black dark:text-white font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0 cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
+                                        className="px-1.5 py-0.5 bg-white/90 dark:bg-transparent text-white rounded text-slate-800 font-mono text-xs border border-slate-300 dark:border-white shadow-sm flex-shrink-0 cursor-pointer hover:bg-white/70 dark:hover:bg-white/10 inline-flex items-center"
                                         onClick={copyTaskLink}
                                         title="Нажмите, чтобы скопировать ссылку на задачу"
                                     >

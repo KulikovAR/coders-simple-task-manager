@@ -30,8 +30,8 @@ const Footer = () => {
 
     // Ссылки на правовую информацию
     const legalLinks = [
-        { title: 'Условия использования', href: '#' },
-        { title: 'Политика конфиденциальности', href: '#' },
+        { title: 'Условия использования', href: '/agreement.pdf' },
+        { title: 'Политика конфиденциальности', href: '/policy.pdf' },
     ];
 
     return (
@@ -137,6 +137,7 @@ const Footer = () => {
                     <div className="flex flex-wrap gap-6">
                         {legalLinks.map((link, index) => (
                             <a
+                                target={"_blank"}
                                 key={index}
                                 href={link.href}
                                 className="text-text-secondary hover:text-text-primary transition-colors text-sm"
