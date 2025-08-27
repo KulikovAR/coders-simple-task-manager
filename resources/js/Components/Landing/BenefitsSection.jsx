@@ -94,11 +94,14 @@ const BenefitsSection = ({ registerRef }) => {
         <section
             ref={sectionRef}
             id="benefits"
-            className="max-w-7xl mx-auto px-6 py-8"
+            className="max-w-7xl mx-auto px-6 py-24 relative"
         >
+            {/* Декоративный элемент */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent-purple/5 rounded-full blur-[120px] -z-10"></div>
             {/* Ключевые преимущества */}
             <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-accent-purple to-accent-indigo px-4 py-1.5 rounded-full text-xs font-semibold inline-block mb-4 text-white">ПРЕИМУЩЕСТВА</span>
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
                     Почему выбирают 379ТМ
                 </h2>
                 <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -110,18 +113,21 @@ const BenefitsSection = ({ registerRef }) => {
                 {benefits.map((benefit, index) => (
                     <div
                         key={index}
-                        className="bg-[#131313] border border-border-color rounded-2xl p-8 text-white hover:bg-[#232323] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                        className="group bg-black/40 backdrop-blur-sm border border-white/5 rounded-2xl p-8 text-white hover:bg-black/60 transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-accent-purple/30"
                     >
-                        <div className={`w-12 h-12 rounded-xl bg-${benefit.color}/15 text-${benefit.color} grid place-items-center mb-6`}>
+                        <div className={`w-12 h-12 rounded-xl bg-${benefit.color}/15 text-${benefit.color} grid place-items-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-sm`}>
                             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d={benefit.icon} />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-semibold mb-3 text-white">{benefit.title}</h3>
+                        <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-accent-blue transition-colors">{benefit.title}</h3>
                         <p className="text-gray-300">{benefit.description}</p>
                     </div>
                 ))}
             </div>
+            
+            {/* Декоративный разделитель */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-border-color/30 to-transparent my-24"></div>
         </section>
     );
 };

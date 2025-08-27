@@ -47,12 +47,14 @@ const AiAssistantSection = ({ registerRef }) => {
         <section
             ref={sectionRef}
             id="ai-assistant"
-            className="max-w-7xl mx-auto px-6 py-20"
+            className="max-w-7xl mx-auto px-6 py-24 relative"
         >
+            {/* Декоративный элемент */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent-blue/5 rounded-full blur-[120px] -z-10"></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 {/* Левая колонка - Демонстрация диалога */}
                 <div className="order-2 lg:order-1">
-                    <div className="bg-[#131313] border border-border-color rounded-2xl p-6 shadow-lg backdrop-blur-sm hover:shadow-xl hover:bg-[#232323] transition-all duration-300">
+                    <div className="bg-black/40 border border-white/5 rounded-2xl p-6 shadow-lg backdrop-blur-sm hover:shadow-xl hover:bg-black/60 hover:border-accent-purple/30 transition-all duration-300 hover:-translate-y-1.5">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-8 h-8 rounded-full bg-accent-blue/20 text-accent-blue grid place-items-center text-xs font-medium">
                                 ИИ
@@ -74,7 +76,7 @@ const AiAssistantSection = ({ registerRef }) => {
                                         <div className="w-8 h-8 rounded-full bg-accent-blue/20 text-accent-blue grid place-items-center text-xs font-medium mt-1">
                                             ИИ
                                         </div>
-                                        <div className="max-w-[85%] rounded-xl border border-border-color bg-secondary-bg/80 px-4 py-3 text-sm shadow-sm">
+                                        <div className="max-w-[85%] rounded-xl border border-white/5 bg-black/40 px-4 py-3 text-sm shadow-sm">
                                             {item.response}
                                         </div>
                                     </div>
@@ -82,8 +84,8 @@ const AiAssistantSection = ({ registerRef }) => {
                             ))}
                         </div>
 
-                        <div className="mt-6 pt-6 border-t border-border-color flex">
-                            <div className="bg-secondary-bg/90 rounded-xl border border-border-color flex-1 px-4 py-3 text-text-secondary text-sm shadow-sm">
+                        <div className="mt-6 pt-6 border-t border-white/10 flex">
+                            <div className="bg-black/50 rounded-xl border border-white/5 flex-1 px-4 py-3 text-gray-400 text-sm shadow-sm">
                                 Введите команду...
                             </div>
                             <button className="ml-2 w-10 h-10 rounded-xl bg-accent-blue text-white grid place-items-center">
@@ -97,6 +99,7 @@ const AiAssistantSection = ({ registerRef }) => {
 
                 {/* Правая колонка - Описание возможностей */}
                 <div className="order-1 lg:order-2">
+                    <span className="bg-gradient-to-r from-accent-blue to-accent-purple px-4 py-1.5 rounded-full text-xs font-semibold inline-block mb-4 text-white">ИИ-АССИСТЕНТ</span>
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
                        ИИ для управления проектами
                     </h2>
@@ -106,14 +109,14 @@ const AiAssistantSection = ({ registerRef }) => {
 
                     <div className="space-y-6 mb-8">
                         {aiFeatures.map((feature, index) => (
-                            <div key={index} className="flex items-start gap-4 bg-[#131313] rounded-xl p-4 hover:bg-[#232323] transition-all duration-300">
-                                <div className="w-10 h-10 rounded-xl bg-accent-blue/15 text-accent-blue grid place-items-center flex-shrink-0">
+                            <div key={index} className="flex items-start gap-4 bg-black/40 backdrop-blur-sm rounded-xl p-4 border border-white/5 hover:border-accent-purple/30 hover:bg-black/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="w-10 h-10 rounded-xl bg-accent-blue/15 text-accent-blue grid place-items-center flex-shrink-0 group-hover:scale-110 transition-all duration-300 shadow-sm">
                                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d={feature.icon} />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-medium mb-1 text-white">{feature.title}</h3>
+                                    <h3 className="text-lg font-medium mb-1 text-white hover:text-accent-blue transition-colors">{feature.title}</h3>
                                     <p className="text-gray-300 text-sm">{feature.description}</p>
                                 </div>
                             </div>
@@ -131,6 +134,9 @@ const AiAssistantSection = ({ registerRef }) => {
                     </Link>
                 </div>
             </div>
+            
+            {/* Декоративный разделитель */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-border-color/30 to-transparent my-24"></div>
         </section>
     );
 };
