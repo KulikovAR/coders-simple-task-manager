@@ -24,8 +24,8 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'result' => 'nullable|string|max:2000',
+            'description' => 'nullable|string|max:65535',
+            'result' => 'nullable|string|max:65535',
             'merge_request' => 'nullable|url|max:255',
             'sprint_id' => 'nullable|exists:sprints,id',
             'assignee_id' => 'nullable|exists:users,id',
@@ -42,10 +42,11 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title.required' => 'Название задачи обязательно',
             'title.max' => 'Название задачи не может быть длиннее 255 символов',
-            'description.max' => 'Описание задачи не может быть длиннее 1000 символов',
+            'description.max' => 'слишком много символов',
             'sprint_id.exists' => 'Указанный спринт не существует',
             'assignee_id.exists' => 'Указанный исполнитель не существует',
             'priority.in' => 'Приоритет должен быть одним из: low, medium, high, critical',
+            'result.max' => 'слишком много символов',
         ];
     }
 }

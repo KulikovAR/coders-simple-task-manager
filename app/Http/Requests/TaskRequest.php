@@ -19,12 +19,12 @@ class TaskRequest extends FormRequest
     {
         $rules = [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:65535',
             'priority' => 'nullable|in:low,medium,high',
             'sprint_id' => 'nullable|exists:sprints,id',
             'assignee_id' => 'nullable|exists:users,id',
             'deadline' => 'nullable|date',
-            'result' => 'nullable|string',
+            'result' => 'nullable|string|max:65535',
             'merge_request' => 'nullable|url',
             'tags' => 'nullable|max:255'
         ];
@@ -52,6 +52,8 @@ class TaskRequest extends FormRequest
             'assignee_id.exists' => 'Выбранный исполнитель не существует.',
             'deadline.date' => 'Дедлайн должен быть корректной датой.',
             'merge_request.url' => 'Ссылка на merge request должна быть корректным URL.',
+            'description.max' => 'слишком много символов',
+            'result.max' => 'слишком много символов',
         ];
     }
 
