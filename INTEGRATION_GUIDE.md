@@ -1,223 +1,341 @@
-# 🚀 Интеграция RichTextEditor
+# 🚀 Руководство по интеграции функционала файлов
 
-## Быстрая замена MentionTextarea
+## 📋 Обзор
 
-### 1. Импорт
-```jsx
-// Было
-import MentionTextarea from '@/Components/MentionTextarea';
+Функционал загрузки файлов полностью интегрирован в систему и готов к использованию. Все основные компоненты (задачи, проекты, комментарии) теперь поддерживают загрузку и отображение файлов.
 
-// Стало
-import RichTextEditor from '@/Components/RichTextEditor';
+## 🔧 Установка и настройка
+
+### 1. Запуск миграций
+```bash
+php artisan migrate
 ```
 
-### 2. Замена компонента
-```jsx
-// Было
-<MentionTextarea
-    value={content}
-    onChange={setContent}
-    users={users}
-    rows={4}
-    className="w-full border rounded"
-/>
+### 2. Создание символической ссылки для storage
+```bash
+php artisan storage:link
+```
 
-// Стало
+### 3. Проверка настроек файловой системы
+Убедитесь, что в `config/filesystems.php` настроен диск `public`:
+```php
+'public' => [
+    'driver' => 'local',
+    'root' => storage_path('app/public'),
+    'url' => env('APP_URL').'/storage',
+    'visibility' => 'public',
+],
+```
+
+## 🎯 Интеграция с существующими компонентами
+
+### Tasks (Задачи)
+
+#### Обновление TaskForm
+```jsx
+// В TaskForm.jsx уже добавлена поддержка файлов
 <RichTextEditor
-    value={content}
-    onChange={setContent}
-    users={users}
+    value={data.description}
+    onChange={(value) => setDataWithAutoSave('description', value)}
+    attachableType="App\\Models\\Task"
+    attachableId={task?.id || 'temp_' + Date.now()}
+    placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
     className="w-full"
 />
 ```
 
-### 3. Отображение HTML контента
+#### Отображение файлов в задаче
 ```jsx
-// Для отображения отформатированного текста
-import HtmlRenderer from '@/Components/HtmlRenderer';
+import TaskFileAttachments from '@/Components/Tasks/TaskFileAttachments';
 
-<HtmlRenderer content={comment.content} />
+// В компоненте отображения задачи
+<TaskFileAttachments 
+    taskId={task.id} 
+    onFileDeleted={(fileId) => {
+        // Обработка удаления файла
+        console.log('Файл удален:', fileId);
+    }} 
+/>
 ```
 
-## 📍 Где заменить
+### Projects (Проекты)
 
-### Комментарии к задачам
-- `resources/js/Components/TaskComments.jsx` → `TaskCommentsWithRichEditor.jsx`
-- `resources/js/Pages/TaskComments/Form.jsx`
+#### Обновление ProjectForm
+```jsx
+// В ProjectForm.jsx уже добавлена поддержка файлов
+<RichTextEditor
+    value={data.description}
+    onChange={(value) => setData('description', value)}
+    attachableType="App\\Models\\Project"
+    attachableId={project?.id || 'temp_' + Date.now()}
+    placeholder="Опишите цели проекта... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
+    className="w-full"
+/>
+```
 
-### Формы задач
-- `resources/js/Components/TaskForm.jsx` (поля description, result)
+#### Отображение файлов в проекте
+```jsx
+import ProjectFileAttachments from '@/Components/Projects/ProjectFileAttachments';
 
-### Описание проектов
-- `resources/js/Pages/Projects/Form.jsx`
+// В компоненте отображения проекта
+<ProjectFileAttachments 
+    projectId={project.id} 
+    onFileDeleted={(fileId) => {
+        // Обработка удаления файла
+        console.log('Файл удален:', fileId);
+    }} 
+/>
+```
 
-### Описание спринтов
-- `resources/js/Pages/Sprints/Form.jsx`
+### TaskComments (Комментарии к задачам)
 
-### AI агент
-- `resources/js/Pages/AiAgent/Index.jsx`
+#### Обновление TaskComments Form
+```jsx
+// В TaskComments/Form.jsx уже добавлена поддержка файлов
+<RichTextEditor
+    value={data.content}
+    onChange={(value) => setData('content', value)}
+    attachableType="App\\Models\\TaskComment"
+    attachableId={isEditing ? comment.id : 'temp_' + Date.now()}
+    placeholder="Введите комментарий... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
+    className="w-full"
+/>
+```
 
-## 🔧 Настройка бэкенда
+#### Отображение файлов в комментарии
+```jsx
+import FileAttachments from '@/Components/TaskComments/FileAttachments';
 
-### 1. Валидация HTML
+// В компоненте отображения комментария
+<FileAttachments 
+    commentId={comment.id} 
+    onFileDeleted={(fileId) => {
+        // Обработка удаления файла
+        console.log('Файл удален:', fileId);
+    }} 
+/>
+```
+
+## 🔄 Использование в новых компонентах
+
+### Создание нового компонента с поддержкой файлов
+
+```jsx
+import RichTextEditor from '@/Components/RichTextEditor';
+
+export default function MyComponent({ item }) {
+    const [content, setContent] = useState(item?.content || '');
+
+    return (
+        <div>
+            <RichTextEditor
+                value={content}
+                onChange={setContent}
+                attachableType="App\\Models\\MyModel"
+                attachableId={item?.id || 'temp_' + Date.now()}
+                placeholder="Введите текст с поддержкой файлов..."
+                className="w-full"
+            />
+        </div>
+    );
+}
+```
+
+### Создание компонента отображения файлов
+
+```jsx
+import { useState, useEffect } from 'react';
+import { Paperclip, Download, Trash2 } from 'lucide-react';
+
+export default function MyFileAttachments({ modelType, modelId, onFileDeleted }) {
+    const [attachments, setAttachments] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (modelId) {
+            loadAttachments();
+        }
+    }, [modelId]);
+
+    const loadAttachments = async () => {
+        try {
+            const response = await fetch(`/api/file-upload?attachable_type=${modelType}&attachable_id=${modelId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    setAttachments(result.data.attachments || []);
+                }
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки файлов:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFileDelete = async (fileId) => {
+        try {
+            const response = await fetch(`/api/file-upload/${fileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                setAttachments(prev => prev.filter(file => file.id !== fileId));
+                onFileDeleted?.(fileId);
+            }
+        } catch (err) {
+            console.error('Ошибка при удалении файла:', err);
+        }
+    };
+
+    if (loading) return <div>Загрузка файлов...</div>;
+    if (attachments.length === 0) return null;
+
+    return (
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+                <Paperclip size={16} />
+                <span className="font-medium">Файлы ({attachments.length})</span>
+            </div>
+            
+            <div className="space-y-2">
+                {attachments.map((attachment) => (
+                    <div key={attachment.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                        <span className="truncate">{attachment.original_name}</span>
+                        <div className="flex gap-2">
+                            <a
+                                href={`/api/file-upload/${attachment.id}/download`}
+                                target="_blank"
+                                className="text-blue-600 hover:text-blue-800"
+                            >
+                                <Download size={16} />
+                            </a>
+                            <button
+                                onClick={() => handleFileDelete(attachment.id)}
+                                className="text-red-600 hover:text-red-800"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+```
+
+## 🧪 Тестирование
+
+### Запуск тестов
+```bash
+# Запуск всех тестов
+php artisan test
+
+# Запуск только тестов файлов
+php artisan test --filter=FileUploadTest
+
+# Запуск конкретного теста
+php artisan test --filter=test_user_can_upload_file
+```
+
+### Тестирование в браузере
+1. Создайте задачу или проект
+2. Попробуйте загрузить файл через RichTextEditor
+3. Проверьте отображение файлов
+4. Протестируйте скачивание и удаление
+
+## 🗑️ Очистка неиспользуемых файлов
+
+### Ручная очистка
+```bash
+# Предварительный просмотр (dry-run)
+php artisan files:cleanup --dry-run
+
+# Очистка файлов старше 7 дней
+php artisan files:cleanup --days=7
+
+# Очистка файлов старше 30 дней
+php artisan files:cleanup --days=30
+```
+
+### Автоматическая очистка
+Добавьте в `app/Console/Kernel.php`:
 ```php
-// В Request классе
-public function rules()
+protected function schedule(Schedule $schedule)
 {
-    return [
-        'content' => 'required|string|max:10000', // HTML контент
-    ];
+    // Очистка неиспользуемых файлов каждую неделю
+    $schedule->command('files:cleanup --days=7')->weekly();
 }
-```
-
-### 2. Очистка HTML (опционально)
-```php
-// В Service классе
-use Illuminate\Support\Str;
-
-public function sanitizeHtml($html)
-{
-    // Разрешенные теги
-    $allowedTags = [
-        'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'ul', 'ol', 'li', 'blockquote', 'a', 'img'
-    ];
-    
-    return strip_tags($html, $allowedTags);
-}
-```
-
-### 3. Обновление миграций (если нужно)
-```php
-// Увеличить размер поля content
-Schema::table('task_comments', function (Blueprint $table) {
-    $table->text('content')->change(); // Увеличить с VARCHAR до TEXT
-});
-```
-
-## 🎨 Кастомизация стилей
-
-### 1. Переопределение CSS переменных
-```css
-/* В app.css */
-:root {
-    --tiptap-border-color: theme('colors.border-color');
-    --tiptap-accent-blue: theme('colors.accent-blue');
-    --tiptap-card-bg: theme('colors.card-bg');
-}
-```
-
-### 2. Кастомизация панели инструментов
-```jsx
-// В RichTextEditor.jsx добавить новые кнопки
-<button
-    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-    className={`p-2 rounded hover:bg-accent-blue/10 ${
-        editor.isActive('heading', { level: 2 }) ? 'bg-accent-blue/20 text-accent-blue' : 'text-text-primary'
-    }`}
->
-    H2
-</button>
-```
-
-## 📱 Адаптивность
-
-### 1. Мобильная панель инструментов
-```jsx
-// Автоматически адаптируется под размер экрана
-<div className="flex flex-wrap items-center gap-1 p-2">
-    {/* Кнопки автоматически переносятся */}
-</div>
-```
-
-### 2. Touch-оптимизация
-```jsx
-// Drag & drop работает на всех устройствах
-<div
-    onDrop={handleDrop}
-    onDragOver={(e) => e.preventDefault()}
-    className="min-h-[200px] p-3"
->
-```
-
-## 🚀 Производительность
-
-### 1. Ленивая загрузка
-```jsx
-// Расширения загружаются только при необходимости
-const editor = useEditor({
-    extensions: [
-        StarterKit, // Базовые функции
-        // Дополнительные расширения загружаются по требованию
-    ],
-});
-```
-
-### 2. Оптимизация обновлений
-```jsx
-// onChange вызывается только при реальных изменениях
-onUpdate: ({ editor }) => {
-    const html = editor.getHTML();
-    onChange(html); // Вызывается только при изменении контента
-},
 ```
 
 ## 🔒 Безопасность
 
-### 1. XSS защита
-- TipTap автоматически очищает опасные теги
-- HTML контент проходит через ProseMirror
-- Поддерживается только безопасный HTML
+### Проверка прав доступа
+- Пользователь может удалять только свои файлы
+- Все запросы проверяют CSRF токены
+- Валидация файлов на сервере
 
-### 2. Валидация на бэкенде
-```php
-// Проверка размера контента
-if (strlen($request->content) > 10000) {
-    throw new ValidationException('Содержание слишком длинное');
-}
-```
+### Лимиты
+- Максимальный размер файла: 50MB
+- Общий лимит пользователя: 500MB
+- Поддерживаются только безопасные типы файлов
 
-## 📊 Мониторинг
+## 🐛 Решение проблем
 
-### 1. Логирование использования
-```jsx
-const handleMentionSelect = (user) => {
-    // Логируем упоминания
-    console.log('User mentioned:', user);
-    
-    // Отправляем аналитику
-    analytics.track('user_mentioned', { 
-        mentioned_user: user.id,
-        context: 'comment'
-    });
-};
-```
+### Файл не загружается
+1. Проверьте лимиты пользователя
+2. Убедитесь, что attachableType и attachableId указаны
+3. Проверьте права доступа к storage
 
-### 2. Отслеживание ошибок
-```jsx
-// В RichTextEditor
-useEffect(() => {
-    if (editor) {
-        editor.on('error', (error) => {
-            console.error('Editor error:', error);
-            // Отправляем в систему мониторинга
-        });
-    }
-}, [editor]);
-```
+### Файлы не отображаются
+1. Проверьте attachableType и attachableId
+2. Убедитесь, что миграции выполнены
+3. Проверьте логи Laravel
 
-## 🎯 Следующие шаги
+### Ошибки валидации
+1. Проверьте размер файла (максимум 50MB)
+2. Убедитесь, что тип файла поддерживается
+3. Проверьте обязательные поля
 
-1. **Заменить MentionTextarea** в основных компонентах
-2. **Протестировать** функциональность на демо-странице
-3. **Обновить бэкенд** для поддержки HTML контента
-4. **Добавить валидацию** и очистку HTML
-5. **Настроить мониторинг** использования
-6. **Оптимизировать** производительность при необходимости
+## 📚 Полезные ссылки
 
-## 📞 Поддержка
+- [FILE_UPLOAD_README.md](./FILE_UPLOAD_README.md) - Подробная документация по функционалу
+- [RICH_TEXT_EDITOR_FILE_UPLOAD_PROGRESS.md](./RICH_TEXT_EDITOR_FILE_UPLOAD_PROGRESS.md) - Прогресс реализации
+- [Laravel Storage документация](https://laravel.com/docs/storage)
+- [TipTap документация](https://tiptap.dev/)
 
-- Демо-страница: `/demo/rich-editor`
-- Документация: `RICH_TEXT_EDITOR_README.md`
-- Примеры: `resources/js/Components/TaskCommentsWithRichEditor.jsx`
+## 🤝 Поддержка
+
+При возникновении проблем:
+1. Проверьте логи Laravel (`storage/logs/laravel.log`)
+2. Убедитесь, что все миграции выполнены
+3. Проверьте настройки файловой системы
+4. Убедитесь, что символическая ссылка storage создана
+
+## 🎉 Готово!
+
+Функционал загрузки файлов полностью интегрирован и готов к использованию. Все основные компоненты системы теперь поддерживают работу с файлами, включая:
+
+- ✅ RichTextEditor с поддержкой файлов
+- ✅ Tasks (задачи) с файлами
+- ✅ Projects (проекты) с файлами  
+- ✅ TaskComments (комментарии) с файлами
+- ✅ Безопасность и валидация
+- ✅ Тесты и документация
+- ✅ Команды для обслуживания
+
+Система готова к продакшену! 🚀

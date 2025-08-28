@@ -4,6 +4,7 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Mention from '@tiptap/extension-mention';
+import FileExtension from './RichTextEditor/FileExtension';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
     Bold,
@@ -12,11 +13,13 @@ import {
     ListOrdered,
     Link as LinkIcon,
     Image as ImageIcon,
+    Paperclip,
     Undo,
     Redo,
     Code,
     Quote
 } from 'lucide-react';
+import FileUploadModal from './RichTextEditor/FileUploadModal';
 
 export default function RichTextEditor({
     value = '',
@@ -26,6 +29,8 @@ export default function RichTextEditor({
     placeholder = 'Начните писать...',
     className = '',
     rows = 4,
+    attachableType = null,
+    attachableId = null,
     ...props
 }) {
     // Проверяем, является ли устройство мобильным
@@ -65,6 +70,85 @@ export default function RichTextEditor({
             min-width: 200px;
             max-width: calc(100vw - 32px);
             z-index: 9999;
+        }
+
+        /* Стили для файлов в редакторе */
+        .file-attachment-node {
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--secondary-bg);
+            position: relative;
+        }
+
+        .file-attachment-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .file-attachment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .file-attachment-icon {
+            font-size: 1.25rem;
+        }
+
+        .file-attachment-filename {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .file-attachment-details {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .file-attachment-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--accent-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            align-self: flex-start;
+        }
+
+        .file-attachment-link:hover {
+            background: var(--accent-blue-dark, #1d4ed8);
+        }
+
+        /* Специальные стили для изображений */
+        .file-attachment-image {
+            background: var(--card-bg);
+        }
+
+        .file-attachment-preview {
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+
+        .file-attachment-image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .file-attachment-image-preview:hover {
+            transform: scale(1.02);
         }
 
         /* Стили для мобильной версии */
@@ -291,10 +375,19 @@ export default function RichTextEditor({
     }, [users]);
 
     // Создание экземпляра редактора
+    console.log('RichTextEditor: Инициализация редактора с расширениями:', [
+        'StarterKit',
+        'Image', 
+        'FileExtension',
+        'Placeholder',
+        'Mention'
+    ]);
+    
     const editor = useEditor({
         extensions: [
             StarterKit,
             Image,
+            FileExtension,
             // Убираем дублирующее расширение Link, так как оно уже есть в StarterKit
             Placeholder.configure({
                 placeholder,
@@ -772,6 +865,9 @@ export default function RichTextEditor({
 
     // Состояние для отслеживания перетаскивания
     const [isDragging, setIsDragging] = useState(false);
+    
+    // Состояние для модального окна загрузки файлов
+    const [showFileUploadModal, setShowFileUploadModal] = useState(false);
 
     // Обработка drag & drop файлов
     const handleDrop = useCallback((event) => {
@@ -805,6 +901,35 @@ export default function RichTextEditor({
             reader.readAsDataURL(file);
         }
     }, [editor]);
+
+    // Обработка загрузки файлов через модальное окно
+    const handleFileUploaded = useCallback((files) => {
+        if (!editor || !files || files.length === 0) return;
+
+        files.forEach(file => {
+            try {
+                // Вставляем файл как вложение в редактор
+                editor.chain().focus().setFileAttachment({
+                    id: file.id,
+                    filename: file.original_name,
+                    size: file.file_size,
+                    mimeType: file.mime_type,
+                    url: file.download_url || `/file-upload/${file.id}/download`,
+                    description: file.description || ''
+                }).run();
+            } catch (error) {
+                console.error('RichTextEditor: Ошибка при вставке файла:', error);
+            }
+        });
+
+        setShowFileUploadModal(false);
+    }, [editor]);
+
+    // Обработка ошибок загрузки файлов
+    const handleFileUploadError = useCallback((error) => {
+        console.error('Ошибка загрузки файла:', error);
+        // Здесь можно добавить уведомление об ошибке
+    }, []);
 
     if (!editor) {
         return null;
@@ -919,11 +1044,12 @@ export default function RichTextEditor({
 
                 <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => setShowFileUploadModal(true)}
                     className="p-2 rounded hover:bg-accent-blue/10 text-text-primary"
                     title="Загрузить файл"
+                    disabled={!attachableType || !attachableId}
                 >
-                    📎
+                    <Paperclip size={16} />
                 </button>
 
                 <div className="w-px h-6 bg-border-color mx-2" />
@@ -1053,9 +1179,21 @@ export default function RichTextEditor({
                 onChange={handleFileSelect}
                 className="hidden"
             />
-        </div>
-        </>
-    );
+                </div>
+
+        {/* Модальное окно загрузки файлов */}
+        {attachableType && attachableId && (
+            <FileUploadModal
+                isOpen={showFileUploadModal}
+                onClose={() => setShowFileUploadModal(false)}
+                onFileUploaded={handleFileUploaded}
+                onError={handleFileUploadError}
+                attachableType={attachableType}
+                attachableId={attachableId}
+            />
+        )}
+    </>
+);
 }
 
 // Компонент для отображения списка упоминаний

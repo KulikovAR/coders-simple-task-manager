@@ -38,10 +38,28 @@ Route::get('/api-docs', function () {
     return Inertia::render('ApiDocs');
 })->name('api-docs');
 
-// Демо-страница RichTextEditor
-Route::get('/demo/rich-editor', function () {
-    return Inertia::render('Demo/RichEditorDemo');
-})->name('demo.rich-editor');
+    // Демо-страница RichTextEditor
+    Route::get('/demo/rich-editor', function () {
+        return Inertia::render('Demo/RichEditorDemo');
+    })->name('demo.rich-editor');
+
+    // Демо-страница загрузки файлов
+    Route::get('/demo/file-upload', function () {
+        return Inertia::render('Demo/FileUploadDemo');
+    })->name('demo.file-upload');
+
+    // Тестовая страница FileExtension
+    Route::get('/demo/file-extension-test', function () {
+        return Inertia::render('Demo/FileExtensionTest');
+    })->name('demo.file-extension-test');
+
+    // Загрузка файлов для RichTextEditor
+    Route::middleware('auth')->group(function () {
+        Route::post('/file-upload', [App\Http\Controllers\FileUploadController::class, 'store'])->name('file-upload.store');
+        Route::get('/file-upload/{attachment}/download', [App\Http\Controllers\FileUploadController::class, 'download'])->name('file-upload.download');
+        Route::delete('/file-upload/{attachment}', [App\Http\Controllers\FileUploadController::class, 'destroy'])->name('file-upload.destroy');
+        Route::get('/file-upload/user-stats', [App\Http\Controllers\FileUploadController::class, 'userStats'])->name('file-upload.user-stats');
+    });
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

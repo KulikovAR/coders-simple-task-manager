@@ -131,7 +131,9 @@ export default function Form({ auth, comment, task }) {
                                                 }
                                             }}
                                             users={projectUsers}
-                                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
+                                            attachableType="App\\Models\\TaskComment"
+                                            attachableId={isEditing ? comment.id : 'temp_' + Date.now()}
+                                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения, ссылки и загрузка файлов)"
                                             className="w-full"
                                         />
                                     );

@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { useFormWithDocs } from '@/utils/hooks/useFormWithDocs';
+import RichTextEditor from '@/Components/RichTextEditor';
 
 export default function Form({ auth, project = null, errors = {} }) {
     const isEditing = !!project;
@@ -113,25 +114,17 @@ export default function Form({ auth, project = null, errors = {} }) {
                                     <label htmlFor="description" className="form-label">
                                         Описание
                                     </label>
-                                    <textarea
-                                        id="description"
+                                    <RichTextEditor
                                         value={data.description}
-                                        onChange={(e) => setData('description', e.target.value)}
-                                        rows={4}
-                                        className={`form-input ${
-                                            formErrors.description ? 'border-accent-red focus:ring-accent-red' : ''
-                                        }`}
-                                        placeholder="Опишите цели проекта, основные задачи и ожидаемые результаты..."
-                                        maxLength={1000}
+                                        onChange={(value) => setData('description', value)}
+                                        attachableType="App\\Models\\Project"
+                                        attachableId={project?.id || 'temp_' + Date.now()}
+                                        placeholder="Опишите цели проекта, основные задачи и ожидаемые результаты... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
+                                        className="w-full"
                                     />
-                                    <div className="flex items-center justify-between mt-1">
-                                        {formErrors.description && (
-                                            <p className="text-sm text-accent-red">{formErrors.description}</p>
-                                        )}
-                                        <p className="text-xs text-text-muted ml-auto">
-                                            {data.description.length}/1000
-                                        </p>
-                                    </div>
+                                    {formErrors.description && (
+                                        <p className="mt-1 text-sm text-accent-red">{formErrors.description}</p>
+                                    )}
                                 </div>
 
                                 {/* Статус и дедлайн */}

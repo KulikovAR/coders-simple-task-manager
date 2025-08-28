@@ -424,6 +424,8 @@ const [hasChanges, setHasChanges] = useState(false);
                         <RichTextEditor
                             value={data[fieldName]}
                             onChange={(value) => setDataWithAutoSave(fieldName, value)}
+                            attachableType="App\\Models\\Task"
+                            attachableId={task?.id || 'temp_' + Date.now()}
                             placeholder={options.placeholder || ''}
                             className={`w-full ${
                                 hasError ? 'border-accent-red' : ''
@@ -522,7 +524,9 @@ const [hasChanges, setHasChanges] = useState(false);
                                                             <RichTextEditor
                                     value={data.description}
                                     onChange={(value) => setDataWithAutoSave('description', value)}
-                                    placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения и ссылки)"
+                                    attachableType="App\\Models\\Task"
+                                    attachableId={task?.id || 'temp_' + Date.now()}
+                                    placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
                                     className="w-full"
                                 />
                             {(formErrors.description || errors.description) && (
@@ -541,7 +545,9 @@ const [hasChanges, setHasChanges] = useState(false);
                                     <RichTextEditor
                                         value={data.result}
                                         onChange={(value) => setDataWithAutoSave('result', value)}
-                                        placeholder="Опишите что было сделано... (поддерживается форматирование, изображения и ссылки)"
+                                        attachableType="App\\Models\\Task"
+                                        attachableId={task?.id || 'temp_' + Date.now()}
+                                        placeholder="Опишите что было сделано... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
                                         className="w-full"
                                     />
                                 </div>
