@@ -567,7 +567,7 @@ const [hasChanges, setHasChanges] = useState(false);
                     {/* Правая колонка - параметры задачи */}
                     <div className="space-y-4 md:space-y-6">
                         {/* Быстрые действия */}
-                        <div className="bg-card-bg border border-border-color rounded-xl p-3 md:p-4">
+                        <div className="border border-border-color rounded-xl p-3 md:p-4">
                             <h3 className="text-sm font-medium text-text-primary mb-4">Параметры задачи</h3>
                             <div className="space-y-4">
                                 {/* Теги */}
