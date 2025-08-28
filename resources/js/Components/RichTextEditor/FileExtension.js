@@ -70,6 +70,9 @@ export default Node.create({
         
         // Для изображений показываем превью, для остальных файлов - стандартный блок
         if (mimeType && mimeType.startsWith('image/')) {
+            // Создаем URL для просмотра изображения (без скачивания)
+            const viewUrl = url.replace('/download', '/view');
+            
             return [
                 'div',
                 mergeAttributes(HTMLAttributes, {
@@ -122,12 +125,13 @@ export default Node.create({
                         ],
                     ],
                     [
-                        'a',
+                        'button',
                         {
-                            href: url,
-                            target: '_blank',
+                            type: 'button',
                             class: 'file-attachment-link',
                             'data-file-id': id,
+                            'data-image-url': url,
+                            'onclick': 'window.openImageModal(this.dataset.imageUrl)',
                         },
                         'Открыть изображение',
                     ],

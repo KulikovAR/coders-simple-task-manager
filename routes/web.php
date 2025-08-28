@@ -57,6 +57,7 @@ Route::get('/api-docs', function () {
     Route::middleware('auth')->group(function () {
         Route::post('/file-upload', [App\Http\Controllers\FileUploadController::class, 'store'])->name('file-upload.store');
         Route::get('/file-upload/{attachment}/download', [App\Http\Controllers\FileUploadController::class, 'download'])->name('file-upload.download');
+        Route::get('/file-upload/{attachment}/view', [App\Http\Controllers\FileUploadController::class, 'view'])->name('file-upload.view');
         Route::delete('/file-upload/{attachment}', [App\Http\Controllers\FileUploadController::class, 'destroy'])->name('file-upload.destroy');
         Route::get('/file-upload/user-stats', [App\Http\Controllers\FileUploadController::class, 'userStats'])->name('file-upload.user-stats');
     });

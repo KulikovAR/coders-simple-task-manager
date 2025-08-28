@@ -117,7 +117,7 @@ export default function RichTextEditor({
             align-items: center;
             padding: 0.5rem 1rem;
             background: var(--accent-blue);
-            color: white;
+            color: white !important;
             text-decoration: none;
             border-radius: 0.375rem;
             font-weight: 500;
@@ -127,6 +127,7 @@ export default function RichTextEditor({
 
         .file-attachment-link:hover {
             background: var(--accent-blue-dark, #1d4ed8);
+            color: white !important;
         }
 
         /* Специальные стили для изображений */
@@ -868,10 +869,13 @@ export default function RichTextEditor({
     
     // Состояние для модального окна загрузки файлов
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [currentImageUrl, setCurrentImageUrl] = useState('');
 
     // Обработка drag & drop файлов
     const handleDrop = useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         setIsDragging(false);
         const files = Array.from(event.dataTransfer.files);
 
@@ -930,6 +934,21 @@ export default function RichTextEditor({
         console.error('Ошибка загрузки файла:', error);
         // Здесь можно добавить уведомление об ошибке
     }, []);
+
+    // Функция для открытия модального окна изображений
+    const openImageModal = useCallback((imageUrl) => {
+        setCurrentImageUrl(imageUrl);
+        setShowImageModal(true);
+    }, []);
+
+    // Добавляем глобальную функцию для открытия модального окна изображений
+    useEffect(() => {
+        window.openImageModal = openImageModal;
+        
+        return () => {
+            delete window.openImageModal;
+        };
+    }, [openImageModal]);
 
     if (!editor) {
         return null;
@@ -1191,6 +1210,48 @@ export default function RichTextEditor({
                 attachableType={attachableType}
                 attachableId={attachableId}
             />
+        )}
+
+        {/* Модальное окно для просмотра изображений */}
+        {showImageModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            Просмотр изображения
+                        </h3>
+                        <button
+                            onClick={() => setShowImageModal(false)}
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+                        <img
+                            src={currentImageUrl}
+                            alt="Просмотр изображения"
+                            className="max-w-full max-h-full object-contain rounded-lg"
+                            style={{ maxHeight: 'calc(90vh - 120px)' }}
+                        />
+                    </div>
+                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 flex-shrink-0">
+                        <a
+                            href={currentImageUrl}
+                            download
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Скачать
+                        </a>
+                        <button
+                            onClick={() => setShowImageModal(false)}
+                            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            Закрыть
+                        </button>
+                    </div>
+                </div>
+            </div>
         )}
     </>
 );

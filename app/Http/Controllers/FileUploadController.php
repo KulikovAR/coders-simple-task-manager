@@ -92,6 +92,40 @@ class FileUploadController extends Controller
     }
 
     /**
+     * Просматривает файл (для изображений)
+     */
+    public function view(FileAttachment $attachment)
+    {
+        try {
+            // Проверяем существование файла
+            if (!$attachment->fileExists()) {
+                abort(404, 'Файл не найден');
+            }
+
+            // Проверяем права доступа
+            if ($attachment->user_id !== Auth::id()) {
+                // Здесь можно добавить дополнительную логику проверки прав
+            }
+
+            // Проверяем, что это изображение
+            if (!str_starts_with($attachment->mime_type, 'image/')) {
+                abort(400, 'Этот файл не является изображением');
+            }
+
+            $path = Storage::disk('public')->path($attachment->file_path);
+            
+            // Возвращаем изображение для просмотра (без скачивания)
+            return response()->file($path, [
+                'Content-Type' => $attachment->mime_type,
+                'Content-Disposition' => 'inline',
+            ]);
+
+        } catch (\Exception $e) {
+            abort(500, 'Ошибка при просмотре файла: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Удаляет файл
      */
     public function destroy(FileAttachment $attachment)

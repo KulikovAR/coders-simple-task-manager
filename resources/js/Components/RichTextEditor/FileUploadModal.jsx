@@ -53,6 +53,23 @@ export default function FileUploadModal({
         }
     };
 
+    // Предотвращаем обновление страницы при drag & drop
+    useEffect(() => {
+        const preventDefault = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Предотвращаем drag & drop на уровне документа
+        document.addEventListener('dragover', preventDefault);
+        document.addEventListener('drop', preventDefault);
+
+        return () => {
+            document.removeEventListener('dragover', preventDefault);
+            document.removeEventListener('drop', preventDefault);
+        };
+    }, []);
+
     const handleFiles = (files) => {
         const validFiles = files.filter(file => {
             const validation = fileService.canUploadFile(file);
@@ -160,9 +177,9 @@ export default function FileUploadModal({
 
             {/* Модальное окно */}
             <div className="absolute inset-0 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
                     {/* Заголовок */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                             Загрузка файлов
                         </h2>
@@ -177,7 +194,7 @@ export default function FileUploadModal({
 
                     {/* Статистика пользователя */}
                     {userStats && (
-                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex-shrink-0">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600 dark:text-gray-300">
                                     Использовано: {userStats.total_size_formatted} / {userStats.max_size_formatted}
@@ -192,8 +209,8 @@ export default function FileUploadModal({
                         </div>
                     )}
 
-                    {/* Область загрузки */}
-                    <div className="p-6">
+                    {/* Область загрузки - скроллится */}
+                    <div className="p-6 overflow-y-auto flex-1">
                         {/* Drag & Drop область */}
                         <div
                             ref={dropRef}
@@ -334,8 +351,8 @@ export default function FileUploadModal({
                         )}
                     </div>
 
-                    {/* Кнопки */}
-                    <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
+                    {/* Кнопки - всегда видны */}
+                    <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
                         <button
                             onClick={closeModal}
                             disabled={uploading}
