@@ -64,41 +64,30 @@ class ProjectController extends Controller
 
         $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
 
-        // Получаем спринты и определяем активный спринт
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $activeSprint = $sprints->where('status', 'active')->first();
 
-        // Логика выбора спринта:
-        // 1. Если пользователь явно указал sprint_id - используем его (включая 'none')
-        // 2. Если sprint_id не указан и есть активный спринт - используем активный по умолчанию
-        // 3. В остальных случаях (нет активного спринта) - используем "без спринта"
         $selectedSprintId = $request->get('sprint_id');
         $selectedSprint = null;
 
+        // TODO отрефакторить
         if ($selectedSprintId !== null) {
-            // Пользователь явно указал спринт
             if ($selectedSprintId === 'none') {
-                // Пользователь выбрал "без спринта"
                 $selectedSprintId = 'none';
                 $selectedSprint = null;
             } else {
-                // Пользователь выбрал конкретный спринт
                 $selectedSprint = $project->sprints()->find($selectedSprintId);
                 if (!$selectedSprint) {
-                    // Если спринт не найден, сбрасываем на "без спринта"
                     $selectedSprintId = 'none';
                 }
             }
         } elseif ($activeSprint) {
-            // Если спринт не указан и есть активный спринт, используем его по умолчанию
             $selectedSprintId = $activeSprint->id;
             $selectedSprint = $activeSprint;
         } else {
-            // Если нет активного спринта, используем "без спринта"
             $selectedSprintId = 'none';
         }
 
-        // Получаем релевантные статусы с учетом контекста
         $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
 
@@ -109,7 +98,7 @@ class ProjectController extends Controller
             'sprints' => $sprints,
             'members' => $members,
             'selectedSprintId' => $selectedSprintId,
-            'hasCustomStatuses' => $selectedSprint ? $this->taskStatusService->hasCustomStatuses($selectedSprint) : false,
+            'hasCustomStatuses' => $selectedSprint && $this->taskStatusService->hasCustomStatuses($selectedSprint),
         ]);
     }
 

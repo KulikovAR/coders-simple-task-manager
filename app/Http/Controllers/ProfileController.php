@@ -34,14 +34,12 @@ class ProfileController extends Controller
         $user = $request->user();
         $originalChatId = $user->telegram_chat_id;
 
-        // Обработка аватарки
         if ($request->hasFile('avatar')) {
             $avatar = $request->file('avatar');
             $path = $avatar->store('avatars', 'public');
             $user->avatar = $path;
         }
 
-        // Обновляем только те поля, которые реально пришли (кроме avatar)
         $fields = collect($request->except('avatar'))->filter(fn($v) => !is_null($v))->all();
 
         if (!empty($fields)) {
@@ -54,7 +52,6 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Если chatId появился или изменился — отправим подтверждение в Telegram
         if ($user->telegram_chat_id && $user->telegram_chat_id !== $originalChatId) {
             /** @var TelegramService $tg */
             $tg = app(TelegramService::class);

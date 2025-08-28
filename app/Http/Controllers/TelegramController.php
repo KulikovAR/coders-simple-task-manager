@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\Ai\ContextProviders\DynamicStatusContextProvider;
+use App\Services\TaskStatusService;
 use App\Services\TelegramService;
 use App\Services\Ai\FlexibleAiAgentService;
 use App\Services\Ai\CommandRegistry;
@@ -111,9 +113,8 @@ class TelegramController extends Controller
                 return response()->noContent();
             }
 
-            // Команда для общения с ИИ: /ai <запрос>
+            // /ai <запрос>
             if (str_starts_with(mb_strtolower($text), '/ai')) {
-                // Ищем пользователя по senderId, чтобы корректно работать в группах
                 $user = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
                 if (!$user) {
                     $msg = 'Аккаунт не привязан. Вставьте ваш <b>senderId</b> в профиль на сайте (поле Telegram chatId).';
@@ -131,7 +132,6 @@ class TelegramController extends Controller
                 }
 
                 try {
-                    // Смайлик ожидания
                     $tg->sendMessage($chatId, '⏳');
 
                     $ai = $this->createFlexibleAiAgentService();
@@ -147,11 +147,9 @@ class TelegramController extends Controller
                 return response()->noContent();
             }
 
-            // Если пользователь прислал email — попробуем связать автоматически
             if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
                 $user = User::where('email', $text)->first();
                 if ($user) {
-                    // Привязываем по senderId, чтобы связь была персональной, а не с группой
                     $user->telegram_chat_id = (string) ($fromId ?: $chatId);
                     $user->save();
                     $tg->sendMessage($chatId, 'Telegram успешно подключен к вашему аккаунту.');
@@ -193,7 +191,7 @@ class TelegramController extends Controller
             new ProjectContextProvider(app(ProjectService::class)),
             new UsersContextProvider(),
             new EnumsContextProvider(),
-            new \App\Services\Ai\ContextProviders\DynamicStatusContextProvider(app(\App\Services\TaskStatusService::class)),
+            new DynamicStatusContextProvider(app(TaskStatusService::class)),
         ];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));

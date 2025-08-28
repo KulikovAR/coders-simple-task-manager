@@ -95,10 +95,7 @@ class SprintController extends Controller
 
         $sprint->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id']);
 
-        return Inertia::render('Sprints/Show', [
-            'project' => $project,
-            'sprint' => $sprint,
-        ]);
+        return Inertia::render('Sprints/Show', compact('project', 'sprint'));
     }
 
     public function edit(Project $project, Sprint $sprint)
@@ -107,10 +104,7 @@ class SprintController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        return Inertia::render('Sprints/Form', [
-            'project' => $project,
-            'sprint' => $sprint,
-        ]);
+        return Inertia::render('Sprints/Form', compact('project', 'sprint'));
     }
 
     public function update(Request $request, Project $project, Sprint $sprint)

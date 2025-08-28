@@ -28,7 +28,7 @@ class TaskCommentController extends Controller
         }
 
         $comments = $this->taskCommentService->getTaskComments($task);
-        
+
         return Inertia::render('TaskComments/Index', [
             'task' => $task->load(['project.users', 'project.owner']),
             'comments' => $comments,
@@ -43,19 +43,15 @@ class TaskCommentController extends Controller
 
         $comment = $this->taskCommentService->createComment($request->validated(), $task, Auth::user());
 
-        // Загружаем связанные данные для уведомлений
         $comment->load(['task.assignee', 'task.reporter', 'task.project.users']);
 
-        // Уведомляем о новом комментарии
         $this->notificationService->commentAdded($comment, Auth::user());
 
-        // Обрабатываем упоминания в комментарии
         $mentionedUsers = MentionHelper::getMentionedUsers(
-            $comment->content, 
+            $comment->content,
             $comment->task->project->users
         );
 
-        // Отправляем уведомления упомянутым пользователям
         foreach ($mentionedUsers as $mentionedUser) {
             if ($mentionedUser->id !== Auth::id()) {
                 $this->notificationService->userMentioned($comment, $mentionedUser, Auth::user());
@@ -128,4 +124,4 @@ class TaskCommentController extends Controller
         return redirect()->route('tasks.show', $task)
             ->with('success', 'Комментарий успешно удален.');
     }
-} 
+}

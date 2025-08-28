@@ -157,15 +157,11 @@ class TaskController extends Controller
         // Если это AJAX запрос из модалки доски, возвращаем JSON
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
             return response()->json([
-                'props' => [
-                    'task' => $task,
-                ]
+                'props' => compact('task')
             ]);
         }
 
-        return Inertia::render('Tasks/Show', [
-            'task' => $task,
-        ]);
+        return Inertia::render('Tasks/Show', compact('task'));
     }
 
     public function edit(Task $task)
@@ -215,6 +211,8 @@ class TaskController extends Controller
             $this->notificationService->taskUpdated($task, Auth::user());
         }
 
+
+        // TODO ту мач условий
         if ($request->header('X-Inertia')) {
             // Для Inertia запросов проверяем, откуда пришел запрос
             $referer = $request->header('Referer');
@@ -312,7 +310,6 @@ class TaskController extends Controller
             'priority' => 'required|in:low,medium,high',
         ]);
 
-        // Загружаем связанные данные
         $task->load(['status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'project']);
 
         $oldPriority = $task->priority;
@@ -320,7 +317,6 @@ class TaskController extends Controller
 
         $task = $this->taskService->updateTaskPriority($task, $newPriority);
 
-        // Уведомляем об изменении приоритета
         if ($oldPriority !== $newPriority) {
             $this->notificationService->taskPriorityChanged($task, $oldPriority, $newPriority, Auth::user());
         }
@@ -395,13 +391,12 @@ class TaskController extends Controller
             }
         }
 
-        // Используем новый контекстный метод
         $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $sprint);
 
         Log::info('Task statuses loaded', [
             'project_id' => $project->id,
             'sprint_id' => $sprint?->id,
-            'has_custom_statuses' => $sprint ? $this->taskStatusService->hasCustomStatuses($sprint) : false,
+            'has_custom_statuses' => $sprint && $this->taskStatusService->hasCustomStatuses($sprint),
             'statuses_count' => $taskStatuses->count(),
             'statuses' => $taskStatuses->map(fn($s) => [
                 'id' => $s->id,

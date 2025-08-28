@@ -252,14 +252,12 @@ class TaskStatusController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        // Получаем параметры контекста
         $sprintId = $request->get('sprint_id');
         $taskId = $request->get('task_id');
 
         $sprint = null;
         $task = null;
 
-        // Загружаем спринт если указан
         if ($sprintId && $sprintId !== 'all') {
             $sprint = $project->sprints()->find($sprintId);
             if (!$sprint) {
@@ -267,7 +265,6 @@ class TaskStatusController extends Controller
             }
         }
 
-        // Загружаем задачу если указана
         if ($taskId) {
             $task = $project->tasks()->find($taskId);
             if (!$task) {
@@ -275,10 +272,8 @@ class TaskStatusController extends Controller
             }
         }
 
-        // Получаем контекстные статусы
         $statuses = $this->taskStatusService->getContextualStatuses($project, $sprint, $task);
 
-        // Добавляем метаинформацию о контексте
         $response = [
             'statuses' => $statuses->toArray(),
             'context' => [
