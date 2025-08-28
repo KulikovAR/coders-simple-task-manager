@@ -3,6 +3,7 @@
 use App\Http\Middleware\AiAgentMiddleware;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,9 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'ai.agent' => AiAgentMiddleware::class,
         ]);
 
-        // Исключаем маршруты ИИ из CSRF проверки
+        // Исключаем все маршруты из CSRF проверки
         $middleware->validateCsrfTokens(except: [
-            'ai-agent/*',
+            '*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
