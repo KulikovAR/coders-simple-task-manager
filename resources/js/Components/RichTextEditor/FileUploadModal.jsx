@@ -17,6 +17,7 @@ export default function FileUploadModal({
     const [uploadResults, setUploadResults] = useState([]);
     const [showStats, setShowStats] = useState(false);
     const [userStats, setUserStats] = useState(null);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     
     const fileInputRef = useRef(null);
     const dropRef = useRef(null);
@@ -149,6 +150,12 @@ export default function FileUploadModal({
         if (successfulUploads.length > 0) {
             const files = successfulUploads.map(r => r.file).filter(Boolean);
             console.log('FileUploadModal: Отправляем файлы в onFileUploaded:', files);
+            console.log(`FileUploadModal: Успешно загружено ${files.length} файлов`);
+            
+            // Показываем уведомление об успехе
+            setShowSuccessMessage(true);
+            setTimeout(() => setShowSuccessMessage(false), 3000);
+            
             onFileUploaded?.(files);
         }
 
@@ -182,6 +189,11 @@ export default function FileUploadModal({
                     <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                             Загрузка файлов
+                            {selectedFiles.length > 0 && (
+                                <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                                    ({selectedFiles.length} файл{selectedFiles.length === 1 ? '' : selectedFiles.length < 5 ? 'а' : 'ов'})
+                                </span>
+                            )}
                         </h2>
                         <button
                             onClick={closeModal}
@@ -205,6 +217,16 @@ export default function FileUploadModal({
                                         style={{ width: `${userStats.used_percentage}%` }}
                                     />
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Уведомление об успешной загрузке */}
+                    {showSuccessMessage && (
+                        <div className="px-6 py-3 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-700 flex-shrink-0">
+                            <div className="flex items-center text-sm text-green-700 dark:text-green-300">
+                                <span className="mr-2">✅</span>
+                                Файлы успешно загружены и вставлены в редактор!
                             </div>
                         </div>
                     )}

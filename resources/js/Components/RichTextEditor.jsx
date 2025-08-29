@@ -972,21 +972,32 @@ export default function RichTextEditor({
     const handleFileUploaded = useCallback((files) => {
         if (!editor || !files || files.length === 0) return;
 
-        files.forEach(file => {
+        // Вставляем файлы последовательно
+        let chain = editor.chain().focus();
+        
+        files.forEach((file, index) => {
             try {
                 // Вставляем файл как вложение в редактор
-                editor.chain().focus().setFileAttachment({
+                chain = chain.setFileAttachment({
                     id: file.id,
                     filename: file.original_name,
                     size: file.file_size,
                     mimeType: file.mime_type,
                     url: file.download_url || `/file-upload/${file.id}/download`,
                     description: file.description || ''
-                }).run();
+                });
+                
+                // Добавляем перенос строки между файлами (кроме последнего)
+                if (index < files.length - 1) {
+                    chain = chain.enter();
+                }
             } catch (error) {
                 console.error('RichTextEditor: Ошибка при вставке файла:', error);
             }
         });
+        
+        // Выполняем все команды за один раз
+        chain.run();
 
         setShowFileUploadModal(false);
     }, [editor]);
