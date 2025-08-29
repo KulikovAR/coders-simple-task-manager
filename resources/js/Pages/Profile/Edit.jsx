@@ -60,6 +60,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
+                            user={user}
                             className="max-w-xl"
                         />
                         {/* Статус подписки и кнопка оплаты */}

@@ -20,7 +20,8 @@ export default function UpdateProfileInformation({
             email: user.email,
             telegram_chat_id: user.telegram_chat_id || '',
             email_notifications: user.email_notifications ?? true,
-            deadline_notification_time: user.deadline_notification_time || '09:00',
+            deadline_notification_time: user.deadline_notification_time ? 
+                new Date(user.deadline_notification_time).toTimeString().substring(0, 5) : '09:00',
             avatar: null,
         });
 
