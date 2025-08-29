@@ -95,7 +95,7 @@ class Notification extends Model
             self::TYPE_SPRINT_STARTED => 'Спринт ":sprint_name" начался',
             self::TYPE_SPRINT_ENDED => 'Спринт ":sprint_name" завершён',
             self::TYPE_PROJECT_INVITED => 'Вас пригласили в проект ":project_name"',
-            self::TYPE_DEADLINE_APPROACHING => 'Дедлайн задачи ":task_title" приближается',
+            self::TYPE_DEADLINE_APPROACHING => ':custom_message для задачи ":task_title"',
             self::TYPE_DEADLINE_OVERDUE => 'Дедлайн задачи ":task_title" просрочен',
         ];
 

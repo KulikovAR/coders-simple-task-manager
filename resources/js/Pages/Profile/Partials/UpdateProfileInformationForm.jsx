@@ -20,6 +20,7 @@ export default function UpdateProfileInformation({
             email: user.email,
             telegram_chat_id: user.telegram_chat_id || '',
             email_notifications: user.email_notifications ?? true,
+            deadline_notification_time: user.deadline_notification_time || '09:00',
             avatar: null,
         });
 
@@ -164,6 +165,26 @@ export default function UpdateProfileInformation({
                     </div>
 
                     <InputError message={errors.email_notifications} className="mt-2" />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="deadline_notification_time" value="Время уведомлений о дедлайнах" />
+                    
+                    <div className="mt-2">
+                        <input
+                            id="deadline_notification_time"
+                            type="time"
+                            className="mt-1 block w-full border-border-color rounded-md shadow-sm focus:border-accent-blue focus:ring-accent-blue sm:text-sm"
+                            value={data.deadline_notification_time}
+                            onChange={(e) => setData('deadline_notification_time', e.target.value)}
+                        />
+                    </div>
+
+                    <div className="mt-2 text-xs text-text-muted">
+                        В это время вы будете получать уведомления о приближающихся дедлайнах задач (за 2 дня, за 1 день и в день дедлайна).
+                    </div>
+
+                    <InputError message={errors.deadline_notification_time} className="mt-2" />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

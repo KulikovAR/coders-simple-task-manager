@@ -27,6 +27,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'email_notifications' => ['nullable', 'boolean'],
             'telegram_chat_id' => ['nullable', 'string', 'max:32'],
+            'deadline_notification_time' => ['nullable', 'date_format:H:i'],
             'avatar' => ['nullable', 'image', 'max:2048'], // до 2 МБ
         ];
     }

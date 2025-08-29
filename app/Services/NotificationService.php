@@ -359,6 +359,26 @@ class NotificationService
     }
 
     /**
+     * Создать уведомление о приближающемся дедлайне с кастомным сообщением
+     */
+    public function deadlineApproachingWithCustomMessage(Task $task, string $customMessage): void
+    {
+        if ($task->assignee_id) {
+            $this->createNotification(
+                type: Notification::TYPE_DEADLINE_APPROACHING,
+                userId: $task->assignee_id,
+                fromUserId: null,
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'deadline' => $task->deadline,
+                    'custom_message' => $customMessage,
+                ]
+            );
+        }
+    }
+
+    /**
      * Базовый метод создания уведомления
      */
     private function createNotification(
