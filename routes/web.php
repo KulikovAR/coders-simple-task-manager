@@ -53,6 +53,11 @@ Route::get('/api-docs', function () {
         return Inertia::render('Demo/FileExtensionTest');
     })->name('demo.file-extension-test');
 
+    // Тестовая страница загрузки файлов
+    Route::get('/demo/file-upload-test', function () {
+        return Inertia::render('Demo/FileUploadTest');
+    })->name('demo.file-upload-test');
+
     // Загрузка файлов для RichTextEditor
     Route::middleware('auth')->group(function () {
         Route::post('/file-upload', [App\Http\Controllers\FileUploadController::class, 'store'])->name('file-upload.store');

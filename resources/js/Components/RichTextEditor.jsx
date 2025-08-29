@@ -130,6 +130,68 @@ export default function RichTextEditor({
             color: white !important;
         }
 
+        /* Стили для действий с файлами */
+        .file-attachment-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .file-attachment-action-btn {
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .file-attachment-view-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .file-attachment-view-btn:hover {
+            background: var(--primary-hover, #1d4ed8);
+        }
+
+        .file-attachment-download-btn {
+            background: var(--secondary-color, #6b7280);
+            color: white;
+        }
+
+        .file-attachment-download-btn:hover {
+            background: var(--secondary-hover, #4b5563);
+        }
+
+        .file-attachment-delete-btn {
+            background: var(--danger-color, #dc2626);
+            color: white;
+        }
+
+        .file-attachment-delete-btn:hover {
+            background: var(--danger-hover, #b91c1c);
+        }
+
+        /* Стили для нередактируемых блоков файлов */
+        .file-attachment-node[contenteditable="false"] {
+            user-select: none;
+            cursor: default;
+        }
+
+        .file-attachment-node[contenteditable="false"] * {
+            user-select: none;
+        }
+
+        .file-attachment-node[contenteditable="false"] button,
+        .file-attachment-node[contenteditable="false"] a {
+            user-select: none;
+            cursor: pointer;
+        }
+
         /* Специальные стили для изображений */
         .file-attachment-image {
             background: var(--card-bg);
@@ -941,14 +1003,160 @@ export default function RichTextEditor({
         setShowImageModal(true);
     }, []);
 
-    // Добавляем глобальную функцию для открытия модального окна изображений
+
+
+    // Функция для удаления файла
+    const deleteFileAttachment = useCallback(async (fileId) => {
+        if (!confirm('Вы уверены, что хотите удалить этот файл? Файл будет удален с сервера.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/file-upload/${fileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                // Удаляем файл из редактора
+                if (editor) {
+                    editor.commands.deleteSelection();
+                }
+                console.log('Файл успешно удален');
+            } else {
+                console.error('Ошибка при удалении файла');
+                alert('Ошибка при удалении файла');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении файла:', error);
+            alert('Ошибка при удалении файла');
+        }
+    }, [editor]);
+
+    // Функция для восстановления файлов из простого текста
+    const restoreFileAttachments = useCallback(() => {
+        if (!editor) return;
+
+        const { state } = editor;
+        let restored = false;
+
+        // Проходим по всем параграфам и ищем файлы для восстановления
+        state.doc.descendants((node, pos) => {
+            if (node.type.name === 'paragraph') {
+                const text = node.textContent || '';
+                
+                // Ищем паттерн файла
+                const filePattern = /([🖼️🎥🎵📄📝📊📽️📦])(.+?)(\d+\.?\d*\s*[КМ]?Б)/;
+                const match = text.match(filePattern);
+                
+                if (match) {
+                    const icon = match[1];
+                    const filename = match[2].trim();
+                    const sizeText = match[3];
+                    
+                    // Определяем MIME тип по иконке
+                    let mimeType = 'application/octet-stream';
+                    if (icon === '🖼️') mimeType = 'image/png';
+                    else if (icon === '📄') mimeType = 'application/pdf';
+                    else if (icon === '📝') mimeType = 'application/msword';
+                    else if (icon === '📦') mimeType = 'application/zip';
+                    
+                    // Парсим размер
+                    const sizeMatch = sizeText.match(/(\d+\.?\d*)\s*([КМ]?Б)/);
+                    let size = 0;
+                    if (sizeMatch) {
+                        const num = parseFloat(sizeMatch[1]);
+                        const unit = sizeMatch[2];
+                        if (unit === 'КБ') size = num * 1024;
+                        else if (unit === 'МБ') size = num * 1024 * 1024;
+                        else size = num;
+                    }
+                    
+                    // Восстанавливаем файл
+                    editor.chain()
+                        .focus()
+                        .deleteRange({ from: pos, to: pos + node.nodeSize })
+                        .setFileAttachment({
+                            id: 'recovered_' + Date.now(),
+                            filename: filename,
+                            size: size,
+                            mimeType: mimeType,
+                            url: '#',
+                            description: '',
+                        })
+                        .run();
+                    
+                    restored = true;
+                    return false; // Останавливаем поиск после первого восстановления
+                }
+            }
+        });
+
+        // Также ищем и восстанавливаем HTML блоки файлов, которые потеряли функциональность
+        state.doc.descendants((node, pos) => {
+            if (node.type.name === 'doc' || node.type.name === 'paragraph') {
+                // Ищем HTML блоки файлов
+                const htmlContent = node.type.name === 'doc' ? 
+                    editor.getHTML() : 
+                    editor.getHTML().substring(pos, pos + node.nodeSize);
+                
+                // Ищем блоки изображений
+                const imageBlockMatch = htmlContent.match(/<div[^>]*class="[^"]*file-attachment-image[^"]*"[^>]*>.*?<img[^>]*src="([^"]+)"[^>]*>.*?<span[^>]*class="[^"]*file-attachment-filename[^"]*"[^>]*>([^<]+)<\/span>/s);
+                
+                if (imageBlockMatch) {
+                    const url = imageBlockMatch[1];
+                    const filename = imageBlockMatch[2];
+                    
+                    // Восстанавливаем изображение как полноценный узел
+                    editor.chain()
+                        .focus()
+                        .deleteRange({ from: pos, to: pos + node.nodeSize })
+                        .setFileAttachment({
+                            id: 'recovered_' + Date.now(),
+                            filename: filename,
+                            size: 0, // Размер неизвестен
+                            mimeType: 'image/png',
+                            url: url,
+                            description: '',
+                        })
+                        .run();
+                    
+                    restored = true;
+                    return false;
+                }
+            }
+        });
+
+        if (restored) {
+            console.log('Файлы восстановлены');
+        }
+    }, [editor]);
+
+    // Добавляем глобальные функции
     useEffect(() => {
         window.openImageModal = openImageModal;
+        window.deleteFileAttachment = deleteFileAttachment;
         
         return () => {
             delete window.openImageModal;
+            delete window.deleteFileAttachment;
         };
-    }, [openImageModal]);
+    }, [openImageModal, deleteFileAttachment]);
+
+    // Автоматически восстанавливаем файлы при загрузке контента
+    useEffect(() => {
+        if (editor && value) {
+            // Небольшая задержка для полной загрузки контента
+            const timer = setTimeout(() => {
+                restoreFileAttachments();
+            }, 100);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [editor, value, restoreFileAttachments]);
 
     if (!editor) {
         return null;
@@ -1069,6 +1277,14 @@ export default function RichTextEditor({
                     disabled={!attachableType || !attachableId}
                 >
                     <Paperclip size={16} />
+                </button>
+                <button
+                    type="button"
+                    onClick={() => restoreFileAttachments()}
+                    className="p-2 rounded hover:bg-accent-blue/10 text-text-primary"
+                    title="Восстановить файлы"
+                >
+                    🔄
                 </button>
 
                 <div className="w-px h-6 bg-border-color mx-2" />

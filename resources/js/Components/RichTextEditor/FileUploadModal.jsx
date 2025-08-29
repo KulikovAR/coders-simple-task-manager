@@ -114,7 +114,7 @@ export default function FileUploadModal({
                     file, 
                     attachableType, 
                     attachableId,
-                    `Загружен через RichTextEditor`
+                    ''
                 );
 
                 if (result.success) {
