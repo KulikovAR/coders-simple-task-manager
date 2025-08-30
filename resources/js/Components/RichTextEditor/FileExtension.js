@@ -321,16 +321,6 @@ export default Node.create({
                             },
                             'Скачать',
                         ],
-                        [
-                            'button',
-                            {
-                                type: 'button',
-                                class: 'file-attachment-action-btn file-attachment-delete-btn',
-                                'data-file-id': id,
-                                'onclick': 'window.deleteFileAttachment(this.dataset.fileId)',
-                            },
-                            'Удалить',
-                        ],
                     ],
                 ],
             ];
@@ -387,16 +377,6 @@ export default Node.create({
                                 class: 'file-attachment-action-btn file-attachment-download-btn',
                             },
                             'Скачать',
-                        ],
-                        [
-                            'button',
-                            {
-                                type: 'button',
-                                class: 'file-attachment-action-btn file-attachment-delete-btn',
-                                'data-file-id': id,
-                                'onclick': 'window.deleteFileAttachment(this.dataset.fileId)',
-                            },
-                            'Удалить',
                         ],
                     ],
                 ],

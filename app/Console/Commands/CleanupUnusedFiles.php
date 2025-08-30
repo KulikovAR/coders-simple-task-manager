@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\FileUploadService;
+use App\Services\RichTextContentAnalyzerService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -25,7 +26,7 @@ class CleanupUnusedFiles extends Command
     /**
      * Execute the console command.
      */
-    public function handle(FileUploadService $fileUploadService)
+    public function handle(FileUploadService $fileUploadService, RichTextContentAnalyzerService $richTextAnalyzer)
     {
         $days = $this->option('days');
         $dryRun = $this->option('dry-run');
@@ -64,10 +65,21 @@ class CleanupUnusedFiles extends Command
             } else {
                 $this->info('🗑️ Выполнение очистки неиспользуемых файлов...');
                 
+                // Очищаем старые неиспользуемые файлы
                 $deletedCount = $fileUploadService->cleanupUnusedFiles($days);
                 
+                // Очищаем неиспользуемые файлы из RichTextEditor контента
+                $this->info('🔍 Анализ RichTextEditor контента...');
+                $richTextUnusedFiles = $richTextAnalyzer->analyzeAllRichTextContent();
+                
+                if (!empty($richTextUnusedFiles)) {
+                    $richTextDeletedCount = $richTextAnalyzer->cleanupUnusedFiles($richTextUnusedFiles);
+                    $this->info("🗑️ Удалено неиспользуемых файлов из RichTextEditor: {$richTextDeletedCount}");
+                    $deletedCount += $richTextDeletedCount;
+                }
+                
                 if ($deletedCount > 0) {
-                    $this->info("✅ Успешно удалено файлов: {$deletedCount}");
+                    $this->info("✅ Всего удалено файлов: {$deletedCount}");
                     Log::info("Очистка неиспользуемых файлов завершена", ['deleted_count' => $deletedCount]);
                 } else {
                     $this->info('✅ Неиспользуемых файлов не найдено');

@@ -179,7 +179,7 @@
 
 /* Темная тема */
 :root[data-theme="dark"] .file-attachment-node {
-    background: #1f2937;
+    background: #1a1a1a !important;
     border-color: #374151;
 }
 
@@ -212,7 +212,7 @@
 }
 
 :root[data-theme="dark"] .file-attachment-preview {
-    background: #111827;
+    background: #0a0a0a;
 }
 
 :root[data-theme="dark"] .file-attachment-image {
@@ -327,15 +327,15 @@
         padding: 0.75rem;
         margin: 0.5rem 0;
     }
-    
+
     .file-attachment-header {
         gap: 0.5rem;
     }
-    
+
     .file-attachment-actions {
         gap: 0.375rem;
     }
-    
+
     .file-attachment-action-btn {
         padding: 0.375rem 0.75rem;
         font-size: 0.75rem;
@@ -348,12 +348,12 @@
         align-items: flex-start;
         gap: 0.5rem;
     }
-    
+
     .file-attachment-actions {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .file-attachment-action-btn {
         flex: 1;
         justify-content: center;
@@ -679,11 +679,11 @@
         margin: 1rem;
         max-width: calc(100vw - 2rem);
     }
-    
+
     .file-upload-modal .drag-zone {
         padding: 2rem;
     }
-    
+
     .file-upload-modal .file-grid {
         grid-template-columns: 1fr;
     }
@@ -693,12 +693,12 @@
     .file-upload-modal .drag-zone {
         padding: 1.5rem;
     }
-    
+
     .file-upload-modal .action-buttons {
         flex-direction: column;
         gap: 0.75rem;
     }
-    
+
     .file-upload-modal .action-button {
         width: 100%;
         justify-content: center;
