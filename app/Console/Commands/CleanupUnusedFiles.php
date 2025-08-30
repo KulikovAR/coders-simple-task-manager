@@ -31,22 +31,16 @@ class CleanupUnusedFiles extends Command
         $days = $this->option('days');
         $dryRun = $this->option('dry-run');
 
-        $this->info("🔍 Поиск неиспользуемых файлов старше {$days} дней...");
-
         try {
             if ($dryRun) {
-                $this->info('🔍 Режим предварительного просмотра (dry-run)');
-                
-                // Получаем список файлов для удаления
                 $unusedFiles = $this->getUnusedFiles($days);
-                
+
                 if ($unusedFiles->isEmpty()) {
-                    $this->info('✅ Неиспользуемых файлов не найдено');
                     return 0;
                 }
 
                 $this->warn("📋 Найдено файлов для удаления: {$unusedFiles->count()}");
-                
+
                 $this->table(
                     ['ID', 'Имя файла', 'Размер', 'Дата создания', 'Тип объекта'],
                     $unusedFiles->map(function ($file) use ($fileUploadService) {
@@ -60,30 +54,22 @@ class CleanupUnusedFiles extends Command
                     })
                 );
 
-                $this->info('💡 Для выполнения удаления запустите команду без --dry-run');
-                
             } else {
-                $this->info('🗑️ Выполнение очистки неиспользуемых файлов...');
-                
                 // Очищаем старые неиспользуемые файлы
                 $deletedCount = $fileUploadService->cleanupUnusedFiles($days);
-                
-                // Очищаем неиспользуемые файлы из RichTextEditor контента
-                $this->info('🔍 Анализ RichTextEditor контента...');
+
                 $richTextUnusedFiles = $richTextAnalyzer->analyzeAllRichTextContent();
-                
+
                 if (!empty($richTextUnusedFiles)) {
                     $richTextDeletedCount = $richTextAnalyzer->cleanupUnusedFiles($richTextUnusedFiles);
                     $this->info("🗑️ Удалено неиспользуемых файлов из RichTextEditor: {$richTextDeletedCount}");
                     $deletedCount += $richTextDeletedCount;
                 }
-                
+
                 if ($deletedCount > 0) {
                     $this->info("✅ Всего удалено файлов: {$deletedCount}");
                     Log::info("Очистка неиспользуемых файлов завершена", ['deleted_count' => $deletedCount]);
-                } else {
-                    $this->info('✅ Неиспользуемых файлов не найдено');
-                }
+                } 
             }
 
             return 0;
