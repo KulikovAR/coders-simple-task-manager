@@ -21,9 +21,9 @@ const HeroSection = ({ isLoaded, auth, registerRef }) => {
                 <div className="absolute top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent-blue/10 rounded-full blur-[100px] -z-10"></div>
                 <div className="absolute top-48 left-1/4 w-32 h-32 bg-accent-purple/10 rounded-full blur-[80px] -z-10"></div>
                 <div className="absolute top-48 right-1/4 w-32 h-32 bg-accent-cyan/10 rounded-full blur-[80px] -z-10"></div>
-                
+
                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight text-white mb-6">
-                    Просто удобный<br className="hidden sm:block" />
+                    Просто удобный <br/>
                     <span className="bg-gradient-to-r from-accent-blue via-accent-purple to-accent-cyan bg-clip-text text-transparent">
                         таск-менеджер
                     </span>
