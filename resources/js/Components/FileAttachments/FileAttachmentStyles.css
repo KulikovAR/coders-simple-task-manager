@@ -1,172 +1,336 @@
-/* Универсальные стили для файлов - используются во всех компонентах */
+/* 🎨 Универсальные стили для файлов - современный дизайн */
 
 /* Основной блок файла */
 .file-attachment-node {
-    margin: 0.75em 0;
-    padding: 0.75rem;
+    margin: 1rem 0;
+    padding: 1rem;
     border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
-    background-color: #ffffff;
-    transition: all 0.15s ease;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.file-attachment-node::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .file-attachment-node:hover {
     border-color: #d1d5db;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.file-attachment-node:hover::before {
+    opacity: 1;
 }
 
 /* Структура содержимого */
 .file-attachment-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 /* Заголовок файла */
 .file-attachment-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
 .file-attachment-icon {
-    font-size: 1rem;
+    font-size: 1.25rem;
     color: #6b7280;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.file-attachment-node:hover .file-attachment-icon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #3b82f6;
+    transform: scale(1.1);
 }
 
 .file-attachment-filename {
-    font-weight: 500;
-    color: #374151;
-    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
 }
 
 .file-attachment-size {
-    color: #9ca3af;
-    font-size: 0.6875rem;
-    background-color: #f3f4f6;
-    padding: 0.1875rem 0.375rem;
-    border-radius: 0.25rem;
-    font-weight: 400;
+    color: #6b7280;
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.file-attachment-node:hover .file-attachment-size {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #bfdbfe;
+    color: #1d4ed8;
 }
 
 .file-attachment-description {
     color: #6b7280;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-style: normal;
+    line-height: 1.5;
+    margin-top: 0.25rem;
 }
 
 /* Предпросмотр */
 .file-attachment-preview {
     display: flex;
     justify-content: center;
-    margin: 0.375rem 0;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+}
+
+.file-attachment-node:hover .file-attachment-preview {
+    background: #f3f4f6;
 }
 
 .file-attachment-image-preview {
     max-width: 100%;
-    max-height: 250px;
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    max-height: 280px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.file-attachment-node:hover .file-attachment-image-preview {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    transform: scale(1.02);
 }
 
 /* Кнопки действий */
 .file-attachment-actions {
     display: flex;
-    gap: 0.375rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
-    margin-top: 0.375rem;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.file-attachment-node:hover .file-attachment-actions {
+    opacity: 1;
 }
 
 .file-attachment-action-btn {
-    background-color: transparent;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
     color: #6b7280;
     border: 1px solid #d1d5db;
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 400;
-    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.file-attachment-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.file-attachment-action-btn:hover::before {
+    left: 100%;
 }
 
 .file-attachment-action-btn:hover {
-    background-color: #f9fafb;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-color: #9ca3af;
     color: #374151;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .file-attachment-download-btn {
-    background-color: transparent;
-    border-color: #d1d5db;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #bfdbfe;
+    color: #1d4ed8;
 }
 
 .file-attachment-download-btn:hover {
-    background-color: #f9fafb;
-    border-color: #9ca3af;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #93c5fd;
+    color: #1e40af;
 }
 
 .file-attachment-delete-btn {
-    background-color: transparent;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
     border-color: #fecaca;
-    color: #ef4444;
+    color: #dc2626;
 }
 
 .file-attachment-delete-btn:hover {
-    background-color: #fef2f2;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     border-color: #fca5a5;
-    color: #dc2626;
+    color: #b91c1c;
 }
 
 /* Специальные стили для изображений */
 .file-attachment-image {
-    background-color: #fafafa;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
     border-color: #e5e7eb;
 }
 
 .file-attachment-image:hover {
     border-color: #d1d5db;
-    background-color: #f9fafb;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+/* Анимации для появления */
+@keyframes fileSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-attachment-node {
+    animation: fileSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Темная тема */
 :root[data-theme="dark"] .file-attachment-node {
-    background-color: #1a1a1a;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-color: #374151;
+}
+
+:root[data-theme="dark"] .file-attachment-node::before {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+}
+
+:root[data-theme="dark"] .file-attachment-node:hover {
+    border-color: #4b5563;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .file-attachment-icon {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    color: #9ca3af;
+}
+
+:root[data-theme="dark"] .file-attachment-node:hover .file-attachment-icon {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: #60a5fa;
+}
+
+:root[data-theme="dark"] .file-attachment-filename {
+    color: #f9fafb;
 }
 
 :root[data-theme="dark"] .file-attachment-size {
-    background-color: #374151;
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
     color: #d1d5db;
+    border-color: #4b5563;
+}
+
+:root[data-theme="dark"] .file-attachment-node:hover .file-attachment-size {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #1d4ed8;
+    color: #93c5fd;
+}
+
+:root[data-theme="dark"] .file-attachment-description {
+    color: #9ca3af;
+}
+
+:root[data-theme="dark"] .file-attachment-preview {
+    background: #111827;
+}
+
+:root[data-theme="dark"] .file-attachment-node:hover .file-attachment-preview {
+    background: #1f2937;
 }
 
 :root[data-theme="dark"] .file-attachment-image {
-    background-color: #1a1a1a;
-    border: none;
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    border-color: #374151;
 }
 
+:root[data-theme="dark"] .file-attachment-image:hover {
+    border-color: #4b5563;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+}
 
 :root[data-theme="dark"] .file-attachment-action-btn {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
     border-color: #4b5563;
     color: #9ca3af;
 }
 
 :root[data-theme="dark"] .file-attachment-action-btn:hover {
-    background-color: #374151;
+    background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
     border-color: #6b7280;
     color: #d1d5db;
 }
 
+:root[data-theme="dark"] .file-attachment-download-btn {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #1d4ed8;
+    color: #93c5fd;
+}
+
+:root[data-theme="dark"] .file-attachment-download-btn:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #2563eb;
+    color: #bfdbfe;
+}
+
 :root[data-theme="dark"] .file-attachment-delete-btn {
-    border-color: #7f1d1d;
-    color: #f87171;
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    border-color: #991b1b;
+    color: #fca5a5;
 }
 
 :root[data-theme="dark"] .file-attachment-delete-btn:hover {
-    background-color: #450a0a;
-    border-color: #991b1b;
-    color: #fca5a5;
+    background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);
+    border-color: #b91c1c;
+    color: #fecaca;
 }
 
 /* Специфичные стили для разных контекстов */
@@ -179,9 +343,395 @@
 /* Стили для редактора */
 .ProseMirror .file-attachment-node {
     /* Дополнительные стили для редактора */
+    margin: 0.5rem 0;
 }
 
 /* Стили для модальных окон */
 .modal .file-attachment-node {
     /* Дополнительные стили для модальных окон */
+    margin: 0.75rem 0;
+}
+
+/* Responsive дизайн */
+@media (max-width: 640px) {
+    .file-attachment-node {
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+    }
+    
+    .file-attachment-header {
+        gap: 0.5rem;
+    }
+    
+    .file-attachment-actions {
+        gap: 0.375rem;
+    }
+    
+    .file-attachment-action-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-attachment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .file-attachment-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .file-attachment-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* Анимации для состояний загрузки */
+@keyframes filePulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.file-attachment-node.uploading {
+    animation: filePulse 1.5s ease-in-out infinite;
+}
+
+/* Анимации для успешной загрузки */
+@keyframes fileSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.file-attachment-node.upload-success {
+    animation: fileSuccess 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Анимации для ошибок */
+@keyframes fileError {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+.file-attachment-node.upload-error {
+    animation: fileError 0.6s ease-in-out;
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+/* 🚀 Стили для модального окна загрузки файлов */
+
+/* Анимации появления модального окна */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Анимации для drag & drop */
+@keyframes dragPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+@keyframes dragGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    }
+}
+
+/* Анимации для прогресс-бара */
+@keyframes progressGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+    }
+}
+
+/* Анимации для кнопок */
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Анимации для файлов */
+@keyframes fileCardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Анимации для иконок */
+@keyframes iconBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Анимации для уведомлений */
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Применение анимаций */
+.file-upload-modal {
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-upload-modal .modal-backdrop {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.file-upload-modal .drag-active {
+    animation: dragPulse 1s ease-in-out infinite, dragGlow 2s ease-in-out infinite;
+}
+
+.file-upload-modal .progress-bar {
+    animation: progressGlow 2s ease-in-out infinite;
+}
+
+.file-upload-modal .upload-button:hover {
+    animation: buttonPulse 0.6s ease-in-out;
+}
+
+.file-upload-modal .file-card {
+    animation: fileCardSlideIn 0.3s ease-out;
+}
+
+.file-upload-modal .icon-animated {
+    animation: iconBounce 2s ease-in-out infinite;
+}
+
+.file-upload-modal .notification {
+    animation: notificationSlideIn 0.3s ease-out;
+}
+
+/* Дополнительные эффекты для модального окна */
+.file-upload-modal .gradient-border {
+    position: relative;
+}
+
+.file-upload-modal .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+/* Эффекты для drag & drop */
+.file-upload-modal .drag-zone {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-upload-modal .drag-zone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Эффекты для кнопок */
+.file-upload-modal .action-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-modal .action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.file-upload-modal .action-button:hover::before {
+    left: 100%;
+}
+
+/* Эффекты для прогресс-бара */
+.file-upload-modal .progress-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-modal .progress-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progressShine 2s ease-in-out infinite;
+}
+
+@keyframes progressShine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Эффекты для файлов */
+.file-upload-modal .file-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-upload-modal .file-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Эффекты для иконок */
+.file-upload-modal .file-icon {
+    transition: all 0.3s ease;
+}
+
+.file-upload-modal .file-item:hover .file-icon {
+    transform: rotate(5deg) scale(1.1);
+}
+
+/* Эффекты для статистики */
+.file-upload-modal .stats-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-modal .stats-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1));
+    transform: skewX(-15deg);
+    animation: statsShine 3s ease-in-out infinite;
+}
+
+@keyframes statsShine {
+    0%, 100% {
+        transform: skewX(-15deg) translateX(-100px);
+    }
+    50% {
+        transform: skewX(-15deg) translateX(100px);
+    }
+}
+
+/* Темная тема для модального окна */
+:root[data-theme="dark"] .file-upload-modal {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+:root[data-theme="dark"] .file-upload-modal .drag-zone {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
+}
+
+:root[data-theme="dark"] .file-upload-modal .drag-zone:hover {
+    border-color: #60a5fa;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+/* Responsive дизайн для модального окна */
+@media (max-width: 768px) {
+    .file-upload-modal {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    .file-upload-modal .drag-zone {
+        padding: 2rem;
+    }
+    
+    .file-upload-modal .file-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-upload-modal .drag-zone {
+        padding: 1.5rem;
+    }
+    
+    .file-upload-modal .action-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .file-upload-modal .action-button {
+        width: 100%;
+        justify-content: center;
+    }
 }
