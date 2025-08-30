@@ -37,11 +37,11 @@ export default function ProjectCard({ project }) {
         const num = count || 0;
         const lastDigit = num % 10;
         const lastTwoDigits = num % 100;
-        
+
         if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
             return `${num} задач`;
         }
-        
+
         if (lastDigit === 1) {
             return `${num} задача`;
         } else if (lastDigit >= 2 && lastDigit <= 4) {
@@ -60,9 +60,6 @@ export default function ProjectCard({ project }) {
                             {project.name}
                         </Link>
                     </h3>
-                    <p className="text-text-secondary text-sm mb-3 line-clamp-2">
-                        {project.description || 'Описание отсутствует'}
-                    </p>
                 </div>
                 <span className={`status-badge ${getStatusClass(project.status)}`}>
                     {getStatusText(project.status)}
@@ -119,7 +116,7 @@ export default function ProjectCard({ project }) {
                         {getTaskCountText(project.tasks_count)}
                     </div>
                 </div>
-                
+
                 <div className="flex space-x-2">
                     <Link
                         href={route('projects.board', project.id)}
@@ -137,4 +134,4 @@ export default function ProjectCard({ project }) {
             </div>
         </div>
     );
-} 
+}
