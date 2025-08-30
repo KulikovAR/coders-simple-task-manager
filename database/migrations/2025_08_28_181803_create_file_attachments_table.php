@@ -21,7 +21,7 @@ return new class extends Migration
             $table->bigInteger('file_size'); // Размер файла в байтах
             $table->text('description')->nullable(); // Описание файла
             $table->string('attachable_type'); // Тип объекта, к которому прикреплен файл
-            $table->unsignedBigInteger('attachable_id'); // ID объекта
+            $table->string('attachable_id'); // ID объекта
             $table->timestamps();
 
             // Индексы для оптимизации запросов
