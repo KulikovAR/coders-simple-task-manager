@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileAttachmentWrapper } from './FileAttachments';
 
 export default function HtmlRenderer({ content, className = '' }) {
     if (!content) return null;
@@ -100,18 +101,15 @@ export default function HtmlRenderer({ content, className = '' }) {
         /* Светлая тема */
         :root[data-theme="light"] .html-content {
             --code-bg: #f3f4f6;
-            --pre-bg: #1f2937;
-            --pre-text: #f9fafb;
-            --blockquote-bg: rgba(0, 0, 0, 0.03);
         }
     `;
 
     return (
         <>
             <style>{rendererStyles}</style>
-            <div 
+            <FileAttachmentWrapper 
+                content={content}
                 className={`prose prose-sm max-w-none html-content ${className}`}
-                dangerouslySetInnerHTML={{ __html: content }}
             />
         </>
     );

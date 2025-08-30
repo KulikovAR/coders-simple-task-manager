@@ -289,7 +289,6 @@ export default Node.create({
                                 src: url,
                                 alt: filename || 'Изображение',
                                 class: 'file-attachment-image-preview',
-                                style: 'max-width: 100%; max-height: 300px; border-radius: 0.375rem;',
                                 contenteditable: 'false', // Изображение тоже нередактируемое
                             },
                         ],
@@ -310,7 +309,6 @@ export default Node.create({
                                 'data-file-id': id,
                                 'data-image-url': url,
                                 'onclick': 'window.openImageModal(this.dataset.imageUrl)',
-                                style: 'background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-right: 0.5rem;'
                             },
                             'Открыть изображение',
                         ],
@@ -320,7 +318,6 @@ export default Node.create({
                                 href: url,
                                 download: filename,
                                 class: 'file-attachment-action-btn file-attachment-download-btn',
-                                style: 'background: var(--secondary-color); color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.375rem; display: inline-block; margin-right: 0.5rem;'
                             },
                             'Скачать',
                         ],
@@ -331,7 +328,6 @@ export default Node.create({
                                 class: 'file-attachment-action-btn file-attachment-delete-btn',
                                 'data-file-id': id,
                                 'onclick': 'window.deleteFileAttachment(this.dataset.fileId)',
-                                style: 'background: var(--danger-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;'
                             },
                             'Удалить',
                         ],
@@ -389,7 +385,6 @@ export default Node.create({
                                 href: url,
                                 download: filename,
                                 class: 'file-attachment-action-btn file-attachment-download-btn',
-                                style: 'background: var(--primary-color); color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.375rem; display: inline-block; margin-right: 0.5rem;'
                             },
                             'Скачать',
                         ],
@@ -400,7 +395,6 @@ export default Node.create({
                                 class: 'file-attachment-action-btn file-attachment-delete-btn',
                                 'data-file-id': id,
                                 'onclick': 'window.deleteFileAttachment(this.dataset.fileId)',
-                                style: 'background: var(--danger-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;'
                             },
                             'Удалить',
                         ],

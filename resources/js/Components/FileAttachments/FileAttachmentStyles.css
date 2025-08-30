@@ -1,0 +1,187 @@
+/* Универсальные стили для файлов - используются во всех компонентах */
+
+/* Основной блок файла */
+.file-attachment-node {
+    margin: 0.75em 0;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    transition: all 0.15s ease;
+}
+
+.file-attachment-node:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Структура содержимого */
+.file-attachment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Заголовок файла */
+.file-attachment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.file-attachment-icon {
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.file-attachment-filename {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.8125rem;
+}
+
+.file-attachment-size {
+    color: #9ca3af;
+    font-size: 0.6875rem;
+    background-color: #f3f4f6;
+    padding: 0.1875rem 0.375rem;
+    border-radius: 0.25rem;
+    font-weight: 400;
+}
+
+.file-attachment-description {
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-style: normal;
+}
+
+/* Предпросмотр */
+.file-attachment-preview {
+    display: flex;
+    justify-content: center;
+    margin: 0.375rem 0;
+}
+
+.file-attachment-image-preview {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Кнопки действий */
+.file-attachment-actions {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    margin-top: 0.375rem;
+}
+
+.file-attachment-action-btn {
+    background-color: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    transition: all 0.15s ease;
+}
+
+.file-attachment-action-btn:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.file-attachment-download-btn {
+    background-color: transparent;
+    border-color: #d1d5db;
+}
+
+.file-attachment-download-btn:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.file-attachment-delete-btn {
+    background-color: transparent;
+    border-color: #fecaca;
+    color: #ef4444;
+}
+
+.file-attachment-delete-btn:hover {
+    background-color: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+/* Специальные стили для изображений */
+.file-attachment-image {
+    background-color: #fafafa;
+    border-color: #e5e7eb;
+}
+
+.file-attachment-image:hover {
+    border-color: #d1d5db;
+    background-color: #f9fafb;
+}
+
+/* Темная тема */
+:root[data-theme="dark"] .file-attachment-node {
+    background-color: #1a1a1a;
+}
+
+:root[data-theme="dark"] .file-attachment-size {
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+:root[data-theme="dark"] .file-attachment-image {
+    background-color: #1a1a1a;
+    border: none;
+}
+
+
+:root[data-theme="dark"] .file-attachment-action-btn {
+    border-color: #4b5563;
+    color: #9ca3af;
+}
+
+:root[data-theme="dark"] .file-attachment-action-btn:hover {
+    background-color: #374151;
+    border-color: #6b7280;
+    color: #d1d5db;
+}
+
+:root[data-theme="dark"] .file-attachment-delete-btn {
+    border-color: #7f1d1d;
+    color: #f87171;
+}
+
+:root[data-theme="dark"] .file-attachment-delete-btn:hover {
+    background-color: #450a0a;
+    border-color: #991b1b;
+    color: #fca5a5;
+}
+
+/* Специфичные стили для разных контекстов */
+.task-content .file-attachment-node,
+.html-content .file-attachment-node,
+.prose .file-attachment-node {
+    /* Наследуем базовые стили */
+}
+
+/* Стили для редактора */
+.ProseMirror .file-attachment-node {
+    /* Дополнительные стили для редактора */
+}
+
+/* Стили для модальных окон */
+.modal .file-attachment-node {
+    /* Дополнительные стили для модальных окон */
+}

@@ -72,146 +72,36 @@ export default function RichTextEditor({
             z-index: 9999;
         }
 
-        /* Стили для файлов в редакторе */
-        .file-attachment-node {
-            margin: 1rem 0;
-            padding: 1rem;
+        /* Стили для упоминаний */
+        .mention-list {
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
-            background: var(--secondary-bg);
-            position: relative;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            min-width: 200px;
+            max-width: calc(100vw - 32px);
+            z-index: 9999;
         }
 
-        .file-attachment-content {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        /* Специфичные стили для редактора */
+        .ProseMirror .file-attachment-node {
+            /* Дополнительные стили для редактора */
         }
 
-        .file-attachment-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-        }
-
-        .file-attachment-icon {
-            font-size: 1.25rem;
-        }
-
-        .file-attachment-filename {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .file-attachment-details {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .file-attachment-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background: var(--accent-blue);
-            color: white !important;
-            text-decoration: none;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            align-self: flex-start;
-        }
-
-        .file-attachment-link:hover {
-            background: var(--accent-blue-dark, #1d4ed8);
-            color: white !important;
-        }
-
-        /* Стили для действий с файлами */
-        .file-attachment-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            margin-top: 0.5rem;
-        }
-
-        .file-attachment-action-btn {
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .file-attachment-view-btn {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .file-attachment-view-btn:hover {
-            background: var(--primary-hover, #1d4ed8);
-        }
-
-        .file-attachment-download-btn {
-            background: var(--secondary-color, #6b7280);
-            color: white;
-        }
-
-        .file-attachment-download-btn:hover {
-            background: var(--secondary-hover, #4b5563);
-        }
-
-        .file-attachment-delete-btn {
-            background: var(--danger-color, #dc2626);
-            color: white;
-        }
-
-        .file-attachment-delete-btn:hover {
-            background: var(--danger-hover, #b91c1c);
-        }
-
-        /* Стили для нередактируемых блоков файлов */
-        .file-attachment-node[contenteditable="false"] {
+        .ProseMirror .file-attachment-node[contenteditable="false"] {
             user-select: none;
             cursor: default;
         }
 
-        .file-attachment-node[contenteditable="false"] * {
+        .ProseMirror .file-attachment-node[contenteditable="false"] * {
             user-select: none;
         }
 
-        .file-attachment-node[contenteditable="false"] button,
-        .file-attachment-node[contenteditable="false"] a {
+        .ProseMirror .file-attachment-node[contenteditable="false"] button,
+        .ProseMirror .file-attachment-node[contenteditable="false"] a {
             user-select: none;
             cursor: pointer;
-        }
-
-        /* Специальные стили для изображений */
-        .file-attachment-image {
-            background: var(--card-bg);
-        }
-
-        .file-attachment-preview {
-            margin: 0.5rem 0;
-            text-align: center;
-        }
-
-        .file-attachment-image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 0.375rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .file-attachment-image-preview:hover {
-            transform: scale(1.02);
         }
 
         /* Стили для мобильной версии */

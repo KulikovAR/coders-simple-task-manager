@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileAttachmentWrapper } from './FileAttachments';
 
 export default function TaskContentRenderer({ content, className = '' }) {
     if (!content) return null;
@@ -146,9 +147,9 @@ export default function TaskContentRenderer({ content, className = '' }) {
     return (
         <>
             <style>{contentStyles}</style>
-            <div 
+            <FileAttachmentWrapper 
+                content={content}
                 className={`task-content ${className}`}
-                dangerouslySetInnerHTML={{ __html: content }}
             />
         </>
     );
