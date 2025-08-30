@@ -217,10 +217,10 @@ export default function Landing({ auth }) {
                     />
 
                     {/* Секция призыва к действию */}
-                    <CtaSection
-                        auth={auth}
-                        registerRef={(ref) => registerSection('cta', ref)}
-                    />
+                    {/*<CtaSection*/}
+                    {/*    auth={auth}*/}
+                    {/*    registerRef={(ref) => registerSection('cta', ref)}*/}
+                    {/*/>*/}
                 </main>
 
                 {/* Футер */}
