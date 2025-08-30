@@ -15,7 +15,7 @@ class ProjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:50000', // Увеличиваем лимит для HTML контента
             'status' => 'required|in:active,completed,on_hold,cancelled',
             'deadline' => 'nullable|date|after:today',
             'docs' => 'nullable|array',
@@ -29,6 +29,7 @@ class ProjectRequest extends FormRequest
         return [
             'name.required' => 'Название проекта обязательно для заполнения.',
             'name.max' => 'Название проекта не может быть длиннее 255 символов.',
+            'description.max' => 'Описание проекта не может быть длиннее 50 000 символов.',
             'status.required' => 'Статус проекта обязателен для заполнения.',
             'status.in' => 'Выбран недопустимый статус проекта.',
             'deadline.date' => 'Дедлайн должен быть корректной датой.',

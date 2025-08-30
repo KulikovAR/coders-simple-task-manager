@@ -8,6 +8,7 @@ use App\Models\ProjectMember;
 use App\Models\TaskStatus;
 use App\Models\User;
 use App\Services\TaskStatusService;
+use App\Services\HtmlContentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -15,7 +16,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class ProjectService
 {
     public function __construct(
-        private TaskStatusService $taskStatusService
+        private TaskStatusService $taskStatusService,
+        private HtmlContentService $htmlContentService
     ) {}
     public function getUserProjects(User $user, array $filters = []): LengthAwarePaginator
     {
@@ -60,9 +62,18 @@ class ProjectService
 
     public function createProject(array $data, User $user): Project
     {
+        // Обрабатываем HTML контент с изображениями
+        $processedDescription = null;
+        if (!empty($data['description'])) {
+            $processedDescription = $this->htmlContentService->processContent($data['description'], [
+                'storage_path' => 'projects/' . ($user->id ?? 'temp') . '/descriptions',
+                'disk' => 'public'
+            ]);
+        }
+
         $project = Project::create([
             'name' => $data['name'],
-            'description' => $data['description'] ?? null,
+            'description' => $processedDescription['html'] ?? $data['description'] ?? null,
             'owner_id' => $user->id,
             'status' => $data['status'] ?? 'active',
             'deadline' => $data['deadline'] ?? null,
@@ -77,9 +88,18 @@ class ProjectService
 
     public function updateProject(Project $project, array $data): Project
     {
+        // Обрабатываем HTML контент с изображениями
+        $processedDescription = null;
+        if (isset($data['description']) && $data['description'] !== $project->description) {
+            $processedDescription = $this->htmlContentService->processContent($data['description'], [
+                'storage_path' => 'projects/' . $project->id . '/descriptions',
+                'disk' => 'public'
+            ]);
+        }
+
         $project->update([
             'name' => $data['name'] ?? $project->name,
-            'description' => $data['description'] ?? $project->description,
+            'description' => $processedDescription['html'] ?? $data['description'] ?? $project->description,
             'status' => $data['status'] ?? $project->status,
             'deadline' => $data['deadline'] ?? $project->deadline,
             'docs' => $data['docs'] ?? $project->docs,

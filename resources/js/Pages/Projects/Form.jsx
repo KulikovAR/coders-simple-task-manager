@@ -5,7 +5,7 @@ import RichTextEditor from '@/Components/RichTextEditor';
 
 export default function Form({ auth, project = null, errors = {} }) {
     const isEditing = !!project;
-    
+
     const {
         form: { data, setData, post, put, processing, errors: formErrors },
         docs,
@@ -272,67 +272,6 @@ export default function Form({ auth, project = null, errors = {} }) {
                             </div>
                         )}
 
-                        {/* Предварительный просмотр */}
-                        <div className="card">
-                            <h3 className="card-title mb-4">Предварительный просмотр</h3>
-                            <div className="space-y-3">
-                                <div>
-                                    <span className="text-sm text-text-muted">Название:</span>
-                                    <p className="text-text-primary font-medium">
-                                        {data.name || 'Не указано'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-text-muted">Статус:</span>
-                                    <p className={`font-medium ${getStatusColor(data.status)}`}>
-                                        {getStatusIcon(data.status)} {
-                                            data.status === 'active' ? 'Активный' :
-                                            data.status === 'completed' ? 'Завершен' :
-                                            data.status === 'on_hold' ? 'Приостановлен' :
-                                            data.status === 'cancelled' ? 'Отменен' : 'Не указан'
-                                        }
-                                    </p>
-                                </div>
-                                {data.deadline && (
-                                    <div>
-                                        <span className="text-sm text-text-muted">Дедлайн:</span>
-                                        <p className="text-text-primary font-medium">
-                                            {new Date(data.deadline).toLocaleDateString('ru-RU')}
-                                        </p>
-                                    </div>
-                                )}
-                                {data.description && (
-                                    <div>
-                                        <span className="text-sm text-text-muted">Описание:</span>
-                                        <p className="text-text-secondary text-sm line-clamp-3">
-                                            {data.description}
-                                        </p>
-                                    </div>
-                                )}
-                                {docs.filter(doc => typeof doc === 'string' && doc.trim() !== '').length > 0 && (
-                                    <div>
-                                        <span className="text-sm text-text-muted">Документы:</span>
-                                        <div className="space-y-1 mt-1">
-                                            {docs.filter(doc => typeof doc === 'string' && doc.trim() !== '').map((doc, index) => (
-                                                <a
-                                                    key={index}
-                                                    href={doc}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-accent-blue hover:text-blue-300 text-xs flex items-center transition-colors"
-                                                >
-                                                    <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                    </svg>
-                                                    <span className="truncate">Документ {index + 1}</span>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Информация */}
                         <div className="card">
                             <h3 className="card-title mb-4">Информация</h3>
@@ -348,4 +287,4 @@ export default function Form({ auth, project = null, errors = {} }) {
             </div>
         </AuthenticatedLayout>
     );
-} 
+}

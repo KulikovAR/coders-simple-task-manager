@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import TaskContentRenderer from '@/Components/TaskContentRenderer';
 
 export default function Show({ auth, project }) {
     const [showAddMember, setShowAddMember] = useState(false);
@@ -220,7 +221,9 @@ export default function Show({ auth, project }) {
                 {project.description && (
                     <div className="card">
                         <h3 className="card-title mb-3">Описание</h3>
-                        <p className="text-text-secondary whitespace-pre-wrap">{project.description}</p>
+                        <div className="prose prose-sm max-w-none">
+                            <TaskContentRenderer content={project.description} />
+                        </div>
                     </div>
                 )}
 

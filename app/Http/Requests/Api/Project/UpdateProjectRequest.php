@@ -23,7 +23,7 @@ class UpdateProjectRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string|max:1000',
+            'description' => 'nullable|string|max:50000', // Увеличиваем лимит для HTML контента
             'docs' => 'nullable|array',
             'docs.*' => 'nullable|url|max:255',
         ];
@@ -37,7 +37,7 @@ class UpdateProjectRequest extends FormRequest
         return [
             'name.required' => 'Название проекта обязательно',
             'name.max' => 'Название проекта не может быть длиннее 255 символов',
-            'description.max' => 'Описание проекта не может быть длиннее 1000 символов',
+            'description.max' => 'Описание проекта не может быть длиннее 50 000 символов',
         ];
     }
 }
