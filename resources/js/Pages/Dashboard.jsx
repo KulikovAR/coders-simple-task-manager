@@ -252,9 +252,6 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
-                                    <p className="text-body-small text-text-secondary mb-4 line-clamp-2">
-                                        {project.description || 'Описание отсутствует'}
-                                    </p>
                                     <div className="flex items-center justify-between text-body-small">
                                         <span className="text-text-muted">
                                             {(() => {
