@@ -327,15 +327,7 @@ export default function RichTextEditor({
         }
     }, [users]);
 
-    // Создание экземпляра редактора
-    console.log('RichTextEditor: Инициализация редактора с расширениями:', [
-        'StarterKit',
-        'Image', 
-        'FileExtension',
-        'Placeholder',
-        'Mention'
-    ]);
-    
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -818,7 +810,7 @@ export default function RichTextEditor({
 
     // Состояние для отслеживания перетаскивания
     const [isDragging, setIsDragging] = useState(false);
-    
+
     // Состояние для модального окна загрузки файлов
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -864,7 +856,7 @@ export default function RichTextEditor({
 
         // Вставляем файлы последовательно
         let chain = editor.chain().focus();
-        
+
         files.forEach((file, index) => {
             try {
                 // Вставляем файл как вложение в редактор
@@ -876,7 +868,7 @@ export default function RichTextEditor({
                     url: file.download_url || `/file-upload/${file.id}/download`,
                     description: file.description || ''
                 });
-                
+
                 // Добавляем перенос строки между файлами (кроме последнего)
                 if (index < files.length - 1) {
                     chain = chain.enter();
@@ -885,7 +877,7 @@ export default function RichTextEditor({
                 console.error('RichTextEditor: Ошибка при вставке файла:', error);
             }
         });
-        
+
         // Выполняем все команды за один раз
         chain.run();
 
@@ -926,7 +918,6 @@ export default function RichTextEditor({
                 if (editor) {
                     editor.commands.deleteSelection();
                 }
-                console.log('Файл успешно удален');
             } else {
                 console.error('Ошибка при удалении файла');
                 alert('Ошибка при удалении файла');
@@ -948,23 +939,23 @@ export default function RichTextEditor({
         state.doc.descendants((node, pos) => {
             if (node.type.name === 'paragraph') {
                 const text = node.textContent || '';
-                
+
                 // Ищем паттерн файла
                 const filePattern = /([🖼️🎥🎵📄📝📊📽️📦])(.+?)(\d+\.?\d*\s*[КМ]?Б)/;
                 const match = text.match(filePattern);
-                
+
                 if (match) {
                     const icon = match[1];
                     const filename = match[2].trim();
                     const sizeText = match[3];
-                    
+
                     // Определяем MIME тип по иконке
                     let mimeType = 'application/octet-stream';
                     if (icon === '🖼️') mimeType = 'image/png';
                     else if (icon === '📄') mimeType = 'application/pdf';
                     else if (icon === '📝') mimeType = 'application/msword';
                     else if (icon === '📦') mimeType = 'application/zip';
-                    
+
                     // Парсим размер
                     const sizeMatch = sizeText.match(/(\d+\.?\d*)\s*([КМ]?Б)/);
                     let size = 0;
@@ -975,7 +966,7 @@ export default function RichTextEditor({
                         else if (unit === 'МБ') size = num * 1024 * 1024;
                         else size = num;
                     }
-                    
+
                     // Восстанавливаем файл
                     editor.chain()
                         .focus()
@@ -989,7 +980,7 @@ export default function RichTextEditor({
                             description: '',
                         })
                         .run();
-                    
+
                     restored = true;
                     return false; // Останавливаем поиск после первого восстановления
                 }
@@ -1000,17 +991,17 @@ export default function RichTextEditor({
         state.doc.descendants((node, pos) => {
             if (node.type.name === 'doc' || node.type.name === 'paragraph') {
                 // Ищем HTML блоки файлов
-                const htmlContent = node.type.name === 'doc' ? 
-                    editor.getHTML() : 
+                const htmlContent = node.type.name === 'doc' ?
+                    editor.getHTML() :
                     editor.getHTML().substring(pos, pos + node.nodeSize);
-                
+
                 // Ищем блоки изображений
                 const imageBlockMatch = htmlContent.match(/<div[^>]*class="[^"]*file-attachment-image[^"]*"[^>]*>.*?<img[^>]*src="([^"]+)"[^>]*>.*?<span[^>]*class="[^"]*file-attachment-filename[^"]*"[^>]*>([^<]+)<\/span>/s);
-                
+
                 if (imageBlockMatch) {
                     const url = imageBlockMatch[1];
                     const filename = imageBlockMatch[2];
-                    
+
                     // Восстанавливаем изображение как полноценный узел
                     editor.chain()
                         .focus()
@@ -1024,7 +1015,7 @@ export default function RichTextEditor({
                             description: '',
                         })
                         .run();
-                    
+
                     restored = true;
                     return false;
                 }
@@ -1040,7 +1031,7 @@ export default function RichTextEditor({
     useEffect(() => {
         window.openImageModal = openImageModal;
         window.deleteFileAttachment = deleteFileAttachment;
-        
+
         return () => {
             delete window.openImageModal;
             delete window.deleteFileAttachment;
@@ -1054,7 +1045,7 @@ export default function RichTextEditor({
             const timer = setTimeout(() => {
                 restoreFileAttachments();
             }, 100);
-            
+
             return () => clearTimeout(timer);
         }
     }, [editor, value, restoreFileAttachments]);

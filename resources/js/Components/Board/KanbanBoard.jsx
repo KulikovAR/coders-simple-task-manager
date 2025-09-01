@@ -72,7 +72,6 @@ export default function KanbanBoard({
 
     const handleEditStatusesClick = () => {
         // Здесь будет открытие модалки управления статусами
-        console.log('Открыть модалка управления статусами:', currentSprintId !== 'none' ? 'sprint' : 'project');
     };
 
     const startDragReorderMode = () => {

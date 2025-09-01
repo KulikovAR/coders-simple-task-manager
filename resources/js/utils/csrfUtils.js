@@ -49,7 +49,7 @@ export async function refreshCsrfToken() {
     } catch (error) {
         console.error('Ошибка при обновлении CSRF токена:', error);
     }
-    
+
     return null;
 }
 
@@ -60,7 +60,7 @@ export async function refreshCsrfToken() {
  */
 export function createCsrfHeaders(additionalHeaders = {}) {
     const csrfToken = getCsrfToken();
-    
+
     if (!csrfToken) {
         console.error('CSRF токен не найден');
         return null;
@@ -83,8 +83,6 @@ export function createCsrfHeaders(additionalHeaders = {}) {
  */
 export function handleCsrfError(response, onCsrfError = null) {
     if (response.status === 419) {
-        console.log('CSRF токен истек');
-        
         if (onCsrfError) {
             onCsrfError();
         } else {
@@ -92,10 +90,10 @@ export function handleCsrfError(response, onCsrfError = null) {
             alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
             window.location.reload();
         }
-        
+
         return true;
     }
-    
+
     return false;
 }
 
@@ -108,7 +106,7 @@ export function handleCsrfError(response, onCsrfError = null) {
  */
 export async function safeFetch(url, options = {}, onCsrfError = null) {
     const csrfToken = getCsrfToken();
-    
+
     if (!csrfToken) {
         throw new Error('CSRF токен не найден');
     }
@@ -126,11 +124,11 @@ export async function safeFetch(url, options = {}, onCsrfError = null) {
     };
 
     const response = await fetch(url, fetchOptions);
-    
+
     // Проверяем ошибку CSRF
     if (handleCsrfError(response, onCsrfError)) {
         return response;
     }
-    
+
     return response;
 }

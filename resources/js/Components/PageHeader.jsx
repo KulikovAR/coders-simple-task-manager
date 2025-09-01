@@ -19,18 +19,18 @@ import { Link } from '@inertiajs/react';
  * @param {string} className - дополнительные CSS классы
  * @param {boolean} stackOnMobile - складывать кнопки вертикально на мобильных
  */
-export default function PageHeader({ 
-    title, 
-    description, 
-    actions = [], 
+export default function PageHeader({
+    title,
+    description,
+    actions = [],
     className = '',
-    stackOnMobile = true 
+    stackOnMobile = true
 }) {
     const getButtonClasses = (variant, isMobile = false) => {
-        const baseClasses = isMobile 
-            ? 'inline-flex items-center justify-center h-11 w-full sm:w-auto' 
+        const baseClasses = isMobile
+            ? 'inline-flex items-center justify-center h-11 w-full sm:w-auto'
             : 'inline-flex items-center justify-center h-11';
-            
+
         switch (variant) {
             case 'primary':
                 return `btn btn-primary ${baseClasses}`;
@@ -58,18 +58,18 @@ export default function PageHeader({
                     <p className="text-text-secondary mt-1 text-body lg:text-body-large">{description}</p>
                 )}
             </div>
-            
+
             {sortedActions.length > 0 && (
                 <div className={`
                     flex-shrink-0 w-full lg:w-auto
-                    ${stackOnMobile 
-                        ? 'flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 lg:space-x-3' 
+                    ${stackOnMobile
+                        ? 'flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 lg:space-x-3'
                         : 'flex flex-row flex-wrap gap-2 sm:gap-3'
                     }
                 `}>
                     {sortedActions.map((action, index) => {
                         const buttonClasses = getButtonClasses(action.variant, stackOnMobile);
-                        
+
                         if (action.type === 'link') {
                             return (
                                 <Link
@@ -86,14 +86,14 @@ export default function PageHeader({
                                 </Link>
                             );
                         }
-                        
+
                         return (
                             <button
                                 key={action.key || index}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Button clicked:', action.text, action.onClick);
+
                                     if (action.onClick) {
                                         action.onClick(e);
                                     }

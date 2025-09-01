@@ -71,8 +71,6 @@ export default function TaskComments({
                 });
 
                 if (response.status === 419) {
-                    // CSRF токен истек, обновляем страницу
-                    console.log('CSRF токен истек, обновляем страницу');
                     window.location.reload();
                     return;
                 }
@@ -109,8 +107,6 @@ export default function TaskComments({
                 });
 
                 if (response.status === 419) {
-                    // CSRF токен истек, обновляем страницу
-                    console.log('CSRF токен истек, обновляем страницу');
                     window.location.reload();
                     return;
                 }
@@ -196,8 +192,6 @@ export default function TaskComments({
             });
 
             if (response.status === 419) {
-                // CSRF токен истек, обновляем страницу
-                console.log('CSRF токен истек, обновляем страницу');
                 window.location.reload();
                 return;
             }

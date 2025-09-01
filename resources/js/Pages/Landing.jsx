@@ -230,12 +230,6 @@ export default function Landing({ auth }) {
                     <PricingSection
                         registerRef={(ref) => registerSection('pricing', ref)}
                     />
-
-                    {/* Секция призыва к действию */}
-                    <CtaSection
-                        auth={auth}
-                        registerRef={(ref) => registerSection('cta', ref)}
-                    />
                 </main>
 
                 {/* Футер */}
