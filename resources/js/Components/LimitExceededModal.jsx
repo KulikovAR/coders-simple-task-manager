@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from '@inertiajs/react';
+import { SUBSCRIPTION_PLANS, AI_REQUEST_LIMITS, AI_REQUEST_PERIODS_BY_PLAN } from '@/Constants/SubscriptionPlans';
 
 export default function LimitExceededModal({ isOpen, onClose, limitType, currentLimit, currentPlan }) {
     // Закрытие модалки по Escape
@@ -46,13 +47,10 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
             break;
         case 'ai':
             title = 'Достигнут лимит запросов к ИИ';
-            if (currentPlan === 'Бесплатный') {
-                description = `В вашем тарифе доступно 5 запросов к ИИ-ассистенту в месяц.`;
-            } else if (currentPlan === 'Команда') {
-                description = `В вашем тарифе доступно 5 запросов к ИИ-ассистенту в месяц.`;
-            } else {
-                description = `В вашем тарифе "${currentPlan}" доступно ${currentLimit} запросов к ИИ.`;
-            }
+            const aiLimit = AI_REQUEST_LIMITS[currentPlan] || currentLimit;
+            const aiPeriod = AI_REQUEST_PERIODS_BY_PLAN[currentPlan] === 'daily' ? 'в день' : 'в месяц';
+            
+            description = `В вашем тарифе доступно ${aiLimit} запросов к ИИ-ассистенту ${aiPeriod}.`;
             limitText = 'запросов к ИИ';
             break;
         default:

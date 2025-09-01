@@ -55,7 +55,7 @@ class AiAgentController extends Controller
                 'ai_requests_period' => $subscriptionInfo['ai_requests_period'],
                 'ai_requests_reset_at' => $subscriptionInfo['ai_requests_reset_at'],
             ],
-        ]);
+        ])->with('subscriptionName', $subscriptionInfo['name']);
     }
 
     /**
@@ -74,14 +74,18 @@ class AiAgentController extends Controller
         
         // Проверяем, есть ли у пользователя доступные запросы к ИИ
         if (!$this->subscriptionService->canUseAi($user)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
-                'subscription' => [
-                    'ai_requests_remaining' => $user->getRemainingAiRequests(),
-                    'ai_requests_reset_at' => $user->ai_requests_reset_at,
-                ]
-            ], 403);
+                    // Получаем информацию о текущем тарифе
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        
+        return response()->json([
+            'success' => false,
+            'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
+            'subscription' => [
+                'name' => $subscriptionInfo['name'],
+                'ai_requests_remaining' => $user->getRemainingAiRequests(),
+                'ai_requests_reset_at' => $user->ai_requests_reset_at,
+            ]
+        ], 403);
         }
 
         // Обрабатываем запрос

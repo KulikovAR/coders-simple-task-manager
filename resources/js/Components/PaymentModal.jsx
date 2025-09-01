@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { SUBSCRIPTION_PLANS, AI_REQUEST_LIMITS, AI_REQUEST_PERIODS_BY_PLAN } from '@/Constants/SubscriptionPlans';
 
 export default function PaymentModal({ isOpen, onClose }) {
     // Закрытие модалки по Escape
@@ -40,9 +41,11 @@ export default function PaymentModal({ isOpen, onClose }) {
                     <h3 className="text-xl font-bold text-text-primary mb-2">
                         Спасибо за тестирование!
                     </h3>
-                            <p className="text-text-secondary text-sm">
-                                В вашем тарифе доступно 5 бесплатных запросов к ИИ-ассистенту в месяц
-                            </p>
+                    <p className="text-text-secondary text-sm">
+                        {window.subscriptionName === SUBSCRIPTION_PLANS.TEAM_AI 
+                            ? `В вашем тарифе доступно ${AI_REQUEST_LIMITS[SUBSCRIPTION_PLANS.TEAM_AI]} запросов к ИИ-ассистенту в день` 
+                            : `В вашем тарифе доступно ${AI_REQUEST_LIMITS[SUBSCRIPTION_PLANS.FREE]} бесплатных запросов к ИИ-ассистенту в месяц`}
+                    </p>
                 </div>
 
                 <div className="space-y-4 mb-6">

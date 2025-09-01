@@ -1,9 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import AiMessageRenderer from '@/Components/AiMessageRenderer';
 import PaymentModal from '@/Components/PaymentModal';
+import { SUBSCRIPTION_PLANS } from '@/Constants/SubscriptionPlans';
 
 export default function AiAgentIndex({ auth, conversations, stats }) {
     const [messages, setMessages] = useState([]);
@@ -111,10 +112,10 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
 
             setMessages(prev => [...prev, aiMessage]);
             
-            // Проверяем, не исчерпан ли лимит бесплатных запросов
+            // Проверяем, не исчерпан ли лимит запросов
             if (!result.success && result.message && (
-                result.message.includes('Бесплатный лимит в 5 запросов исчерпан') || 
-                result.message.includes('Бесплатный лимит в 9 запросов исчерпан')
+                result.message.includes('лимит запросов') || 
+                result.message.includes('Превышен лимит запросов')
             )) {
                 openPaymentModal();
             }
