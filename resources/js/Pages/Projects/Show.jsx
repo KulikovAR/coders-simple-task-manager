@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
 import LimitExceededModal from '@/Components/LimitExceededModal';
 
-export default function Show({ auth, project, flash }) {
+export default function Show({ auth, project, flash, canAddMember, subscriptionInfo }) {
     const [showAddMember, setShowAddMember] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -247,12 +247,28 @@ export default function Show({ auth, project, flash }) {
                 <div className="card">
                     <div className="card-header">
                         <h3 className="card-title">Участники проекта ({1 + (project.members?.filter(member => member.user_id !== project.owner_id).length || 0)})</h3>
-                        <button
-                            onClick={() => setShowAddMember(!showAddMember)}
-                            className="btn btn-secondary btn-sm"
-                        >
-                            {showAddMember ? 'Отмена' : 'Добавить участника'}
-                        </button>
+                        {canAddMember ? (
+                            <button
+                                onClick={() => setShowAddMember(!showAddMember)}
+                                className="btn btn-secondary btn-sm"
+                            >
+                                {showAddMember ? 'Отмена' : 'Добавить участника'}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setLimitError({
+                                        type: 'members',
+                                        limit: subscriptionInfo.members_limit,
+                                        plan: subscriptionInfo.name
+                                    });
+                                    setShowLimitModal(true);
+                                }}
+                                className="btn btn-secondary btn-sm"
+                            >
+                                Обновить тариф
+                            </button>
+                        )}
                     </div>
 
                     {/* Форма добавления участника */}

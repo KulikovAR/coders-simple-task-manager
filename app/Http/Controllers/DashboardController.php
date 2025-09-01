@@ -6,11 +6,16 @@ use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private SubscriptionService $subscriptionService
+    ) {}
+    
     public function index()
     {
         $user = Auth::user();
@@ -60,6 +65,10 @@ class DashboardController extends Controller
             'user_connected' => !empty($user->telegram_chat_id),
         ];
 
-        return Inertia::render('Dashboard', compact('stats', 'projects', 'telegram'));
+        // Получаем информацию о подписке пользователя и возможности создания проекта
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        $canCreateProject = $this->subscriptionService->canCreateProject($user);
+
+        return Inertia::render('Dashboard', compact('stats', 'projects', 'telegram', 'subscriptionInfo', 'canCreateProject'));
     }
 }

@@ -9,7 +9,7 @@ import PageHeader from '@/Components/PageHeader';
 import LimitExceededModal from '@/Components/LimitExceededModal';
 import { useFilters } from '@/utils/hooks/useFilters';
 
-export default function Index({ auth, projects, filters, flash }) {
+export default function Index({ auth, projects, filters, flash, subscriptionInfo, canCreateProject }) {
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [limitError, setLimitError] = useState(null);
     
@@ -84,12 +84,26 @@ export default function Index({ auth, projects, filters, flash }) {
                             },
                             mobileOrder: 2
                         },
-                        {
+                        canCreateProject ? {
                             type: 'link',
                             variant: 'primary',
                             text: 'Новый проект',
                             icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
                             href: route('projects.create'),
+                            mobileOrder: 1
+                        } : {
+                            type: 'button',
+                            variant: 'primary',
+                            text: 'Обновить тариф',
+                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+                            onClick: () => {
+                                setLimitError({
+                                    type: 'projects',
+                                    limit: subscriptionInfo.projects_limit,
+                                    plan: subscriptionInfo.name
+                                });
+                                setShowLimitModal(true);
+                            },
                             mobileOrder: 1
                         }
                     ]}
@@ -169,11 +183,24 @@ export default function Index({ auth, projects, filters, flash }) {
                         }
                         hasFilters={!!(search || status)}
                         onClearFilters={clearFilters}
-                        action={!search && !status ? {
-                            href: route('projects.create'),
-                            text: 'Создать проект',
-                            icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'
-                        } : null}
+                        action={!search && !status ? (
+                            canCreateProject ? {
+                                href: route('projects.create'),
+                                text: 'Создать проект',
+                                icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'
+                            } : {
+                                onClick: () => {
+                                    setLimitError({
+                                        type: 'projects',
+                                        limit: subscriptionInfo.projects_limit,
+                                        plan: subscriptionInfo.name
+                                    });
+                                    setShowLimitModal(true);
+                                },
+                                text: 'Обновить тариф',
+                                icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6'
+                            }
+                        ) : null}
                     />
                 )}
 

@@ -23,11 +23,16 @@ class ProjectController extends Controller
 
     public function index(Request $request)
     {
-        $projects = $this->projectService->getUserProjects(Auth::user(), $request->only(['search', 'status']));
+        $user = Auth::user();
+        $projects = $this->projectService->getUserProjects($user, $request->only(['search', 'status']));
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        $canCreateProject = $this->subscriptionService->canCreateProject($user);
 
         return Inertia::render('Projects/Index', [
             'projects' => $projects,
             'filters' => $request->only(['search', 'status']),
+            'subscriptionInfo' => $subscriptionInfo,
+            'canCreateProject' => $canCreateProject,
         ]);
     }
 
@@ -80,15 +85,23 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+        $user = Auth::user();
+        if (!$this->projectService->canUserAccessProject($user, $project)) {
             abort(403, 'Доступ запрещен');
         }
 
         $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.project', 'taskStatuses', 'members.user']);
+        
+        // Проверяем, может ли пользователь добавить еще участников
+        $currentMembersCount = $project->members()->count() + 1; // +1 для владельца
+        $canAddMember = $this->subscriptionService->canAddMemberToProject($user, $currentMembersCount);
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
 
         return Inertia::render('Projects/Show', [
             'project' => $project,
             'tasks' => $project->tasks,
+            'canAddMember' => $canAddMember,
+            'subscriptionInfo' => $subscriptionInfo,
         ]);
     }
 

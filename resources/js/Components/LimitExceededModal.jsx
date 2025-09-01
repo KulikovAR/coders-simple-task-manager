@@ -135,12 +135,6 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
                     >
                         Закрыть
                     </button>
-                    <Link
-                        href={route('profile.edit')}
-                        className="px-6 py-2 bg-accent-blue text-white rounded-lg font-medium hover:bg-accent-blue/80 transition-colors duration-200"
-                    >
-                        Перейти в профиль
-                    </Link>
                 </div>
             </div>
         </div>

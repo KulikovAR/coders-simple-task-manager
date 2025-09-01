@@ -1,14 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import LimitExceededModal from '@/Components/LimitExceededModal';
 
-export default function Dashboard({ auth, stats, projects, telegram }) {
+export default function Dashboard({ auth, stats, projects, telegram, subscriptionInfo, canCreateProject }) {
     const [showTips, setShowTips] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('dashboardTipsHidden') !== '1';
         }
         return true;
     });
+
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [limitError, setLimitError] = useState(null);
 
     useEffect(() => {
         if (!showTips && typeof window !== 'undefined') {
@@ -38,6 +42,16 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
             <Head title="Dashboard" />
 
             <div className="space-y-8">
+                {/* Модальное окно превышения лимита */}
+                {showLimitModal && limitError && (
+                    <LimitExceededModal
+                        isOpen={showLimitModal}
+                        onClose={() => setShowLimitModal(false)}
+                        limitType={limitError.type}
+                        currentLimit={limitError.limit}
+                        currentPlan={limitError.plan}
+                    />
+                )}
                 {/* Приветствие */}
                 <div className="text-center">
                     <h1 className="text-heading-1 text-gradient mb-3">
@@ -170,23 +184,50 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                                 <p className="text-body-small text-text-secondary text-xs opacity-80">Управление через ИИ</p>
                             </div>
                         </Link>
-                        <Link
-                            href={route('projects.create')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
-                        >
-                            <div className="absolute top-0 right-0 w-12 h-12 bg-accent-blue/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="font-semibold text-text-primary text-xs">Создать проект</p>
-                                    <div className="p-1.5 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors duration-300">
-                                        <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
+                        {canCreateProject ? (
+                            <Link
+                                href={route('projects.create')}
+                                className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
+                            >
+                                <div className="absolute top-0 right-0 w-12 h-12 bg-accent-blue/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <p className="font-semibold text-text-primary text-xs">Создать проект</p>
+                                        <div className="p-1.5 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors duration-300">
+                                            <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        </div>
                                     </div>
+                                    <p className="text-body-small text-text-secondary text-xs opacity-80">Новый проект для команды</p>
                                 </div>
-                                <p className="text-body-small text-text-secondary text-xs opacity-80">Новый проект для команды</p>
-                            </div>
-                        </Link>
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setLimitError({
+                                        type: 'projects',
+                                        limit: subscriptionInfo.projects_limit,
+                                        plan: subscriptionInfo.name
+                                    });
+                                    setShowLimitModal(true);
+                                }}
+                                className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
+                            >
+                                <div className="absolute top-0 right-0 w-12 h-12 bg-accent-blue/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <p className="font-semibold text-text-primary text-xs">Обновить тариф</p>
+                                        <div className="p-1.5 bg-accent-blue/20 rounded-lg group-hover:bg-accent-blue/30 transition-colors duration-300">
+                                            <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p className="text-body-small text-text-secondary text-xs opacity-80 text-left">Лимит проектов исчерпан</p>
+                                </div>
+                            </button>
+                        )}
                         <Link
                             href={route('tasks.create')}
                             className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-green/5 transition-all duration-300 hover:shadow-glow-green border border-border-color hover:border-accent-green/30"
@@ -297,15 +338,34 @@ export default function Dashboard({ auth, stats, projects, telegram }) {
                         </div>
                         <h3 className="text-heading-4 text-text-secondary mb-3">Нет проектов</h3>
                         <p className="text-body-small text-text-muted mb-6">Создайте первый проект для начала работы</p>
-                        <Link
-                            href={route('projects.create')}
-                            className="btn btn-primary inline-flex items-center"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Создать проект
-                        </Link>
+                        {canCreateProject ? (
+                            <Link
+                                href={route('projects.create')}
+                                className="btn btn-primary inline-flex items-center"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Создать проект
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setLimitError({
+                                        type: 'projects',
+                                        limit: subscriptionInfo.projects_limit,
+                                        plan: subscriptionInfo.name
+                                    });
+                                    setShowLimitModal(true);
+                                }}
+                                className="btn btn-primary inline-flex items-center"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Обновить тариф
+                            </button>
+                        )}
                     </div>
                 )}
 
