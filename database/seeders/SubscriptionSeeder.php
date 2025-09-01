@@ -43,7 +43,7 @@ class SubscriptionSeeder extends Seeder
             [
                 'name' => 'Команда + ИИ',
                 'slug' => 'team-ai',
-                'price' => 399,
+                'price' => 999,
                 'description' => 'Расширенный тариф с доступом к продвинутым возможностям ИИ',
                 'max_projects' => -1, // неограничено
                 'max_members_per_project' => -1, // неограничено

@@ -105,7 +105,7 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
                                     <span className="text-text-primary font-medium block">Тариф "Команда + ИИ"</span>
                                     <span className="text-text-secondary text-sm">Все возможности + 50 запросов к ИИ в день</span>
                                 </div>
-                                <span className="text-accent-purple font-bold">399₽/чел</span>
+                                <span className="text-accent-purple font-bold">999₽/чел</span>
                             </div>
                         </div>
                     </div>

@@ -46,7 +46,7 @@ const PricingSection = ({ registerRef }) => {
         },
         {
             name: 'Команда + ИИ',
-            price: '399 ₽',
+                            price: '999 ₽',
             priceDescription: 'за человека в месяц',
             description: 'Максимальная продуктивность с ИИ',
             features: [
