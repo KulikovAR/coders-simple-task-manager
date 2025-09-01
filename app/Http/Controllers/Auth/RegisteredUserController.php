@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Subscription;
+use App\Models\SubscriptionUserLimit;
+use App\Services\SubscriptionService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +18,12 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
+    protected SubscriptionService $subscriptionService;
+    
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
     /**
      * Display the registration view.
      */
@@ -40,6 +49,18 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+        
+        // Назначаем пользователю бесплатный тариф
+        $freeSubscription = Subscription::where('slug', 'free')->first();
+        if ($freeSubscription) {
+            $this->subscriptionService->assignSubscriptionToUser($user, $freeSubscription);
+        }
+        
+        // Создаем запись для отслеживания использования хранилища
+        SubscriptionUserLimit::create([
+            'user_id' => $user->id,
+            'storage_used_bytes' => 0
         ]);
 
         event(new Registered($user));

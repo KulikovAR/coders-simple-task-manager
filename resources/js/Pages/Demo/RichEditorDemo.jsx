@@ -15,14 +15,7 @@ export default function RichEditorDemo() {
         { id: 5, name: 'Сергей Козлов', email: 'sergey@example.com' },
     ];
 
-    // Отладочная информация о демо-пользователях
-    console.log('RichEditorDemo - demoUsers:', demoUsers);
-
     const handleMentionSelect = (user) => {
-        console.log('RichEditorDemo - Упомянут пользователь:', user);
-        console.log('RichEditorDemo - User name:', user?.name);
-        console.log('RichEditorDemo - User email:', user?.email);
-        console.log('RichEditorDemo - User id:', user?.id);
         // Здесь можно добавить логику уведомления
     };
 
@@ -44,7 +37,7 @@ export default function RichEditorDemo() {
                     <h2 className="text-xl font-semibold text-text-primary mb-4">
                         Редактор
                     </h2>
-                    
+
                     <RichTextEditor
                         value={content}
                         onChange={setContent}
@@ -70,7 +63,7 @@ export default function RichEditorDemo() {
                                 Загрузить тест
                             </button>
                         </div>
-                        
+
                         <button
                             onClick={() => setShowPreview(!showPreview)}
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"

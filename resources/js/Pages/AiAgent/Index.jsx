@@ -1,9 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import AiMessageRenderer from '@/Components/AiMessageRenderer';
 import PaymentModal from '@/Components/PaymentModal';
+import { SUBSCRIPTION_PLANS } from '@/Constants/SubscriptionPlans';
 
 export default function AiAgentIndex({ auth, conversations, stats }) {
     const [messages, setMessages] = useState([]);
@@ -77,6 +78,23 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
 
             const result = await response.json();
 
+            // Проверяем, не превышен ли лимит запросов к ИИ
+            if (!response.ok && response.status === 403 && result.error) {
+                const errorMessage = {
+                    id: Date.now() + 1,
+                    type: 'ai',
+                    content: result.error,
+                    success: false,
+                    timestamp: new Date().toISOString(),
+                };
+                
+                setMessages(prev => [...prev, errorMessage]);
+                
+                // Показываем модальное окно для оплаты
+                openPaymentModal();
+                return;
+            }
+
             // Сохраняем session_id для поддержания контекста
             if (result.session_id) {
                 setSessionId(result.session_id);
@@ -94,8 +112,11 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
 
             setMessages(prev => [...prev, aiMessage]);
             
-            // Проверяем, не исчерпан ли лимит бесплатных запросов
-            if (!result.success && result.message && result.message.includes('Бесплатный лимит в 9 запросов исчерпан')) {
+            // Проверяем, не исчерпан ли лимит запросов
+            if (!result.success && result.message && (
+                result.message.includes('лимит запросов') || 
+                result.message.includes('Превышен лимит запросов')
+            )) {
                 openPaymentModal();
             }
             

@@ -77,18 +77,9 @@ class FlexibleAiAgentService
             $user->update(['paid' => false]);
         }
 
-        // Проверка лимита бесплатных запросов
-        if (!$user->paid && $this->conversationService) {
-            $freeRequests = $this->conversationService->getUserFreeAiRequestsCount($user);
-            $freeLimit = (int) config('ai-agent.free.requests', 9);
-            if ($freeRequests >= $freeLimit) {
-                return [
-                    'success' => false,
-                    'message' => "Бесплатный лимит в {$freeLimit} запросов исчерпан. Для продолжения оплатите подписку.",
-                    'session_id' => $sessionId,
-                ];
-            }
-        }
+        // Проверка лимита запросов к ИИ
+        // Эта проверка больше не нужна, так как лимиты проверяются в AiAgentController
+        // через SubscriptionService::canUseAi()
 
         try {
             // Проверяем, является ли это подтверждением

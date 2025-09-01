@@ -28,11 +28,7 @@ export default function FilterPanel({
     children,
     className = ''
 }) {
-    // Отладочная информация
-    console.log('FilterPanel render:', { isVisible, filtersCount: filters.length });
-    
     if (!isVisible) {
-        console.log('FilterPanel: not visible, returning null');
         return null;
     }
 
@@ -47,7 +43,7 @@ export default function FilterPanel({
                     Очистить все
                 </button>
             </div>
-            
+
             <div className="space-y-4">
                 {/* Поиск */}
                 {searchConfig && (

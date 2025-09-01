@@ -2,16 +2,32 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
+import LimitExceededModal from '@/Components/LimitExceededModal';
 
-export default function Show({ auth, project }) {
+export default function Show({ auth, project, flash, canAddMember, subscriptionInfo }) {
     const [showAddMember, setShowAddMember] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [limitError, setLimitError] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         role: 'member',
     });
+    
+    // Проверяем наличие ошибки о превышении лимита в flash-сообщениях
+    useEffect(() => {
+        // Проверяем наличие данных о превышении лимита
+        if (flash?.limitExceeded) {
+            setLimitError({
+                type: flash.limitExceeded.type,
+                limit: flash.limitExceeded.limit,
+                plan: flash.limitExceeded.plan
+            });
+            setShowLimitModal(true);
+        }
+    }, [flash]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -231,12 +247,28 @@ export default function Show({ auth, project }) {
                 <div className="card">
                     <div className="card-header">
                         <h3 className="card-title">Участники проекта ({1 + (project.members?.filter(member => member.user_id !== project.owner_id).length || 0)})</h3>
-                        <button
-                            onClick={() => setShowAddMember(!showAddMember)}
-                            className="btn btn-secondary btn-sm"
-                        >
-                            {showAddMember ? 'Отмена' : 'Добавить участника'}
-                        </button>
+                        {canAddMember ? (
+                            <button
+                                onClick={() => setShowAddMember(!showAddMember)}
+                                className="btn btn-secondary btn-sm"
+                            >
+                                {showAddMember ? 'Отмена' : 'Добавить участника'}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setLimitError({
+                                        type: 'members',
+                                        limit: subscriptionInfo.members_limit,
+                                        plan: subscriptionInfo.name
+                                    });
+                                    setShowLimitModal(true);
+                                }}
+                                className="btn btn-secondary btn-sm"
+                            >
+                                Обновить тариф
+                            </button>
+                        )}
                     </div>
 
                     {/* Форма добавления участника */}
@@ -410,6 +442,17 @@ export default function Show({ auth, project }) {
                 </div>
             </div>
 
+            {/* Модальное окно превышения лимита */}
+            {showLimitModal && limitError && (
+                <LimitExceededModal
+                    isOpen={showLimitModal}
+                    onClose={() => setShowLimitModal(false)}
+                    limitType={limitError.type}
+                    currentLimit={limitError.limit}
+                    currentPlan={limitError.plan}
+                />
+            )}
+            
             {/* Модальное окно подтверждения удаления */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">

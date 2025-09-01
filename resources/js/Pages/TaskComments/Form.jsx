@@ -21,7 +21,7 @@ export default function Form({ auth, comment, task }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         if (isEditing) {
             put(route('comments.update', comment.id), {
                 preserveScroll: true,
@@ -101,24 +101,19 @@ export default function Form({ auth, comment, task }) {
                                 </label>
                                 {(() => {
                                     // Собираем всех пользователей проекта
-                                    const projectUsers = task.project 
+                                    const projectUsers = task.project
                                         ? [
-                                            ...(task.project.owner ? [task.project.owner] : []), 
+                                            ...(task.project.owner ? [task.project.owner] : []),
                                             ...(task.project.users || [])
                                         ]
                                         // Убираем дубликаты по ID
-                                        .filter((user, index, array) => 
+                                        .filter((user, index, array) =>
                                             array.findIndex(u => u.id === user.id) === index
                                         )
                                         // Проверяем наличие необходимых полей
                                         .filter(user => user && user.id && user.name && user.email)
                                         : [];
-                                    
-                                    console.log('TaskComments/Form - task.project:', task.project);
-                                    console.log('TaskComments/Form - task.project.owner:', task.project?.owner);
-                                    console.log('TaskComments/Form - task.project.users:', task.project?.users);
-                                    console.log('TaskComments/Form - итоговые пользователи:', projectUsers);
-                                    
+
                                     return (
                                         <RichTextEditor
                                             value={data.content}
@@ -127,7 +122,6 @@ export default function Form({ auth, comment, task }) {
                                                 if (user && user.email) {
                                                     // Обновляем содержимое с упоминанием
                                                     const mention = `@${user.email}`;
-                                                    console.log('TaskComments/Form - Добавляем упоминание:', mention);
                                                 }
                                             }}
                                             users={projectUsers}
@@ -152,7 +146,7 @@ export default function Form({ auth, comment, task }) {
                                 >
                                     {processing ? 'Сохранение...' : (isEditing ? 'Сохранить' : 'Добавить комментарий')}
                                 </button>
-                                
+
                                 <Link
                                     href={route('tasks.show', task.id)}
                                     className="btn btn-secondary"

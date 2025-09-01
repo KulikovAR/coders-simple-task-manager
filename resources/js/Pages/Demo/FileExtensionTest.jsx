@@ -21,9 +21,7 @@ export default function FileExtensionTest({ auth }) {
 
     const insertTestFile = () => {
         if (!editor) return;
-        
-        console.log('Вставляем тестовый файл...');
-        
+
         try {
             const result = editor.chain().focus().setFileAttachment({
                 id: 'test-123',
@@ -33,8 +31,7 @@ export default function FileExtensionTest({ auth }) {
                 url: '/test-download',
                 description: 'Тестовый PDF документ'
             }).run();
-            
-            console.log('Результат вставки:', result);
+
         } catch (error) {
             console.error('Ошибка при вставке файла:', error);
         }
@@ -62,7 +59,7 @@ export default function FileExtensionTest({ auth }) {
                             <h3 className="text-lg font-medium mb-4">
                                 Тестирование FileExtension
                             </h3>
-                            
+
                             <div className="mb-6">
                                 <button
                                     onClick={insertTestFile}

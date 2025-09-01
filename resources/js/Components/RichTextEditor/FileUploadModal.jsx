@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import RichTextFileService from './RichTextFileService';
 import { X, Upload, File, AlertCircle, CheckCircle, HardDrive, Cloud, Zap, Eye, Trash2 } from 'lucide-react';
 
-export default function FileUploadModal({ 
-    isOpen, 
-    onClose, 
-    onFileUploaded, 
-    attachableType, 
+export default function FileUploadModal({
+    isOpen,
+    onClose,
+    onFileUploaded,
+    attachableType,
     attachableId,
-    onError 
+    onError
 }) {
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -19,7 +19,7 @@ export default function FileUploadModal({
     const [userStats, setUserStats] = useState(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [previewFile, setPreviewFile] = useState(null);
-    
+
     const fileInputRef = useRef(null);
     const dropRef = useRef(null);
     const fileService = new RichTextFileService();
@@ -49,7 +49,7 @@ export default function FileUploadModal({
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        
+
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             handleFiles(Array.from(e.dataTransfer.files));
         }
@@ -120,8 +120,8 @@ export default function FileUploadModal({
 
             try {
                 const result = await fileService.uploadFile(
-                    file, 
-                    attachableType, 
+                    file,
+                    attachableType,
                     attachableId,
                     ''
                 );
@@ -157,15 +157,12 @@ export default function FileUploadModal({
         const successfulUploads = results.filter(r => r.success);
         if (successfulUploads.length > 0) {
             const files = successfulUploads.map(r => r.file).filter(Boolean);
-            console.log('FileUploadModal: Отправляем файлы в onFileUploaded:', files);
-            console.log(`FileUploadModal: Успешно загружено ${files.length} файлов`);
-            
             // Показываем уведомление об успехе
             setShowSuccessMessage(true);
             setTimeout(() => setShowSuccessMessage(false), 3000);
-            
+
             onFileUploaded?.(files);
-            
+
             // Очищаем содержимое модалки после успешной загрузки
             setSelectedFiles([]);
             setUploadResults([]);
@@ -173,7 +170,7 @@ export default function FileUploadModal({
             setPreviewFile(null);
             setShowStats(false);
             setDragActive(false);
-            
+
             // Очищаем input файла, чтобы предотвратить повторную загрузку того же файла
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -192,12 +189,12 @@ export default function FileUploadModal({
             setPreviewFile(null);
             setShowStats(false);
             setDragActive(false);
-            
+
             // Очищаем input файла при закрытии модалки
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
-            
+
             onClose();
         }
     };
@@ -207,7 +204,7 @@ export default function FileUploadModal({
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
             {/* Затемнение фона с анимацией */}
-            <div 
+            <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
                 onClick={closeModal}
             />
@@ -256,7 +253,7 @@ export default function FileUploadModal({
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-40 bg-border-color rounded-full h-3 overflow-hidden">
-                                        <div 
+                                        <div
                                             className="h-full bg-gradient-to-r from-accent-blue to-accent-purple rounded-full transition-all duration-500 ease-out"
                                             style={{ width: `${userStats.used_percentage}%` }}
                                         />
@@ -291,8 +288,8 @@ export default function FileUploadModal({
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
                             className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
-                                dragActive 
-                                    ? 'border-accent-blue bg-secondary-bg scale-105 shadow-lg' 
+                                dragActive
+                                    ? 'border-accent-blue bg-secondary-bg scale-105 shadow-lg'
                                     : 'border-border-color hover:border-accent-blue hover:bg-secondary-bg'
                             }`}
                         >
@@ -300,29 +297,29 @@ export default function FileUploadModal({
                             {dragActive && (
                                 <div className="absolute inset-0 bg-accent-blue/5 animate-pulse rounded-2xl"></div>
                             )}
-                            
+
                             <div className="relative z-10">
                                 <div className={`inline-flex p-4 rounded-2xl mb-6 transition-all duration-300 ${
-                                    dragActive 
-                                        ? 'bg-gradient-to-r from-accent-blue to-accent-purple text-white scale-110' 
+                                    dragActive
+                                        ? 'bg-gradient-to-r from-accent-blue to-accent-purple text-white scale-110'
                                         : 'bg-secondary-bg text-text-secondary'
                                 }`}>
-                                    <Upload 
-                                        size={56} 
+                                    <Upload
+                                        size={56}
                                         className={`transition-all duration-300 ${
                                             dragActive ? 'animate-bounce' : ''
                                         }`}
                                     />
                                 </div>
-                                
+
                                 <h3 className="text-2xl font-bold text-text-primary mb-3">
                                     {dragActive ? 'Отпустите файлы здесь!' : 'Перетащите файлы сюда'}
                                 </h3>
-                                
+
                                 <p className="text-text-secondary mb-6 text-lg">
                                     Поддерживаются документы, архивы, аудио, видео и изображения до 50MB
                                 </p>
-                                
+
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
@@ -331,7 +328,7 @@ export default function FileUploadModal({
                                     <Cloud className="inline mr-2" size={20} />
                                     Выбрать файлы
                                 </button>
-                                
+
                                 <input
                                     ref={fileInputRef}
                                     type="file"
@@ -352,7 +349,7 @@ export default function FileUploadModal({
                                 </h3>
                                 <div className="grid gap-4">
                                     {selectedFiles.map((file, index) => (
-                                        <div 
+                                        <div
                                             key={index}
                                             className="group relative p-4 bg-secondary-bg rounded-xl border border-border-color hover:border-accent-blue transition-all duration-300 hover:shadow-lg"
                                         >
@@ -405,11 +402,11 @@ export default function FileUploadModal({
                                 </h3>
                                 <div className="space-y-3">
                                     {uploadResults.map((result, index) => (
-                                        <div 
+                                        <div
                                             key={index}
                                             className={`p-4 rounded-xl border transition-all duration-300 ${
-                                                result.success 
-                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' 
+                                                result.success
+                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
                                                     : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
                                             }`}
                                         >
@@ -421,8 +418,8 @@ export default function FileUploadModal({
                                                 )}
                                                 <div className="flex-1">
                                                     <p className={`font-medium ${
-                                                        result.success 
-                                                            ? 'text-green-800 dark:text-green-200' 
+                                                        result.success
+                                                            ? 'text-green-800 dark:text-green-200'
                                                             : 'text-red-800 dark:text-red-200'
                                                     }`}>
                                                         {result.success ? 'Успешно загружен' : 'Ошибка загрузки'}: {result.originalFile.name}
@@ -477,7 +474,7 @@ export default function FileUploadModal({
                                     </span>
                                 </div>
                                 <div className="w-full bg-border-color rounded-full h-3 overflow-hidden">
-                                    <div 
+                                    <div
                                         className="h-full bg-gradient-to-r from-accent-blue to-accent-purple rounded-full transition-all duration-300 ease-out"
                                         style={{ width: `${uploadProgress}%` }}
                                     />

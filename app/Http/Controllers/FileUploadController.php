@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FileUpload\StoreFileRequest;
 use App\Models\FileAttachment;
 use App\Services\FileUploadService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,8 @@ use Inertia\Inertia;
 class FileUploadController extends Controller
 {
     public function __construct(
-        private FileUploadService $fileUploadService
+        private FileUploadService $fileUploadService,
+        private SubscriptionService $subscriptionService
     ) {}
 
     /**
@@ -33,11 +35,19 @@ class FileUploadController extends Controller
                 $attachableId = (int) $attachableId;
             }
 
-            // Проверяем лимит пользователя
-            if (!$this->fileUploadService->checkUserFileLimit(Auth::id(), $file->getSize())) {
+            // Получаем текущего пользователя
+            $user = Auth::user();
+            
+            // Проверяем лимит пользователя по тарифу
+            if (!$this->subscriptionService->canUploadFile($user, $file->getSize())) {
+                $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+                $limitText = $subscriptionInfo['storage_limit'] === -1 ? 
+                    'Неограниченно' : 
+                    "{$subscriptionInfo['storage_limit']} ГБ";
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Превышен лимит на файлы. Максимум: 500MB'
+                    'message' => "Превышен лимит на файлы. Доступно: {$limitText}. Использовано: {$subscriptionInfo['storage_used']} ГБ"
                 ], 422);
             }
 
@@ -48,6 +58,9 @@ class FileUploadController extends Controller
                 $attachableId,
                 $description
             );
+            
+            // Обновляем счетчик использованного места
+            $this->subscriptionService->processFileUpload($user, $file->getSize());
 
             return response()->json([
                 'success' => true,
@@ -139,7 +152,15 @@ class FileUploadController extends Controller
                 ], 403);
             }
 
+            // Получаем размер файла перед удалением
+            $fileSize = $attachment->file_size;
+            
+            // Удаляем файл
             $this->fileUploadService->deleteFile($attachment);
+            
+            // Обновляем счетчик использованного места
+            $user = Auth::user();
+            $this->subscriptionService->processFileDelete($user, $fileSize);
 
             return response()->json([
                 'success' => true,
@@ -160,21 +181,47 @@ class FileUploadController extends Controller
     public function userStats()
     {
         try {
-            $userId = Auth::id();
-            $totalSize = $this->fileUploadService->getUserTotalFileSize($userId);
-            $maxSize = 500 * 1024 * 1024; // 500MB
-            $usedPercentage = ($totalSize / $maxSize) * 100;
-
+            $user = Auth::user();
+            
+            // Получаем информацию о тарифе пользователя
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+            
+            // Получаем текущий размер файлов пользователя
+            $totalSize = 0;
+            if ($user->subscriptionLimit) {
+                $totalSize = $user->subscriptionLimit->storage_used_bytes;
+            }
+            
+            // Определяем максимальный размер в зависимости от тарифа
+            $maxSize = $subscriptionInfo['storage_limit'] === -1 
+                ? PHP_INT_MAX 
+                : $subscriptionInfo['storage_limit'] * 1024 * 1024 * 1024; // ГБ в байты
+            
+            // Вычисляем процент использования
+            $usedPercentage = $maxSize > 0 ? min(100, ($totalSize / $maxSize) * 100) : 0;
+            if ($subscriptionInfo['storage_limit'] === -1) {
+                $usedPercentage = 0; // Для безлимитного тарифа показываем 0%
+            }
+            
+            // Форматируем размеры для отображения
+            $totalSizeFormatted = $this->fileUploadService->formatFileSize($totalSize);
+            $maxSizeFormatted = $subscriptionInfo['storage_limit'] === -1 
+                ? 'Неограниченно' 
+                : $this->fileUploadService->formatFileSize($maxSize);
+            
             return response()->json([
                 'success' => true,
                 'data' => [
                     'total_size' => $totalSize,
-                    'total_size_formatted' => $this->fileUploadService->formatFileSize($totalSize),
+                    'total_size_formatted' => $totalSizeFormatted,
                     'max_size' => $maxSize,
-                    'max_size_formatted' => $this->fileUploadService->formatFileSize($maxSize),
+                    'max_size_formatted' => $maxSizeFormatted,
                     'used_percentage' => round($usedPercentage, 2),
                     'remaining_size' => $maxSize - $totalSize,
-                    'remaining_size_formatted' => $this->fileUploadService->formatFileSize($maxSize - $totalSize),
+                    'remaining_size_formatted' => $subscriptionInfo['storage_limit'] === -1 
+                        ? 'Неограниченно' 
+                        : $this->fileUploadService->formatFileSize($maxSize - $totalSize),
+                    'subscription_name' => $subscriptionInfo['name'],
                 ],
                 'message' => 'Статистика получена'
             ]);

@@ -9,6 +9,7 @@ import FeaturesSection from '@/Components/Landing/FeaturesSection';
 import AiAssistantSection from '@/Components/Landing/AiAssistantSection';
 import ScreenshotsSection from '@/Components/Landing/ScreenshotsSection';
 import BenefitsSection from '@/Components/Landing/BenefitsSection';
+import PricingSection from '@/Components/Landing/PricingSection';
 import CtaSection from '@/Components/Landing/CtaSection';
 import Footer from '@/Components/Landing/Footer';
 
@@ -125,6 +126,12 @@ export default function Landing({ auth }) {
                                 >
                                     Преимущества
                                 </button>
+                                <button
+                                    onClick={() => navClick('pricing')}
+                                    className={`${activeSection === 'pricing' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'pricing' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                >
+                                    Тарифы
+                                </button>
                                 <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
                                     Поддержка
                                 </a>
@@ -165,6 +172,9 @@ export default function Landing({ auth }) {
                                 </button>
                                 <button onClick={() => navClick('benefits')} className={`text-left ${activeSection === 'benefits' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
                                     Преимущества
+                                </button>
+                                <button onClick={() => navClick('pricing')} className={`text-left ${activeSection === 'pricing' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
+                                    Тарифы
                                 </button>
                                 <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
                                     Поддержка
@@ -216,11 +226,10 @@ export default function Landing({ auth }) {
                         registerRef={(ref) => registerSection('benefits', ref)}
                     />
 
-                    {/* Секция призыва к действию */}
-                    {/*<CtaSection*/}
-                    {/*    auth={auth}*/}
-                    {/*    registerRef={(ref) => registerSection('cta', ref)}*/}
-                    {/*/>*/}
+                    {/* Секция тарифов */}
+                    <PricingSection
+                        registerRef={(ref) => registerSection('pricing', ref)}
+                    />
                 </main>
 
                 {/* Футер */}

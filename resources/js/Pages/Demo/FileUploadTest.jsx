@@ -12,12 +12,10 @@ export default function FileUploadTest() {
 
     const handleSave = () => {
         setSavedContent(content);
-        console.log('Сохраненный контент:', content);
     };
 
     const handleLoad = () => {
         setContent(savedContent);
-        console.log('Загруженный контент:', savedContent);
     };
 
     return (
@@ -27,7 +25,7 @@ export default function FileUploadTest() {
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
                             <h1 className="text-2xl font-bold mb-6">Тест загрузки файлов в RichTextEditor</h1>
-                            
+
                             <div className="mb-6">
                                 <h2 className="text-lg font-semibold mb-2">Инструкции:</h2>
                                 <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
