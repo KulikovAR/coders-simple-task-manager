@@ -323,7 +323,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                                     project: result.task.project || task.project,
                                     // Обновляем поля статуса для совместимости, приводим к числу для единообразия
                                     status_id: parseInt(result.task.status_id || result.task.status?.id || task.status_id),
-                                    sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : (result.task.sprint?.id ? parseInt(result.task.sprint.id) : task.sprint_id),
+                                    sprint_id: result.task.sprint_id ? parseInt(result.task.sprint_id) : (result.task.sprint?.id ? parseInt(result.task.sprint.id) : null),
                                     assignee_id: result.task.assignee_id ? parseInt(result.task.assignee_id) : (result.task.assignee?.id ? parseInt(result.task.assignee.id) : task.assignee_id),
                                     project_id: parseInt(result.task.project_id || result.task.project?.id || task.project_id)
                                 }

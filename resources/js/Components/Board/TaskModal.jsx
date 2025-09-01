@@ -354,7 +354,7 @@ export default function TaskModal({
                                 // Обновляем связанные объекты
                                 status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
                                 assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
-                                sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : selectedTask.sprint,
+                                sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
                             };
                             setSelectedTask(updatedTask);
 

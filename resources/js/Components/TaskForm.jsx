@@ -215,7 +215,7 @@ const [hasChanges, setHasChanges] = useState(false);
 
     // Перезагружаем статусы при изменении спринта
     useEffect(() => {
-        if (data.project_id && data.sprint_id !== '') {
+        if (data.project_id) {
             const sprintParam = data.sprint_id ? `?sprint_id=${data.sprint_id}` : '';
             fetch(route('tasks.project.statuses', data.project_id) + sprintParam, {
                 headers: {
@@ -339,7 +339,11 @@ const [hasChanges, setHasChanges] = useState(false);
             // Откладываем автосохранение до загрузки зависимых данных
             return;
         } else if (key === 'sprint_id') {
-            // При смене спринта ждем обновления статусов
+            // При смене спринта запускаем автосохранение после небольшой задержки
+            // чтобы дать время useEffect обновить статусы
+            setTimeout(() => {
+                triggerAutoSave(newData);
+            }, 100);
             return;
         }
 

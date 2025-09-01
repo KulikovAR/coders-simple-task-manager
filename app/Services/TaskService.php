@@ -206,12 +206,12 @@ class TaskService
         }
 
         $updateData = [
-            'sprint_id' => $data['sprint_id'] ?? $task->sprint_id,
+            'sprint_id' => array_key_exists('sprint_id', $data) ? ($data['sprint_id'] ?: null) : $task->sprint_id,
             'title' => $data['title'] ?? $task->title,
             'description' => $processedDescription ? $processedDescription['html'] : ($data['description'] ?? $task->description),
             'result' => $processedResult ? $processedResult['html'] : ($data['result'] ?? $task->result),
             'merge_request' => $data['merge_request'] ?? $task->merge_request,
-            'assignee_id' => $data['assignee_id'] ?? $task->assignee_id,
+            'assignee_id' => array_key_exists('assignee_id', $data) ? ($data['assignee_id'] ?: null) : $task->assignee_id,
             'priority' => $data['priority'] ?? $task->priority,
             'tags' => array_key_exists('tags', $data) ? TagHelper::normalize($data['tags']) : $task->tags,
         ];

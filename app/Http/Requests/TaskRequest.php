@@ -21,7 +21,7 @@ class TaskRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:65535',
             'priority' => 'nullable|in:low,medium,high',
-            'sprint_id' => 'nullable|exists:sprints,id',
+            'sprint_id' => 'nullable|string',
             'assignee_id' => 'nullable|exists:users,id',
             'deadline' => 'nullable|date',
             'result' => 'nullable|string|max:65535',
@@ -65,6 +65,14 @@ class TaskRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
+            // Валидация sprint_id
+            if ($this->filled('sprint_id') && $this->sprint_id !== '') {
+                $sprintExists = \App\Models\Sprint::where('id', $this->sprint_id)->exists();
+                if (!$sprintExists) {
+                    $validator->errors()->add('sprint_id', 'Выбранный спринт не существует.');
+                }
+            }
+
             // Контекстная валидация статуса
             if ($this->filled('status_id')) {
                 $project = null;
@@ -76,7 +84,7 @@ class TaskRequest extends FormRequest
                 }
 
                 // Получаем спринт если указан
-                if ($this->filled('sprint_id') && $project) {
+                if ($this->filled('sprint_id') && $this->sprint_id !== '' && $project) {
                     $sprint = $project->sprints()->find($this->sprint_id);
                 }
 
