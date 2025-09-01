@@ -165,6 +165,19 @@ export default function FileUploadModal({
             setTimeout(() => setShowSuccessMessage(false), 3000);
             
             onFileUploaded?.(files);
+            
+            // Очищаем содержимое модалки после успешной загрузки
+            setSelectedFiles([]);
+            setUploadResults([]);
+            setUploadProgress(0);
+            setPreviewFile(null);
+            setShowStats(false);
+            setDragActive(false);
+            
+            // Очищаем input файла, чтобы предотвратить повторную загрузку того же файла
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
 
         // Обновляем статистику
@@ -177,6 +190,14 @@ export default function FileUploadModal({
             setUploadResults([]);
             setUploadProgress(0);
             setPreviewFile(null);
+            setShowStats(false);
+            setDragActive(false);
+            
+            // Очищаем input файла при закрытии модалки
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+            
             onClose();
         }
     };
