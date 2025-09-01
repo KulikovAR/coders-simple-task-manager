@@ -5,7 +5,7 @@ import { getStatusClass, getStatusLabel, getPriorityColor, getPriorityLabel, get
 import TaskComments from '@/Components/TaskComments';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
 
-export default function Show({ auth, task }) {
+export default function Show({ auth, task, boardUrl }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const getPriorityText = (priority) => {
@@ -111,6 +111,15 @@ export default function Show({ auth, task }) {
                             <span className="hidden sm:inline">К списку</span>
                             <span className="sm:hidden">Список</span>
                         </Link>
+                        {boardUrl && (
+                            <Link
+                                href={boardUrl}
+                                className="btn btn-secondary text-center"
+                            >
+                                <span className="hidden sm:inline">В доску</span>
+                                <span className="sm:hidden">Доска</span>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

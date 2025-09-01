@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\BoardUrlHelper;
 use App\Http\Requests\TaskRequest;
 use App\Models\Project;
 use App\Models\Task;
@@ -161,7 +162,10 @@ class TaskController extends Controller
             ]);
         }
 
-        return Inertia::render('Tasks/Show', compact('task'));
+        // Формируем ссылку на доску проекта с фильтрацией по спринту
+        $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+
+        return Inertia::render('Tasks/Show', compact('task', 'boardUrl'));
     }
 
     public function edit(Task $task)
