@@ -57,6 +57,6 @@ return [
 
     'free' => [
         // Количество бесплатных запросов к ИИ (для paid = false)
-        'requests' => env('AI_AGENT_FREE_REQUESTS', 9),
+        'requests' => env('AI_AGENT_FREE_REQUESTS', 5),
     ],
 ]; 

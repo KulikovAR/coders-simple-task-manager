@@ -46,7 +46,13 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
             break;
         case 'ai':
             title = 'Достигнут лимит запросов к ИИ';
-            description = `В вашем тарифе "${currentPlan}" доступно ${currentLimit} запросов к ИИ.`;
+            if (currentPlan === 'Бесплатный') {
+                description = `В вашем тарифе доступно 5 запросов к ИИ-ассистенту в месяц.`;
+            } else if (currentPlan === 'Команда') {
+                description = `В вашем тарифе доступно 5 запросов к ИИ-ассистенту в месяц.`;
+            } else {
+                description = `В вашем тарифе "${currentPlan}" доступно ${currentLimit} запросов к ИИ.`;
+            }
             limitText = 'запросов к ИИ';
             break;
         default:
@@ -87,9 +93,9 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
                             <div className="flex items-center justify-between">
                                 <div>
                                     <span className="text-text-primary font-medium block">Тариф "Команда"</span>
-                                    <span className="text-text-secondary text-sm">Неограниченное количество проектов и участников</span>
+                                    <span className="text-text-secondary text-sm">Неограниченно проектов, участников и памяти</span>
                                 </div>
-                                <span className="text-accent-blue font-bold">199₽/мес</span>
+                                <span className="text-accent-blue font-bold">199₽/чел</span>
                             </div>
                         </div>
 
@@ -99,7 +105,7 @@ export default function LimitExceededModal({ isOpen, onClose, limitType, current
                                     <span className="text-text-primary font-medium block">Тариф "Команда + ИИ"</span>
                                     <span className="text-text-secondary text-sm">Все возможности + 50 запросов к ИИ в день</span>
                                 </div>
-                                <span className="text-accent-purple font-bold">399₽/мес</span>
+                                <span className="text-accent-purple font-bold">399₽/чел</span>
                             </div>
                         </div>
                     </div>

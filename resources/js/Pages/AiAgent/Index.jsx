@@ -112,7 +112,10 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
             setMessages(prev => [...prev, aiMessage]);
             
             // Проверяем, не исчерпан ли лимит бесплатных запросов
-            if (!result.success && result.message && result.message.includes('Бесплатный лимит в 9 запросов исчерпан')) {
+            if (!result.success && result.message && (
+                result.message.includes('Бесплатный лимит в 5 запросов исчерпан') || 
+                result.message.includes('Бесплатный лимит в 9 запросов исчерпан')
+            )) {
                 openPaymentModal();
             }
             

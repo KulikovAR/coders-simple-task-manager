@@ -80,7 +80,7 @@ class FlexibleAiAgentService
         // Проверка лимита бесплатных запросов
         if (!$user->paid && $this->conversationService) {
             $freeRequests = $this->conversationService->getUserFreeAiRequestsCount($user);
-            $freeLimit = (int) config('ai-agent.free.requests', 9);
+            $freeLimit = (int) config('ai-agent.free.requests', 5);
             if ($freeRequests >= $freeLimit) {
                 return [
                     'success' => false,
