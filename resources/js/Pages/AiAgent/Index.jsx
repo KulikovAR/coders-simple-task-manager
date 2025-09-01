@@ -77,6 +77,23 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
 
             const result = await response.json();
 
+            // Проверяем, не превышен ли лимит запросов к ИИ
+            if (!response.ok && response.status === 403 && result.error) {
+                const errorMessage = {
+                    id: Date.now() + 1,
+                    type: 'ai',
+                    content: result.error,
+                    success: false,
+                    timestamp: new Date().toISOString(),
+                };
+                
+                setMessages(prev => [...prev, errorMessage]);
+                
+                // Показываем модальное окно для оплаты
+                openPaymentModal();
+                return;
+            }
+
             // Сохраняем session_id для поддержания контекста
             if (result.session_id) {
                 setSessionId(result.session_id);

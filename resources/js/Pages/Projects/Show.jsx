@@ -2,16 +2,32 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import TaskContentRenderer from '@/Components/TaskContentRenderer';
+import LimitExceededModal from '@/Components/LimitExceededModal';
 
-export default function Show({ auth, project }) {
+export default function Show({ auth, project, flash }) {
     const [showAddMember, setShowAddMember] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [limitError, setLimitError] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         role: 'member',
     });
+    
+    // Проверяем наличие ошибки о превышении лимита в flash-сообщениях
+    useEffect(() => {
+        // Проверяем наличие данных о превышении лимита
+        if (flash?.limitExceeded) {
+            setLimitError({
+                type: flash.limitExceeded.type,
+                limit: flash.limitExceeded.limit,
+                plan: flash.limitExceeded.plan
+            });
+            setShowLimitModal(true);
+        }
+    }, [flash]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -410,6 +426,17 @@ export default function Show({ auth, project }) {
                 </div>
             </div>
 
+            {/* Модальное окно превышения лимита */}
+            {showLimitModal && limitError && (
+                <LimitExceededModal
+                    isOpen={showLimitModal}
+                    onClose={() => setShowLimitModal(false)}
+                    limitType={limitError.type}
+                    currentLimit={limitError.limit}
+                    currentPlan={limitError.plan}
+                />
+            )}
+            
             {/* Модальное окно подтверждения удаления */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">

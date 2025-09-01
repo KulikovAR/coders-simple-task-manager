@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\SubscriptionService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,15 +15,28 @@ use App\Services\TelegramService;
 
 class ProfileController extends Controller
 {
+    protected SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
      * Display the user's profile form.
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        $availableSubscriptions = $this->subscriptionService->getActiveSubscriptions();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
-            'user' => $request->user(),
+            'user' => $user,
+            'subscriptionInfo' => $subscriptionInfo,
+            'availableSubscriptions' => $availableSubscriptions,
         ]);
     }
 

@@ -14,6 +14,7 @@ use App\Services\TaskService;
 use App\Services\SprintService;
 use App\Services\CommentService;
 use App\Services\AiConversationService;
+use App\Services\SubscriptionService;
 use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,10 +23,12 @@ use Inertia\Inertia;
 class AiAgentController extends Controller
 {
     private FlexibleAiAgentService $aiAgentService;
+    private SubscriptionService $subscriptionService;
 
-    public function __construct()
+    public function __construct(SubscriptionService $subscriptionService)
     {
         $this->aiAgentService = $this->createFlexibleAiAgentService();
+        $this->subscriptionService = $subscriptionService;
     }
 
     /**
@@ -35,11 +38,23 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
+        
+        // Получаем информацию о лимитах запросов к ИИ
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        $aiRequestsRemaining = $user->getRemainingAiRequests();
 
         return Inertia::render('AiAgent/Index', [
             'user' => $user,
             'conversations' => $conversationService->getUserConversations($user, 5),
             'stats' => $conversationService->getUserStats($user),
+            'subscription' => [
+                'name' => $subscriptionInfo['name'],
+                'ai_requests_limit' => $subscriptionInfo['ai_requests_limit'],
+                'ai_requests_used' => $subscriptionInfo['ai_requests_used'],
+                'ai_requests_remaining' => $aiRequestsRemaining,
+                'ai_requests_period' => $subscriptionInfo['ai_requests_period'],
+                'ai_requests_reset_at' => $subscriptionInfo['ai_requests_reset_at'],
+            ],
         ]);
     }
 
@@ -56,8 +71,30 @@ class AiAgentController extends Controller
         $user = Auth::user();
         $message = $request->input('message');
         $sessionId = $request->input('session_id');
+        
+        // Проверяем, есть ли у пользователя доступные запросы к ИИ
+        if (!$this->subscriptionService->canUseAi($user)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
+                'subscription' => [
+                    'ai_requests_remaining' => $user->getRemainingAiRequests(),
+                    'ai_requests_reset_at' => $user->ai_requests_reset_at,
+                ]
+            ], 403);
+        }
 
+        // Обрабатываем запрос
         $result = $this->aiAgentService->processRequest($message, $user, $sessionId);
+        
+        // Увеличиваем счетчик использованных запросов
+        $this->subscriptionService->processAiUsage($user);
+        
+        // Добавляем информацию о лимитах в ответ
+        $result['subscription'] = [
+            'ai_requests_remaining' => $user->getRemainingAiRequests(),
+            'ai_requests_reset_at' => $user->ai_requests_reset_at,
+        ];
 
         return response()->json($result);
     }
@@ -156,10 +193,22 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
+        
+        // Получаем информацию о лимитах запросов к ИИ
+        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+        $aiRequestsRemaining = $user->getRemainingAiRequests();
 
         return response()->json([
             'success' => true,
             'stats' => $conversationService->getUserStats($user),
+            'subscription' => [
+                'name' => $subscriptionInfo['name'],
+                'ai_requests_limit' => $subscriptionInfo['ai_requests_limit'],
+                'ai_requests_used' => $subscriptionInfo['ai_requests_used'],
+                'ai_requests_remaining' => $aiRequestsRemaining,
+                'ai_requests_period' => $subscriptionInfo['ai_requests_period'],
+                'ai_requests_reset_at' => $subscriptionInfo['ai_requests_reset_at'],
+            ],
         ]);
     }
 

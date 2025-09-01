@@ -1,14 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProjectCard from '@/Components/ProjectCard';
 import FilterPanel from '@/Components/FilterPanel';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
 import PageHeader from '@/Components/PageHeader';
+import LimitExceededModal from '@/Components/LimitExceededModal';
 import { useFilters } from '@/utils/hooks/useFilters';
 
-export default function Index({ auth, projects, filters }) {
+export default function Index({ auth, projects, filters, flash }) {
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [limitError, setLimitError] = useState(null);
+    
     const {
         search,
         status,
@@ -26,6 +30,19 @@ export default function Index({ auth, projects, filters }) {
         'projects.index'
     );
 
+    // Проверяем наличие ошибки о превышении лимита в flash-сообщениях
+    useEffect(() => {
+        // Проверяем наличие данных о превышении лимита
+        if (flash?.limitExceeded) {
+            setLimitError({
+                type: flash.limitExceeded.type,
+                limit: flash.limitExceeded.limit,
+                plan: flash.limitExceeded.plan
+            });
+            setShowLimitModal(true);
+        }
+    }, [flash]);
+
     const handleStatusChange = (e) => {
         setStatus(e.target.value);
     };
@@ -40,6 +57,17 @@ export default function Index({ auth, projects, filters }) {
             <Head title="Проекты" />
 
             <div className="space-y-6">
+                {/* Модальное окно превышения лимита */}
+                {showLimitModal && limitError && (
+                    <LimitExceededModal
+                        isOpen={showLimitModal}
+                        onClose={() => setShowLimitModal(false)}
+                        limitType={limitError.type}
+                        currentLimit={limitError.limit}
+                        currentPlan={limitError.plan}
+                    />
+                )}
+                
                 {/* Заголовок и кнопки действий */}
                 <PageHeader
                     title="Проекты"

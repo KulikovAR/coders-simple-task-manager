@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Http\Requests\ProjectRequest;
 use App\Services\ProjectService;
+use App\Services\SubscriptionService;
 use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,8 @@ class ProjectController extends Controller
 {
     public function __construct(
         private ProjectService $projectService,
-        private TaskStatusService $taskStatusService
+        private TaskStatusService $taskStatusService,
+        private SubscriptionService $subscriptionService
     ) {}
 
     public function index(Request $request)
@@ -31,12 +33,46 @@ class ProjectController extends Controller
 
     public function create()
     {
+        $user = Auth::user();
+        
+        // Проверяем, может ли пользователь создать еще один проект
+        if (!$this->subscriptionService->canCreateProject($user)) {
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+            
+            // Возвращаем ошибку с дополнительными данными для модального окна
+            return back()->with([
+                'error' => "Достигнут лимит проектов для вашего тарифа ({$subscriptionInfo['projects_limit']}). Обновите тариф, чтобы создавать больше проектов.",
+                'limitExceeded' => [
+                    'type' => 'projects',
+                    'limit' => $subscriptionInfo['projects_limit'],
+                    'plan' => $subscriptionInfo['name']
+                ]
+            ]);
+        }
+        
         return Inertia::render('Projects/Form');
     }
 
     public function store(ProjectRequest $request)
     {
-        $project = $this->projectService->createProject($request->validated(), Auth::user());
+        $user = Auth::user();
+        
+        // Проверяем, может ли пользователь создать еще один проект
+        if (!$this->subscriptionService->canCreateProject($user)) {
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+            
+            // Возвращаем ошибку с дополнительными данными для модального окна
+            return back()->with([
+                'error' => "Достигнут лимит проектов для вашего тарифа ({$subscriptionInfo['projects_limit']}). Обновите тариф, чтобы создавать больше проектов.",
+                'limitExceeded' => [
+                    'type' => 'projects',
+                    'limit' => $subscriptionInfo['projects_limit'],
+                    'plan' => $subscriptionInfo['name']
+                ]
+            ]);
+        }
+        
+        $project = $this->projectService->createProject($request->validated(), $user);
 
         return redirect()->route('projects.show', $project)
             ->with('success', 'Проект успешно создан.');
@@ -137,7 +173,9 @@ class ProjectController extends Controller
 
     public function addMember(Request $request, Project $project)
     {
-        if (!$this->projectService->canUserManageProject(Auth::user(), $project)) {
+        $currentUser = Auth::user();
+        
+        if (!$this->projectService->canUserManageProject($currentUser, $project)) {
             abort(403, 'Доступ запрещен');
         }
 
@@ -150,6 +188,22 @@ class ProjectController extends Controller
 
         if ($project->members()->where('user_id', $user->id)->exists()) {
             return redirect()->back()->with('error', 'Пользователь уже является участником проекта.');
+        }
+        
+        // Проверяем лимит участников для проекта
+        $currentMembersCount = $project->members()->count() + 1; // +1 для владельца
+        if (!$this->subscriptionService->canAddMemberToProject($currentUser, $currentMembersCount)) {
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($currentUser);
+            
+            // Возвращаем ошибку с дополнительными данными для модального окна
+            return back()->with([
+                'error' => "Достигнут лимит участников для вашего тарифа ({$subscriptionInfo['members_limit']}). Обновите тариф, чтобы добавлять больше участников.",
+                'limitExceeded' => [
+                    'type' => 'members',
+                    'limit' => $subscriptionInfo['members_limit'],
+                    'plan' => $subscriptionInfo['name']
+                ]
+            ]);
         }
 
         $this->projectService->addMember($project, $user, $request->role ?? 'member');

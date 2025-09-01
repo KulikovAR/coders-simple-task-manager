@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -28,6 +30,10 @@ class User extends Authenticatable
         'email_notifications',
         'telegram_chat_id',
         'deadline_notification_time',
+        'subscription_id',
+        'subscription_expires_at',
+        'ai_requests_used',
+        'ai_requests_reset_at',
     ];
 
     /**
@@ -55,6 +61,9 @@ class User extends Authenticatable
             'email_notifications' => 'boolean',
             'telegram_chat_id' => 'string',
             'deadline_notification_time' => 'datetime',
+            'subscription_expires_at' => 'datetime',
+            'ai_requests_used' => 'integer',
+            'ai_requests_reset_at' => 'datetime',
         ];
     }
 
@@ -93,5 +102,55 @@ class User extends Authenticatable
         return $this->belongsToMany(Project::class, 'project_members')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
+    }
+
+    public function subscriptionLimit(): HasOne
+    {
+        return $this->hasOne(SubscriptionUserLimit::class);
+    }
+
+    public function getRemainingAiRequests(): int
+    {
+        if (!$this->subscription) {
+            return 0;
+        }
+
+        // Если период сброса прошел, сбрасываем счетчик
+        if ($this->ai_requests_reset_at && $this->ai_requests_reset_at < now()) {
+            $this->ai_requests_used = 0;
+            $this->updateAiRequestsResetDate();
+            $this->save();
+        }
+
+        return max(0, $this->subscription->ai_requests_limit - $this->ai_requests_used);
+    }
+
+    public function updateAiRequestsResetDate(): void
+    {
+        if (!$this->subscription) {
+            return;
+        }
+
+        if ($this->subscription->ai_requests_period === 'daily') {
+            $this->ai_requests_reset_at = now()->addDay();
+        } else {
+            $this->ai_requests_reset_at = now()->addMonth();
+        }
+    }
+
+    public function incrementAiRequestsUsed(): void
+    {
+        $this->ai_requests_used++;
+        $this->save();
+    }
+
+    public function hasAvailableAiRequests(): bool
+    {
+        return $this->getRemainingAiRequests() > 0;
     }
 }

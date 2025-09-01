@@ -7,7 +7,7 @@ import UpdateProfileInformationForm from './Partials/UpdateProfileInformationFor
 import PaymentModal from '@/Components/PaymentModal';
 import { useState } from 'react';
 
-export default function Edit({ auth, mustVerifyEmail, status, user }) {
+export default function Edit({ auth, mustVerifyEmail, status, user, subscriptionInfo, availableSubscriptions }) {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const handlePay = () => {
@@ -18,8 +18,8 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
         setShowPaymentModal(false);
     };
 
-    const isPaid = user?.paid && (!user?.expires_at || new Date(user.expires_at) > new Date());
-    const expiresAt = user?.expires_at ? new Date(user.expires_at).toLocaleDateString() : null;
+    const hasActiveSubscription = subscriptionInfo && subscriptionInfo.name !== 'Нет активного тарифа';
+    const expiresAt = subscriptionInfo?.expires_at ? new Date(subscriptionInfo.expires_at).toLocaleDateString() : null;
 
     return (
         <AuthenticatedLayout
@@ -70,52 +70,98 @@ export default function Edit({ auth, mustVerifyEmail, status, user }) {
                                 Тариф
                             </div>
                             <div className="flex flex-col gap-3 mb-4">
-                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${!isPaid ? 'border-green-500 bg-green-500/10' : 'border-border-color'}`} style={{ color: !isPaid ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                                    <span className="font-bold">Базовый</span>
-                                    <span className="ml-auto text-gray-400">0 ₽/мес</span>
-                                    {!isPaid && (
-                                        <>
-                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
-                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
+                                {availableSubscriptions && availableSubscriptions.map(subscription => (
+                                    <div key={subscription.id} className={`rounded px-3 py-3 flex items-center gap-3 border ${subscriptionInfo?.name === subscription.name ? 'border-green-500 bg-green-500/10' : 'border-border-color'}`} 
+                                         style={{ color: subscriptionInfo?.name === subscription.name ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                                        <span className="font-bold">{subscription.name}</span>
+                                        <span className="ml-auto text-gray-400">{subscription.price > 0 ? `${subscription.price} ₽/мес` : 'Бесплатно'}</span>
+                                        {subscriptionInfo?.name === subscription.name && (
+                                            <>
+                                                <span className="ml-2 text-green-400 font-semibold flex items-center">
+                                                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
+                                                </span>
+                                                <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mb-4">
+                                <div className="font-semibold text-base mb-2">Информация о вашем тарифе</div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="bg-secondary-bg border border-border-color rounded p-3">
+                                        <div className="font-semibold mb-1">Проекты</div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Использовано:</span>
+                                            <span className="font-bold">{subscriptionInfo?.projects_used || 0}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Лимит:</span>
+                                            <span className="font-bold">{subscriptionInfo?.projects_limit === -1 ? 'Не ограничено' : subscriptionInfo?.projects_limit || 0}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-secondary-bg border border-border-color rounded p-3">
+                                        <div className="font-semibold mb-1">Участники</div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Лимит на проект:</span>
+                                            <span className="font-bold">{subscriptionInfo?.members_limit === -1 ? 'Не ограничено' : subscriptionInfo?.members_limit || 0}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-secondary-bg border border-border-color rounded p-3">
+                                        <div className="font-semibold mb-1">Хранилище</div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Использовано:</span>
+                                            <span className="font-bold">{subscriptionInfo?.storage_used || 0} ГБ</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Лимит:</span>
+                                            <span className="font-bold">{subscriptionInfo?.storage_limit === -1 ? 'Не ограничено' : `${subscriptionInfo?.storage_limit || 0} ГБ`}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-secondary-bg border border-border-color rounded p-3">
+                                        <div className="font-semibold mb-1">Запросы к ИИ</div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Использовано:</span>
+                                            <span className="font-bold">{subscriptionInfo?.ai_requests_used || 0}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span>Лимит:</span>
+                                            <span className="font-bold">
+                                                {subscriptionInfo?.ai_requests_limit || 0} 
+                                                {subscriptionInfo?.ai_requests_period === 'daily' ? ' в день' : ' в месяц'}
                                             </span>
-                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
-                                        </>
-                                    )}
-                                </div>
-                                <div className={`rounded px-3 py-3 flex items-center gap-3 border ${isPaid ? 'border-blue-500 bg-blue-500/10' : 'border-border-color'}`} style={{ color: isPaid ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                                    <span className="font-bold">ИИ-ассистент</span>
-                                    <span className="ml-auto text-gray-400">2000 ₽/мес или 20000 ₽/год</span>
-                                    {isPaid && (
-                                        <>
-                                            <span className="ml-2 text-green-400 font-semibold flex items-center">
-                                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>Активен
-                                            </span>
-                                            <span className="ml-2 text-xs text-gray-400">Ваш тариф</span>
-                                        </>
-                                    )}
+                                        </div>
+                                        {subscriptionInfo?.ai_requests_reset_at && (
+                                            <div className="flex items-center justify-between text-xs text-gray-400 mt-1">
+                                                <span>Сброс счетчика:</span>
+                                                <span>{new Date(subscriptionInfo.ai_requests_reset_at).toLocaleDateString()}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            <div className="mb-2 text-xs text-gray-400">
-                                <div><span className="font-bold">Базовый</span>: доступ к проектам и задачам, без ИИ-ассистента.</div>
-                                <div><span className="font-bold">ИИ-ассистент</span>: генерация задач, советы и помощь от ИИ.</div>
-                            </div>
+                            
                             <div className="mb-2">
                                 <span className="font-semibold">Статус подписки:</span>{' '}
-                                {isPaid ? (
+                                {hasActiveSubscription ? (
                                     <span className="text-green-400 font-bold">Активна{expiresAt && ` до ${expiresAt}`}</span>
                                 ) : (
                                     <span className="text-red-400 font-bold">Неактивна</span>
                                 )}
                             </div>
-                            {!isPaid && (
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handlePay}
-                                >
-                                    Оплатить подписку
-                                </button>
-                            )}
-                            {isPaid && expiresAt && (
+                            
+                            <button
+                                className="btn btn-primary"
+                                onClick={handlePay}
+                            >
+                                {hasActiveSubscription ? 'Изменить тариф' : 'Выбрать тариф'}
+                            </button>
+                            
+                            {hasActiveSubscription && expiresAt && (
                                 <div className="text-xs text-gray-500 mt-2">Подписка продлевается вручную</div>
                             )}
                         </div>
