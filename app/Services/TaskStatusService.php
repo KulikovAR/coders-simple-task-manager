@@ -66,20 +66,36 @@ class TaskStatusService
      */
     public function createCustomSprintStatuses(Sprint $sprint): Collection
     {
+        // Проверяем, есть ли уже кастомные статусы для этого спринта
+        $existingStatuses = TaskStatus::where('sprint_id', $sprint->id)->get();
+        if ($existingStatuses->isNotEmpty()) {
+            return $existingStatuses;
+        }
+
         $projectStatuses = $this->getProjectStatuses($sprint->project);
         $customStatuses = new \Illuminate\Database\Eloquent\Collection();
 
         DB::transaction(function () use ($sprint, $projectStatuses, &$customStatuses) {
             foreach ($projectStatuses as $projectStatus) {
-                $customStatus = TaskStatus::create([
-                    'project_id' => $sprint->project_id,
-                    'sprint_id' => $sprint->id,
-                    'name' => $projectStatus->name,
-                    'order' => $projectStatus->order,
-                    'color' => $projectStatus->color,
-                    'is_custom' => true,
-                ]);
-                $customStatuses->push($customStatus);
+                // Проверяем, не существует ли уже статус с таким именем для этого спринта
+                $existingStatus = TaskStatus::where('project_id', $sprint->project_id)
+                    ->where('sprint_id', $sprint->id)
+                    ->where('name', $projectStatus->name)
+                    ->first();
+
+                if (!$existingStatus) {
+                    $customStatus = TaskStatus::create([
+                        'project_id' => $sprint->project_id,
+                        'sprint_id' => $sprint->id,
+                        'name' => $projectStatus->name,
+                        'order' => $projectStatus->order,
+                        'color' => $projectStatus->color,
+                        'is_custom' => true,
+                    ]);
+                    $customStatuses->push($customStatus);
+                } else {
+                    $customStatuses->push($existingStatus);
+                }
             }
         });
 
@@ -109,15 +125,26 @@ class TaskStatusService
                         'color' => $statusData['color'],
                     ]);
                 } else {
-                    // Создаем новый статус
-                    $status = TaskStatus::create([
-                        'project_id' => $sprint->project_id,
-                        'sprint_id' => $sprint->id,
-                        'name' => $statusData['name'],
-                        'order' => $order,
-                        'color' => $statusData['color'],
-                        'is_custom' => true,
-                    ]);
+                    // Проверяем, не существует ли уже статус с таким именем для этого спринта
+                    $existingStatus = TaskStatus::where('project_id', $sprint->project_id)
+                        ->where('sprint_id', $sprint->id)
+                        ->where('name', $statusData['name'])
+                        ->first();
+
+                    if (!$existingStatus) {
+                        // Создаем новый статус
+                        $status = TaskStatus::create([
+                            'project_id' => $sprint->project_id,
+                            'sprint_id' => $sprint->id,
+                            'name' => $statusData['name'],
+                            'order' => $order,
+                            'color' => $statusData['color'],
+                            'is_custom' => true,
+                        ]);
+                    } else {
+                        // Используем существующий статус
+                        $status = $existingStatus;
+                    }
                 }
                 $updatedStatuses->push($status);
             }
@@ -172,15 +199,26 @@ class TaskStatusService
                         'color' => $statusData['color'],
                     ]);
                 } else {
-                    // Создаем новый статус
-                    $status = TaskStatus::create([
-                        'project_id' => $project->id,
-                        'sprint_id' => null,
-                        'name' => $statusData['name'],
-                        'order' => $order,
-                        'color' => $statusData['color'],
-                        'is_custom' => false,
-                    ]);
+                    // Проверяем, не существует ли уже статус с таким именем для этого проекта
+                    $existingStatus = TaskStatus::where('project_id', $project->id)
+                        ->whereNull('sprint_id')
+                        ->where('name', $statusData['name'])
+                        ->first();
+
+                    if (!$existingStatus) {
+                        // Создаем новый статус
+                        $status = TaskStatus::create([
+                            'project_id' => $project->id,
+                            'sprint_id' => null,
+                            'name' => $statusData['name'],
+                            'order' => $order,
+                            'color' => $statusData['color'],
+                            'is_custom' => false,
+                        ]);
+                    } else {
+                        // Используем существующий статус
+                        $status = $existingStatus;
+                    }
                 }
                 $updatedStatuses->push($status);
             }
