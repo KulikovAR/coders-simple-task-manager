@@ -169,7 +169,7 @@ export default function WebhooksIndex({ project, webhooks = [], auth }) {
 
                         <div className="space-y-6 text-sm text-text-secondary">
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Что такое Webhook?</h4>
+                                <h4 className="font-semibold text-text-primary mb-2">🔗 Что такое Webhook?</h4>
                                 <p className="mb-3">
                                     Webhook — это способ автоматической отправки данных о событиях в вашем проекте
                                     на внешние сервисы в реальном времени. Например, когда создается новая задача,
@@ -178,7 +178,7 @@ export default function WebhooksIndex({ project, webhooks = [], auth }) {
                             </div>
 
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Как это работает?</h4>
+                                <h4 className="font-semibold text-text-primary mb-2">⚙️ Как это работает?</h4>
                                 <ol className="list-decimal list-inside space-y-1 mb-3">
                                     <li>Создайте webhook и укажите URL вашего сервиса</li>
                                     <li>Выберите события, на которые должен реагировать webhook</li>
@@ -188,32 +188,136 @@ export default function WebhooksIndex({ project, webhooks = [], auth }) {
                             </div>
 
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Пример использования</h4>
-                                <div className="bg-secondary-bg rounded-lg p-4 font-mono text-xs">
-                                    <div className="text-accent-green">// URL вашего сервиса</div>
-                                    <div className="text-text-primary">https://your-service.com/webhook</div>
-                                    <br />
-                                    <div className="text-accent-green">// Данные, которые получит ваш сервис</div>
-                                    <div className="text-text-primary">{`{
+                                <h4 className="font-semibold text-text-primary mb-2">💻 Для разработчиков</h4>
+                                
+                                <div className="bg-secondary-bg rounded-lg p-4 mb-4">
+                                    <h5 className="font-semibold text-text-primary mb-2">📋 Формат запроса</h5>
+                                    <div className="font-mono text-xs">
+                                        <div className="text-accent-green">POST https://your-server.com/webhook</div>
+                                        <div className="text-accent-green">Content-Type: application/json</div>
+                                        <div className="text-accent-green">X-Webhook-Signature: sha256=abc123...</div>
+                                        <div className="text-accent-green">X-Webhook-Event: task.created</div>
+                                        <br />
+                                        <div className="text-text-primary">{`{
   "event": "task.created",
+  "timestamp": "2024-01-15T10:30:00Z",
   "data": {
-    "task": { "id": 123, "title": "Новая задача" },
-    "project": { "id": 22, "name": "Мой проект" }
-  },
-  "timestamp": "2024-01-01T12:00:00Z"
+    "task": {
+      "id": 123,
+      "title": "Новая задача",
+      "description": "Описание задачи",
+      "status": "В работе",
+      "assignee": "user@example.com",
+      "project": "Мой проект"
+    }
+  }
 }`}</div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-secondary-bg rounded-lg p-4 mb-4">
+                                    <h5 className="font-semibold text-text-primary mb-2">🔐 Проверка подписи (PHP)</h5>
+                                    <div className="font-mono text-xs">
+                                        <div className="text-accent-green">{`<?php
+$payload = file_get_contents('php://input');
+$signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '';
+$secret = 'your-webhook-secret';
+
+$expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+
+if (!hash_equals($expectedSignature, $signature)) {
+    http_response_code(401);
+    exit('Unauthorized');
+}
+
+$data = json_decode($payload, true);
+// Обработка webhook'а
+?>`}</div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-secondary-bg rounded-lg p-4 mb-4">
+                                    <h5 className="font-semibold text-text-primary mb-2">🔐 Проверка подписи (Node.js)</h5>
+                                    <div className="font-mono text-xs">
+                                        <div className="text-accent-green">{`const crypto = require('crypto');
+
+app.post('/webhook', (req, res) => {
+  const payload = JSON.stringify(req.body);
+  const signature = req.headers['x-webhook-signature'];
+  const secret = 'your-webhook-secret';
+  
+  const expectedSignature = 'sha256=' + 
+    crypto.createHmac('sha256', secret)
+          .update(payload)
+          .digest('hex');
+  
+  if (signature !== expectedSignature) {
+    return res.status(401).send('Unauthorized');
+  }
+  
+  // Обработка webhook'а
+  console.log('Webhook received:', req.body);
+  res.status(200).send('OK');
+});`}</div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-secondary-bg rounded-lg p-4">
+                                    <h5 className="font-semibold text-text-primary mb-2">⚡ Настройки производительности</h5>
+                                    <ul className="text-text-secondary text-sm space-y-1">
+                                        <li>• <strong>Timeout:</strong> Максимальное время ожидания ответа (по умолчанию 30 сек)</li>
+                                        <li>• <strong>Retry Count:</strong> Количество повторных попыток при ошибке (по умолчанию 3)</li>
+                                        <li>• <strong>Queue:</strong> Webhook'и обрабатываются асинхронно в очереди</li>
+                                        <li>• <strong>Rate Limiting:</strong> Автоматическое ограничение частоты запросов</li>
+                                    </ul>
                                 </div>
                             </div>
 
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Популярные интеграции</h4>
-                                <ul className="list-disc list-inside space-y-1">
-                                    <li><strong>Slack:</strong> Уведомления в каналы при создании задач</li>
-                                    <li><strong>Discord:</strong> Автоматические сообщения в сервер</li>
-                                    <li><strong>Telegram:</strong> Уведомления в бот</li>
-                                    <li><strong>Email:</strong> Отправка писем через внешний сервис</li>
-                                    <li><strong>CRM:</strong> Синхронизация с системами управления клиентами</li>
+                                <h4 className="font-semibold text-text-primary mb-2">📊 Мониторинг и логи</h4>
+                                <p className="mb-2">
+                                    Все отправленные webhook'и логируются в системе. Вы можете просматривать:
+                                </p>
+                                <ul className="text-text-secondary text-sm space-y-1">
+                                    <li>• Статус отправки (успех/ошибка)</li>
+                                    <li>• Время выполнения запроса</li>
+                                    <li>• Код ответа от вашего сервера</li>
+                                    <li>• Количество попыток</li>
+                                    <li>• Детали ошибок</li>
                                 </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold text-text-primary mb-2">🚀 Примеры использования</h4>
+                                <div className="space-y-3">
+                                    <div className="bg-secondary-bg rounded-lg p-3">
+                                        <h5 className="font-semibold text-text-primary text-sm mb-1">📱 Slack уведомления</h5>
+                                        <p className="text-text-secondary text-xs">Отправка уведомлений в Slack канал при создании задач</p>
+                                    </div>
+                                    <div className="bg-secondary-bg rounded-lg p-3">
+                                        <h5 className="font-semibold text-text-primary text-sm mb-1">📊 Аналитика</h5>
+                                        <p className="text-text-secondary text-xs">Сбор метрик в внешние системы аналитики</p>
+                                    </div>
+                                    <div className="bg-secondary-bg rounded-lg p-3">
+                                        <h5 className="font-semibold text-text-primary text-sm mb-1">🔄 Синхронизация</h5>
+                                        <p className="text-text-secondary text-xs">Синхронизация данных с CRM или другими системами</p>
+                                    </div>
+                                    <div className="bg-secondary-bg rounded-lg p-3">
+                                        <h5 className="font-semibold text-text-primary text-sm mb-1">📧 Email маркетинг</h5>
+                                        <p className="text-text-secondary text-xs">Автоматическая отправка email при завершении задач</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold text-text-primary mb-2">🔒 Безопасность</h4>
+                                <p className="mb-2">
+                                    Каждый webhook имеет секретный ключ для проверки подлинности запросов. 
+                                    Используйте его для валидации входящих данных.
+                                </p>
+                                <p className="text-text-secondary text-sm">
+                                    Все запросы отправляются через HTTPS с подписью в заголовке X-Webhook-Signature.
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -29,7 +29,7 @@ const HeroSection = ({ isLoaded, auth, registerRef }) => {
                     </span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-                    Проекты, спринты, канбан-доска, теги, дедлайны, комментарии с упоминаниями и мгновенные уведомления в Email и Telegram. С ИИ-ассистентом, который всё делает по команде.
+                    Проекты, спринты, канбан-доска, теги, дедлайны, комментарии с упоминаниями, мгновенные уведомления в Email и Telegram, webhook интеграции. С ИИ-ассистентом, который всё делает по команде.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                     {auth.user ? (

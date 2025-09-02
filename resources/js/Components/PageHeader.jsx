@@ -78,7 +78,13 @@ export default function PageHeader({
                                     className={buttonClasses}
                                 >
                                     {action.icon && (
-                                        <span className="mr-2 text-sm sm:text-base">{action.icon}</span>
+                                        typeof action.icon === 'string' && action.icon.startsWith('M') ? (
+                                            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
+                                            </svg>
+                                        ) : (
+                                            <span className="mr-2 text-sm sm:text-base">{action.icon}</span>
+                                        )
                                     )}
                                     <span className="text-sm sm:text-base">{action.text}</span>
                                 </Link>
@@ -102,7 +108,13 @@ export default function PageHeader({
                                 type="button"
                             >
                                 {action.icon && (
-                                    <span className="mr-2 text-sm sm:text-base">{action.icon}</span>
+                                    typeof action.icon === 'string' && action.icon.startsWith('M') ? (
+                                        <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
+                                        </svg>
+                                    ) : (
+                                        <span className="mr-2 text-sm sm:text-base">{action.icon}</span>
+                                    )
                                 )}
                                 <span className="text-sm sm:text-base">{action.text}</span>
                             </button>

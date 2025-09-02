@@ -65,17 +65,17 @@ export default function Landing({ auth }) {
         <>
             <Head>
                 <title>379ТМ — Таск‑менеджер класса Pro с ИИ</title>
-                <meta name="description" content="Проекты, спринты, канбан‑доска, теги, дедлайны, комментарии с упоминаниями, email и Telegram‑уведомления. Плюс ИИ‑ассистент, который всё делает по вашей команде." />
+                <meta name="description" content="Проекты, спринты, канбан‑доска, теги, дедлайны, комментарии с упоминаниями, email и Telegram‑уведомления, webhook интеграции. Плюс ИИ‑ассистент, который всё делает по вашей команде." />
                 <meta name="keywords" content="таск менеджер, управление проектами, спринты, канбан, ИИ ассистент, уведомления, Telegram, email" />
                 <meta name="robots" content="index, follow" />
                 <meta property="og:title" content="379ТМ — Таск‑менеджер класса Pro с ИИ" />
-                <meta property="og:description" content="Проекты, спринты, канбан, теги, дедлайны, комментарии и ИИ‑ассистент." />
+                <meta property="og:description" content="Проекты, спринты, канбан, теги, дедлайны, комментарии, webhook интеграции и ИИ‑ассистент." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
                 <meta property="og:image" content="/og-image.jpg" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="379ТМ — Таск‑менеджер класса Pro с ИИ" />
-                <meta name="twitter:description" content="Проекты, спринты, канбан, теги, дедлайны, комментарии и ИИ‑ассистент." />
+                <meta name="twitter:description" content="Проекты, спринты, канбан, теги, дедлайны, комментарии, webhook интеграции и ИИ‑ассистент." />
                 <meta name="twitter:image" content="/og-image.jpg" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#0a0a0a" />
@@ -85,7 +85,7 @@ export default function Landing({ auth }) {
                         "@context": "https://schema.org",
                         "@type": "SoftwareApplication",
                         "name": "379ТМ",
-                        "description": "Таск‑менеджер класса Pro с ИИ. Проекты, спринты, канбан, теги, дедлайны и уведомления.",
+                        "description": "Таск‑менеджер класса Pro с ИИ. Проекты, спринты, канбан, теги, дедлайны, уведомления и webhook интеграции.",
                         "applicationCategory": "BusinessApplication",
                         "operatingSystem": "Web",
                         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
