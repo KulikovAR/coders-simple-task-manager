@@ -256,8 +256,8 @@ const [hasChanges, setHasChanges] = useState(false);
                         setData('status_id', firstStatus);
                         // Запускаем автосохранение после обновления статуса
                         triggerAutoSave(newData);
-                    } else {
-                        // Если статус валиден для нового спринта, сохраняем изменения
+                    } else if (data.sprint_id !== task?.sprint_id) {
+                        // Если спринт изменился, но статус остался валидным, все равно сохраняем
                         triggerAutoSave(data);
                     }
                 })
@@ -346,11 +346,9 @@ const [hasChanges, setHasChanges] = useState(false);
             // Откладываем автосохранение до загрузки зависимых данных
             return;
         } else if (key === 'sprint_id') {
-            // При смене спринта запускаем автосохранение после небольшой задержки
-            // чтобы дать время useEffect обновить статусы
-            setTimeout(() => {
-                triggerAutoSave(newData);
-            }, 100);
+            // При смене спринта не запускаем автосохранение здесь,
+            // так как useEffect для sprint_id сам вызовет triggerAutoSave
+            // после обновления статусов
             return;
         }
 
