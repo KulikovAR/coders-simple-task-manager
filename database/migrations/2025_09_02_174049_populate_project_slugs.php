@@ -13,13 +13,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        $projects = Project::whereNull('slug')->orWhere('slug', '')->get();
-        foreach ($projects as $project) {
-            $project->slug = SlugHelper::generateUniqueSlug($project->name, Project::class, $project->id);
-            $project->save();
+        // Проверяем, существует ли поле slug
+        if (!Schema::hasColumn('projects', 'slug')) {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->string('slug')->nullable()->after('name');
+            });
         }
 
+        // Заполняем slug для всех проектов
+        $projects = Project::all();
+        foreach ($projects as $project) {
+            if (empty($project->slug)) {
+                $project->slug = SlugHelper::generateUniqueSlug($project->name, Project::class, $project->id);
+                $project->save();
+            }
+        }
+
+        // Добавляем уникальное ограничение
         Schema::table('projects', function (Blueprint $table) {
             $table->string('slug')->unique()->change();
         });
