@@ -21,12 +21,10 @@ class EnumsContextProvider implements ContextProviderInterface
         ];
     }
 
-
-
     private function getCommentTypes(): array
     {
         $types = [];
-        
+
         foreach (CommentType::cases() as $type) {
             $types[] = [
                 'name' => $type->value,
@@ -37,9 +35,9 @@ class EnumsContextProvider implements ContextProviderInterface
                 'is_special' => $type->isSpecial(),
             ];
         }
-        
+
         return $types;
     }
 
 
-} 
+}

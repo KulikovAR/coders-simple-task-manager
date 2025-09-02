@@ -222,6 +222,9 @@ class TaskService
             $updateData['deadline'] = $task->deadline;
         }
 
+        // Проверяем, изменился ли спринт
+        $sprintChanged = array_key_exists('sprint_id', $data) && $data['sprint_id'] != $task->sprint_id;
+        $newSprintId = array_key_exists('sprint_id', $data) ? ($data['sprint_id'] ?: null) : $task->sprint_id;
 
         if (isset($data['status_id']) && $data['status_id']) {
             // Проверяем, что status_id принадлежит проекту задачи
@@ -234,6 +237,12 @@ class TaskService
             $status = $task->project->taskStatuses()->where('name', $data['status'])->first();
             if ($status) {
                 $updateData['status_id'] = $status->id;
+            }
+        } elseif ($sprintChanged) {
+            // Если спринт изменился, но статус не указан, присваиваем первый статус нового спринта
+            $firstStatusId = $this->getFirstStatusForSprintChange($task, $newSprintId);
+            if ($firstStatusId) {
+                $updateData['status_id'] = $firstStatusId;
             }
         }
 
@@ -288,5 +297,28 @@ class TaskService
     {
         $projectService = app(ProjectService::class);
         return $projectService->canUserAccessProject($user, $task->project);
+    }
+
+    /**
+     * Получить первый статус для задачи при смене спринта
+     */
+    public function getFirstStatusForSprintChange(Task $task, ?int $newSprintId): ?int
+    {
+        $taskStatusService = app(TaskStatusService::class);
+        
+        if ($newSprintId) {
+            // Задача перемещается в спринт - используем статусы спринта
+            $sprint = \App\Models\Sprint::find($newSprintId);
+            if ($sprint) {
+                $firstStatus = $taskStatusService->getFirstStatusForContext($task->project, $sprint);
+                return $firstStatus?->id;
+            }
+        } else {
+            // Задача перемещается из спринта в проект - используем статусы проекта
+            $firstStatus = $taskStatusService->getFirstStatusForContext($task->project);
+            return $firstStatus?->id;
+        }
+        
+        return null;
     }
 }

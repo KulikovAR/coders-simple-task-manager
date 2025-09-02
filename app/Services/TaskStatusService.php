@@ -391,4 +391,13 @@ class TaskStatusService
 
         return $stats;
     }
+
+    /**
+     * Получить первый статус для контекста (проект или спринт)
+     */
+    public function getFirstStatusForContext(Project $project, ?Sprint $sprint = null): ?TaskStatus
+    {
+        $statuses = $this->getContextualStatuses($project, $sprint);
+        return $statuses->sortBy('order')->first();
+    }
 }

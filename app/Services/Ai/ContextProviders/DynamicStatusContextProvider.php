@@ -63,7 +63,6 @@ class DynamicStatusContextProvider implements ContextProviderInterface
 
                 $context['project_statuses'][$project->name] = $projectStatuses;
 
-                // Собираем все уникальные названия статусов
                 foreach ($statuses as $status) {
                     if (!in_array($status->name, $context['available_status_names'])) {
                         $context['available_status_names'][] = $status->name;

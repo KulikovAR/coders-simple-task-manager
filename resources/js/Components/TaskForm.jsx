@@ -242,8 +242,15 @@ const [hasChanges, setHasChanges] = useState(false);
 
                     setAvailableStatuses(loadedStatuses);
 
-                    // Сбрасываем выбранный статус, если он не принадлежит новому контексту
-                    if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
+                    // При смене спринта автоматически выбираем первый статус нового спринта
+                    if (data.sprint_id !== task?.sprint_id) {
+                        const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
+                        const newData = { ...data, status_id: firstStatus };
+                        setData('status_id', firstStatus);
+                        // Запускаем автосохранение после обновления статуса
+                        triggerAutoSave(newData);
+                    } else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
+                        // Сбрасываем выбранный статус, если он не принадлежит новому контексту
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
                         const newData = { ...data, status_id: firstStatus };
                         setData('status_id', firstStatus);

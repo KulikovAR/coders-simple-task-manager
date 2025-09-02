@@ -19,21 +19,19 @@ class UsersContextProvider implements ContextProviderInterface
             return [];
         }
 
-        // Получаем проекты пользователя (где он владелец или участник)
         $userProjectIds = Project::where('owner_id', $user->id)
             ->orWhereHas('members', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->pluck('id');
-        
-        // Получаем пользователей, которые имеют доступ к этим проектам
+
         $accessibleUsers = User::whereHas('projectMemberships', function($query) use ($userProjectIds) {
             $query->whereIn('project_id', $userProjectIds);
         })
         ->orWhereHas('ownedProjects', function($query) use ($userProjectIds) {
             $query->whereIn('id', $userProjectIds);
         })
-        ->orWhere('id', $user->id) // Включаем самого пользователя
+        ->orWhere('id', $user->id)
         ->distinct()
         ->get();
 
@@ -51,4 +49,4 @@ class UsersContextProvider implements ContextProviderInterface
             'current_user_name' => $user->name,
         ];
     }
-} 
+}
