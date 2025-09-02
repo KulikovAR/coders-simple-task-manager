@@ -31,7 +31,7 @@ export default function TaskModal({
 
         if (!selectedTask?.id) return;
 
-        const taskUrl = route('tasks.show', selectedTask.id);
+        const taskUrl = selectedTask.code ? route('tasks.show.by-code', selectedTask.code) : route('tasks.show', selectedTask.id);
         navigator.clipboard.writeText(taskUrl)
             .then(() => {
                 // Показываем временное уведомление, проверяя наличие элемента

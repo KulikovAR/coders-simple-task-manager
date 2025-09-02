@@ -18,7 +18,7 @@ export default function TaskCard({
         e.preventDefault();
         e.stopPropagation();
         
-        const taskUrl = route('tasks.show', task.id);
+        const taskUrl = task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id);
         navigator.clipboard.writeText(taskUrl)
             .then(() => {
                 // Показываем временное уведомление, проверяя наличие элемента
@@ -97,7 +97,7 @@ export default function TaskCard({
                             {/* Заголовок задачи */}
                             <h5 className="text-text-primary font-medium text-sm leading-tight truncate">
                                 <a
-                                    href={route('tasks.show', task.id)}
+                                    href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                                     className="hover:text-accent-blue transition-colors duration-200"
                                     onClick={(e) => e.stopPropagation()}
                                     target="_blank"
@@ -223,7 +223,7 @@ export default function TaskCard({
                         {/* Заголовок задачи */}
                         <h5 className="text-text-primary font-medium text-sm leading-tight truncate mb-1">
                             <a
-                                href={route('tasks.show', task.id)}
+                                href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                                 className="hover:text-accent-blue transition-colors duration-200"
                                 onClick={(e) => e.stopPropagation()}
                                 target="_blank"
@@ -343,7 +343,7 @@ export default function TaskCard({
             <div className="flex justify-between items-start mb-4">
                 <h5 className="text-text-primary font-semibold text-body leading-tight">
                     <a
-                        href={route('tasks.show', task.id)}
+                        href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                         className="hover:text-accent-blue transition-colors duration-200"
                         onClick={(e) => e.stopPropagation()}
                         target="_blank"

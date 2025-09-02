@@ -7,7 +7,6 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import Waves from '@/Components/Waves';
-import FlashMessages from '@/Components/FlashMessages';
 
 export default function Authenticated({ user, header, children, flash }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -235,7 +234,6 @@ export default function Authenticated({ user, header, children, flash }) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
                         {/* Отображаем flash-сообщения глобально */}
-                        <FlashMessages flash={flash} />
 
                         {children}
                     </div>

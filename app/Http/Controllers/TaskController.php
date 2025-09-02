@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\BoardUrlHelper;
+use App\Helpers\TaskCodeHelper;
 use App\Http\Requests\TaskRequest;
 use App\Models\Project;
 use App\Models\Task;
@@ -417,5 +418,93 @@ class TaskController extends Controller
 
         // Для обычных запросов возвращаем данные для Inertia
         return response()->json(['taskStatuses' => $taskStatuses->toArray()]);
+    }
+
+    /**
+     * Показать задачу по коду
+     */
+    public function showByCode(string $code, Request $request)
+    {
+        $task = TaskCodeHelper::findTaskByCode($code);
+        
+        if (!$task) {
+            abort(404, 'Задача не найдена');
+        }
+
+        return $this->show($task, $request);
+    }
+
+    /**
+     * Показать задачу в модалке на доске проекта по коду
+     */
+    public function showInBoardModal(Project $project, string $code, Request $request)
+    {
+        // Проверяем доступ к проекту
+        if (!$this->projectService->canUserAccessProject(Auth::user(), $project)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        $task = TaskCodeHelper::findTaskByCode($code);
+        
+        if (!$task) {
+            abort(404, 'Задача не найдена');
+        }
+
+        // Проверяем, что задача принадлежит данному проекту
+        if ($task->project_id !== $project->id) {
+            abort(404, 'Задача не найдена в данном проекте');
+        }
+
+        // Проверяем доступ к задаче
+        if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        // Загружаем все данные для доски (как в обычном методе board)
+        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
+
+        $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
+        $activeSprint = $sprints->where('status', 'active')->first();
+
+        $selectedSprintId = $request->get('sprint_id');
+        $selectedSprint = null;
+
+        // TODO отрефакторить
+        if ($selectedSprintId !== null) {
+            if ($selectedSprintId === 'none') {
+                $selectedSprintId = 'none';
+                $selectedSprint = null;
+            } else {
+                $selectedSprint = $project->sprints()->find($selectedSprintId);
+                if (!$selectedSprint) {
+                    $selectedSprintId = 'none';
+                }
+            }
+        } elseif ($activeSprint) {
+            $selectedSprintId = $activeSprint->id;
+            $selectedSprint = $activeSprint;
+        } else {
+            $selectedSprintId = 'none';
+        }
+
+        $taskStatuses = $this->taskStatusService->getContextualStatuses($project, $selectedSprint);
+        $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
+
+        // Загружаем полную информацию о задаче
+        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user', 'checklists']);
+
+        // Формируем ссылку на доску проекта с фильтрацией по спринту
+        $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+
+        return Inertia::render('Projects/Board', [
+            'project' => $project,
+            'tasks' => $project->tasks,
+            'taskStatuses' => $taskStatuses,
+            'sprints' => $sprints,
+            'members' => $members,
+            'selectedSprintId' => $selectedSprintId,
+            'hasCustomStatuses' => $selectedSprint && $this->taskStatusService->hasCustomStatuses($selectedSprint),
+            'modalTaskCode' => $code, // Передаем код задачи для открытия модалки
+        ]);
     }
 }

@@ -93,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
     Route::get('/projects/{project}/board', [App\Http\Controllers\ProjectController::class, 'board'])->name('projects.board');
+    Route::get('/projects/{project}/board/task/{code}', [App\Http\Controllers\TaskController::class, 'showInBoardModal'])->name('projects.board.task');
     Route::get('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'getMembers'])->name('projects.members');
     Route::post('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'addMember'])->name('projects.members.add');
     Route::delete('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'removeMember'])->name('projects.members.remove');
@@ -131,6 +132,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/tasks/{task}/priority', [App\Http\Controllers\TaskController::class, 'updatePriority'])->name('tasks.priority.update');
     Route::get('/projects/{project}/sprints-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectSprints'])->name('tasks.project.sprints');
     Route::get('/projects/{project}/statuses-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectStatuses'])->name('tasks.project.statuses');
+    
+    // Задачи по коду
+    Route::get('/tasks/code/{code}', [App\Http\Controllers\TaskController::class, 'showByCode'])->name('tasks.show.by-code');
 
     // Комментарии к задачам
     Route::get('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'index'])->name('tasks.comments.index');

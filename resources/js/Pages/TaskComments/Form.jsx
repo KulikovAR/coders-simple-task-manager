@@ -47,7 +47,7 @@ export default function Form({ auth, comment, task }) {
                         {isEditing ? 'Редактировать комментарий' : 'Добавить комментарий'}
                     </h2>
                     <Link
-                        href={route('tasks.show', task.id)}
+                        href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                         className="btn btn-secondary"
                     >
                         Отмена
@@ -148,7 +148,7 @@ export default function Form({ auth, comment, task }) {
                                 </button>
 
                                 <Link
-                                    href={route('tasks.show', task.id)}
+                                    href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                                     className="btn btn-secondary"
                                 >
                                     Отмена

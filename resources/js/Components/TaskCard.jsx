@@ -16,7 +16,7 @@ export default function TaskCard({ task }) {
                     </div>
                 )}
                 <Link
-                    href={route('tasks.show', task.id)}
+                    href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                     className="block group-hover:text-accent-blue transition-colors duration-200"
                 >
                     <h3 className="card-title mb-3 line-clamp-2 hover:text-accent-blue transition-colors duration-200">
@@ -100,7 +100,7 @@ export default function TaskCard({ task }) {
             {/* Кнопка "Подробнее" - всегда внизу */}
             <div className="mt-auto pt-4 border-t border-border-color">
                 <Link
-                    href={route('tasks.show', task.id)}
+                    href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                     className="btn btn-primary btn-sm w-full group-hover:shadow-glow-blue transition-all duration-300"
                 >
                     <span className="mr-2">Подробнее</span>

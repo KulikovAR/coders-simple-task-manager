@@ -31,7 +31,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [selectedTask, setSelectedTask] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
-    const [localTasks, setLocalTasks] = useState(tasks);
+    const [localTasks, setLocalTasks] = useState(tasks || []);
+    const [modalOpenedFromUrl, setModalOpenedFromUrl] = useState(false);
     const [dragOverStatusId, setDragOverStatusId] = useState(null);
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
@@ -51,15 +52,17 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
     // Обновляем локальные задачи при изменении props
     useEffect(() => {
-        // Нормализуем ID для корректного сравнения
-        const normalizedTasks = tasks.map(task => ({
-            ...task,
-            status_id: parseInt(task.status_id),
-            sprint_id: task.sprint_id ? parseInt(task.sprint_id) : task.sprint_id,
-            assignee_id: task.assignee_id ? parseInt(task.assignee_id) : task.assignee_id,
-            project_id: parseInt(task.project_id)
-        }));
-        setLocalTasks(normalizedTasks);
+        if (tasks) {
+            // Нормализуем ID для корректного сравнения
+            const normalizedTasks = tasks.map(task => ({
+                ...task,
+                status_id: parseInt(task.status_id),
+                sprint_id: task.sprint_id ? parseInt(task.sprint_id) : task.sprint_id,
+                assignee_id: task.assignee_id ? parseInt(task.assignee_id) : task.assignee_id,
+                project_id: parseInt(task.project_id)
+            }));
+            setLocalTasks(normalizedTasks);
+        }
     }, [tasks]);
 
     // Автоматически скрываем сообщение об успехе через 4 секунды
@@ -96,10 +99,74 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     // Дополнительная проверка состояния при изменении задач
     useEffect(() => {
         // Если draggedTask больше не существует в задачах, сбрасываем его
-        if (draggedTask && !localTasks.find(task => task.id === draggedTask.id)) {
+        if (draggedTask && localTasks && !localTasks.find(task => task.id === draggedTask.id)) {
             setDraggedTask(null);
         }
     }, [localTasks, draggedTask]);
+
+    // Обработка URL с кодом задачи для открытия модалки
+    useEffect(() => {
+        const url = window.location.pathname;
+        const taskCodeMatch = url.match(/\/projects\/\d+\/board\/task\/(.+)$/);
+        
+        if (taskCodeMatch && localTasks && localTasks.length > 0) {
+            const taskCode = taskCodeMatch[1];
+            const task = localTasks.find(t => t.code === taskCode);
+            
+            if (task) {
+                // Сразу устанавливаем состояние модалки и задачи
+                setSelectedTask(task);
+                setShowTaskModal(true);
+                setErrors({});
+                setModalOpenedFromUrl(true);
+                
+                // Применяем стили к body сразу (только если модалка еще не открыта)
+                if (!showTaskModal) {
+                    const scrollY = window.scrollY;
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = `-${scrollY}px`;
+                    document.body.style.width = '100%';
+                    document.body.classList.add('modal-open');
+                }
+                
+                // Загружаем полную информацию о задаче
+                if (task.id) {
+                    const taskUrl = task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id);
+                    fetch(taskUrl + '?modal=1', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.props && data.props.task) {
+                            setSelectedTask(prev => {
+                                // Если selectedTask уже null, возвращаем новую задачу
+                                if (!prev) {
+                                    return data.props.task;
+                                }
+                                // Иначе обновляем существующую задачу
+                                return {
+                                    ...prev,
+                                    ...data.props.task,
+                                    assignee: data.props.task.assignee || prev.assignee,
+                                    status: data.props.task.status || prev.status,
+                                    sprint: data.props.task.sprint || prev.sprint,
+                                    project: data.props.task.project || prev.project
+                                };
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки задачи:', error);
+                    });
+                }
+            }
+        }
+    }, [localTasks]);
 
     // Очистка таймеров при размонтировании компонента
     useEffect(() => {
@@ -125,7 +192,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
         if (task.id) {
             // Загружаем существующую задачу с комментариями
-            fetch(route('tasks.show', task.id) + '?modal=1', {
+            const taskUrl = task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id);
+            fetch(taskUrl + '?modal=1', {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
@@ -135,7 +203,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             .then(response => response.json())
             .then(data => {
                 if (data.props && data.props.task) {
-                    setSelectedTask(data.props.task);
+                    setSelectedTask(prev => {
+                        if (!prev) {
+                            return data.props.task;
+                        }
+                        return {
+                            ...prev,
+                            ...data.props.task,
+                            assignee: data.props.task.assignee || prev.assignee,
+                            status: data.props.task.status || prev.status,
+                            sprint: data.props.task.sprint || prev.sprint,
+                            project: data.props.task.project || prev.project
+                        };
+                    });
                 } else {
                     setSelectedTask(task);
                 }
@@ -152,12 +232,23 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(true);
         setErrors({});
 
-        // Блокируем скролл страницы и сохраняем текущую позицию
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = '100%';
-        document.body.classList.add('modal-open');
+        // Изменяем URL без перезагрузки страницы (только если мы не на правильной странице)
+        if (task.code) {
+            const currentUrl = window.location.pathname;
+            const expectedUrl = route('projects.board.task', { project: project.id, code: task.code });
+            if (currentUrl !== expectedUrl) {
+                window.history.pushState({}, '', expectedUrl);
+            }
+        }
+
+        // Блокируем скролл страницы и сохраняем текущую позицию (только если модалка еще не открыта)
+        if (!showTaskModal && !modalOpenedFromUrl) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.classList.add('modal-open');
+        }
     };
 
     const closeTaskModal = () => {
@@ -175,6 +266,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                 setShowTaskModal(false);
                 setSelectedTask(null);
                 setErrors({});
+                setModalOpenedFromUrl(false);
+                
+                // Восстанавливаем URL доски
+                const boardUrl = route('projects.board', project.id);
+                window.history.pushState({}, '', boardUrl);
+                
                 // Восстанавливаем скролл и позицию страницы
                 const scrollY = parseInt(document.body.style.top || '0');
                 document.body.style.position = '';
@@ -190,6 +287,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         setShowTaskModal(false);
         setSelectedTask(null);
         setErrors({});
+        setModalOpenedFromUrl(false);
+
+        // Восстанавливаем URL доски
+        const boardUrl = route('projects.board', project.id);
+        window.history.pushState({}, '', boardUrl);
 
         // Восстанавливаем скролл и позицию страницы
         const scrollY = parseInt(document.body.style.top || '0');
@@ -288,7 +390,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
 
             // Определяем URL и метод в зависимости от того, создаем или обновляем задачу
             const isUpdate = selectedTask?.id;
-            const url = isUpdate ? route('tasks.update', selectedTask.id) : route('tasks.store');
+            const url = isUpdate ? route('tasks.update', selectedTask?.id) : route('tasks.store');
 
             if (isUpdate) {
                 formData.append('_method', 'PUT');
@@ -312,7 +414,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     // Обновляем задачу в локальном состоянии
                     setLocalTasks(prevTasks =>
                         prevTasks.map(task =>
-                            task.id === selectedTask.id
+                            task.id === selectedTask?.id
                                 ? {
                                     ...task,
                                     ...result.task,
@@ -332,14 +434,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     );
 
                     // Обновляем выбранную задачу для отображения в модалке
-                    setSelectedTask(prev => ({
-                        ...prev,
-                        ...result.task,
-                        assignee: result.task.assignee || prev.assignee,
-                        status: result.task.status || prev.status,
-                        sprint: result.task.sprint || prev.sprint,
-                        project: result.task.project || prev.project
-                    }));
+                    setSelectedTask(prev => {
+                        if (!prev) {
+                            return result.task;
+                        }
+                        return {
+                            ...prev,
+                            ...result.task,
+                            assignee: result.task.assignee || prev.assignee,
+                            status: result.task.status || prev.status,
+                            sprint: result.task.sprint || prev.sprint,
+                            project: result.task.project || prev.project
+                        };
+                    });
                 } else {
                     // Нормализуем ID новой задачи и добавляем её в локальное состояние
                     const normalizedTask = {
@@ -707,7 +814,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     };
 
     // Фильтрация задач по спринту, исполнителю, тегам и поисковому запросу
-    const filteredTasks = localTasks.filter(task => {
+    const filteredTasks = (localTasks || []).filter(task => {
         let sprintOk = false;
         if (currentSprintId === 'none') {
             sprintOk = !task.sprint_id; // Показать только задачи без спринта

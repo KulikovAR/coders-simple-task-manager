@@ -12,7 +12,7 @@ export default function Index({ auth, task, comments }) {
                         Комментарии к задаче: {task.title}
                     </h2>
                     <Link
-                        href={route('tasks.show', task.id)}
+                        href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
                         className="btn btn-secondary"
                     >
                         Вернуться к задаче
