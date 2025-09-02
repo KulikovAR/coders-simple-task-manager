@@ -16,6 +16,7 @@ class Task extends Model
 
     protected $fillable = [
         'project_id',
+        'internal_id',
         'sprint_id',
         'title',
         'description',
@@ -74,12 +75,10 @@ class Task extends Model
     public function getCodeAttribute(): string
     {
         $project = $this->project;
-        if (!$project) return (string)$this->id;
+        if (!$project || !$this->internal_id) {
+            return (string)$this->id;
+        }
 
-        $name = $project->name;
-
-        $translit = TranslitHelper::translit($name);
-
-        return $translit . '-' . $this->id;
+        return $project->slug . '-' . $this->internal_id;
     }
 }

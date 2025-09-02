@@ -9,6 +9,7 @@ use App\Models\TaskStatus;
 use App\Models\User;
 use App\Services\HtmlContentService;
 use App\Helpers\TagHelper;
+use App\Helpers\TaskCodeHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -133,6 +134,7 @@ class TaskService
 
         $task = Task::create([
             'project_id' => $project->id,
+            'internal_id' => TaskCodeHelper::getNextInternalId($project->id),
             'sprint_id' => $data['sprint_id'] ?? null,
             'title' => $data['title'],
             'description' => $processedDescription ? $processedDescription['html'] : null,

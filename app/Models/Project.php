@@ -13,6 +13,7 @@ class Project extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'owner_id',
         'status',
@@ -55,5 +56,13 @@ class Project extends Model
         return $this->belongsToMany(User::class, 'project_members')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * Получить проект по slug
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }

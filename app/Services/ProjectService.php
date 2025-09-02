@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\TaskStatusType;
+use App\Helpers\SlugHelper;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\TaskStatus;
@@ -73,6 +74,7 @@ class ProjectService
 
         $project = Project::create([
             'name' => $data['name'],
+            'slug' => SlugHelper::generateUniqueSlug($data['name'], Project::class),
             'description' => $processedDescription['html'] ?? $data['description'] ?? null,
             'owner_id' => $user->id,
             'status' => $data['status'] ?? 'active',
@@ -80,7 +82,6 @@ class ProjectService
             'docs' => $data['docs'] ?? [],
         ]);
 
-        // Создаем стандартные статусы для проекта
         $this->taskStatusService->createDefaultProjectStatuses($project);
 
         return $project->load(['owner', 'members.user']);
@@ -88,7 +89,6 @@ class ProjectService
 
     public function updateProject(Project $project, array $data): Project
     {
-        // Обрабатываем HTML контент с изображениями
         $processedDescription = null;
         if (isset($data['description']) && $data['description'] !== $project->description) {
             $processedDescription = $this->htmlContentService->processContent($data['description'], [
@@ -97,13 +97,20 @@ class ProjectService
             ]);
         }
 
-        $project->update([
+        $updateData = [
             'name' => $data['name'] ?? $project->name,
             'description' => $processedDescription['html'] ?? $data['description'] ?? $project->description,
             'status' => $data['status'] ?? $project->status,
             'deadline' => $data['deadline'] ?? $project->deadline,
             'docs' => $data['docs'] ?? $project->docs,
-        ]);
+        ];
+
+        // Обновляем slug только если изменилось название
+        if (isset($data['name']) && $data['name'] !== $project->name) {
+            $updateData['slug'] = SlugHelper::generateUniqueSlug($data['name'], Project::class, $project->id);
+        }
+
+        $project->update($updateData);
 
         return $project->load(['owner', 'members.user']);
     }
@@ -111,10 +118,8 @@ class ProjectService
     public function deleteProject(Project $project): bool
     {
         return DB::transaction(function () use ($project) {
-            // Удаляем задачи проекта явно, чтобы избежать конфликта FK
             $project->tasks()->delete();
 
-            // После удаления задач каскадное удаление статусов пройдет без ошибок
             return $project->delete();
         });
     }
@@ -143,8 +148,6 @@ class ProjectService
 
     public function canUserManageProject(User $user, Project $project): bool
     {
-//        return $project->owner_id === $user->id;
-        // Временно
         return $project->owner_id === $user->id ||
             $project->members()->where('user_id', $user->id)
                 ->whereIn('role', ['member'])->exists();
