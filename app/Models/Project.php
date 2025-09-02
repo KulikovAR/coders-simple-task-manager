@@ -57,4 +57,9 @@ class Project extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(Webhook::class);
+    }
 }

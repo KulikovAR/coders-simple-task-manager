@@ -153,6 +153,14 @@ Route::middleware('auth')->group(function () {
 
     // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
+
+    // Webhook'и
+    Route::get('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'index'])->name('webhooks.index');
+    Route::post('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'store'])->name('webhooks.store');
+    Route::put('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'update'])->name('webhooks.update');
+    Route::delete('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'destroy'])->name('webhooks.destroy');
+    Route::post('/projects/{project}/webhooks/{webhook}/test', [App\Http\Controllers\WebhookController::class, 'test'])->name('webhooks.test');
+    Route::post('/projects/{project}/webhooks/{webhook}/toggle', [App\Http\Controllers\WebhookController::class, 'toggle'])->name('webhooks.toggle');
 });
 
 // ИИ-агент API (без CSRF)

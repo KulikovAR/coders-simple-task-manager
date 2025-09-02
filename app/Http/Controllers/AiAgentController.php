@@ -52,7 +52,7 @@ class AiAgentController extends Controller
                 'ai_requests_limit' => $subscriptionInfo['ai_requests_limit'],
                 'ai_requests_used' => $subscriptionInfo['ai_requests_used'],
                 'ai_requests_remaining' => $aiRequestsRemaining,
-                'ai_requests_period' => $subscriptionInfo['ai_requests_period'],
+                'ai_requests_period' => $subscriptionInfo['ai_requests_period'] ?? null,
                 'ai_requests_reset_at' => $subscriptionInfo['ai_requests_reset_at'],
             ],
         ])->with('subscriptionName', $subscriptionInfo['name']);
@@ -210,7 +210,7 @@ class AiAgentController extends Controller
                 'ai_requests_limit' => $subscriptionInfo['ai_requests_limit'],
                 'ai_requests_used' => $subscriptionInfo['ai_requests_used'],
                 'ai_requests_remaining' => $aiRequestsRemaining,
-                'ai_requests_period' => $subscriptionInfo['ai_requests_period'],
+                'ai_requests_period' => $subscriptionInfo['ai_requests_period'] ?? null,
                 'ai_requests_reset_at' => $subscriptionInfo['ai_requests_reset_at'],
             ],
         ]);

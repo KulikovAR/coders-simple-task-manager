@@ -17,8 +17,10 @@ class ProjectFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->words(3, true);
         return [
-            'name' => fake()->words(3, true),
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
             'description' => fake()->paragraph(),
             'owner_id' => User::factory(),
         ];

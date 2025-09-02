@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SprintController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Resources\ApiResponse;
 use App\Http\Controllers\TelegramController;
 
@@ -66,6 +67,17 @@ Route::middleware('auth')->group(function () {
         'update' => 'api.projects.tasks.comments.update',
         'destroy' => 'api.projects.tasks.comments.destroy',
     ]);
+    
+    // API роуты для webhook'ов
+    Route::get('projects/{project}/webhooks', [WebhookController::class, 'apiIndex'])->name('api.projects.webhooks.index');
+    Route::post('projects/{project}/webhooks', [WebhookController::class, 'apiStore'])->name('api.projects.webhooks.store');
+    Route::get('projects/{project}/webhooks/{webhook}', [WebhookController::class, 'show'])->name('api.projects.webhooks.show');
+    Route::put('projects/{project}/webhooks/{webhook}', [WebhookController::class, 'apiUpdate'])->name('api.projects.webhooks.update');
+    Route::delete('projects/{project}/webhooks/{webhook}', [WebhookController::class, 'apiDestroy'])->name('api.projects.webhooks.destroy');
+    Route::post('projects/{project}/webhooks/{webhook}/test', [WebhookController::class, 'apiTest'])->name('api.projects.webhooks.test');
+    Route::get('projects/{project}/webhooks/{webhook}/logs', [WebhookController::class, 'logs'])->name('api.projects.webhooks.logs');
+    Route::post('projects/{project}/webhooks/{webhook}/toggle', [WebhookController::class, 'apiToggle'])->name('api.projects.webhooks.toggle');
+    Route::get('webhooks/events', [WebhookController::class, 'events'])->name('api.webhooks.events');
 });
 
 // Публичные API роуты

@@ -521,6 +521,11 @@ body {
         background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
     }
 
+    .btn-info {
+        @apply bg-cyan-500 text-white hover:bg-cyan-600 focus:ring-cyan-500 shadow-md hover:shadow-lg;
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    }
+
     .btn-danger {
         @apply bg-accent-red text-white hover:bg-red-600 focus:ring-accent-red shadow-md hover:shadow-lg;
         background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
@@ -528,6 +533,10 @@ body {
 
     .btn-sm {
         @apply px-3 py-2 text-xs;
+    }
+
+    .input {
+        @apply bg-card-bg border border-border-color text-text-primary placeholder-text-secondary rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-blue focus:border-accent-blue transition-colors;
     }
 
     .btn-lg {

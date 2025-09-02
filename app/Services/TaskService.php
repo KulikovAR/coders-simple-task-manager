@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
 use App\Services\HtmlContentService;
+use App\Services\WebhookService;
 use App\Helpers\TagHelper;
 use App\Helpers\TaskCodeHelper;
 use Illuminate\Database\Eloquent\Collection;
@@ -148,7 +149,17 @@ class TaskService
             'tags' => isset($data['tags']) ? TagHelper::normalize($data['tags']) : null,
         ]);
 
-        return $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
+        $task = $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
+
+        // Отправляем webhook событие о создании задачи
+        $webhookService = app(WebhookService::class);
+        $webhookService->dispatchEvent('task.created', [
+            'task' => $task->toArray(),
+            'project' => $project->toArray(),
+            'reporter' => $reporter->toArray(),
+        ], $project->id);
+
+        return $task;
     }
 
     public function updateTask(Task $task, array $data): Task
@@ -249,8 +260,17 @@ class TaskService
         }
 
         $task->update($updateData);
+        $task = $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
 
-        return $task->load(['assignee', 'reporter', 'status:id,name,color,project_id,sprint_id', 'sprint', 'project']);
+        // Отправляем webhook событие об обновлении задачи
+        $webhookService = app(WebhookService::class);
+        $webhookService->dispatchEvent('task.updated', [
+            'task' => $task->toArray(),
+            'project' => $task->project->toArray(),
+            'changes' => $updateData,
+        ], $task->project_id);
+
+        return $task;
     }
 
     public function updateTaskStatus(Task $task, TaskStatus $status): Task
