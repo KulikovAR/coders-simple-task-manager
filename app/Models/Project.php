@@ -57,12 +57,4 @@ class Project extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
-
-    /**
-     * Получить проект по slug
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
 }
