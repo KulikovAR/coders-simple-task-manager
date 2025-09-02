@@ -15,7 +15,7 @@ export default function Form({ auth, project, sprint = null, errors = {} }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         if (isEditing) {
             put(route('sprints.update', [project.id, sprint.id]), data);
         } else {
@@ -212,14 +212,6 @@ export default function Form({ auth, project, sprint = null, errors = {} }) {
                                             {project.name}
                                         </span>
                                     </div>
-                                    {project.description && (
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-text-muted">Описание:</span>
-                                            <span className="text-sm text-text-primary font-medium">
-                                                {project.description}
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -228,4 +220,4 @@ export default function Form({ auth, project, sprint = null, errors = {} }) {
             </form>
         </AuthenticatedLayout>
     );
-} 
+}
