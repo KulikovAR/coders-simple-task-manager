@@ -41,6 +41,10 @@ const [hasChanges, setHasChanges] = useState(false);
     const [checklists, setChecklists] = useState(task?.checklists || []);
     const checklistRef = useRef(null);
 
+    // Состояние для отслеживания изменения спринта
+    const [sprintChanged, setSprintChanged] = useState(false);
+    const [originalSprintId, setOriginalSprintId] = useState(task?.sprint_id || '');
+
 // Функция для безопасного преобразования тегов в строку
     const tagsToString = (tags) => {
         if (!tags) return '';
@@ -242,13 +246,11 @@ const [hasChanges, setHasChanges] = useState(false);
 
                     setAvailableStatuses(loadedStatuses);
 
-                    // При смене спринта автоматически выбираем первый статус нового спринта
-                    if (data.sprint_id !== task?.sprint_id) {
-                        const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
-                        const newData = { ...data, status_id: firstStatus };
-                        setData('status_id', firstStatus);
-                        // Запускаем автосохранение после обновления статуса
-                        triggerAutoSave(newData);
+                    // При смене спринта требуем пользователя выбрать статус
+                    if (data.sprint_id !== originalSprintId) {
+                        setSprintChanged(true);
+                        // Сбрасываем статус, чтобы пользователь выбрал его явно
+                        setData('status_id', '');
                     } else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
                         // Сбрасываем выбранный статус, если он не принадлежит новому контексту
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
@@ -292,6 +294,11 @@ const [hasChanges, setHasChanges] = useState(false);
 
                 // Проверяем зависимые поля перед сохранением
                 const shouldSave = () => {
+                    // Если спринт изменился, но статус не выбран, не сохраняем
+                    if (sprintChanged && !dataToSave.status_id) {
+                        return false;
+                    }
+                    
                     // Проверяем, загружены ли все необходимые данные для выбранного проекта
                     if (dataToSave.project_id) {
                         const hasValidStatus = !dataToSave.status_id || availableStatuses.some(s => s.id == dataToSave.status_id);
@@ -346,10 +353,21 @@ const [hasChanges, setHasChanges] = useState(false);
             // Откладываем автосохранение до загрузки зависимых данных
             return;
         } else if (key === 'sprint_id') {
+            // При смене спринта отмечаем это изменение
+            if (value !== originalSprintId) {
+                setSprintChanged(true);
+            } else {
+                setSprintChanged(false);
+            }
             // При смене спринта не запускаем автосохранение здесь,
             // так как useEffect для sprint_id сам вызовет triggerAutoSave
             // после обновления статусов
             return;
+        } else if (key === 'status_id') {
+            // При выборе статуса сбрасываем флаг изменения спринта
+            if (sprintChanged && value) {
+                setSprintChanged(false);
+            }
         }
 
         // Для остальных полей запускаем автосохранение
@@ -358,6 +376,14 @@ const [hasChanges, setHasChanges] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Валидация: если спринт изменился, но статус не выбран
+        if (sprintChanged && !data.status_id) {
+            // Показываем ошибку валидации
+            setData('status_id', ''); // Это вызовет ошибку валидации
+            return;
+        }
+        
         if (onSubmit) {
             // Получаем изменения чек-листов, если компонент существует
             let checklistData = null;
@@ -505,6 +531,25 @@ const [hasChanges, setHasChanges] = useState(false);
                             </div>
                         </div>
                     )}
+
+                    {/* Предупреждение о необходимости выбора статуса при изменении спринта */}
+                    {sprintChanged && !data.status_id && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 md:p-4">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <div>
+                                    <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                                        Спринт изменен
+                                    </p>
+                                    <p className="text-amber-700 dark:text-amber-300 text-sm mt-1">
+                                        Пожалуйста, выберите статус для задачи в новом спринте
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {/* Основная информация и параметры в две колонки */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                         {/* Левая колонка - основная информация */}
@@ -601,12 +646,16 @@ const [hasChanges, setHasChanges] = useState(false);
                                 {/* Статус */}
                                 <div>
                                     <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
-                                        Статус
+                                        Статус {sprintChanged && !data.status_id && <span className="text-amber-600 dark:text-amber-400">*</span>}
                                     </label>
                                     <select
                                         value={data.status_id}
                                         onChange={(e) => setDataWithAutoSave('status_id', e.target.value)}
-                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all duration-150"
+                                        className={`w-full bg-secondary-bg border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 transition-all duration-150 ${
+                                            sprintChanged && !data.status_id 
+                                                ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500/20' 
+                                                : 'border-border-color focus:border-accent-blue focus:ring-accent-blue/20'
+                                        }`}
                                     >
                                         <option value="">Выберите статус</option>
                                         {availableStatuses.map((status) => (
@@ -615,6 +664,11 @@ const [hasChanges, setHasChanges] = useState(false);
                                             </option>
                                         ))}
                                     </select>
+                                    {sprintChanged && !data.status_id && (
+                                        <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                            Обязательно выберите статус для нового спринта
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Приоритет */}
