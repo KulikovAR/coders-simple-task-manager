@@ -36,6 +36,8 @@ const [hasChanges, setHasChanges] = useState(false);
     }
     // Флаг для отслеживания процесса автосохранения
     const [autoSaving, setAutoSaving] = useState(false);
+    // Флаг для отслеживания инициализации формы
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // Состояние для чек-листов
     const [checklists, setChecklists] = useState(task?.checklists || []);
@@ -78,6 +80,20 @@ const [hasChanges, setHasChanges] = useState(false);
             }
         }
     }, [task, isEditing]);
+
+    // Устанавливаем флаг инициализации после первой загрузки данных
+    useEffect(() => {
+        if (task && !isInitialized) {
+            // Небольшая задержка чтобы все useEffect'ы успели выполниться
+            const timer = setTimeout(() => {
+                setIsInitialized(true);
+            }, 100);
+            return () => clearTimeout(timer);
+        } else if (!task) {
+            // Для новых задач (без task) сразу помечаем как инициализированную
+            setIsInitialized(true);
+        }
+    }, [task, isInitialized]);
 
     const [availableSprints, setAvailableSprints] = useState(sprints);
     const [availableMembers, setAvailableMembers] = useState(members);
@@ -151,20 +167,12 @@ const [hasChanges, setHasChanges] = useState(false);
 
                     // Если нет выбранного статуса и это создание задачи, выбираем первый статус
                     if (!isEditing && !data.status_id && loadedStatuses.length > 0) {
-                        const newData = { ...data, status_id: loadedStatuses[0].id };
                         setData('status_id', loadedStatuses[0].id);
-                        triggerAutoSave(newData);
                     }
                     // Сбрасываем выбранный статус, если он не принадлежит новому проекту
                     else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
-                        const newData = { ...data, status_id: firstStatus };
                         setData('status_id', firstStatus);
-                        triggerAutoSave(newData);
-                    }
-                    // Если все данные загружены, можно сохранить изменения
-                    else if (data.project_id) {
-                        triggerAutoSave(data);
                     }
                 })
                 .catch(error => {
@@ -254,13 +262,7 @@ const [hasChanges, setHasChanges] = useState(false);
                     } else if (data.status_id && !loadedStatuses.find(s => s.id == data.status_id)) {
                         // Сбрасываем выбранный статус, если он не принадлежит новому контексту
                         const firstStatus = loadedStatuses.length > 0 ? loadedStatuses[0].id : '';
-                        const newData = { ...data, status_id: firstStatus };
                         setData('status_id', firstStatus);
-                        // Запускаем автосохранение после обновления статуса
-                        triggerAutoSave(newData);
-                    } else if (data.sprint_id !== task?.sprint_id) {
-                        // Если спринт изменился, но статус остался валидным, все равно сохраняем
-                        triggerAutoSave(data);
                     }
                 })
                 .catch(error => {
@@ -272,7 +274,7 @@ const [hasChanges, setHasChanges] = useState(false);
 
     // Функция для автосохранения с дебаунсом и обработкой зависимых полей
     const triggerAutoSave = (newData = null) => {
-        if (!autoSave || !task?.id) return;
+        if (!autoSave || !task?.id || !isInitialized) return;
 
         // Очищаем предыдущий таймер
         if (autoSaveTimerRef.current) {
