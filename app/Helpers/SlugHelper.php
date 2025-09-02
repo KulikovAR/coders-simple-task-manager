@@ -28,7 +28,7 @@ class SlugHelper
     /**
      * Генерирует уникальный slug для проекта
      */
-    public static function generateUniqueSlug(string $text, Model $model, int $excludeId = null): string
+    public static function generateUniqueSlug(string $text, string $model, int $excludeId = null): string
     {
         $baseSlug = self::generate($text);
         $slug = $baseSlug;
