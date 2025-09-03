@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import TaskForm from '@/Components/TaskForm';
 import Checklist from '@/Components/Checklist';
+import UserAvatar from '@/Components/UserAvatar';
 
 export default function TaskModal({
     showTaskModal,
@@ -168,21 +169,20 @@ export default function TaskModal({
 
                             <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-slate-800 text-xs lg:text-sm">
                                 {selectedTask.assignee && (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-5 h-5 lg:w-6 lg:h-6 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                            <span className="text-xs font-medium text-slate-800 text-white">
-                                                {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                            </span>
-                                        </div>
-                                        <span className="truncate max-w-[120px] lg:max-w-none  text-white">{selectedTask.assignee.name}</span>
-                                    </div>
+                                    <UserAvatar 
+                                        user={selectedTask.assignee}
+                                        size="sm"
+                                        showName={true}
+                                        className="lg:w-6 lg:h-6 border-slate-300 dark:border-white"
+                                        nameClassName="truncate max-w-[120px] lg:max-w-none text-white"
+                                    />
                                 )}
                                 {selectedTask.deadline && (
                                     <div className="flex items-center gap-1 drop-shadow-sm">
-                                        <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3 h-3 lg:w-4 lg:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
-                                        <span>{selectedTask.deadline && selectedTask.deadline !== '0000-00-00' ? new Date(selectedTask.deadline).toLocaleDateString('ru-RU') : 'Нет дедлайна'}</span>
+                                        <span className="text-white">{selectedTask.deadline && selectedTask.deadline !== '0000-00-00' ? new Date(selectedTask.deadline).toLocaleDateString('ru-RU') : 'Нет дедлайна'}</span>
                                     </div>
                                 )}
                             </div>
@@ -287,21 +287,20 @@ export default function TaskModal({
 
                             <div className="flex flex-wrap items-center gap-2 !text-white text-xs">
                                 {selectedTask.assignee && (
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="w-4 h-4 bg-white/90 dark:bg-transparent rounded-full flex items-center justify-center border border-slate-300 dark:border-white shadow-sm">
-                                            <span className="text-xs font-medium text-slate-800 dark:text-white">
-                                                {selectedTask.assignee.name?.charAt(0) || 'U'}
-                                            </span>
-                                        </div>
-                                        <span className="truncate max-w-[100px] drop-shadow-sm text-xs">{selectedTask.assignee.name}</span>
-                                    </div>
+                                    <UserAvatar 
+                                        user={selectedTask.assignee}
+                                        size="xs"
+                                        showName={true}
+                                        className="w-4 h-4 border-slate-300 dark:border-white"
+                                        nameClassName="truncate max-w-[100px] drop-shadow-sm text-xs"
+                                    />
                                 )}
                                 {selectedTask.deadline && selectedTask.deadline !== '0000-00-00' && (
                                     <div className="flex items-center gap-1 drop-shadow-sm">
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
-                                        <span className="text-xs">{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
+                                        <span className="text-xs text-white">{new Date(selectedTask.deadline).toLocaleDateString('ru-RU')}</span>
                                     </div>
                                 )}
                             </div>

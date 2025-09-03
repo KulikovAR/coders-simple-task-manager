@@ -523,7 +523,17 @@ const [hasChanges, setHasChanges] = useState(false);
         // Если показываем только параметры
         if (showOnlyParams) {
             return (
-                <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+                <>
+                    {/* Стили для иконки календаря в темной теме */}
+                    <style jsx>{`
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                        }
+                        .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                        }
+                    `}</style>
+                    <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
                     <div className="flex-1 p-2 sm:p-4 space-y-4">
                         {/* Общие ошибки */}
                         {(errors.general || formErrors.general) && (
@@ -708,13 +718,24 @@ const [hasChanges, setHasChanges] = useState(false);
                         </div>
                     )}
                 </form>
+                </>
             );
         }
 
         // Если показываем только контент
         if (showOnlyContent) {
             return (
-                <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+                <>
+                    {/* Стили для иконки календаря в темной теме */}
+                    <style jsx>{`
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                        }
+                        .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                            filter: invert(1);
+                        }
+                    `}</style>
+                    <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
                     <div className="flex-1 p-2 sm:p-4 space-y-6">
                         {/* Название задачи */}
                         <div>
@@ -816,12 +837,23 @@ const [hasChanges, setHasChanges] = useState(false);
                         </div>
                     )}
                 </form>
+                </>
             );
         }
 
         // Оригинальная модальная форма (для обратной совместимости)
         return (
-            <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+            <>
+                {/* Стили для иконки календаря в темной теме */}
+                <style jsx>{`
+                    input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                    }
+                    .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                    }
+                `}</style>
+                <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
                 {/* Основное содержимое */}
                 <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
                     {/* Общие ошибки */}
@@ -1110,6 +1142,7 @@ const [hasChanges, setHasChanges] = useState(false);
                     </div>
                 )}
             </form>
+            </>
         );
     }
 
