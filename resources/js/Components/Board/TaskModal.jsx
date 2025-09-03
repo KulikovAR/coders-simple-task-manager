@@ -89,6 +89,29 @@ export default function TaskModal({
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden" style={{margin: 0}}>
+            {/* Стили для скроллбара */}
+            <style jsx>{`
+                .task-modal-scroll::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .task-modal-scroll::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .task-modal-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(156, 163, 175, 0.3);
+                    border-radius: 4px;
+                }
+                .task-modal-scroll::-webkit-scrollbar-thumb:hover {
+                    background: rgba(156, 163, 175, 0.5);
+                }
+                .dark .task-modal-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(75, 85, 99, 0.3);
+                }
+                .dark .task-modal-scroll::-webkit-scrollbar-thumb:hover {
+                    background: rgba(75, 85, 99, 0.5);
+                }
+            `}</style>
+            
             {/* Затемнение фона */}
             <div
                 className="absolute inset-0 bg-black/20 backdrop-blur-sm"
@@ -323,7 +346,7 @@ export default function TaskModal({
                     {/* Десктопная версия - 3 колонки с отдельным скроллом */}
                     <div className="hidden lg:flex h-full">
                         {/* Левая колонка - Параметры задачи (25%) */}
-                        <div className="w-1/4 border-r border-border-color bg-secondary-bg/30 overflow-y-auto">
+                        <div className="w-1/4 border-r border-border-color bg-secondary-bg/30 overflow-y-auto task-modal-scroll">
                             <TaskForm
                                 task={selectedTask}
                                 projects={[project]}
@@ -356,7 +379,7 @@ export default function TaskModal({
                         </div>
 
                         {/* Центральная колонка - Описание, результат и комментарии (50%) */}
-                        <div className="w-1/2 border-r border-border-color overflow-y-auto">
+                        <div className="w-1/2 border-r border-border-color overflow-y-auto task-modal-scroll">
                             <TaskForm
                                 task={selectedTask}
                                 projects={[project]}
@@ -409,7 +432,7 @@ export default function TaskModal({
                         </div>
 
                         {/* Правая колонка - Чек-лист и дополнительные элементы (25%) */}
-                        <div className="w-1/4 bg-secondary-bg/30 overflow-y-auto">
+                        <div className="w-1/4 bg-secondary-bg/30 overflow-y-auto task-modal-scroll">
                             {/* Чек-лист для существующих задач */}
                             {selectedTask?.id && (
                                 <div className="p-4 border-b border-border-color">
@@ -472,7 +495,7 @@ export default function TaskModal({
                     </div>
 
                     {/* Мобильная версия - вертикальное расположение с общим скроллом */}
-                    <div className="lg:hidden overflow-y-auto h-full">
+                    <div className="lg:hidden overflow-y-auto h-full task-modal-scroll">
                         {/* 1. Чек-лист для мобильных устройств */}
                         {selectedTask?.id && (
                             <div className="p-2 sm:p-4 border-b border-border-color bg-secondary-bg/30">
