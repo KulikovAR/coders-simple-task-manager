@@ -76,10 +76,21 @@ export default function BoardFilters({
 
                     {/* Спринты */}
                     <div className="min-w-0">
-                        <label className="block text-xs font-medium text-text-secondary mb-1">
+                        <label className="block text-xs font-medium text-text-secondary mb-1 flex items-center gap-1">
+                            {sprints.some(s => s.status === 'active') && (
+                                <div className="group relative">
+                                    <svg className="w-3 h-3 text-text-muted cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20">
+                                        Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
+                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                            )}
                             Спринт
                             {currentSprintId !== 'none' && sprints.find(s => s.id == currentSprintId)?.status === 'active' && (
-                                <span className="ml-2 text-accent-green text-xs">(Активный)</span>
+                                <span className="text-accent-green text-xs">(Активный)</span>
                             )}
                         </label>
                         <select
@@ -101,11 +112,6 @@ export default function BoardFilters({
                                 </option>
                             ))}
                         </select>
-                        {sprints.some(s => s.status === 'active') && !window.location.search.includes('sprint_id=none') && (
-                            <p className="text-xs text-text-muted mt-1 break-words">
-                                💡 Активный спринт выбирается по умолчанию, но вы можете переключиться на "Без спринта"
-                            </p>
-                        )}
                     </div>
 
                     {/* Исполнитель с аватарками */}
