@@ -22,7 +22,9 @@ export default function TaskForm({
     onCommentAdded = null,
     onCommentUpdated = null,
     onCommentDeleted = null,
-    autoSave = false
+    autoSave = false,
+    showOnlyParams = false,
+    showOnlyContent = false
 }) {
     const isEditing = !!task;
 
@@ -300,7 +302,7 @@ const [hasChanges, setHasChanges] = useState(false);
                     if (sprintChanged && !dataToSave.status_id) {
                         return false;
                     }
-                    
+
                     // Проверяем, загружены ли все необходимые данные для выбранного проекта
                     if (dataToSave.project_id) {
                         const hasValidStatus = !dataToSave.status_id || availableStatuses.some(s => s.id == dataToSave.status_id);
@@ -378,14 +380,14 @@ const [hasChanges, setHasChanges] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         // Валидация: если спринт изменился, но статус не выбран
         if (sprintChanged && !data.status_id) {
             // Показываем ошибку валидации
             setData('status_id', ''); // Это вызовет ошибку валидации
             return;
         }
-        
+
         if (onSubmit) {
             // Получаем изменения чек-листов, если компонент существует
             let checklistData = null;
@@ -464,7 +466,7 @@ const [hasChanges, setHasChanges] = useState(false);
                             attachableType="App\\Models\\Task"
                             attachableId={task?.id || 'temp_' + Date.now()}
                             placeholder={options.placeholder || ''}
-                            className={`w-full ${
+                            className={`w-full [&>div]:border-none [&>div]:bg-transparent [&>div]:shadow-none [&_.ProseMirror]:bg-transparent [&_.ProseMirror]:border-none [&_.ProseMirror]:shadow-none [&_.ProseMirror]:outline-none ${
                                 hasError ? 'border-accent-red' : ''
                             }`}
                         />
@@ -518,6 +520,306 @@ const [hasChanges, setHasChanges] = useState(false);
     };
 
     if (isModal) {
+        // Если показываем только параметры
+        if (showOnlyParams) {
+            return (
+                <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+                    <div className="flex-1 p-2 sm:p-4 space-y-4">
+                        {/* Общие ошибки */}
+                        {(errors.general || formErrors.general) && (
+                            <div className="bg-accent-red/10 border border-accent-red/20 rounded-lg p-3">
+                                <div className="flex items-center">
+                                    <svg className="w-4 h-4 text-accent-red mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p className="text-accent-red text-xs">{errors.general || formErrors.general}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Предупреждение о необходимости выбора статуса при изменении спринта */}
+                        {sprintChanged && !data.status_id && (
+                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                                <div className="flex items-center">
+                                    <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    <div>
+                                        <p className="text-amber-800 dark:text-amber-200 text-xs font-medium">
+                                            Спринт изменен
+                                        </p>
+                                        <p className="text-amber-700 dark:text-amber-300 text-xs mt-1">
+                                            Выберите статус для нового спринта
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Параметры задачи */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-medium text-text-primary">Параметры задачи</h3>
+
+                            {/* Теги */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Теги
+                                </label>
+                                <TagsInput
+                                    value={data.tags}
+                                    onChange={(value) => setDataWithAutoSave('tags', value)}
+                                    placeholder="Введите теги..."
+                                    className="bg-secondary-bg border-border-color text-sm"
+                                />
+                            </div>
+
+                            {/* Статус */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Статус {sprintChanged && !data.status_id && <span className="text-amber-600 dark:text-amber-400">*</span>}
+                                </label>
+                                <select
+                                    value={data.status_id}
+                                    onChange={(e) => setDataWithAutoSave('status_id', e.target.value)}
+                                    className={`w-full bg-secondary-bg border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 transition-all duration-150 ${
+                                        sprintChanged && !data.status_id
+                                            ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500/20'
+                                            : 'border-border-color focus:border-accent-blue focus:ring-accent-blue/20'
+                                    }`}
+                                >
+                                    <option value="">Выберите статус</option>
+                                    {availableStatuses.map((status) => (
+                                        <option key={status.id} value={status.id}>
+                                            {status.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {sprintChanged && !data.status_id && (
+                                    <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                        Обязательно выберите статус для нового спринта
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Приоритет */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Приоритет
+                                </label>
+                                <select
+                                    value={data.priority}
+                                    onChange={(e) => setDataWithAutoSave('priority', e.target.value)}
+                                    className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                >
+                                    {priorities.map((priority) => (
+                                        <option key={priority.value} value={priority.value}>
+                                            {priority.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Исполнитель */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Исполнитель
+                                </label>
+                                <select
+                                    value={data.assignee_id}
+                                    onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
+                                    className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                >
+                                    <option value="">Не назначен</option>
+                                    {availableMembers.map((user) => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Спринт */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Спринт
+                                </label>
+                                <select
+                                    value={data.sprint_id}
+                                    onChange={(e) => setDataWithAutoSave('sprint_id', e.target.value)}
+                                    className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                >
+                                    <option value="">Без спринта</option>
+                                    {availableSprints.map((sprint) => (
+                                        <option key={sprint.id} value={sprint.id}>
+                                            {sprint.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Дедлайн */}
+                            <div>
+                                <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                    Дедлайн
+                                </label>
+                                <input
+                                    type="date"
+                                    value={data.deadline}
+                                    onChange={(e) => setDataWithAutoSave('deadline', e.target.value)}
+                                    className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Проект (только для новых задач) */}
+                        {!isEditing && (
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-medium text-text-primary">Размещение</h3>
+                                <div>
+                                    <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+                                        Проект
+                                    </label>
+                                    <select
+                                        value={data.project_id}
+                                        onChange={(e) => setDataWithAutoSave('project_id', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        required
+                                    >
+                                        <option value="">Выберите проект</option>
+                                        {projects.map((project) => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Индикатор автосохранения */}
+                    {autoSave && task?.id && autoSaving && (
+                        <div className="fixed bottom-4 right-4 bg-accent-blue/90 text-text-inverse px-2 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-50 animate-fade-in">
+                            <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-xs font-medium">Сохранение...</span>
+                        </div>
+                    )}
+                </form>
+            );
+        }
+
+        // Если показываем только контент
+        if (showOnlyContent) {
+            return (
+                <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+                    <div className="flex-1 p-2 sm:p-4 space-y-6">
+                        {/* Название задачи */}
+                        <div>
+                            <input
+                                type="text"
+                                value={data.title}
+                                onChange={(e) => setDataWithAutoSave('title', e.target.value)}
+                                className="w-full text-lg font-semibold bg-transparent border-none px-0 py-2 text-text-primary placeholder-text-muted focus:outline-none focus:ring-0"
+                                placeholder="Введите название задачи..."
+                                required
+                            />
+                            <div className="h-px bg-border-color mt-2"></div>
+                            {(formErrors.title || errors.title) && (
+                                <p className="mt-2 text-sm text-accent-red">{formErrors.title || errors.title}</p>
+                            )}
+                        </div>
+
+                        {/* Описание */}
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-3">
+                                Описание
+                            </label>
+                            <RichTextEditor
+                                value={data.description}
+                                onChange={(value) => setDataWithAutoSave('description', value)}
+                                attachableType="App\\Models\\Task"
+                                attachableId={task?.id || 'temp_' + Date.now()}
+                                placeholder="Опишите задачу подробно... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
+                                className="w-full [&_.ProseMirror]:bg-transparent [&_.ProseMirror]:border-none [&_.ProseMirror]:shadow-none [&_.ProseMirror]:outline-none"
+                            />
+                            {(formErrors.description || errors.description) && (
+                                <p className="mt-1 text-sm text-accent-red">{formErrors.description || errors.description}</p>
+                            )}
+                        </div>
+
+                        {/* Дополнительные поля для редактирования */}
+                        {isEditing && (
+                            <>
+                                {/* Результат */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-primary mb-3">
+                                        Результат выполнения
+                                    </label>
+                                    <RichTextEditor
+                                        value={data.result}
+                                        onChange={(value) => setDataWithAutoSave('result', value)}
+                                        attachableType="App\\Models\\Task"
+                                        attachableId={task?.id || 'temp_' + Date.now()}
+                                        placeholder="Опишите что было сделано... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
+                                        className="w-full [&>div]:border-none [&>div]:bg-transparent [&>div]:shadow-none [&_.ProseMirror]:bg-transparent [&_.ProseMirror]:border-none [&_.ProseMirror]:shadow-none [&_.ProseMirror]:outline-none"
+                                    />
+                                </div>
+
+                                {/* Merge Request */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-primary mb-3">
+                                        Ссылка на Merge Request
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={data.merge_request}
+                                        onChange={(e) => setDataWithAutoSave('merge_request', e.target.value)}
+                                        className="w-full bg-secondary-bg border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
+                                        placeholder="https://github.com/..."
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Комментарии */}
+                        {task?.id && auth && (
+                            <div>
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold text-text-primary">Комментарии</h3>
+                                    <p className="text-sm text-text-secondary">Обсудите задачу с командой</p>
+                                </div>
+                                <TaskComments
+                                    task={task}
+                                    comments={task.comments || []}
+                                    auth={auth}
+                                    users={members}
+                                    compact={true}
+                                    onCommentAdded={onCommentAdded}
+                                    onCommentUpdated={onCommentUpdated}
+                                    onCommentDeleted={onCommentDeleted}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Индикатор автосохранения */}
+                    {autoSave && task?.id && autoSaving && (
+                        <div className="fixed bottom-4 right-4 bg-accent-blue/90 text-text-inverse px-2 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-50 animate-fade-in">
+                            <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-xs font-medium">Сохранение...</span>
+                        </div>
+                    )}
+                </form>
+            );
+        }
+
+        // Оригинальная модальная форма (для обратной совместимости)
         return (
             <form id="task-form" onSubmit={handleSubmit} className="h-full flex flex-col">
                 {/* Основное содержимое */}
@@ -604,7 +906,7 @@ const [hasChanges, setHasChanges] = useState(false);
                                         attachableType="App\\Models\\Task"
                                         attachableId={task?.id || 'temp_' + Date.now()}
                                         placeholder="Опишите что было сделано... (поддерживается форматирование, изображения, ссылки и загрузка файлов)"
-                                        className="w-full"
+                                        className="w-full [&>div]:border-none [&>div]:bg-transparent [&>div]:shadow-none [&_.ProseMirror]:bg-transparent [&_.ProseMirror]:border-none [&_.ProseMirror]:shadow-none [&_.ProseMirror]:outline-none"
                                     />
                                 </div>
 
@@ -654,8 +956,8 @@ const [hasChanges, setHasChanges] = useState(false);
                                         value={data.status_id}
                                         onChange={(e) => setDataWithAutoSave('status_id', e.target.value)}
                                         className={`w-full bg-secondary-bg border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 transition-all duration-150 ${
-                                            sprintChanged && !data.status_id 
-                                                ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500/20' 
+                                            sprintChanged && !data.status_id
+                                                ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500/20'
                                                 : 'border-border-color focus:border-accent-blue focus:ring-accent-blue/20'
                                         }`}
                                     >

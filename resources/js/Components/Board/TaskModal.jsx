@@ -95,16 +95,16 @@ export default function TaskModal({
                 onClick={closeTaskModal}
             />
 
-            {/* Модальное окно снизу */}
+            {/* Модальное окно по центру */}
             <div
-                className="absolute board-modal bottom-0 left-0 right-0 w-full rounded-t-2xl border-t border-slate-200 dark:border-border-color shadow-2xl max-h-[90vh] overflow-hidden"
+                className="absolute board-modal top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl mx-0 sm:mx-4 rounded-2xl border border-slate-200 dark:border-border-color shadow-2xl max-h-[90vh] overflow-hidden"
                 style={{
                     maxHeight: '90vh',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Заголовок модалки с градиентом и кнопками */}
-                <div className="bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 dark:border-border-color border-b border-slate-200 p-4 lg:p-6">
+                <div className="bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 dark:border-border-color border-b border-slate-200 p-2 sm:p-4 lg:p-6">
                     {/* Десктопная версия - кнопки справа */}
                     <div className="hidden lg:flex justify-between items-start">
                         <div className="flex-1 min-w-0">
@@ -318,75 +318,266 @@ export default function TaskModal({
                     </div>
                 </div>
 
-                {/* Содержимое модалки */}
-                <div className="overflow-y-auto h-[calc(90vh-120px)]">
-                    {/* Чек-лист для существующих задач */}
-                    {selectedTask?.id && (
-                        <div className="p-4 lg:p-6 border-b border-border-color">
-                            <Checklist
-                                taskId={selectedTask.id}
-                                checklists={checklists}
-                                onChecklistChange={(updatedChecklists) => {
-                                    setChecklists(updatedChecklists);
-                                    // Обновляем задачу в локальном состоянии
-                                    setSelectedTask(prev => ({
-                                        ...prev,
-                                        checklists: updatedChecklists
-                                    }));
+                {/* Содержимое модалки - 3 колонки на десктопе, вертикально на мобильных */}
+                <div className="h-[calc(90vh-140px)]">
+                    {/* Десктопная версия - 3 колонки с отдельным скроллом */}
+                    <div className="hidden lg:flex h-full">
+                        {/* Левая колонка - Параметры задачи (25%) */}
+                        <div className="w-1/4 border-r border-border-color bg-secondary-bg/30 overflow-y-auto">
+                            <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                taskStatuses={taskStatuses}
+                                members={members}
+                                errors={errors}
+                                onSubmit={(formData) => {
+                                    // Обновляем локальное состояние задачи перед отправкой на сервер
+                                    const updatedTask = {
+                                        ...selectedTask,
+                                        ...formData,
+                                        // Обновляем связанные объекты
+                                        status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
+                                        assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
+                                        sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
+                                    };
+                                    setSelectedTask(updatedTask);
+
+                                    // Вызываем оригинальный обработчик
+                                    handleTaskSubmit(formData);
                                 }}
+                                onCancel={closeTaskModal}
                                 isModal={true}
+                                processing={processing}
+                                auth={auth}
+                                autoSave={true}
+                                showOnlyParams={true}
                             />
                         </div>
-                    )}
 
-                    <TaskForm
-                        task={selectedTask}
-                        projects={[project]}
-                        sprints={sprints}
-                        taskStatuses={taskStatuses}
-                        members={members}
-                        errors={errors}
-                        onSubmit={(formData) => {
-                            // Обновляем локальное состояние задачи перед отправкой на сервер
-                            const updatedTask = {
-                                ...selectedTask,
-                                ...formData,
-                                // Обновляем связанные объекты
-                                status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
-                                assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
-                                sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
-                            };
-                            setSelectedTask(updatedTask);
+                        {/* Центральная колонка - Описание, результат и комментарии (50%) */}
+                        <div className="w-1/2 border-r border-border-color overflow-y-auto">
+                            <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                taskStatuses={taskStatuses}
+                                members={members}
+                                errors={errors}
+                                onSubmit={(formData) => {
+                                    // Обновляем локальное состояние задачи перед отправкой на сервер
+                                    const updatedTask = {
+                                        ...selectedTask,
+                                        ...formData,
+                                        // Обновляем связанные объекты
+                                        status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
+                                        assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
+                                        sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
+                                    };
+                                    setSelectedTask(updatedTask);
 
-                            // Вызываем оригинальный обработчик
-                            handleTaskSubmit(formData);
-                        }}
-                        onCancel={closeTaskModal}
-                        isModal={true}
-                        processing={processing}
-                        auth={auth}
-                        autoSave={true}
-                        onCommentAdded={selectedTask?.id ? (newComment) => {
-                            setSelectedTask(prev => ({
-                                ...prev,
-                                comments: [newComment, ...(prev.comments || [])]
-                            }));
-                        } : undefined}
-                        onCommentUpdated={selectedTask?.id ? (updatedComment) => {
-                            setSelectedTask(prev => ({
-                                ...prev,
-                                comments: prev.comments?.map(comment =>
-                                    comment.id === updatedComment.id ? updatedComment : comment
-                                ) || []
-                            }));
-                        } : undefined}
-                        onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
-                            setSelectedTask(prev => ({
-                                ...prev,
-                                comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
-                            }));
-                        } : undefined}
-                    />
+                                    // Вызываем оригинальный обработчик
+                                    handleTaskSubmit(formData);
+                                }}
+                                onCancel={closeTaskModal}
+                                isModal={true}
+                                processing={processing}
+                                auth={auth}
+                                autoSave={true}
+                                showOnlyContent={true}
+                                onCommentAdded={selectedTask?.id ? (newComment) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: [newComment, ...(prev.comments || [])]
+                                    }));
+                                } : undefined}
+                                onCommentUpdated={selectedTask?.id ? (updatedComment) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: prev.comments?.map(comment =>
+                                            comment.id === updatedComment.id ? updatedComment : comment
+                                        ) || []
+                                    }));
+                                } : undefined}
+                                onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
+                                    }));
+                                } : undefined}
+                            />
+                        </div>
+
+                        {/* Правая колонка - Чек-лист и дополнительные элементы (25%) */}
+                        <div className="w-1/4 bg-secondary-bg/30 overflow-y-auto">
+                            {/* Чек-лист для существующих задач */}
+                            {selectedTask?.id && (
+                                <div className="p-4 border-b border-border-color">
+                                    <Checklist
+                                        taskId={selectedTask.id}
+                                        checklists={checklists}
+                                        onChecklistChange={(updatedChecklists) => {
+                                            setChecklists(updatedChecklists);
+                                            // Обновляем задачу в локальном состоянии
+                                            setSelectedTask(prev => ({
+                                                ...prev,
+                                                checklists: updatedChecklists
+                                            }));
+                                        }}
+                                        isModal={true}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Дополнительная информация */}
+                            <div className="p-4">
+                                <h3 className="text-sm font-medium text-text-primary mb-3">Информация</h3>
+                                <div className="space-y-3 text-xs text-text-secondary">
+                                    {selectedTask?.created_at && (
+                                        <div>
+                                            <span className="font-medium">Создана:</span>
+                                            <br />
+                                            {new Date(selectedTask.created_at).toLocaleDateString('ru-RU', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
+                                    )}
+                                    {selectedTask?.updated_at && selectedTask.updated_at !== selectedTask.created_at && (
+                                        <div>
+                                            <span className="font-medium">Обновлена:</span>
+                                            <br />
+                                            {new Date(selectedTask.updated_at).toLocaleDateString('ru-RU', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
+                                    )}
+                                    {selectedTask?.author && (
+                                        <div>
+                                            <span className="font-medium">Автор:</span>
+                                            <br />
+                                            {selectedTask.author.name}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Мобильная версия - вертикальное расположение с общим скроллом */}
+                    <div className="lg:hidden overflow-y-auto h-full">
+                        {/* 1. Чек-лист для мобильных устройств */}
+                        {selectedTask?.id && (
+                            <div className="p-2 sm:p-4 border-b border-border-color bg-secondary-bg/30">
+                                <Checklist
+                                    taskId={selectedTask.id}
+                                    checklists={checklists}
+                                    onChecklistChange={(updatedChecklists) => {
+                                        setChecklists(updatedChecklists);
+                                        // Обновляем задачу в локальном состоянии
+                                        setSelectedTask(prev => ({
+                                            ...prev,
+                                            checklists: updatedChecklists
+                                        }));
+                                    }}
+                                    isModal={true}
+                                />
+                            </div>
+                        )}
+
+                        {/* 2. Параметры задачи для мобильных устройств */}
+                        <div className="p-2 sm:p-4 border-b border-border-color bg-secondary-bg/30">
+                            <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                taskStatuses={taskStatuses}
+                                members={members}
+                                errors={errors}
+                                onSubmit={(formData) => {
+                                    // Обновляем локальное состояние задачи перед отправкой на сервер
+                                    const updatedTask = {
+                                        ...selectedTask,
+                                        ...formData,
+                                        // Обновляем связанные объекты
+                                        status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
+                                        assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
+                                        sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
+                                    };
+                                    setSelectedTask(updatedTask);
+
+                                    // Вызываем оригинальный обработчик
+                                    handleTaskSubmit(formData);
+                                }}
+                                onCancel={closeTaskModal}
+                                isModal={true}
+                                processing={processing}
+                                auth={auth}
+                                autoSave={true}
+                                showOnlyParams={true}
+                            />
+                        </div>
+
+                        {/* 3. Основной контент для мобильных устройств */}
+                        <div className="p-2 sm:p-4">
+                            <TaskForm
+                                task={selectedTask}
+                                projects={[project]}
+                                sprints={sprints}
+                                taskStatuses={taskStatuses}
+                                members={members}
+                                errors={errors}
+                                onSubmit={(formData) => {
+                                    // Обновляем локальное состояние задачи перед отправкой на сервер
+                                    const updatedTask = {
+                                        ...selectedTask,
+                                        ...formData,
+                                        // Обновляем связанные объекты
+                                        status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask.status,
+                                        assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask.assignee,
+                                        sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
+                                    };
+                                    setSelectedTask(updatedTask);
+
+                                    // Вызываем оригинальный обработчик
+                                    handleTaskSubmit(formData);
+                                }}
+                                onCancel={closeTaskModal}
+                                isModal={true}
+                                processing={processing}
+                                auth={auth}
+                                autoSave={true}
+                                showOnlyContent={true}
+                                onCommentAdded={selectedTask?.id ? (newComment) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: [newComment, ...(prev.comments || [])]
+                                    }));
+                                } : undefined}
+                                onCommentUpdated={selectedTask?.id ? (updatedComment) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: prev.comments?.map(comment =>
+                                            comment.id === updatedComment.id ? updatedComment : comment
+                                        ) || []
+                                    }));
+                                } : undefined}
+                                onCommentDeleted={selectedTask?.id ? (deletedCommentId) => {
+                                    setSelectedTask(prev => ({
+                                        ...prev,
+                                        comments: prev.comments?.filter(comment => comment.id !== deletedCommentId) || []
+                                    }));
+                                } : undefined}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
