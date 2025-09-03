@@ -62,6 +62,23 @@ export default function UpdateProfileInformation({
 
     return (
         <section className={className}>
+            {/* Стили для иконки календаря и времени в темной теме */}
+            <style jsx>{`
+                input[type="date"]::-webkit-calendar-picker-indicator,
+                input[type="time"]::-webkit-calendar-picker-indicator {
+                    filter: invert(0);
+                }
+                .dark input[type="date"]::-webkit-calendar-picker-indicator,
+                .dark input[type="time"]::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                }
+                @media (prefers-color-scheme: dark) {
+                    input[type="date"]::-webkit-calendar-picker-indicator,
+                    input[type="time"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                    }
+                }
+            `}</style>
             <form onSubmit={submit} className="space-y-6">
                 <div>
                     <InputLabel htmlFor="name" value="Имя" />

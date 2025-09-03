@@ -77,6 +77,21 @@ export default function Form({ auth, project = null, errors = {} }) {
         >
             <Head title={isEditing ? 'Редактировать проект' : 'Новый проект'} />
 
+            {/* Стили для иконки календаря в темной теме */}
+            <style jsx>{`
+                input[type="date"]::-webkit-calendar-picker-indicator {
+                    filter: invert(0);
+                }
+                .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                }
+                @media (prefers-color-scheme: dark) {
+                    input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                    }
+                }
+            `}</style>
+
             <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Основная форма */}

@@ -857,7 +857,7 @@ export default function RichTextEditor({
         try {
             // Создаем массив узлов для всех файлов с разделителями
             const contentNodes = [];
-            
+
             files.forEach((file, index) => {
                 // Добавляем файл
                 contentNodes.push({
@@ -1064,7 +1064,7 @@ export default function RichTextEditor({
     // Дополнительная проверка готовности редактора
     if (!editor.view || !editor.view.dom || editor.isDestroyed) {
         return (
-            <div className={`border border-border-color rounded-lg ${className}`}>
+            <div className={`rounded-lg ${className}`}>
                 <div className="flex items-center justify-center p-8 text-text-muted">
                     Загрузка редактора...
                 </div>
@@ -1075,7 +1075,7 @@ export default function RichTextEditor({
     return (
         <>
             <style>{editorStyles}</style>
-            <div className={`border border-border-color rounded-lg ${className}`}>
+            <div className={`rounded-lg ${className}`}>
                 {/* Панель инструментов */}
             <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg overflow-x-auto rounded-t-lg">
                 <button

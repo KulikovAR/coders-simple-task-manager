@@ -37,6 +37,21 @@ export default function Form({ auth, project, sprint = null, errors = {} }) {
         >
             <Head title={isEditing ? 'Редактировать спринт' : 'Новый спринт'} />
 
+            {/* Стили для иконки календаря в темной теме */}
+            <style jsx>{`
+                input[type="date"]::-webkit-calendar-picker-indicator {
+                    filter: invert(0);
+                }
+                .dark input[type="date"]::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                }
+                @media (prefers-color-scheme: dark) {
+                    input[type="date"]::-webkit-calendar-picker-indicator {
+                        filter: invert(1);
+                    }
+                }
+            `}</style>
+
             <form onSubmit={handleSubmit}>
                 <div className="space-y-6">
                     {/* Заголовок и действия */}
