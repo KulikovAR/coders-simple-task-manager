@@ -22,7 +22,7 @@ class NotificationService
     {
         return match($priority) {
             'low' => 'Низкий',
-            'medium' => 'Средний', 
+            'medium' => 'Средний',
             'high' => 'Высокий',
             default => $priority
         };
@@ -32,9 +32,7 @@ class NotificationService
      */
     public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
     {
-        // Не отправлять уведомление, если задача назначена на текущего пользователя
-        // или если задачу назначает сам исполнитель на себя
-        if (($task->assignee_id && $task->assignee_id === Auth::id()) || 
+        if (($task->assignee_id && $task->assignee_id === Auth::id()) ||
             ($assignee->id === ($fromUser?->id ?? Auth::id()))) {
             return;
         }
@@ -62,7 +60,7 @@ class NotificationService
 
         // Не отправлять уведомление, если задача обновляется самим исполнителем
         // или если обновляющий пользователь и исполнитель - одно лицо
-        if ($task->assignee_id && $task->assignee_id !== Auth::id() && 
+        if ($task->assignee_id && $task->assignee_id !== Auth::id() &&
             $task->assignee_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_UPDATED,
@@ -76,7 +74,7 @@ class NotificationService
             );
         }
 
-        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && 
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
             $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_UPDATED,
@@ -100,7 +98,7 @@ class NotificationService
 
         // Не отправлять уведомление, если задача перемещается самим исполнителем
         // или если перемещающий пользователь и исполнитель - одно лицо
-        if ($task->assignee_id && $task->assignee_id !== Auth::id() && 
+        if ($task->assignee_id && $task->assignee_id !== Auth::id() &&
             $task->assignee_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_MOVED,
@@ -115,7 +113,7 @@ class NotificationService
             );
         }
 
-        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && 
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
             $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_MOVED,
@@ -177,7 +175,7 @@ class NotificationService
             );
         }
 
-        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && 
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
             $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_TASK_PRIORITY_CHANGED,
@@ -216,7 +214,7 @@ class NotificationService
             );
         }
 
-        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id && 
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
             $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
             $this->createNotification(
                 type: Notification::TYPE_COMMENT_ADDED,

@@ -34,13 +34,7 @@ const BenefitsSection = ({ registerRef }) => {
             description: 'Встроенный ИИ улучшает качество ваших комментариев и описаний: исправляет ошибки, улучшает стиль, читаемость и добавляет HTML форматирование',
             icon: 'M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z',
             color: 'accent-purple'
-        },
-        {
-            title: 'Темная тема',
-            description: 'Профессиональный дизайн с двумя проработанными темами: светлая и темная',
-            icon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
-            color: 'accent-indigo'
-        },
+        }
     ];
 
     // Сравнение с конкурентами
@@ -138,7 +132,7 @@ const BenefitsSection = ({ registerRef }) => {
                     </div>
                 ))}
             </div>
-            
+
             {/* Декоративный разделитель */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-border-color/30 to-transparent my-24"></div>
         </section>
