@@ -9,6 +9,8 @@ use App\Services\Ai\ContextProviders\ProjectContextProvider;
 use App\Services\Ai\ContextProviders\UsersContextProvider;
 use App\Services\Ai\ContextProviders\EnumsContextProvider;
 use App\Services\Ai\ContextProviders\DynamicStatusContextProvider;
+use App\Services\Ai\ContextProviders\SprintContextProvider;
+use App\Services\Ai\ContextProviders\LazyContextProvider;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\SprintService;
@@ -236,13 +238,17 @@ class AiAgentController extends Controller
     {
         $commandRegistry = $this->createCommandRegistry();
 
-        $contextProviders = [
+        // Создаем ленивый контекст-провайдер для оптимизации
+        $lazyProvider = new LazyContextProvider([
             new UserContextProvider(),
             new ProjectContextProvider(app(ProjectService::class)),
             new UsersContextProvider(),
             new EnumsContextProvider(),
             new DynamicStatusContextProvider(app(TaskStatusService::class)),
-        ];
+            new SprintContextProvider(),
+        ]);
+
+        $contextProviders = [$lazyProvider];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
     }

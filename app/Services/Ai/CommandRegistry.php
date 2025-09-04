@@ -13,6 +13,9 @@ use App\Services\Ai\Commands\ListTasksCommand;
 use App\Services\Ai\Commands\UpdateTaskStatusCommand;
 use App\Services\Ai\Commands\BulkUpdateTaskStatusCommand;
 use App\Services\Ai\Commands\AssignTaskCommand;
+use App\Services\Ai\Commands\CreateSprintCommand;
+use App\Services\Ai\Commands\UpdateSprintCommand;
+use App\Services\Ai\Commands\ListSprintsCommand;
 use App\Services\Ai\Commands\ErrorCommand;
 use App\Services\ProjectService;
 use App\Services\TaskService;
@@ -56,6 +59,11 @@ class CommandRegistry
         $this->register(new UpdateTaskStatusCommand($taskService));
         $this->register(new BulkUpdateTaskStatusCommand($taskService, $projectService));
         $this->register(new AssignTaskCommand($taskService));
+        
+        // Команды спринтов
+        $this->register(new CreateSprintCommand($sprintService, $projectService, app(\App\Services\TaskStatusService::class)));
+        $this->register(new UpdateSprintCommand($sprintService, $projectService));
+        $this->register(new ListSprintsCommand($sprintService, $projectService));
         
         // Команды ошибок
         $this->register(new ErrorCommand());

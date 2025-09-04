@@ -332,13 +332,15 @@ class FlexibleAiAgentService
         $prompt .= "8. Если пользователь подтверждает действие (да, сделай, ок) - выполняй предыдущие команды\n";
         $prompt .= "9. Для массового обновления статуса используй BULK_UPDATE_TASK_STATUS с параметрами project_name и current_status\n";
         $prompt .= "10. ВАЖНО: Используй только точные названия статусов из доступных статусов задач\n";
+        $prompt .= "11. Для работы со спринтами используй CREATE_SPRINT, LIST_SPRINTS, UPDATE_SPRINT\n";
+        $prompt .= "12. При создании спринта автоматически создаются все нужные статусы\n";
         if (isset($context['dynamic_statuses']) && !empty($context['dynamic_statuses']['available_status_names'])) {
             $statusNames = implode("', '", $context['dynamic_statuses']['available_status_names']);
-            $prompt .= "11. Доступные статусы задач: '{$statusNames}'\n";
+            $prompt .= "13. Доступные статусы задач: '{$statusNames}'\n";
         } else {
-            $prompt .= "11. ВНИМАНИЕ: Статусы задач не загружены. Используй общие названия.\n";
+            $prompt .= "13. ВНИМАНИЕ: Статусы задач не загружены. Используй общие названия.\n";
         }
-        $prompt .= "12. Возвращай ТОЛЬКО JSON\n\n";
+        $prompt .= "14. Возвращай ТОЛЬКО JSON\n\n";
 
         $prompt .= "Формат ответа:\n";
         $prompt .= '{"commands": [{"name": "COMMAND_NAME", "parameters": {"param1": "value1"}}]}';
@@ -423,7 +425,16 @@ class FlexibleAiAgentService
 
         foreach ($this->contextProviders as $provider) {
             if ($provider instanceof ContextProviderInterface) {
-                $context[$provider->getName()] = $provider->getContext($user);
+                try {
+                    $providerContext = $provider->getContext($user);
+                    $context[$provider->getName()] = $providerContext;
+                } catch (\Exception $e) {
+                    // Логируем ошибку, но продолжаем работу
+                    Log::warning("Context provider {$provider->getName()} failed", [
+                        'error' => $e->getMessage(),
+                        'user_id' => $user->id
+                    ]);
+                }
             }
         }
 
@@ -594,6 +605,47 @@ class FlexibleAiAgentService
                     'parameters' => []
                 ]
             ];
+        }
+
+        // Спринты
+        if (preg_match('/(спринты|список спринтов|все спринты|мои спринты)/', $input)) {
+            return [
+                [
+                    'name' => 'LIST_SPRINTS',
+                    'parameters' => []
+                ]
+            ];
+        }
+
+        // Создание спринта
+        if (preg_match('/(создай спринт|создать спринт|новый спринт|добавь спринт)/', $input)) {
+            $parameters = [];
+            
+            // Ищем название проекта
+            if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
+                $parameters['project_name'] = $matches[1];
+            }
+
+            // Ищем название спринта
+            if (preg_match('/название[:\s]+"([^"]+)"/', $input, $matches)) {
+                $parameters['name'] = $matches[1];
+            } elseif (preg_match('/название[:\s]+([^,\n]+)/', $input, $matches)) {
+                $parameters['name'] = trim($matches[1]);
+            } else {
+                $parameters['name'] = 'Новый спринт';
+            }
+
+            // Ищем даты
+            if (preg_match('/с (\d{4}-\d{2}-\d{2})/', $input, $matches)) {
+                $parameters['start_date'] = $matches[1];
+            }
+            if (preg_match('/до (\d{4}-\d{2}-\d{2})/', $input, $matches)) {
+                $parameters['end_date'] = $matches[1];
+            }
+
+            return [['name' => 'CREATE_SPRINT', 'parameters' => $parameters]];
         }
 
         return [];
