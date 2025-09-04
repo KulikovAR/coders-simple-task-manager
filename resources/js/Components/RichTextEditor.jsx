@@ -20,6 +20,7 @@ import {
     Quote
 } from 'lucide-react';
 import FileUploadModal from './RichTextEditor/FileUploadModal';
+import AiOptimizeButton from './RichTextEditor/AiOptimizeButton';
 
 export default function RichTextEditor({
     value = '',
@@ -1207,6 +1208,12 @@ export default function RichTextEditor({
                 >
                     <Redo size={16} />
                 </button>
+
+                {/* Разделитель */}
+                <div className="w-px h-6 bg-border-color mx-1"></div>
+
+                {/* ИИ кнопка оптимизации */}
+                <AiOptimizeButton editor={editor} />
             </div>
 
             {/* Поле ввода ссылки */}

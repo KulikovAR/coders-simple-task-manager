@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Resources\ApiResponse;
 use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\AiTextOptimizationController;
 
 /*
 |--------------------------------------------------------------------------

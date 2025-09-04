@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AiAgentController;
+use App\Http\Controllers\AiTextOptimizationController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
@@ -42,6 +43,11 @@ Route::get('/api-docs', function () {
     Route::get('/demo/rich-editor', function () {
         return Inertia::render('Demo/RichEditorDemo');
     })->name('demo.rich-editor');
+
+    // Демо-страница ИИ RichTextEditor
+    Route::get('/demo/ai-rich-editor', function () {
+        return Inertia::render('Demo/AiRichEditorDemo');
+    })->name('demo.ai-rich-editor');
 
     // Демо-страница загрузки файлов
     Route::get('/demo/file-upload', function () {
@@ -153,6 +159,9 @@ Route::middleware('auth')->group(function () {
 
     // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
+    
+    // Оптимизация текста с помощью ИИ
+    Route::post('/ai-text-optimize', [AiTextOptimizationController::class, 'optimizeText'])->name('ai-text-optimize');
 
     // Webhook'и
     Route::get('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'index'])->name('webhooks.index');
