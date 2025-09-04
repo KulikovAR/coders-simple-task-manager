@@ -1079,6 +1079,12 @@ export default function RichTextEditor({
             <div className={`rounded-lg ${className}`}>
                 {/* Панель инструментов */}
             <div className="flex items-center gap-1 p-2 border-b border-border-color bg-secondary-bg overflow-x-auto rounded-t-lg">
+                {/* ИИ кнопка оптимизации - первая кнопка */}
+                <AiOptimizeButton editor={editor} />
+
+                {/* Разделитель */}
+                <div className="w-px h-6 bg-border-color mx-1"></div>
+
                 <button
                     type="button"
                     onClick={() => editor.chain().focus().toggleBold().run()}
@@ -1208,12 +1214,6 @@ export default function RichTextEditor({
                 >
                     <Redo size={16} />
                 </button>
-
-                {/* Разделитель */}
-                <div className="w-px h-6 bg-border-color mx-1"></div>
-
-                {/* ИИ кнопка оптимизации */}
-                <AiOptimizeButton editor={editor} />
             </div>
 
             {/* Поле ввода ссылки */}
