@@ -208,7 +208,7 @@ class TaskController extends Controller
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        if ($task->assignee_id && $task->assignee_id !== $oldAssigneeId) {
+        if ($task->assignee_id && $task->assignee_id != $oldAssigneeId) {
             $assignee = $task->assignee;
             $this->notificationService->taskAssigned($task, $assignee, Auth::user());
         }
@@ -426,7 +426,7 @@ class TaskController extends Controller
     public function showByCode(string $code, Request $request)
     {
         $task = TaskCodeHelper::findTaskByCode($code);
-        
+
         if (!$task) {
             abort(404, 'Задача не найдена');
         }
@@ -445,7 +445,7 @@ class TaskController extends Controller
         }
 
         $task = TaskCodeHelper::findTaskByCode($code);
-        
+
         if (!$task) {
             abort(404, 'Задача не найдена');
         }
