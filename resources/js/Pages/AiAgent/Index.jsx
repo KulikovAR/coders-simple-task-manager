@@ -61,6 +61,13 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
 
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
+        
+        // Сброс высоты textarea
+        const textarea = document.getElementById('inputMessage');
+        if (textarea) {
+            textarea.style.height = 'auto';
+        }
+        
         setIsLoading(true);
 
         try {
@@ -173,6 +180,17 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
             e.preventDefault();
             sendMessage();
         }
+    };
+
+    const handleTextareaChange = (e) => {
+        setInputMessage(e.target.value);
+        
+        // Автоматическое изменение высоты textarea
+        const textarea = e.target;
+        textarea.style.height = 'auto';
+        const maxHeight = 8 * 24; // 8 строк * 24px (примерная высота строки)
+        const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+        textarea.style.height = newHeight + 'px';
     };
 
     const loadConversation = async (conversationId) => {
@@ -519,11 +537,12 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
                                         <textarea
                                             id='inputMessage'
                                             value={inputMessage}
-                                            onChange={(e) => setInputMessage(e.target.value)}
+                                            onChange={handleTextareaChange}
                                             onKeyPress={handleKeyPress}
                                             placeholder="Введите ваш запрос..."
-                                            className="flex-1 resize-none border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent bg-secondary-bg text-text-primary placeholder:text-text-muted"
+                                            className="flex-1 resize-none border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent bg-secondary-bg text-text-primary placeholder:text-text-muted overflow-hidden"
                                             rows="2"
+                                            style={{ minHeight: '48px', maxHeight: '192px' }}
                                             disabled={isLoading}
                                         />
                                         <button
