@@ -227,7 +227,6 @@ class TelegramController extends Controller
         $totalUsers = User::count();
         $activeUsers = User::whereNotNull('email_verified_at')->count();
         $usersWithTelegram = User::whereNotNull('telegram_chat_id')->count();
-        $paidUsers = User::where('paid', true)->count();
         $usersWithSubscription = User::whereNotNull('subscription_id')->count();
 
         // Получаем статистику проектов
@@ -239,7 +238,6 @@ class TelegramController extends Controller
             '• Всего пользователей: <b>' . $totalUsers . '</b>' . "\n" .
             '• Активных (верифицированных): <b>' . $activeUsers . '</b>' . "\n" .
             '• С Telegram: <b>' . $usersWithTelegram . '</b>' . "\n" .
-            '• Платных: <b>' . $paidUsers . '</b>' . "\n" .
             '• С подпиской: <b>' . $usersWithSubscription . '</b>' . "\n\n" .
             '<b>📋 Проекты и задачи:</b>' . "\n" .
             '• Всего проектов: <b>' . $totalProjects . '</b>' . "\n" .
