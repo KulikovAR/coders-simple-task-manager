@@ -514,18 +514,15 @@ export default function AiAgentIndex({ auth, conversations, stats }) {
                                 </div>
 
                                 {/* Поле ввода */}
-                                <div className="border-t border-border p-4">
+                                <div className="border-t border-gray-300 dark:border-gray-600 py-4">
                                     <div className="flex space-x-2">
                                         <textarea
-                                            style={{
-                                                color: 'black',
-                                            }}
                                             id='inputMessage'
                                             value={inputMessage}
                                             onChange={(e) => setInputMessage(e.target.value)}
                                             onKeyPress={handleKeyPress}
                                             placeholder="Введите ваш запрос..."
-                                            className="flex-1 resize-none border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+                                            className="flex-1 resize-none border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent bg-secondary-bg text-text-primary placeholder:text-text-muted"
                                             rows="2"
                                             disabled={isLoading}
                                         />
