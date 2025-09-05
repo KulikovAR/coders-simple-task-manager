@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +12,13 @@ use Illuminate\Support\Facades\Validator;
 
 class AiTextOptimizationController extends Controller
 {
+    private SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
      * Оптимизировать текст с помощью ИИ
      */
@@ -29,6 +37,19 @@ class AiTextOptimizationController extends Controller
         }
 
         $text = $request->input('text');
+        $user = $request->user();
+
+        // Проверяем лимиты подписки для использования ИИ
+        if (!$this->subscriptionService->canUseAi($user)) {
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Исчерпан лимит запросов к ИИ',
+                'subscription_info' => $subscriptionInfo,
+                'error_type' => 'ai_limit_exceeded'
+            ], 429);
+        }
 
         try {
             // Промпт для оптимизации текста с поддержкой HTML форматирования
@@ -62,6 +83,9 @@ class AiTextOptimizationController extends Controller
 
                 // Очищаем ответ от возможных префиксов
                 $optimizedText = $this->cleanAiResponse($optimizedText);
+
+                // Обрабатываем использование ИИ (увеличиваем счетчик)
+                $this->subscriptionService->processAiUsage($user);
 
                 return response()->json([
                     'success' => true,

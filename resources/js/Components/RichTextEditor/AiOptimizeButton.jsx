@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle, AlertCircle, Crown } from 'lucide-react';
 import { hasSelectedText, getSelectedText } from './aiUtils';
 
 export default function AiOptimizeButton({ editor, className = '' }) {
     const [isLoading, setIsLoading] = useState(false);
-    const [status, setStatus] = useState(null); // 'success', 'error', null
+    const [status, setStatus] = useState(null); // 'success', 'error', 'limit_exceeded', null
     const [hasSelection, setHasSelection] = useState(false);
+    const [subscriptionInfo, setSubscriptionInfo] = useState(null);
 
     // Отслеживаем изменения выделения
     useEffect(() => {
@@ -63,7 +64,16 @@ export default function AiOptimizeButton({ editor, className = '' }) {
                 setTimeout(() => setStatus(null), 3000);
             } else {
                 setStatus('error');
-                console.error('Ошибка оптимизации:', data.message);
+                
+                // Обрабатываем ошибку лимитов ИИ
+                if (data.error_type === 'ai_limit_exceeded') {
+                    setStatus('limit_exceeded');
+                    setSubscriptionInfo(data.subscription_info);
+                    console.warn('Исчерпан лимит запросов к ИИ:', data.message);
+                } else {
+                    setStatus('error');
+                    console.error('Ошибка оптимизации:', data.message);
+                }
             }
         } catch (error) {
             setStatus('error');
@@ -103,6 +113,15 @@ export default function AiOptimizeButton({ editor, className = '' }) {
             );
         }
 
+        if (status === 'limit_exceeded') {
+            return (
+                <>
+                    <Crown className="w-4 h-4 text-yellow-500" />
+                    <span>Лимит ИИ</span>
+                </>
+            );
+        }
+
         return (
             <>
                 <Sparkles className="w-4 h-4" />
@@ -125,9 +144,11 @@ export default function AiOptimizeButton({ editor, className = '' }) {
                 ${className}
             `}
             title={
-                canOptimize
-                    ? 'Оптимизировать выделенный текст с помощью ИИ'
-                    : 'Выделите текст для оптимизации'
+                status === 'limit_exceeded' 
+                    ? `Исчерпан лимит ИИ (${subscriptionInfo?.ai_requests_used || 0}/${subscriptionInfo?.ai_requests_limit || 0}). Обновите тариф для продолжения.`
+                    : canOptimize
+                        ? 'Оптимизировать выделенный текст с помощью ИИ'
+                        : 'Выделите текст для оптимизации'
             }
         >
             {getButtonContent()}

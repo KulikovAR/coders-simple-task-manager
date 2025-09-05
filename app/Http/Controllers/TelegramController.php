@@ -62,6 +62,7 @@ class TelegramController extends Controller
                 $tg->setMyCommands([
                     ['command' => 'ai', 'description' => 'Общение с ИИ: /ai <запрос>'],
                     ['command' => 'id', 'description' => 'Показать chatId и senderId'],
+                    ['command' => 'stats', 'description' => 'Статистика проекта (только для админа)'],
                     ['command' => 'start', 'description' => 'Справка и статус подключения'],
                 ]);
             }
@@ -110,6 +111,26 @@ class TelegramController extends Controller
                     $idText .= "\n<b>Ваш senderId:</b> <code>" . $fromId . '</code>\n<i>Для привязки используйте senderId</i>';
                 }
                 $tg->sendMessage($chatId, $idText);
+                return response()->noContent();
+            }
+
+            // Обработка команды /stats (только для пользователя с id = 1)
+            if (in_array($text, ['/stats', 'stats', 'STATS'], true)) {
+                $user = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
+                
+                if (!$user || $user->id !== 1) {
+                    $tg->sendMessage($chatId, '❌ У вас нет прав для просмотра статистики.');
+                    return response()->noContent();
+                }
+
+                try {
+                    $statsText = $this->getProjectStats();
+                    $tg->sendMessage($chatId, $statsText);
+                } catch (\Throwable $e) {
+                    Log::error('Telegram stats error', ['error' => $e->getMessage()]);
+                    $tg->sendMessage($chatId, 'Произошла ошибка при получении статистики.');
+                }
+
                 return response()->noContent();
             }
 
@@ -195,6 +216,31 @@ class TelegramController extends Controller
         ];
 
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
+    }
+
+    private function getProjectStats(): string
+    {
+        // Получаем статистику пользователей
+        $totalUsers = User::count();
+        $activeUsers = User::whereNotNull('email_verified_at')->count();
+        $usersWithTelegram = User::whereNotNull('telegram_chat_id')->count();
+        $paidUsers = User::where('paid', true)->count();
+        $usersWithSubscription = User::whereNotNull('subscription_id')->count();
+
+        // Получаем статистику проектов
+        $totalProjects = \App\Models\Project::count();
+        $totalTasks = \App\Models\Task::count();
+
+        return '<b>📊 Статистика проекта</b><br/><br/>' .
+            '<b>👥 Пользователи:</b><br/>' .
+            '• Всего пользователей: <b>' . $totalUsers . '</b><br/>' .
+            '• Активных (верифицированных): <b>' . $activeUsers . '</b><br/>' .
+            '• С Telegram: <b>' . $usersWithTelegram . '</b><br/>' .
+            '• Платных: <b>' . $paidUsers . '</b><br/>' .
+            '• С подпиской: <b>' . $usersWithSubscription . '</b><br/><br/>' .
+            '<b>📋 Проекты и задачи:</b><br/>' .
+            '• Всего проектов: <b>' . $totalProjects . '</b><br/>' .
+            '• Всего задач: <b>' . $totalTasks . '</b><br/>';
     }
 }
 
