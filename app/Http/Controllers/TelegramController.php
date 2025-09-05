@@ -59,12 +59,21 @@ class TelegramController extends Controller
 
             // Обновим список команд при каждом /start (безопасно и дёшево)
             if (in_array($text, ['/start', 'start', 'Start'], true)) {
-                $tg->setMyCommands([
+                $linkedUser = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
+                
+                // Базовые команды для всех пользователей
+                $commands = [
                     ['command' => 'ai', 'description' => 'Общение с ИИ: /ai <запрос>'],
                     ['command' => 'id', 'description' => 'Показать chatId и senderId'],
-                    ['command' => 'stats', 'description' => 'Статистика проекта (только для админа)'],
                     ['command' => 'start', 'description' => 'Справка и статус подключения'],
-                ]);
+                ];
+                
+                // Добавляем команду stats только для пользователя с id = 1
+                if ($linkedUser && $linkedUser->id === 1) {
+                    $commands[] = ['command' => 'stats', 'description' => 'Статистика проекта (только для админа)'];
+                }
+                
+                $tg->setMyCommands($commands);
             }
 
             // Приветственное сообщение с инструкциями
@@ -77,8 +86,13 @@ class TelegramController extends Controller
                         '<b>Команды:</b>' . "\n" .
                         '<code>/ai ваш запрос</code> — общение с ИИ' . "\n" .
                         '<code>/id</code> — показать chatId и senderId' . "\n" .
-                        '<code>/stats</code> — статистика проекта (только для админа)' . "\n" .
                         '<code>/start</code> — справка и статус подключения';
+                    
+                    // Добавляем команду stats только для пользователя с id = 1
+                    if ($linkedUser->id === 1) {
+                        $help .= "\n" . '<code>/stats</code> — статистика проекта (только для админа)';
+                    }
+                    
                     if ($chatType !== 'private') {
                         $help .= "\n\n" . '<i>Вы пишете в группе. Для личных уведомлений начните диалог с ботом в личке</i>';
                         if ($botLink) {
@@ -185,7 +199,6 @@ class TelegramController extends Controller
                     '<b>Команды:</b>' . "\n" .
                     '<code>/ai ваш запрос</code> — общение с ИИ' . "\n" .
                     '<code>/id</code> — показать chatId и senderId' . "\n" .
-                    '<code>/stats</code> — статистика проекта (только для админа)' . "\n" .
                     '<code>/start</code> — справка и статус подключения' . "\n\n" .
                     'Для привязки отправьте свой <b>email</b> или вставьте <u>senderId</u> в профиль на сайте.';
                 if ($botLink) {
