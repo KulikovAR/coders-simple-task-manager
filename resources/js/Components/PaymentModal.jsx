@@ -25,7 +25,7 @@ export default function PaymentModal({ isOpen, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 !m-0"
             onClick={onClose}
         >
             <div
@@ -42,8 +42,8 @@ export default function PaymentModal({ isOpen, onClose }) {
                         Спасибо за тестирование!
                     </h3>
                     <p className="text-text-secondary text-sm">
-                        {window.subscriptionName === SUBSCRIPTION_PLANS.TEAM_AI 
-                            ? `В вашем тарифе доступно ${AI_REQUEST_LIMITS[SUBSCRIPTION_PLANS.TEAM_AI]} запросов к ИИ-ассистенту в день` 
+                        {window.subscriptionName === SUBSCRIPTION_PLANS.TEAM_AI
+                            ? `В вашем тарифе доступно ${AI_REQUEST_LIMITS[SUBSCRIPTION_PLANS.TEAM_AI]} запросов к ИИ-ассистенту в день`
                             : `В вашем тарифе доступно ${AI_REQUEST_LIMITS[SUBSCRIPTION_PLANS.FREE]} бесплатных запросов к ИИ-ассистенту в месяц`}
                     </p>
                 </div>
@@ -73,7 +73,7 @@ export default function PaymentModal({ isOpen, onClose }) {
                                 <span className="text-accent-purple font-bold">999₽/чел</span>
                             </div>
                         </div>
-                        
+
                         <div className="bg-secondary-bg border border-border-color rounded-xl p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-text-primary font-medium">Напишите нашему менеджеру</span>
