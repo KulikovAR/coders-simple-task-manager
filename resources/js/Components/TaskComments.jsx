@@ -71,7 +71,7 @@ export default function TaskComments({
                 });
 
                 if (response.status === 419) {
-                    window.location.reload();
+                    window.location.href = window.location.href;
                     return;
                 }
 
@@ -107,7 +107,7 @@ export default function TaskComments({
                 });
 
                 if (response.status === 419) {
-                    window.location.reload();
+                    window.location.href = window.location.href;
                     return;
                 }
 
@@ -128,7 +128,7 @@ export default function TaskComments({
                     // Если ошибка связана с CSRF, показываем сообщение пользователю
                     if (errorData.message && errorData.message.includes('CSRF')) {
                         alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
-                        window.location.reload();
+                        window.location.href = window.location.href;
                     }
                 }
             }
@@ -192,7 +192,7 @@ export default function TaskComments({
             });
 
             if (response.status === 419) {
-                window.location.reload();
+                window.location.href = window.location.href;
                 return;
             }
 
@@ -210,7 +210,7 @@ export default function TaskComments({
                 // Если ошибка связана с CSRF, показываем сообщение пользователю
                 if (errorData.message && errorData.message.includes('CSRF')) {
                     alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
-                    window.location.reload();
+                    window.location.href = window.location.href;
                 }
             }
         } catch (error) {

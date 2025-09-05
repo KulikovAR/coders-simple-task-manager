@@ -122,6 +122,15 @@ class TaskController extends Controller
 
         // Проверяем, это Inertia запрос или обычный
         if ($request->header('X-Inertia')) {
+            // Для Inertia запросов проверяем, откуда пришел запрос
+            $referer = $request->header('Referer');
+            if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+                // Возвращаемся на доску проекта с сохранением параметра sprint_id
+                $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+                return redirect($boardUrl)
+                    ->with('success', 'Задача успешно создана.');
+            }
+
             return redirect()->route('tasks.show', $task)
                 ->with('success', 'Задача успешно создана.');
         }
@@ -139,8 +148,9 @@ class TaskController extends Controller
         // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');
         if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
-            // Возвращаемся на доску проекта
-            return redirect()->route('projects.board', $project)
+            // Возвращаемся на доску проекта с сохранением параметра sprint_id
+            $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+            return redirect($boardUrl)
                 ->with('success', 'Задача успешно создана.');
         }
 
@@ -222,9 +232,10 @@ class TaskController extends Controller
             // Для Inertia запросов проверяем, откуда пришел запрос
             $referer = $request->header('Referer');
             if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
-                // Возвращаемся на доску проекта
+                // Возвращаемся на доску проекта с сохранением параметра sprint_id
                 $projectId = $task->project_id;
-                return redirect()->route('projects.board', $projectId)
+                $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+                return redirect($boardUrl)
                     ->with('success', 'Задача успешно обновлена.');
             }
 
@@ -246,9 +257,9 @@ class TaskController extends Controller
         // Проверяем, пришел ли запрос с доски проекта
         $referer = $request->header('Referer');
         if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
-            // Возвращаемся на доску проекта
-            $projectId = $task->project_id;
-            return redirect()->route('projects.board', $projectId)
+            // Возвращаемся на доску проекта с сохранением параметра sprint_id
+            $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+            return redirect($boardUrl)
                 ->with('success', 'Задача успешно обновлена.');
         }
 

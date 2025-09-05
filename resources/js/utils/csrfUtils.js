@@ -86,9 +86,9 @@ export function handleCsrfError(response, onCsrfError = null) {
         if (onCsrfError) {
             onCsrfError();
         } else {
-            // По умолчанию обновляем страницу
+            // По умолчанию обновляем страницу с сохранением параметров URL
             alert('Сессия истекла. Пожалуйста, обновите страницу и попробуйте снова.');
-            window.location.reload();
+            window.location.href = window.location.href;
         }
 
         return true;
