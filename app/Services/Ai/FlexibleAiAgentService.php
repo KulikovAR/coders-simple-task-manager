@@ -2,14 +2,13 @@
 
 namespace App\Services\Ai;
 
-use App\Services\Ai\Contracts\ContextProviderInterface;
-use App\Services\Ai\Contracts\CommandInterface;
 use App\Models\User;
+use App\Services\Ai\Contracts\ContextProviderInterface;
+use App\Services\AiConversationService;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
-use App\Services\AiConversationService;
 
 class FlexibleAiAgentService
 {
@@ -21,10 +20,12 @@ class FlexibleAiAgentService
     private string $aiModel;
 
     public function __construct(
-        CommandRegistry $commandRegistry,
-        array $contextProviders = [],
-        AiConversationService $conversationService = null
-    ) {
+        CommandRegistry            $commandRegistry,
+        ?array                 $contextProviders = null,
+        ?AiConversationService $conversationService = null
+    )
+    {
+        $contextProviders ??= [];
         $this->commandRegistry = $commandRegistry;
         $this->contextProviders = $contextProviders;
         $this->conversationService = $conversationService;
@@ -40,7 +41,6 @@ class FlexibleAiAgentService
     {
         $startTime = microtime(true);
 
-        // Валидация входных данных
         $userInput = trim($userInput);
         if (empty($userInput)) {
             return [
@@ -59,7 +59,6 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Rate limiting
         $key = 'ai_agent_' . $user->id;
         $rateLimit = config('ai-agent.rate_limiting.requests_per_minute', 10);
         if (RateLimiter::tooManyAttempts($key, $rateLimit)) {
@@ -72,35 +71,21 @@ class FlexibleAiAgentService
         }
         RateLimiter::hit($key, 60);
 
-        // Автоматически сбрасываем paid, если подписка истекла
-        if ($user->paid && $user->expires_at && now()->greaterThan($user->expires_at)) {
-            $user->update(['paid' => false]);
-        }
-
-        // Проверка лимита запросов к ИИ
-        // Эта проверка больше не нужна, так как лимиты проверяются в AiAgentController
-        // через SubscriptionService::canUseAi()
-
         try {
-            // Проверяем, является ли это подтверждением
             $isConfirmation = $this->isConfirmation($userInput);
 
-            // Шаг 1: Получаем команды от ИИ
             $commandsResponse = $this->getCommandsFromAi($userInput, $user, $sessionId, $isConfirmation);
             $sessionId = $commandsResponse['session_id'] ?? $sessionId;
 
-            // Шаг 2: Выполняем команды (автоматически для подтверждений)
             $commandResults = [];
             if (!empty($commandsResponse['commands'])) {
                 $commandResults = $this->executeCommands($commandsResponse['commands'], $user);
             }
 
-            // Шаг 3: Генерируем финальный ответ на основе результатов
             $finalResponse = $this->generateNaturalResponse($userInput, $commandResults, $user, $sessionId, $isConfirmation);
 
             $processingTime = microtime(true) - $startTime;
 
-            // Сохраняем в историю
             if ($this->conversationService) {
                 $conversation = $this->conversationService->getOrCreateActiveSession($user);
                 $this->conversationService->addUserMessage($conversation, $userInput);
@@ -130,10 +115,9 @@ class FlexibleAiAgentService
                 'processing_time' => $processingTime,
                 'command_results' => $commandResults,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $processingTime = isset($startTime) ? microtime(true) - $startTime : 0;
 
-            // Сохраняем ошибку в историю
             if ($this->conversationService) {
                 try {
                     $conversation = $this->conversationService->getOrCreateActiveSession($user);
@@ -146,7 +130,7 @@ class FlexibleAiAgentService
                         [],
                         $processingTime
                     );
-                } catch (\Exception $historyError) {
+                } catch (Exception $historyError) {
                     Log::error('Failed to save conversation history', [
                         'error' => $historyError->getMessage(),
                         'original_error' => $e->getMessage(),
@@ -181,7 +165,7 @@ class FlexibleAiAgentService
         $confirmations = ['да', 'давай', 'сделай', 'выполни', 'ок', 'окей', 'хорошо', 'согласен', 'подтверждаю', 'да, сделай', 'да, выполни'];
 
         foreach ($confirmations as $confirmation) {
-            if (strpos($input, $confirmation) === 0) {
+            if (str_starts_with($input, $confirmation)) {
                 return true;
             }
         }
@@ -210,7 +194,7 @@ class FlexibleAiAgentService
         ]);
 
         if (!$response->successful()) {
-            throw new \Exception('Ошибка при обращении к ИИ сервису: ' . $response->body());
+            throw new Exception('Ошибка при обращении к ИИ сервису: ' . $response->body());
         }
 
         $aiResponse = $response->json();
@@ -223,7 +207,6 @@ class FlexibleAiAgentService
 
         $parsedCommands = $this->parseCommandsResponse($aiResponse);
 
-        // Если команды не найдены, используем fallback
         if (empty($parsedCommands['commands'])) {
             $fallbackCommands = $this->getFallbackCommands($userInput, $context);
             if (!empty($fallbackCommands)) {
@@ -264,7 +247,7 @@ class FlexibleAiAgentService
         ]);
 
         if (!$response->successful()) {
-            throw new \Exception('Ошибка при генерации ответа: ' . $response->body());
+            throw new Exception('Ошибка при генерации ответа: ' . $response->body());
         }
 
         $aiResponse = $response->json();
@@ -294,7 +277,6 @@ class FlexibleAiAgentService
         $prompt .= "Контекст пользователя:\n";
         $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
 
-        // Добавляем информацию о доступных статусах задач
         if (isset($context['dynamic_statuses']) && !empty($context['dynamic_statuses']['available_status_names'])) {
             $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ЗАДАЧ:\n";
             foreach ($context['dynamic_statuses']['status_mapping'] as $statusName => $description) {
@@ -303,7 +285,6 @@ class FlexibleAiAgentService
             $prompt .= "\n";
         }
 
-        // Добавляем информацию о типах комментариев
         if (isset($context['enums']['comment_types'])) {
             $prompt .= "ТИПЫ КОММЕНТАРИЕВ:\n";
             foreach ($context['enums']['comment_types'] as $type) {
@@ -357,10 +338,10 @@ class FlexibleAiAgentService
         $prompt .= "Исходный запрос пользователя: {$userInput}\n\n";
 
         $prompt .= "Результаты выполненных команд:\n";
-        $prompt .= json_encode($commandResults, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
+        $prompt .= json_encode($commandResults, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
 
         $prompt .= "Контекст пользователя:\n";
-        $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
+        $prompt .= json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
 
         $prompt .= "ПРАВИЛА ДЛЯ ОТВЕТА:\n";
         $prompt .= "1. Отвечай естественно и дружелюбно\n";
@@ -385,7 +366,6 @@ class FlexibleAiAgentService
     {
         $content = $this->extractContent($aiResponse);
 
-        // Ищем JSON в ответе
         if (preg_match('/\{.*\}/s', $content, $matches)) {
             $json = json_decode($matches[0], true);
             if ($json && isset($json['commands'])) {
@@ -393,13 +373,12 @@ class FlexibleAiAgentService
             }
         }
 
-        // Если не нашли JSON, попробуем распарсить весь контент
         $json = json_decode($content, true);
         if ($json && isset($json['commands'])) {
             return $json;
         }
 
-        throw new \Exception('Не удалось распарсить команды из ответа ИИ');
+        throw new Exception('Не удалось распарсить команды из ответа ИИ');
     }
 
     /**
@@ -407,12 +386,10 @@ class FlexibleAiAgentService
      */
     private function extractContent(array $aiResponse): string
     {
-        // Проверяем формат OpenAI API
         if (isset($aiResponse['choices']) && is_array($aiResponse['choices'])) {
             return $aiResponse['choices'][0]['message']['content'] ?? '';
         }
 
-        // Fallback для других форматов
         return $aiResponse['output'] ?? $aiResponse['response'] ?? '';
     }
 
@@ -428,8 +405,7 @@ class FlexibleAiAgentService
                 try {
                     $providerContext = $provider->getContext($user);
                     $context[$provider->getName()] = $providerContext;
-                } catch (\Exception $e) {
-                    // Логируем ошибку, но продолжаем работу
+                } catch (Exception $e) {
                     Log::warning("Context provider {$provider->getName()} failed", [
                         'error' => $e->getMessage(),
                         'user_id' => $user->id
@@ -472,7 +448,7 @@ class FlexibleAiAgentService
             try {
                 $result = $command->execute($parameters, $user);
                 $results[] = $result;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $results[] = [
                     'success' => false,
                     'message' => "Ошибка выполнения команды '{$commandName}': " . $e->getMessage(),
@@ -490,13 +466,11 @@ class FlexibleAiAgentService
     {
         $input = mb_strtolower($userInput);
 
-        // Получаем доступные статусы из контекста
         $availableStatuses = [];
         if (isset($context['dynamic_statuses']['available_status_names'])) {
             $availableStatuses = $context['dynamic_statuses']['available_status_names'];
         }
 
-        // Статус проекта/задач
         if (preg_match('/(статус|состояние|как дела|что происходит)/', $input)) {
             return [
                 [
@@ -506,7 +480,6 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Мои задачи
         if (preg_match('/(мои|на меня|мои задачи|задачи на меня|что у меня|что стоит)/', $input)) {
             return [
                 [
@@ -518,7 +491,6 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Попытка найти соответствующий статус в доступных
         $statusMapping = [
             '/(к выполнению|готовые к выполнению|новые задачи|не начатые)/' => ['К выполнению', 'To Do'],
             '/(в работе|выполняются|активные задачи|текущие)/' => ['В работе', 'In Progress'],
@@ -530,7 +502,6 @@ class FlexibleAiAgentService
 
         foreach ($statusMapping as $pattern => $possibleStatuses) {
             if (preg_match($pattern, $input)) {
-                // Ищем первый подходящий статус из доступных
                 $foundStatus = null;
                 foreach ($possibleStatuses as $statusName) {
                     if (in_array($statusName, $availableStatuses)) {
@@ -552,7 +523,6 @@ class FlexibleAiAgentService
             }
         }
 
-        // Общие запросы о задачах
         if (preg_match('/(задачи|список задач|все задачи)/', $input)) {
             return [
                 [
@@ -562,9 +532,7 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Массовое обновление статуса задач
         if (preg_match('/(переведи|перевести|обнови|обновить).*?(задач|задачи).*?(статус|статус).*?(выполнено|готово|done)/', $input)) {
-            // Ищем подходящий "завершенный" статус
             $completedStatus = 'Done'; // fallback
             foreach (['Завершена', 'Done', 'Готова к релизу'] as $status) {
                 if (in_array($status, $availableStatuses)) {
@@ -575,14 +543,12 @@ class FlexibleAiAgentService
 
             $parameters = ['new_status' => $completedStatus];
 
-            // Ищем название проекта
             if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
                 $parameters['project_name'] = $matches[1];
             } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
                 $parameters['project_name'] = $matches[1];
             }
 
-            // Ищем текущий статус
             if (preg_match('/(?:которые|что).*?(?:в|на).*?(тестировании|тестирование)/', $input)) {
                 $testingStatus = 'Testing'; // fallback
                 foreach (['Тестирование', 'Testing'] as $status) {
@@ -597,7 +563,6 @@ class FlexibleAiAgentService
             return [['name' => 'BULK_UPDATE_TASK_STATUS', 'parameters' => $parameters]];
         }
 
-        // Проекты
         if (preg_match('/(проекты|список проектов|все проекты|мои проекты)/', $input)) {
             return [
                 [
@@ -607,7 +572,6 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Спринты
         if (preg_match('/(спринты|список спринтов|все спринты|мои спринты)/', $input)) {
             return [
                 [
@@ -617,18 +581,15 @@ class FlexibleAiAgentService
             ];
         }
 
-        // Создание спринта
         if (preg_match('/(создай спринт|создать спринт|новый спринт|добавь спринт)/', $input)) {
             $parameters = [];
-            
-            // Ищем название проекта
+
             if (preg_match('/в проекте "([^"]+)"/', $input, $matches)) {
                 $parameters['project_name'] = $matches[1];
             } elseif (preg_match('/в проекте ([^,\s]+)/', $input, $matches)) {
                 $parameters['project_name'] = $matches[1];
             }
 
-            // Ищем название спринта
             if (preg_match('/название[:\s]+"([^"]+)"/', $input, $matches)) {
                 $parameters['name'] = $matches[1];
             } elseif (preg_match('/название[:\s]+([^,\n]+)/', $input, $matches)) {
@@ -637,7 +598,6 @@ class FlexibleAiAgentService
                 $parameters['name'] = 'Новый спринт';
             }
 
-            // Ищем даты
             if (preg_match('/с (\d{4}-\d{2}-\d{2})/', $input, $matches)) {
                 $parameters['start_date'] = $matches[1];
             }

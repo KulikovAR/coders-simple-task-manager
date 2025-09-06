@@ -21,7 +21,6 @@ class SprintContextProvider implements ContextProviderInterface
             return [];
         }
 
-        // Кэшируем спринты на 5 минут
         $cacheKey = "sprint_context_user_{$user->id}";
 
         return Cache::remember($cacheKey, 300, function () use ($user) {
@@ -31,7 +30,6 @@ class SprintContextProvider implements ContextProviderInterface
                 'sprint_names' => [],
             ];
 
-            // Получаем все проекты пользователя
             $projectIds = Project::where('owner_id', $user->id)
                 ->orWhereHas('members', function($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -42,7 +40,6 @@ class SprintContextProvider implements ContextProviderInterface
                 return $context;
             }
 
-            // Получаем спринты проектов
             $sprints = Sprint::whereIn('project_id', $projectIds)
                 ->with(['project:id,name'])
                 ->orderBy('start_date', 'desc')
@@ -61,10 +58,9 @@ class SprintContextProvider implements ContextProviderInterface
                 ];
             })->toArray();
 
-            // Активные спринты (текущие)
             $now = now();
             $context['active_sprints'] = $sprints->filter(function ($sprint) use ($now) {
-                return $sprint->status === 'active' && 
+                return $sprint->status === 'active' &&
                        $now->between($sprint->start_date, $sprint->end_date);
             })->map(function ($sprint) {
                 return [

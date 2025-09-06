@@ -40,7 +40,7 @@ class AiAgentController extends Controller
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         // Получаем информацию о лимитах запросов к ИИ
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
         $aiRequestsRemaining = $user->getRemainingAiRequests();
@@ -73,12 +73,12 @@ class AiAgentController extends Controller
         $user = Auth::user();
         $message = $request->input('message');
         $sessionId = $request->input('session_id');
-        
+
         // Проверяем, есть ли у пользователя доступные запросы к ИИ
         if (!$this->subscriptionService->canUseAi($user)) {
                     // Получаем информацию о текущем тарифе
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
-        
+
         return response()->json([
             'success' => false,
             'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
@@ -92,10 +92,10 @@ class AiAgentController extends Controller
 
         // Обрабатываем запрос
         $result = $this->aiAgentService->processRequest($message, $user, $sessionId);
-        
+
         // Увеличиваем счетчик использованных запросов
         $this->subscriptionService->processAiUsage($user);
-        
+
         // Добавляем информацию о лимитах в ответ
         $result['subscription'] = [
             'ai_requests_remaining' => $user->getRemainingAiRequests(),
@@ -200,7 +200,6 @@ class AiAgentController extends Controller
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
         
-        // Получаем информацию о лимитах запросов к ИИ
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
         $aiRequestsRemaining = $user->getRemainingAiRequests();
 
@@ -238,7 +237,6 @@ class AiAgentController extends Controller
     {
         $commandRegistry = $this->createCommandRegistry();
 
-        // Создаем ленивый контекст-провайдер для оптимизации
         $lazyProvider = new LazyContextProvider([
             new UserContextProvider(),
             new ProjectContextProvider(app(ProjectService::class)),

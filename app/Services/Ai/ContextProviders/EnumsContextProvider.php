@@ -38,6 +38,4 @@ class EnumsContextProvider implements ContextProviderInterface
 
         return $types;
     }
-
-
 }
