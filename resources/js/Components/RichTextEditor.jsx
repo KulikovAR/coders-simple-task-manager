@@ -816,6 +816,7 @@ export default function RichTextEditor({
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [currentImageUrl, setCurrentImageUrl] = useState('');
+    const [selectedFiles, setSelectedFiles] = useState([]);
 
     // Обработка drag & drop файлов
     const handleDrop = useCallback((event) => {
@@ -824,6 +825,17 @@ export default function RichTextEditor({
         setIsDragging(false);
         const files = Array.from(event.dataTransfer.files);
 
+        if (files.length === 0) return;
+
+        // Если есть attachableType и attachableId, открываем модальное окно для всех файлов
+        if (attachableType && attachableId) {
+            setShowFileUploadModal(true);
+            // Передаем файлы в модальное окно через состояние
+            setSelectedFiles(files);
+            return;
+        }
+
+        // Fallback для изображений (если нет attachableType/attachableId)
         files.forEach(file => {
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -835,7 +847,7 @@ export default function RichTextEditor({
                 reader.readAsDataURL(file);
             }
         });
-    }, [editor]);
+    }, [editor, attachableType, attachableId]);
 
     // Обработка выбора файла
     const handleFileSelect = useCallback((event) => {
@@ -890,6 +902,7 @@ export default function RichTextEditor({
         }
 
         setShowFileUploadModal(false);
+        setSelectedFiles([]);
     }, [editor]);
 
     // Обработка ошибок загрузки файлов
@@ -1318,11 +1331,15 @@ export default function RichTextEditor({
         {attachableType && attachableId && (
             <FileUploadModal
                 isOpen={showFileUploadModal}
-                onClose={() => setShowFileUploadModal(false)}
+                onClose={() => {
+                    setShowFileUploadModal(false);
+                    setSelectedFiles([]);
+                }}
                 onFileUploaded={handleFileUploaded}
                 onError={handleFileUploadError}
                 attachableType={attachableType}
                 attachableId={attachableId}
+                initialFiles={selectedFiles}
             />
         )}
 

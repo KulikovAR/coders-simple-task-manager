@@ -8,7 +8,8 @@ export default function FileUploadModal({
     onFileUploaded,
     attachableType,
     attachableId,
-    onError
+    onError,
+    initialFiles = []
 }) {
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -27,8 +28,12 @@ export default function FileUploadModal({
     useEffect(() => {
         if (isOpen) {
             loadUserStats();
+            // Устанавливаем начальные файлы, если они переданы
+            if (initialFiles && initialFiles.length > 0) {
+                setSelectedFiles(initialFiles);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialFiles]);
 
     const loadUserStats = async () => {
         const stats = await fileService.getUserFileStats();
