@@ -332,7 +332,9 @@ export default function TaskComments({
 
                             }}
                             users={users}
-                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения и ссылки)"
+                            attachableType={editingComment ? "App\\Models\\TaskComment" : "App\\Models\\Task"}
+                            attachableId={editingComment?.id || task?.id || 'temp_' + Date.now()}
+                            placeholder="Введите комментарий... (используйте @ для упоминания пользователей, поддерживается форматирование, изображения, ссылки и загрузка файлов)"
                             className={`w-full ${
                                 errors.content ? 'border-accent-red' : ''
                             }`}

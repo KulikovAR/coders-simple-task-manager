@@ -368,15 +368,6 @@ export default function FileUploadModal({
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    {file.type.startsWith('image/') && (
-                                                        <button
-                                                            onClick={() => previewFileHandler(file)}
-                                                            className="p-2 text-accent-blue hover:text-accent-blue/80 rounded-lg hover:bg-accent-blue/10 transition-all duration-200"
-                                                            title="Предпросмотр"
-                                                        >
-                                                            <Eye size={18} />
-                                                        </button>
-                                                    )}
                                                     <button
                                                         onClick={() => removeFile(index)}
                                                         disabled={uploading}
