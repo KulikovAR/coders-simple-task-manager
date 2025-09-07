@@ -1345,42 +1345,49 @@ export default function RichTextEditor({
 
         {/* Модальное окно для просмотра изображений */}
         {showImageModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Просмотр изображения
-                        </h3>
-                        <button
-                            onClick={() => setShowImageModal(false)}
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                    <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
-                        <img
-                            src={currentImageUrl}
-                            alt="Просмотр изображения"
-                            className="max-w-full max-h-full object-contain rounded-lg"
-                            style={{ maxHeight: 'calc(90vh - 120px)' }}
-                        />
-                    </div>
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 flex-shrink-0">
-                        <a
-                            href={currentImageUrl}
-                            download
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            Скачать
-                        </a>
-                        <button
-                            onClick={() => setShowImageModal(false)}
-                            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                        >
-                            Закрыть
-                        </button>
-                    </div>
+            <div className="fixed inset-0 bg-black bg-opacity-90 flex flex-col z-50">
+                {/* Кнопка закрытия в правом верхнем углу */}
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
+                    <button
+                        onClick={() => setShowImageModal(false)}
+                        className="w-8 h-8 sm:w-10 sm:h-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm text-sm sm:text-base"
+                        title="Закрыть"
+                    >
+                        ✕
+                    </button>
+                </div>
+                
+                {/* Область изображения - занимает все доступное пространство */}
+                <div className="flex-1 flex items-center justify-center p-2 sm:p-4">
+                    <img
+                        src={currentImageUrl}
+                        alt="Просмотр изображения"
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                        style={{ maxHeight: 'calc(100vh - 140px)' }}
+                    />
+                </div>
+                
+                {/* Кнопки внизу */}
+                <div className="flex justify-center space-x-2 sm:space-x-4 p-2 sm:p-4 bg-black bg-opacity-50 backdrop-blur-sm flex-shrink-0">
+                    <a
+                        href={currentImageUrl}
+                        download
+                        className="px-3 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
+                    >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="hidden sm:inline">Скачать</span>
+                    </a>
+                    <button
+                        onClick={() => setShowImageModal(false)}
+                        className="px-3 py-2 sm:px-6 sm:py-3 text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors font-medium flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
+                    >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span className="hidden sm:inline">Закрыть</span>
+                    </button>
                 </div>
             </div>
         )}
