@@ -1184,14 +1184,6 @@ export default function RichTextEditor({
                 >
                     <Paperclip size={16} />
                 </button>
-                <button
-                    type="button"
-                    onClick={() => restoreFileAttachments()}
-                    className="p-2 rounded hover:bg-accent-blue/10 text-text-primary"
-                    title="Восстановить файлы"
-                >
-                    🔄
-                </button>
 
                 <div className="w-px h-6 bg-border-color mx-2" />
 
