@@ -104,11 +104,11 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             const task = localTasks.find(t => t.code === taskCode);
             
             if (task) {
-                // Сначала сбрасываем состояние и устанавливаем флаг открытия из URL
-                setSelectedTask(null);
+                // Сразу устанавливаем состояние модалки и задачи
+                setSelectedTask(task);
+                setShowTaskModal(true);
                 setErrors({});
                 setModalOpenedFromUrl(true);
-                setShowTaskModal(true);
                 
                 // Применяем стили к body сразу (только если модалка еще не открыта)
                 if (!showTaskModal) {
@@ -133,21 +133,26 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     .then(response => response.json())
                     .then(data => {
                         if (data.props && data.props.task) {
-                            // Устанавливаем задачу напрямую без использования предыдущего состояния
-                            setSelectedTask(data.props.task);
-                        } else {
-                            // Если данные не пришли, используем базовую задачу
-                            setSelectedTask(task);
+                            setSelectedTask(prev => {
+                                // Если selectedTask уже null, возвращаем новую задачу
+                                if (!prev) {
+                                    return data.props.task;
+                                }
+                                // Иначе обновляем существующую задачу
+                                return {
+                                    ...prev,
+                                    ...data.props.task,
+                                    assignee: data.props.task.assignee || prev.assignee,
+                                    status: data.props.task.status || prev.status,
+                                    sprint: data.props.task.sprint || prev.sprint,
+                                    project: data.props.task.project || prev.project
+                                };
+                            });
                         }
                     })
                     .catch(error => {
                         console.error('Ошибка загрузки задачи:', error);
-                        // В случае ошибки используем базовую задачу
-                        setSelectedTask(task);
                     });
-                } else {
-                    // Для задачи без ID просто устанавливаем её
-                    setSelectedTask(task);
                 }
             }
         }
@@ -174,13 +179,6 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const openTaskModal = (task) => {
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
-        
-        // Сначала сбрасываем предыдущую задачу и ошибки
-        setSelectedTask(null);
-        setErrors({});
-        
-        // Устанавливаем модалку как открытую сразу
-        setShowTaskModal(true);
 
         if (task.id) {
             // Загружаем существующую задачу с комментариями
@@ -195,8 +193,19 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             .then(response => response.json())
             .then(data => {
                 if (data.props && data.props.task) {
-                    // Устанавливаем новую задачу напрямую без использования предыдущего состояния
-                    setSelectedTask(data.props.task);
+                    setSelectedTask(prev => {
+                        if (!prev) {
+                            return data.props.task;
+                        }
+                        return {
+                            ...prev,
+                            ...data.props.task,
+                            assignee: data.props.task.assignee || prev.assignee,
+                            status: data.props.task.status || prev.status,
+                            sprint: data.props.task.sprint || prev.sprint,
+                            project: data.props.task.project || prev.project
+                        };
+                    });
                 } else {
                     setSelectedTask(task);
                 }
@@ -209,6 +218,9 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             // Для новой задачи просто устанавливаем начальные данные
             setSelectedTask(task);
         }
+
+        setShowTaskModal(true);
+        setErrors({});
 
         // Изменяем URL без перезагрузки страницы (только если мы не на правильной странице)
         if (task.code) {
