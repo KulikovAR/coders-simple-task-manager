@@ -230,8 +230,8 @@ body[data-page="Welcome"] {
 
 :root {
     --primary-bg: #0a0a0a;
-    --secondary-bg: #1a1a1a;
-    --card-bg: #1f1f1f;
+    --secondary-bg: #151515;
+    --card-bg: #101010;
     --border-color: #2a2a2a;
     --text-primary: #ffffff;
     --text-secondary: #b0b0b0;
@@ -449,7 +449,7 @@ body[data-page="Welcome"] {
     box-shadow: var(--shadow-sm);
 }
 .board-modal {
-    background-color: #1A1A1A !important;
+    background-color: #101010 !important;
     color: #ffffff !important;
     box-shadow: var(--shadow-md);
 }
@@ -872,7 +872,7 @@ body {
 }
 
 .bg-card-bg {
-    background: var(--card-bg) !important;
+    background: var(--card-bg);
 }
 
 .bg-secondary-bg {
@@ -996,8 +996,14 @@ body {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    .task-card {
+        background: #171717;
+    }
+}
+
 .task-card:hover {
-    transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
 

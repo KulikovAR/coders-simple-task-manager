@@ -6,7 +6,7 @@ import HtmlRenderer from '@/Components/HtmlRenderer';
 export default function TaskCard({ task }) {
 
     return (
-        <div className="card hover:shadow-glow transition-all duration-300 group flex flex-col h-full task-glitch">
+        <div className="card hover:shadow-glow transition-all duration-300 group flex flex-col h-full">
             {/* Заголовок карточки */}
             <div className="flex-1 min-h-0">
                 {task.code && (

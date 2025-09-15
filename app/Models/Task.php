@@ -27,7 +27,12 @@ class Task extends Model
         'priority',
         'status_id',
         'deadline',
-        'tags'
+        'tags',
+        'start_date',
+        'duration_days',
+        'progress_percent',
+        'is_milestone',
+        'sort_order'
     ];
 
     protected $casts = [
@@ -35,6 +40,11 @@ class Task extends Model
         'merge_request' => 'string',
         'deadline' => 'date',
         'tags' => 'array',
+        'start_date' => 'date',
+        'duration_days' => 'integer',
+        'progress_percent' => 'integer',
+        'is_milestone' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     public function project(): BelongsTo
@@ -72,6 +82,16 @@ class Task extends Model
         return $this->hasMany(TaskChecklist::class)->orderBy('sort_order', 'asc');
     }
 
+    public function dependencies(): HasMany
+    {
+        return $this->hasMany(TaskDependency::class);
+    }
+
+    public function dependents(): HasMany
+    {
+        return $this->hasMany(TaskDependency::class, 'depends_on_task_id');
+    }
+
     public function getCodeAttribute(): string
     {
         $project = $this->project;
@@ -80,5 +100,50 @@ class Task extends Model
         }
 
         return $project->slug . '-' . $this->internal_id;
+    }
+
+    /**
+     * Получить дату окончания задачи
+     */
+    public function getEndDateAttribute(): ?string
+    {
+        if (!$this->start_date || !$this->duration_days) {
+            return null;
+        }
+
+        return $this->start_date->addDays($this->duration_days - 1)->format('Y-m-d');
+    }
+
+    public function getEndDateCarbonAttribute(): ?\Carbon\Carbon
+    {
+        if (!$this->start_date || !$this->duration_days) {
+            return null;
+        }
+
+        return $this->start_date->addDays($this->duration_days - 1);
+    }
+
+    /**
+     * Проверить, является ли задача вехой
+     */
+    public function isMilestone(): bool
+    {
+        return $this->is_milestone || $this->duration_days === 0;
+    }
+
+    /**
+     * Получить все зависимости задачи
+     */
+    public function getAllDependencies(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->dependencies()->with('dependsOnTask')->get();
+    }
+
+    /**
+     * Получить все задачи, которые зависят от текущей
+     */
+    public function getAllDependents(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->dependents()->with('task')->get();
     }
 }

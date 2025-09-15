@@ -17,7 +17,7 @@ export default function TaskCard({
     const copyTaskLink = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const taskUrl = task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id);
         navigator.clipboard.writeText(taskUrl)
             .then(() => {
@@ -25,13 +25,13 @@ export default function TaskCard({
                 const element = e.currentTarget;
                 if (element) {
                     const originalText = element.textContent || task.code;
-                    
+
                     // Сохраняем оригинальное содержимое
                     const originalContent = element.innerHTML;
-                    
+
                     // Заменяем содержимое на уведомление о копировании
                     element.innerHTML = '<span>Скопировано!</span>';
-                    
+
                     setTimeout(() => {
                         // Проверяем, существует ли еще элемент перед восстановлением
                         if (element && element.isConnected) {
@@ -57,11 +57,11 @@ export default function TaskCard({
         }
     };
 
-    // Компактный списочный вид 
+    // Компактный списочный вид
     if (viewMode === 'list') {
         return (
             <div
-                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 task-glitch ${
+                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
                     draggedTask?.id === task.id ? 'dragging opacity-50' : ''
                 }`}
                 draggable
@@ -85,7 +85,7 @@ export default function TaskCard({
                         <div className="flex items-center gap-2 mb-1">
                             {/* Код задачи с возможностью копирования */}
                             {task.code && (
-                                <span 
+                                <span
                                     className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold flex-shrink-0 cursor-pointer hover:bg-accent-blue/10 transition-colors inline-flex items-center"
                                     onClick={copyTaskLink}
                                     title="Нажмите, чтобы скопировать ссылку на задачу"
@@ -107,7 +107,7 @@ export default function TaskCard({
                                 </a>
                             </h5>
                         </div>
-                        
+
                         {/* Вторая строка: теги */}
                         {task.tags && task.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-1">
@@ -152,9 +152,9 @@ export default function TaskCard({
                             }`}>
                                 <span className="mr-1">{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
                                 <span className="hidden sm:inline">
-                                    {new Date(task.deadline).toLocaleDateString('ru-RU', { 
-                                        day: '2-digit', 
-                                        month: '2-digit' 
+                                    {new Date(task.deadline).toLocaleDateString('ru-RU', {
+                                        day: '2-digit',
+                                        month: '2-digit'
                                     })}
                                 </span>
                             </div>
@@ -184,7 +184,7 @@ export default function TaskCard({
     if (viewMode === 'compact-board') {
         return (
             <div
-                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 task-glitch ${
+                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
                     draggedTask?.id === task.id ? 'dragging opacity-50' : ''
                 }`}
                 draggable
@@ -205,7 +205,7 @@ export default function TaskCard({
                 {/* Первая строка: код задачи с возможностью копирования */}
                 {task.code && (
                     <div className="mb-2">
-                        <span 
+                        <span
                             className="text-xs font-mono text-accent-blue bg-accent-blue/5 px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-accent-blue/10 transition-colors inline-flex items-center"
                             onClick={copyTaskLink}
                             title="Нажмите, чтобы скопировать ссылку на задачу"
@@ -232,7 +232,7 @@ export default function TaskCard({
                                 {task.title}
                             </a>
                         </h5>
-                        
+
                         {/* Теги */}
                         {task.tags && task.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1">
@@ -277,9 +277,9 @@ export default function TaskCard({
                             }`}>
                                 <span className="mr-1">{new Date(task.deadline) < new Date() ? '⚠️' : '📅'}</span>
                                 <span className="hidden sm:inline">
-                                    {new Date(task.deadline).toLocaleDateString('ru-RU', { 
-                                        day: '2-digit', 
-                                        month: '2-digit' 
+                                    {new Date(task.deadline).toLocaleDateString('ru-RU', {
+                                        day: '2-digit',
+                                        month: '2-digit'
                                     })}
                                 </span>
                             </div>
@@ -308,7 +308,7 @@ export default function TaskCard({
     // Обычный карточный вид
     return (
         <div
-            className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 task-glitch ${
+            className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
                 draggedTask?.id === task.id ? 'dragging opacity-50' : ''
             }`}
             draggable
@@ -329,7 +329,7 @@ export default function TaskCard({
         >
             {/* Код задачи с возможностью копирования ссылки */}
             {task.code && (
-                <div 
+                <div
                     className="text-caption font-mono text-accent-blue mb-3 font-bold flex items-center bg-accent-blue/5 px-2 py-1 rounded-lg inline-block cursor-pointer hover:bg-accent-blue/10 transition-colors"
                     onClick={copyTaskLink}
                     title="Нажмите, чтобы скопировать ссылку на задачу"

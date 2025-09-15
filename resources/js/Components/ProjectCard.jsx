@@ -125,6 +125,12 @@ export default function ProjectCard({ project }) {
                         Доска
                     </Link>
                     <Link
+                        href={route('projects.gantt', project.id)}
+                        className="btn btn-accent flex-1 text-center"
+                    >
+                        Гантт
+                    </Link>
+                    <Link
                         href={route('projects.show', project.id)}
                         className="btn btn-secondary flex-1 text-center"
                     >

@@ -26,7 +26,12 @@ class TaskRequest extends FormRequest
             'deadline' => 'nullable|date',
             'result' => 'nullable|string|max:65535',
             'merge_request' => 'nullable|url',
-            'tags' => 'nullable|max:255'
+            'tags' => 'nullable|max:255',
+            'start_date' => 'nullable|date',
+            'duration_days' => 'nullable|integer|min:0',
+            'progress_percent' => 'nullable|integer|min:0|max:100',
+            'is_milestone' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer|min:0'
         ];
 
         if ($this->isMethod('POST')) {

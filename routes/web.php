@@ -4,6 +4,7 @@ use App\Http\Controllers\AiAgentController;
 use App\Http\Controllers\AiTextOptimizationController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GanttController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -103,6 +104,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'getMembers'])->name('projects.members');
     Route::post('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'addMember'])->name('projects.members.add');
     Route::delete('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'removeMember'])->name('projects.members.remove');
+
+    // Гантт диаграммы
+    Route::get('/projects/{project}/gantt', [GanttController::class, 'show'])->name('projects.gantt');
+    Route::put('/tasks/{task}/gantt', [GanttController::class, 'updateTask'])->name('tasks.gantt.update');
+    Route::post('/gantt/dependencies', [GanttController::class, 'createDependency'])->name('gantt.dependencies.create');
+    Route::delete('/gantt/dependencies/{dependency}', [GanttController::class, 'deleteDependency'])->name('gantt.dependencies.delete');
+    Route::post('/projects/{project}/gantt/calculate-dates', [GanttController::class, 'calculateDates'])->name('projects.gantt.calculate-dates');
 
     // Спринты
     Route::get('/projects/{project}/sprints', [App\Http\Controllers\SprintController::class, 'index'])->name('sprints.index');
