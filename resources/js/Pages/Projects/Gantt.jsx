@@ -139,7 +139,8 @@ export default function Gantt({ auth, project, ganttData, sprintId }) {
 
     // Фильтруем задачи по выбранному периоду
     const filteredTasks = tasks.filter(task => {
-        if (!task.start_date) return false;
+        // Если у задачи нет даты начала, показываем её всегда
+        if (!task.start_date) return true;
         
         const taskStart = parseISO(task.start_date);
         const taskEnd = task.end_date ? parseISO(task.end_date) : addDays(taskStart, (task.duration_days || 1) - 1);
@@ -155,7 +156,12 @@ export default function Gantt({ auth, project, ganttData, sprintId }) {
 
     // Вычисляем позицию задачи на временной шкале
     const getTaskPosition = (task) => {
-        if (!task.start_date) return { left: 0, width: 0 };
+        if (!task.start_date) {
+            // Для задач без даты показываем в начале временной шкалы
+            const taskDuration = task.duration_days || 1;
+            const width = (taskDuration / timeline.length) * 100;
+            return { left: 0, width: Math.max(1, width) };
+        }
         
         const taskStart = parseISO(task.start_date);
         const taskEnd = task.end_date ? parseISO(task.end_date) : addDays(taskStart, (task.duration_days || 1) - 1);
@@ -582,7 +588,7 @@ export default function Gantt({ auth, project, ganttData, sprintId }) {
                                                                     : hoveredTask?.id === task.id 
                                                                     ? 'ring-2 ring-green-500' 
                                                                     : ''
-                                                            } ${getTaskColor(task.priority)}`}
+                                                            } ${!task.start_date ? 'opacity-60 border-2 border-dashed border-white' : ''} ${getTaskColor(task.priority)}`}
                                                             style={{
                                                                 left: `${((position.left - (dateIndex / timeline.length) * 100) / (1 / timeline.length))}%`,
                                                                 top: '8px',
@@ -614,7 +620,7 @@ export default function Gantt({ auth, project, ganttData, sprintId }) {
                                                             title={
                                                                 isCreatingDependency 
                                                                     ? (dependencyStart ? `Связать с ${task.title}` : `Начать связь с ${task.title}`)
-                                                                    : `${task.title} (${task.duration_days} дн.)`
+                                                                    : `${task.title} (${task.duration_days || 1} дн.)${!task.start_date ? ' - без даты' : ''}`
                                                             }
                                                         >
                                                             <div className="truncate">
