@@ -325,6 +325,7 @@ const Checklist = forwardRef(({
                                 {editingId === item.id ? (
                                     <>
                                         <button
+                                            type="button"
                                             onClick={() => handleSaveEdit(item)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-green hover:text-accent-green/80 transition-colors duration-200"
@@ -335,6 +336,7 @@ const Checklist = forwardRef(({
                                             </svg>
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={handleCancelEdit}
                                             className="p-1 text-accent-red hover:text-accent-red/80 transition-colors duration-200"
                                             title="Отменить"
@@ -347,6 +349,7 @@ const Checklist = forwardRef(({
                                 ) : (
                                     <>
                                         <button
+                                            type="button"
                                             onClick={() => handleStartEdit(item)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
@@ -357,6 +360,7 @@ const Checklist = forwardRef(({
                                             </svg>
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => handleDeleteItem(item)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-red hover:text-accent-red/80 transition-colors duration-200"
@@ -390,6 +394,7 @@ const Checklist = forwardRef(({
                     />
                     <div className="flex items-center gap-1">
                         <button
+                            type="button"
                             onClick={handleAddItem}
                             disabled={isProcessing || !newItemTitle.trim()}
                             className="p-1 text-accent-green hover:text-accent-green/80 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -400,6 +405,7 @@ const Checklist = forwardRef(({
                             </svg>
                         </button>
                         <button
+                            type="button"
                             onClick={() => {
                                 setIsAdding(false);
                                 setNewItemTitle('');
@@ -415,6 +421,7 @@ const Checklist = forwardRef(({
                 </div>
             ) : (
                 <button
+                    type="button"
                     onClick={() => setIsAdding(true)}
                     className="flex items-center gap-2 text-sm text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
                 >
