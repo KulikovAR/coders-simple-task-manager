@@ -180,6 +180,20 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
         // Сохраняем текущую позицию скролла
         const scrollY = window.scrollY;
 
+        // Сначала закрываем предыдущую модалку, если она открыта
+        if (showTaskModal) {
+            closeTaskModal();
+            // Небольшая задержка перед открытием новой модалки
+            setTimeout(() => {
+                openTaskModalInternal(task, scrollY);
+            }, 100);
+            return;
+        }
+        
+        openTaskModalInternal(task, scrollY);
+    };
+    
+    const openTaskModalInternal = (task, scrollY) => {
         if (task.id) {
             // Загружаем существующую задачу с комментариями
             const taskUrl = task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id);
@@ -231,14 +245,12 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             }
         }
 
-        // Блокируем скролл страницы и сохраняем текущую позицию (только если модалка еще не открыта)
-        if (!showTaskModal && !modalOpenedFromUrl) {
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.top = `-${scrollY}px`;
-            document.body.style.width = '100%';
-            document.body.classList.add('modal-open');
-        }
+        // Блокируем скролл страницы и сохраняем текущую позицию
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+        document.body.classList.add('modal-open');
     };
 
     const closeTaskModal = () => {
