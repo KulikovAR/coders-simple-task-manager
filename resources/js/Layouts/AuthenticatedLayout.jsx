@@ -68,7 +68,7 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href="/dashboard" className="hover:opacity-80 transition-all duration-200 hover:scale-105">
+                                <Link href="/dashboard" className="hover:opacity-80 transition-all duration-200 hover:scale-105 icon-glitch">
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-text-primary" />
                                 </Link>
                             </div>
@@ -84,7 +84,7 @@ export default function Authenticated({ user, header, children, flash }) {
                                 </NavLink>
                             </div>
                         </div>
-                        <div className="hidden sm:flex sm:items-center sm:ml-6">
+                        <div className="hidden sm:flex sm:items-center sm:ml-6 dropdown-glitch">
                             <div className="ml-3 relative flex items-center gap-3">
                                 {/* Theme Switcher */}
                                 <button
@@ -182,7 +182,7 @@ export default function Authenticated({ user, header, children, flash }) {
                         <div className="-mr-2 flex items-center gap-2 sm:hidden">
                             {/* Notification Bell для мобильного - рядом с бургером */}
                             <MobileNotificationBell />
-                            
+
                             <button
                                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
                                 className="inline-flex items-center justify-center p-2 text-text-primary hover:text-text-secondary hover:bg-secondary-bg focus:outline-none focus:bg-secondary-bg focus:text-text-secondary transition-all duration-200 rounded-lg"
@@ -219,7 +219,7 @@ export default function Authenticated({ user, header, children, flash }) {
                             Задачи
                         </ResponsiveNavLink>
                     </div>
-                    
+
                     {/* Мобильное переключение темы */}
                     <div className="mobile-menu-controls">
                         <div className="flex items-center justify-center">
@@ -244,7 +244,7 @@ export default function Authenticated({ user, header, children, flash }) {
                             {theme === 'dark' ? 'Тёмная тема' : 'Светлая тема'}
                         </div>
                     </div>
-                    
+
                     <div className="pt-4 pb-1 border-t border-border-color">
                         <div className="px-4">
                             <div className="font-medium text-base text-text-primary">{user.name}</div>

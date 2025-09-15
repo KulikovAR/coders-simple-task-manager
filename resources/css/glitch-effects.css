@@ -1,0 +1,1214 @@
+/* ===== ГЛИТЧ-ЭФФЕКТЫ ДЛЯ ИНТЕРФЕЙСА ===== */
+
+/* Базовые глитч-эффекты */
+@keyframes glitch-shift {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes glitch-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+    75% { opacity: 0.9; }
+}
+
+@keyframes glitch-distort {
+    0% { filter: hue-rotate(0deg) saturate(1); }
+    25% { filter: hue-rotate(90deg) saturate(1.2); }
+    50% { filter: hue-rotate(180deg) saturate(0.8); }
+    75% { filter: hue-rotate(270deg) saturate(1.1); }
+    100% { filter: hue-rotate(360deg) saturate(1); }
+}
+
+@keyframes glitch-scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+@keyframes glitch-noise {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 100%; }
+}
+
+/* Классы глитч-эффектов */
+.glitch-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Эффект смещения */
+.glitch-shift {
+    animation: glitch-shift 0.3s ease-in-out;
+}
+
+.glitch-shift:hover {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+/* Эффект мерцания */
+.glitch-flicker {
+    animation: glitch-flicker 2s ease-in-out infinite;
+}
+
+.glitch-flicker:hover {
+    animation: glitch-flicker 0.5s ease-in-out infinite;
+}
+
+/* Эффект искажения цвета */
+.glitch-distort {
+    animation: glitch-distort 3s ease-in-out infinite;
+}
+
+.glitch-distort:hover {
+    animation: glitch-distort 1s ease-in-out infinite;
+}
+
+/* Эффект сканирования */
+.glitch-scan::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    animation: glitch-scan 2s linear infinite;
+}
+
+/* Эффект шума */
+.glitch-noise::after {
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+    background-size: 200px 200px;
+    animation: glitch-noise 4s linear infinite;
+    opacity: 0.3;
+}
+
+/* Комбинированные эффекты */
+.glitch-combo {
+    animation:
+        glitch-shift 0.3s ease-in-out,
+        glitch-flicker 2s ease-in-out infinite,
+        glitch-distort 3s ease-in-out infinite;
+}
+
+.glitch-combo:hover {
+    animation:
+        glitch-shift 0.2s ease-in-out infinite,
+        glitch-flicker 0.5s ease-in-out infinite,
+        glitch-distort 1s ease-in-out infinite;
+}
+
+/* Эффект для кнопок */
+.btn-glitch {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.btn-glitch:hover::before {
+    left: 100%;
+}
+
+.btn-glitch:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Эффект для карточек */
+.card-glitch {
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.card-glitch:hover::before {
+    opacity: 1;
+}
+
+.card-glitch:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+/* Эффект для текста */
+.text-glitch {
+    position: relative;
+    display: inline-block;
+}
+
+.text-glitch::before,
+.text-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.text-glitch::before {
+    color: #ff0000;
+    animation: glitch-shift 0.3s ease-in-out infinite;
+    z-index: -1;
+}
+
+.text-glitch::after {
+    color: #00ff00;
+    animation: glitch-shift 0.3s ease-in-out infinite reverse;
+    z-index: -2;
+}
+
+/* Эффект для иконок */
+.icon-glitch {
+    transition: all 0.3s ease;
+}
+
+.icon-glitch:hover {
+    animation: glitch-shift 5s ease-in-out infinite;
+    filter: hue-rotate(90deg);
+}
+
+/* Эффект для статусных бейджей */
+.badge-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: glitch-scan 1.5s linear infinite;
+}
+
+/* Эффект для модальных окон */
+.modal-glitch {
+    animation: glitch-flicker 0.5s ease-in-out;
+}
+
+/* Эффект для форм */
+.form-glitch input:focus,
+.form-glitch textarea:focus,
+.form-glitch select:focus {
+    animation: glitch-shift 0.2s ease-in-out;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Эффект для навигации */
+.nav-glitch {
+    position: relative;
+}
+
+.nav-glitch::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 0.3s ease;
+}
+
+.nav-glitch:hover::after {
+    width: 100%;
+}
+
+/* Эффект для аватаров */
+.avatar-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.2) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.avatar-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для прогресс-баров */
+.progress-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: glitch-scan 2s linear infinite;
+}
+
+/* Эффект для уведомлений */
+.notification-glitch {
+    border-radius: 50%;
+    animation: glitch-flicker 0.5s ease-in-out;
+}
+
+.notification-glitch:hover {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+/* Эффект для дропдаунов */
+.dropdown-glitch {
+    position: relative;
+}
+
+.dropdown-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.dropdown-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для чекбоксов */
+.checkbox-glitch:checked {
+    animation: glitch-shift 0.2s ease-in-out;
+}
+
+/* Эффект для радиокнопок */
+.radio-glitch:checked {
+    animation: glitch-flicker 0.3s ease-in-out;
+}
+
+/* Эффект для слайдеров */
+.slider-glitch::-webkit-slider-thumb {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+.slider-glitch::-moz-range-thumb {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+/* Эффект для табов */
+.tab-glitch {
+    position: relative;
+}
+
+.tab-glitch.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.1) 50%,
+        transparent 70%
+    );
+    animation: glitch-scan 1s linear infinite;
+}
+
+/* Эффект для аккордеонов */
+.accordion-glitch {
+    position: relative;
+}
+
+.accordion-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.05),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.accordion-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для тултипов */
+.tooltip-glitch {
+    animation: glitch-flicker 0.3s ease-in-out;
+}
+
+/* Эффект для алертов */
+.alert-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: glitch-scan 1.5s linear infinite;
+}
+
+/* Эффект для спиннеров */
+.spinner-glitch {
+    animation:
+        glitch-shift 0.5s ease-in-out infinite,
+        glitch-flicker 1s ease-in-out infinite;
+}
+
+/* Эффект для скелетонов */
+.skeleton-glitch {
+    animation: glitch-flicker 1.5s ease-in-out infinite;
+}
+
+/* Эффект для пустых состояний */
+.empty-glitch {
+    animation: glitch-distort 2s ease-in-out infinite;
+}
+
+/* Эффект для пагинации */
+.pagination-glitch .active {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+/* Эффект для хлебных крошек */
+.breadcrumb-glitch {
+    position: relative;
+}
+
+.breadcrumb-glitch::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 0.3s ease;
+}
+
+.breadcrumb-glitch:hover::after {
+    width: 100%;
+}
+
+/* Эффект для тегов */
+.tag-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.tag-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: glitch-scan 1s linear infinite;
+}
+
+/* Эффект для чеклистов */
+.checklist-glitch {
+    position: relative;
+}
+
+.checklist-glitch input[type="checkbox"]:checked + label {
+    animation: glitch-shift 0.2s ease-in-out;
+}
+
+/* Эффект для комментариев */
+.comment-glitch {
+    position: relative;
+}
+
+.comment-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.comment-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для файлов */
+.file-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.file-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для поиска */
+.search-glitch input:focus {
+    animation: glitch-shift 0.2s ease-in-out;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Эффект для фильтров */
+.filter-glitch {
+    position: relative;
+}
+
+.filter-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.filter-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для сортировки */
+.sort-glitch {
+    position: relative;
+}
+
+.sort-glitch:hover {
+    animation: glitch-shift 0.2s ease-in-out infinite;
+}
+
+/* Эффект для экспорта */
+.export-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.export-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(34, 197, 94, 0.2),
+        transparent
+    );
+    animation: glitch-scan 1.5s linear infinite;
+}
+
+/* Эффект для импорта */
+.import-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.import-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(245, 158, 11, 0.2),
+        transparent
+    );
+    animation: glitch-scan 1.5s linear infinite;
+}
+
+/* Эффект для настроек */
+.settings-glitch {
+    position: relative;
+}
+
+.settings-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(147, 51, 234, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.settings-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для профиля */
+.profile-glitch {
+    position: relative;
+}
+
+.profile-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.profile-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для статистики */
+.stats-glitch {
+    position: relative;
+}
+
+.stats-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stats-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для дашборда */
+.dashboard-glitch {
+    position: relative;
+}
+
+.dashboard-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.03) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.dashboard-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для доски */
+.board-glitch {
+    position: relative;
+}
+
+.board-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.05),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.board-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для задач */
+.task-glitch {
+    position: relative;
+    overflow: hidden;
+}
+
+.task-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.task-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для проектов */
+.project-glitch {
+    position: relative;
+}
+
+.project-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(34, 197, 94, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.project-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для спринтов */
+.sprint-glitch {
+    position: relative;
+}
+
+.sprint-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(147, 51, 234, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sprint-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для уведомлений */
+.notification-glitch {
+    position: relative;
+}
+
+.notification-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(245, 158, 11, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.notification-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для вебхуков */
+.webhook-glitch {
+    position: relative;
+}
+
+.webhook-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(239, 68, 68, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.webhook-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для ИИ */
+.ai-glitch {
+    position: relative;
+}
+
+.ai-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(147, 51, 234, 0.1) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.ai-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для аналитики */
+.analytics-glitch {
+    position: relative;
+}
+
+.analytics-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.analytics-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для документов */
+.document-glitch {
+    position: relative;
+}
+
+.document-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(34, 197, 94, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.document-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для FAQ */
+.faq-glitch {
+    position: relative;
+}
+
+.faq-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(245, 158, 11, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.faq-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для API */
+.api-glitch {
+    position: relative;
+}
+
+.api-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.api-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для демо */
+.demo-glitch {
+    position: relative;
+}
+
+.demo-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(147, 51, 234, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.demo-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для дедлайнов */
+.deadline-glitch {
+    position: relative;
+}
+
+.deadline-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(239, 68, 68, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.deadline-glitch:hover::before {
+    opacity: 1;
+}
+
+/* Эффект для Chaos Space */
+.chaos-glitch {
+    position: relative;
+    animation: glitch-combo 2s ease-in-out infinite;
+}
+
+.chaos-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(239, 68, 68, 0.1) 50%,
+        transparent 70%
+    );
+    opacity: 0.5;
+    animation: glitch-scan 1s linear infinite;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .glitch-effect,
+    .glitch-shift,
+    .glitch-flicker,
+    .glitch-distort,
+    .glitch-combo {
+        animation: none;
+    }
+
+    .glitch-effect:hover,
+    .glitch-shift:hover,
+    .glitch-flicker:hover,
+    .glitch-distort:hover,
+    .glitch-combo:hover {
+        animation: none;
+    }
+
+    .btn-glitch:hover,
+    .card-glitch:hover,
+    .text-glitch:hover,
+    .icon-glitch:hover {
+        transform: none;
+        animation: none;
+    }
+}
+
+/* Уменьшение интенсивности эффектов для пользователей с чувствительностью к движению */
+@media (prefers-reduced-motion: reduce) {
+    .glitch-effect,
+    .glitch-shift,
+    .glitch-flicker,
+    .glitch-distort,
+    .glitch-combo,
+    .btn-glitch,
+    .card-glitch,
+    .text-glitch,
+    .icon-glitch {
+        animation: none;
+    }
+
+    .glitch-effect:hover,
+    .glitch-shift:hover,
+    .glitch-flicker:hover,
+    .glitch-distort:hover,
+    .glitch-combo:hover,
+    .btn-glitch:hover,
+    .card-glitch:hover,
+    .text-glitch:hover,
+    .icon-glitch:hover {
+        animation: none;
+        transform: none;
+    }
+}

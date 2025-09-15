@@ -163,7 +163,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                         <Link
                             href={route('ai-agent.index')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-purple/5 transition-all duration-300 hover:shadow-glow-purple border border-border-color hover:border-accent-purple/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-purple/5 transition-all duration-300 hover:shadow-glow-purple border border-border-color hover:border-accent-purple/30 ai-glitch"
                         >
                             <div className="absolute top-0 right-0 w-12 h-12 bg-accent-purple/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
@@ -187,7 +187,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         {canCreateProject ? (
                             <Link
                                 href={route('projects.create')}
-                                className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30"
+                                className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-blue/5 transition-all duration-300 hover:shadow-glow-blue border border-border-color hover:border-accent-blue/30 project-glitch"
                             >
                                 <div className="absolute top-0 right-0 w-12 h-12 bg-accent-blue/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                                 <div className="relative z-10">
@@ -230,7 +230,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         )}
                         <Link
                             href={route('tasks.create')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-green/5 transition-all duration-300 hover:shadow-glow-green border border-border-color hover:border-accent-green/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-green/5 transition-all duration-300 hover:shadow-glow-green border border-border-color hover:border-accent-green/30 task-glitch"
                         >
                             <div className="absolute top-0 right-0 w-12 h-12 bg-accent-green/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
@@ -247,7 +247,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         </Link>
                         <Link
                             href={route('projects.index')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30 project-glitch"
                         >
                             <div className="absolute top-0 right-0 w-12 h-12 bg-accent-yellow/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">
@@ -282,7 +282,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                                 <Link
                                     key={project.id}
                                     href={route('projects.board', project.id)}
-                                    className="card group hover:shadow-glow transition-all duration-300 animate-fade-in"
+                                    className="card group hover:shadow-glow transition-all duration-300 animate-fade-in project-glitch"
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     <div className="card-header">
@@ -341,7 +341,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         {canCreateProject ? (
                             <Link
                                 href={route('projects.create')}
-                                className="btn btn-primary inline-flex items-center"
+                                className="btn btn-primary inline-flex items-center btn-glitch"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -371,7 +371,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
 
                 {/* Расширенная статистика */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="card group hover:shadow-glow-blue transition-all duration-300 animate-fade-in" style={{ animationDelay: '200ms' }}>
+                    <div className="card group hover:shadow-glow-blue transition-all duration-300 animate-fade-in stats-glitch" style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center">
                             <div className="p-4 bg-accent-blue/10 rounded-xl group-hover:bg-accent-blue/20 transition-colors duration-300">
                                 <svg className="w-8 h-8 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,7 +388,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         </div>
                     </div>
 
-                    <div className="card group hover:shadow-glow-green transition-all duration-300 animate-fade-in" style={{ animationDelay: '300ms' }}>
+                    <div className="card group hover:shadow-glow-green transition-all duration-300 animate-fade-in stats-glitch" style={{ animationDelay: '300ms' }}>
                         <div className="flex items-center">
                             <div className="p-4 bg-accent-green/10 rounded-xl group-hover:bg-accent-green/20 transition-colors duration-300">
                                 <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +405,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         </div>
                     </div>
 
-                    <div className="card group hover:shadow-glow-purple transition-all duration-300 animate-fade-in" style={{ animationDelay: '400ms' }}>
+                    <div className="card group hover:shadow-glow-purple transition-all duration-300 animate-fade-in stats-glitch" style={{ animationDelay: '400ms' }}>
                         <div className="flex items-center">
                             <div className="p-4 bg-accent-purple/10 rounded-xl group-hover:bg-accent-purple/20 transition-colors duration-300">
                                 <svg className="w-8 h-8 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">

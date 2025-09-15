@@ -1,3 +1,6 @@
+/* Подключение глитч-эффектов */
+@import './glitch-effects.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -6,7 +6,7 @@ import HtmlRenderer from '@/Components/HtmlRenderer';
 export default function TaskCard({ task }) {
 
     return (
-        <div className="card hover:shadow-glow transition-all duration-300 group flex flex-col h-full">
+        <div className="card hover:shadow-glow transition-all duration-300 group flex flex-col h-full task-glitch">
             {/* Заголовок карточки */}
             <div className="flex-1 min-h-0">
                 {task.code && (
@@ -101,7 +101,7 @@ export default function TaskCard({ task }) {
             <div className="mt-auto pt-4 border-t border-border-color">
                 <Link
                     href={task.code ? route('tasks.show.by-code', task.code) : route('tasks.show', task.id)}
-                    className="btn btn-primary btn-sm w-full group-hover:shadow-glow-blue transition-all duration-300"
+                    className="btn btn-primary btn-sm w-full group-hover:shadow-glow-blue transition-all duration-300 btn-glitch"
                 >
                     <span className="mr-2">Подробнее</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">

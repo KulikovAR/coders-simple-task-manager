@@ -61,7 +61,7 @@ export default function TaskCard({
     if (viewMode === 'list') {
         return (
             <div
-                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
+                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 task-glitch ${
                     draggedTask?.id === task.id ? 'dragging opacity-50' : ''
                 }`}
                 draggable
@@ -184,7 +184,7 @@ export default function TaskCard({
     if (viewMode === 'compact-board') {
         return (
             <div
-                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
+                className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 task-glitch ${
                     draggedTask?.id === task.id ? 'dragging opacity-50' : ''
                 }`}
                 draggable
@@ -308,7 +308,7 @@ export default function TaskCard({
     // Обычный карточный вид
     return (
         <div
-            className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
+            className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 task-glitch ${
                 draggedTask?.id === task.id ? 'dragging opacity-50' : ''
             }`}
             draggable
