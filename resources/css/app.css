@@ -231,7 +231,7 @@ body[data-page="Welcome"] {
 :root {
     --primary-bg: #0a0a0a;
     --secondary-bg: #151515;
-    --card-bg: #101010;
+    --card-bg: #121212;
     --border-color: #2a2a2a;
     --text-primary: #ffffff;
     --text-secondary: #b0b0b0;
@@ -996,17 +996,14 @@ body {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Темная тема */
-@media (prefers-color-scheme: dark) {
-    .task-card {
-        background: #171717;
-    }
+/* Темная тема для task-card */
+.task-card {
+    background: #1a1a1a;
 }
 
-@media (prefers-color-scheme: light) {
-    .task-card {
-        background: white !important;
-    }
+/* Светлая тема для task-card */
+[data-theme='light'] .task-card {
+    background: var(--card-bg);
 }
 
 .task-card:hover {
