@@ -49,6 +49,7 @@ export default function StatusColumn({
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const columnRef = useRef(null);
+    const menuTimeoutRef = useRef(null);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -60,6 +61,31 @@ export default function StatusColumn({
         document.addEventListener('mousedown', handleClick);
         return () => document.removeEventListener('mousedown', handleClick);
     }, [menuOpen]);
+
+    // Функция для плавного открытия меню
+    const toggleMenu = () => {
+        if (menuTimeoutRef.current) {
+            clearTimeout(menuTimeoutRef.current);
+        }
+        
+        if (!menuOpen) {
+            // Небольшая задержка для плавного открытия
+            menuTimeoutRef.current = setTimeout(() => {
+                setMenuOpen(true);
+            }, 50);
+        } else {
+            setMenuOpen(false);
+        }
+    };
+
+    // Очистка таймера при размонтировании
+    useEffect(() => {
+        return () => {
+            if (menuTimeoutRef.current) {
+                clearTimeout(menuTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Фокус на input при начале редактирования
     const startEditing = () => {
@@ -302,7 +328,7 @@ export default function StatusColumn({
                             <button
                                 className="p-1 rounded hover:bg-secondary-bg transition-colors ml-1"
                                 title="Меню статуса"
-                                onClick={() => setMenuOpen(v => !v)}
+                                onClick={toggleMenu}
                                 disabled={loading}
                             >
                                 <svg className="w-4 h-4 text-text-muted hover:text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,25 +338,38 @@ export default function StatusColumn({
                                 </svg>
                             </button>
                             {menuOpen && !isEditing && (
-                                <div className="absolute right-0 z-50 mt-2 w-52 bg-secondary-bg border border-border-color rounded-lg shadow-lg py-1 animate-fade-in-center">
+                                <div className="absolute right-0 z-50 mt-2 w-52 bg-secondary-bg border border-border-color rounded-lg shadow-lg py-1 opacity-0 animate-fade-in-center"
+                                     style={{ 
+                                         animation: 'fadeInCenter 0.2s ease-out forwards',
+                                         animationDelay: '0.01s'
+                                     }}>
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
-                                        onClick={() => { setMenuOpen(false); startEditing(); }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2 transition-colors"
+                                        onClick={() => { 
+                                            setMenuOpen(false); 
+                                            setTimeout(() => startEditing(), 100);
+                                        }}
                                         disabled={loading}
                                     >
                                         <span>✏️</span> <span>Редактировать</span>
                                     </button>
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2"
-                                        onClick={() => { setMenuOpen(false); onStartDragReorder(); }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent-blue/10 text-text-primary flex items-center gap-2 transition-colors"
+                                        onClick={() => { 
+                                            setMenuOpen(false); 
+                                            setTimeout(() => onStartDragReorder(), 100);
+                                        }}
                                         disabled={loading}
                                     >
                                         <span>🔄</span> <span>Изменить порядок</span>
                                     </button>
                                     {tasks.length === 0 && (
                                         <button
-                                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 flex items-center gap-2"
-                                            onClick={handleDelete}
+                                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 flex items-center gap-2 transition-colors"
+                                            onClick={() => {
+                                                setMenuOpen(false);
+                                                setTimeout(() => handleDelete(), 100);
+                                            }}
                                             disabled={loading}
                                         >
                                             <span>🗑</span> <span>Удалить</span>

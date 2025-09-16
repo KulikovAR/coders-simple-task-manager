@@ -1003,6 +1003,12 @@ body {
     }
 }
 
+@media (prefers-color-scheme: light) {
+    .task-card {
+        background: white !important;
+    }
+}
+
 .task-card:hover {
     box-shadow: var(--shadow-md);
 }
@@ -1096,8 +1102,14 @@ input::placeholder, textarea::placeholder {
 }
 
 @keyframes fadeInCenter {
-    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 @keyframes slideUp {
