@@ -278,8 +278,23 @@ export default function Gantt({ auth, project, ganttData, sprintId }) {
         const taskStart = parseISO(taskStartDate);
         const taskEnd = task.end_date ? parseISO(task.end_date) : addDays(taskStart, (task.duration_days || 1) - 1);
 
-        const daysFromStart = differenceInDays(taskStart, startDate);
-        const taskDuration = differenceInDays(taskEnd, taskStart) + 1;
+        // Нормализуем даты к началу дня для точного сравнения
+        const normalizedTaskStart = new Date(taskStart.getFullYear(), taskStart.getMonth(), taskStart.getDate());
+        const normalizedStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        const normalizedTaskEnd = new Date(taskEnd.getFullYear(), taskEnd.getMonth(), taskEnd.getDate());
+
+        const daysFromStart = differenceInDays(normalizedTaskStart, normalizedStartDate);
+        const taskDuration = differenceInDays(normalizedTaskEnd, normalizedTaskStart) + 1;
+
+        console.log('Task position debug:', {
+            taskTitle: task.title,
+            taskStartDate: taskStartDate,
+            normalizedTaskStart: normalizedTaskStart.toISOString(),
+            normalizedStartDate: normalizedStartDate.toISOString(),
+            daysFromStart,
+            taskDuration,
+            timelineLength: timeline.length
+        });
 
         const left = (daysFromStart / timeline.length) * 100;
         const width = (taskDuration / timeline.length) * 100;
