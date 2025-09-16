@@ -104,7 +104,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         </div>
                         <div className="card-body">
                             <div className="space-y-4">
-                                <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram</p>
+                                <p className="text-text-secondary text-sm">Получайте уведомления и общайтесь с ИИ прямо в Telegram. Используйте в группах и на лету создавайте задачи с ИИ во время общения</p>
                                 {/* Информация о боте */}
                                 <div className="text-text-secondary text-sm">
                                     {telegram?.bot_username ? (
