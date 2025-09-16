@@ -64,6 +64,7 @@ class GanttService
                 ] : null,
                 'priority' => $task->priority,
                 'sort_order' => $task->sort_order ?? 0,
+                'created_at' => $task->created_at ? $task->created_at->format('Y-m-d') : null,
             ];
         })->toArray();
     }
