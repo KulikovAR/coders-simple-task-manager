@@ -37,6 +37,8 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
     const [showPriorityDropZones, setShowPriorityDropZones] = useState(false);
     const [dragOverPriority, setDragOverPriority] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    // Состояние для выделения только что созданной задачи
+    const [highlightedTaskId, setHighlightedTaskId] = useState(null);
     // Переключение между видами: 'cards', 'compact-board', 'list'
     const [viewMode, setViewMode] = useState(() => {
         const saved = localStorage.getItem('kanban-view-mode');
@@ -157,6 +159,28 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             }
         }
     }, [localTasks]);
+
+    // Функция для скролла к задаче и выделения
+    const scrollToTask = (taskId) => {
+        // Устанавливаем ID задачи для выделения
+        setHighlightedTaskId(taskId);
+        
+        // Находим элемент задачи на странице
+        const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+        if (taskElement) {
+            // Плавный скролл к задаче
+            taskElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'center'
+            });
+        }
+        
+        // Убираем выделение через 3 секунды
+        setTimeout(() => {
+            setHighlightedTaskId(null);
+        }, 3000);
+    };
 
     // Очистка таймеров при размонтировании компонента
     useEffect(() => {
@@ -459,8 +483,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                         project_id: parseInt(result.task.project_id)
                     };
                     setLocalTasks(prevTasks => [...prevTasks, normalizedTask]);
+                    
                     // Закрываем модалку после создания
                     closeTaskModal();
+                    
+                    // Выделяем только что созданную задачу и скроллим к ней
+                    setTimeout(() => {
+                        scrollToTask(normalizedTask.id);
+                    }, 100); // Небольшая задержка для рендеринга
                 }
 
                 // Сообщение об успехе убрано для предотвращения прыжков страницы
@@ -956,6 +986,7 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
                     handleTaskTouchMove={handleTaskTouchMove}
                     handleTaskTouchEnd={handleTaskTouchEnd}
                     viewMode={viewMode}
+                    highlightedTaskId={highlightedTaskId}
                 />
 
 

@@ -39,7 +39,8 @@ export default function StatusColumn({
     onColumnDragLeave,
     onColumnDrop,
     dragOverColumnId,
-    draggedColumnId
+    draggedColumnId,
+    highlightedTaskId
 }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editableName, setEditableName] = useState(status.name);
@@ -426,6 +427,7 @@ export default function StatusColumn({
                         handleTaskTouchEnd={handleTaskTouchEnd}
                         openTaskModal={openTaskModal}
                         viewMode={viewMode}
+                        highlightedTaskId={highlightedTaskId}
                     />
                 ))}
             </div>

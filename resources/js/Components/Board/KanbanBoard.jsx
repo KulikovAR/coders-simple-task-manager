@@ -24,7 +24,8 @@ export default function KanbanBoard({
     handleTaskTouchStart,
     handleTaskTouchMove,
     handleTaskTouchEnd,
-    viewMode
+    viewMode,
+    highlightedTaskId
 }) {
     const [statuses, setStatuses] = useState(taskStatuses);
     const [isDragReorderMode, setIsDragReorderMode] = useState(false);
@@ -386,6 +387,7 @@ export default function KanbanBoard({
                             onColumnDrop={(e) => handleColumnDrop(e, status)}
                             dragOverColumnId={dragOverColumnId}
                             draggedColumnId={draggedColumnId}
+                            highlightedTaskId={highlightedTaskId}
                         />
                     );
                 })}

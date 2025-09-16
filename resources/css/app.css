@@ -14,6 +14,176 @@
     font-display: swap;
 }
 
+/* ===== СТИЛИ ВЫДЕЛЕНИЯ ЗАДАЧ ===== */
+.task-highlighted {
+    position: relative;
+    border: 2px solid var(--accent-blue);
+    animation: highlight-pulse 3s ease-in-out;
+}
+
+.task-highlighted::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid transparent;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue)) border-box;
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: highlight-border 3s ease-in-out;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes highlight-border {
+    0% {
+        clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    3% {
+        clip-path: polygon(0% 0%, 8% 0%, 8% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    6% {
+        clip-path: polygon(0% 0%, 18% 0%, 18% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    9% {
+        clip-path: polygon(0% 0%, 30% 0%, 30% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    12% {
+        clip-path: polygon(0% 0%, 45% 0%, 45% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    15% {
+        clip-path: polygon(0% 0%, 60% 0%, 60% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    18% {
+        clip-path: polygon(0% 0%, 75% 0%, 75% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    21% {
+        clip-path: polygon(0% 0%, 90% 0%, 90% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    24% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
+        opacity: 0.6;
+    }
+    27% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 5%, 0% 5%);
+        opacity: 0.6;
+    }
+    30% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 12%, 0% 12%);
+        opacity: 0.6;
+    }
+    33% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 22%, 0% 22%);
+        opacity: 0.6;
+    }
+    36% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 35%, 0% 35%);
+        opacity: 0.6;
+    }
+    39% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%);
+        opacity: 0.6;
+    }
+    42% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 65%, 0% 65%);
+        opacity: 0.6;
+    }
+    45% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 0% 80%);
+        opacity: 0.6;
+    }
+    48% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 90%, 0% 90%);
+        opacity: 0.6;
+    }
+    51% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 0% 95%);
+        opacity: 0.6;
+    }
+    54% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    57% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    60% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    63% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    66% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    69% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.6;
+    }
+    72% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.5;
+    }
+    75% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.4;
+    }
+    78% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.3;
+    }
+    81% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.25;
+    }
+    84% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.2;
+    }
+    87% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.15;
+    }
+    90% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.1;
+    }
+    93% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.05;
+    }
+    96% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.02;
+    }
+    100% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0;
+    }
+}
+
 /* ===== ИСПРАВЛЕНИЯ ДЛЯ iOS ===== */
 /* Предотвращаем скролл страницы при скролле в модалке */
 .modal-open {
