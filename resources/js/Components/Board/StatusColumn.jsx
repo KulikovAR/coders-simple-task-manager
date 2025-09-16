@@ -428,6 +428,7 @@ export default function StatusColumn({
                         openTaskModal={openTaskModal}
                         viewMode={viewMode}
                         highlightedTaskId={highlightedTaskId}
+                        getStatusIndicatorColor={getStatusIndicatorColor}
                     />
                 ))}
             </div>

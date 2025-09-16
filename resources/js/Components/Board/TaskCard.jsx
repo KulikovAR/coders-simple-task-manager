@@ -12,7 +12,8 @@ export default function TaskCard({
     handleTaskTouchEnd,
     openTaskModal,
     viewMode,
-    highlightedTaskId
+    highlightedTaskId,
+    getStatusIndicatorColor
 }) {
     // Функция для копирования ссылки на задачу
     const copyTaskLink = (e) => {
@@ -61,6 +62,8 @@ export default function TaskCard({
     // Компактный списочный вид
     if (viewMode === 'list') {
         const isHighlighted = highlightedTaskId === task.id;
+        const statusColor = getStatusIndicatorColor ? getStatusIndicatorColor(task.status_id) : '#3b82f6';
+        
         return (
             <div
                 className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
@@ -69,6 +72,7 @@ export default function TaskCard({
                     isHighlighted ? 'task-highlighted' : ''
                 }`}
                 data-task-id={task.id}
+                style={isHighlighted ? { '--highlight-color': statusColor } : {}}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task)}
                 onDragEnd={handleDragEnd}
@@ -188,6 +192,8 @@ export default function TaskCard({
     // Компактная доска - код сверху, остальное снизу
     if (viewMode === 'compact-board') {
         const isHighlighted = highlightedTaskId === task.id;
+        const statusColor = getStatusIndicatorColor ? getStatusIndicatorColor(task.status_id) : '#3b82f6';
+        
         return (
             <div
                 className={`task-card bg-card-bg border rounded-lg p-3 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-sm hover:shadow-md transition-all duration-200 ${
@@ -196,6 +202,7 @@ export default function TaskCard({
                     isHighlighted ? 'task-highlighted' : ''
                 }`}
                 data-task-id={task.id}
+                style={isHighlighted ? { '--highlight-color': statusColor } : {}}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task)}
                 onDragEnd={handleDragEnd}
@@ -316,6 +323,8 @@ export default function TaskCard({
 
     // Обычный карточный вид
     const isHighlighted = highlightedTaskId === task.id;
+    const statusColor = getStatusIndicatorColor ? getStatusIndicatorColor(task.status_id) : '#3b82f6';
+    
     return (
         <div
             className={`task-card bg-card-bg border rounded-xl p-5 cursor-move hover:bg-secondary-bg hover:border-accent-blue/30 shadow-md hover:shadow-lg transition-all duration-300 ${
@@ -324,6 +333,7 @@ export default function TaskCard({
                 isHighlighted ? 'task-highlighted' : ''
             }`}
             data-task-id={task.id}
+            style={isHighlighted ? { '--highlight-color': statusColor } : {}}
             draggable
             onDragStart={(e) => handleDragStart(e, task)}
             onDragEnd={handleDragEnd}
