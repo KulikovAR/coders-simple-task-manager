@@ -17,6 +17,7 @@ use App\Services\TaskService;
 use App\Services\SprintService;
 use App\Services\CommentService;
 use App\Services\AiConversationService;
+use App\Services\TelegramVoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -86,7 +87,9 @@ class TelegramController extends Controller
                         '<b>Команды:</b>' . "\n" .
                         '<code>/ai ваш запрос</code> — общение с ИИ' . "\n" .
                         '<code>/id</code> — показать chatId и senderId' . "\n" .
-                        '<code>/start</code> — справка и статус подключения';
+                        '<code>/start</code> — справка и статус подключения' . "\n\n" .
+                        '<b>Голосовые сообщения:</b>' . "\n" .
+                        '🎤 Отправьте голосовое сообщение для общения с ИИ';
                     
                     // Добавляем команду stats только для пользователя с id = 1
                     if ($linkedUser->id === 1) {
@@ -150,6 +153,14 @@ class TelegramController extends Controller
                 return response()->noContent();
             }
 
+            // Обработка голосовых сообщений
+            if (isset($message['voice'])) {
+                /** @var TelegramVoiceService $voiceService */
+                $voiceService = app(TelegramVoiceService::class);
+                $voiceService->processVoiceMessage($message, $chatId);
+                return response()->noContent();
+            }
+
             // /ai <запрос>
             if (str_starts_with(mb_strtolower($text), '/ai')) {
                 $user = $fromId ? User::where('telegram_chat_id', $fromId)->first() : null;
@@ -200,6 +211,8 @@ class TelegramController extends Controller
                     '<code>/ai ваш запрос</code> — общение с ИИ' . "\n" .
                     '<code>/id</code> — показать chatId и senderId' . "\n" .
                     '<code>/start</code> — справка и статус подключения' . "\n\n" .
+                    '<b>Голосовые сообщения:</b>' . "\n" .
+                    '🎤 Отправьте голосовое сообщение для общения с ИИ' . "\n\n" .
                     'Для привязки отправьте свой <b>email</b> или вставьте <u>senderId</u> в профиль на сайте.';
                 if ($botLink) {
                     $hint .= "\n" . 'Личный чат с ботом: <a href="' . $botLink . '">' . $botLink . '</a>';

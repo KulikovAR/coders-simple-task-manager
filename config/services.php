@@ -41,4 +41,9 @@ return [
         'model' => env('AI_MODEL', 'gpt-3.5-turbo'),
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'api_url' => env('OPENAI_API_URL', 'https://api.openai.com/v1'),
+    ],
+
 ];
