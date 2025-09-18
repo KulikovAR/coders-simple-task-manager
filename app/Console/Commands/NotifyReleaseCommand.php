@@ -14,7 +14,7 @@ class NotifyReleaseCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'telegram:notify-release {message} {--ver=} {--dry-run} {--test-user=1}';
+    protected $signature = 'telegram:notify-release {message} {--ver=} {--dry-run} {--test-user=}';
 
     /**
      * The console command description.
@@ -42,7 +42,7 @@ class NotifyReleaseCommand extends Command
         $finalMessage = $this->formatReleaseMessage($message, $version);
 
         // Если указан тестовый пользователь, отправляем только ему
-        if ($testUserId) {
+        if ($testUserId !== null) {
             return $this->sendToTestUser($testUserId, $finalMessage, $dryRun);
         }
 
