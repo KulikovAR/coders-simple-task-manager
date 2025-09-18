@@ -14,14 +14,14 @@ class NotifyReleaseCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'telegram:notify-release {message} {--ver=} {--dry-run}';
+    protected $signature = 'telegram:notify-release {message} {--ver=} {--dry-run} {--test-user=1}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Отправить уведомление о новом релизе всем пользователям в Telegram';
+    protected $description = 'Отправить уведомление о новом релизе всем пользователям в Telegram (или конкретному пользователю для тестирования)';
 
     /**
      * Execute the console command.
@@ -31,6 +31,7 @@ class NotifyReleaseCommand extends Command
         $message = $this->argument('message');
         $version = $this->option('ver');
         $dryRun = $this->option('dry-run');
+        $testUserId = $this->option('test-user');
 
         if (empty($message)) {
             $this->error('Сообщение не может быть пустым');
@@ -39,6 +40,11 @@ class NotifyReleaseCommand extends Command
 
         // Формируем финальное сообщение
         $finalMessage = $this->formatReleaseMessage($message, $version);
+
+        // Если указан тестовый пользователь, отправляем только ему
+        if ($testUserId) {
+            return $this->sendToTestUser($testUserId, $finalMessage, $dryRun);
+        }
 
         if ($dryRun) {
             $this->info('Режим тестирования (dry-run) - сообщения не будут отправлены');
@@ -139,6 +145,61 @@ class NotifyReleaseCommand extends Command
         
         return $header . "\n\n" . $message . "\n\n" . 
                "Спасибо за использование нашего сервиса! 💙";
+    }
+
+    /**
+     * Отправить сообщение тестовому пользователю
+     */
+    private function sendToTestUser(int $userId, string $message, bool $dryRun): int
+    {
+        try {
+            $user = User::find($userId);
+            
+            if (!$user) {
+                $this->error("Пользователь с ID {$userId} не найден");
+                return 1;
+            }
+
+            if (empty($user->telegram_chat_id)) {
+                $this->error("У пользователя {$user->name} (ID: {$userId}) не настроен Telegram");
+                return 1;
+            }
+
+            $this->info("Отправка сообщения пользователю: {$user->name} (ID: {$userId})");
+            $this->info("Telegram Chat ID: {$user->telegram_chat_id}");
+            $this->info("Сообщение:");
+            $this->line($message);
+
+            if ($dryRun) {
+                $this->info('Режим тестирования (dry-run) - сообщение не будет отправлено');
+                return 0;
+            }
+
+            $telegramService = app(TelegramService::class);
+            
+            if (!$telegramService->isEnabled()) {
+                $this->error('Telegram бот не настроен. Проверьте TELEGRAM_BOT_TOKEN в .env файле');
+                return 1;
+            }
+
+            $success = $telegramService->sendMessage($user->telegram_chat_id, $message);
+            
+            if ($success) {
+                $this->info('✅ Сообщение успешно отправлено!');
+                return 0;
+            } else {
+                $this->error('❌ Не удалось отправить сообщение');
+                return 1;
+            }
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->error("❌ Ошибка подключения к базе данных: {$e->getMessage()}");
+            $this->warn("Убедитесь, что база данных доступна и настройки подключения корректны");
+            return 1;
+        } catch (\Exception $e) {
+            $this->error("❌ Ошибка: {$e->getMessage()}");
+            return 1;
+        }
     }
 
     /**
