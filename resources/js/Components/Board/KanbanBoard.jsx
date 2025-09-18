@@ -39,6 +39,24 @@ export default function KanbanBoard({
 
     useEffect(() => { setStatuses(taskStatuses); }, [taskStatuses]);
 
+    // Плавный скролл к блоку канбан-доски при переходе на страницу
+    useEffect(() => {
+        const scrollToBoard = () => {
+            const boardContainer = document.getElementById('kanban-board-container');
+            if (boardContainer) {
+                boardContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        };
+
+        // Небольшая задержка для корректного рендеринга
+        const timeoutId = setTimeout(scrollToBoard, 100);
+        
+        return () => clearTimeout(timeoutId);
+    }, []);
+
     // Обработчик клика для выхода из режима перетаскивания
     useEffect(() => {
         if (!isDragReorderMode) return;
@@ -343,11 +361,14 @@ export default function KanbanBoard({
             )}
 
             {/* Горизонтальный скролл для колонок в режиме карточек, вертикальная стопка в списочном режиме */}
-            <div className={viewMode === 'list' ?
-                "space-y-4" :
-                "flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent"
-            }
-                 style={viewMode !== 'list' ? { height: 'calc(100vh - 200px)', minHeight: '500px' } : {}}>
+            <div 
+                id="kanban-board-container"
+                className={viewMode === 'list' ?
+                    "space-y-4 h-screen overflow-y-auto" :
+                    "flex flex-nowrap gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border-color scrollbar-track-transparent h-screen"
+                }
+                style={viewMode !== 'list' ? { minHeight: '100vh' } : {}}
+            >
                 {statuses.map((status) => {
                     const statusTasks = getFilteredStatusTasks(status.id);
                     return (

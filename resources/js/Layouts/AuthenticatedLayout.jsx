@@ -64,7 +64,7 @@ export default function Authenticated({ user, header, children, flash }) {
             />
             <div className="relative z-9999">
             <nav className="border-b border-border-color bg-card-bg/80 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
+                <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
@@ -294,7 +294,7 @@ export default function Authenticated({ user, header, children, flash }) {
             </nav>
             {/* header удалён по требованию пользователя */}
             <main className="py-12 safe-area-inset-y mobile-main">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
+                <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
                         {/* Отображаем flash-сообщения глобально */}
 
