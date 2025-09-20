@@ -2,9 +2,13 @@
 
 namespace App\Services\Ai;
 
+use App\Models\Sprint;
+use App\Models\Task;
 use App\Models\User;
 use App\Services\Ai\Contracts\ContextProviderInterface;
 use App\Services\AiConversationService;
+use App\Services\TaskService;
+use App\Services\TaskStatusService;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +24,7 @@ class FlexibleAiAgentService
     private string $aiModel;
 
     public function __construct(
-        CommandRegistry            $commandRegistry,
+        CommandRegistry        $commandRegistry,
         ?array                 $contextProviders = null,
         ?AiConversationService $conversationService = null
     )
@@ -34,9 +38,6 @@ class FlexibleAiAgentService
         $this->aiModel = config('services.ai.model', 'gpt-3.5-turbo');
     }
 
-    /**
-     * Обработать запрос пользователя с новой схемой
-     */
     public function processRequest(string $userInput, User $user, ?string $sessionId = null): array
     {
         $startTime = microtime(true);
@@ -178,36 +179,16 @@ class FlexibleAiAgentService
      */
     private function getCommandsFromAi(string $userInput, User $user, ?string $sessionId, bool $isConfirmation = false): array
     {
-        $context = $this->buildContext($user);
+        // Step 1: Identify command name with minimal context
         $commands = $this->commandRegistry->getCommandsForAi();
-
-        $prompt = $this->buildCommandsPrompt($userInput, $context, $commands, $isConfirmation);
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->aiServiceToken,
-            'Content-Type' => 'application/json',
-        ])->post($this->aiServiceUrl, [
-            'model' => $this->aiModel,
-            'input' => $prompt,
-            'session_id' => $sessionId ?? 'flexible-ai-session-' . $user->id,
-            'new_session' => $sessionId === null,
-        ]);
-
-        if (!$response->successful()) {
-            throw new Exception('Ошибка при обращении к ИИ сервису: ' . $response->body());
-        }
-
-        $aiResponse = $response->json();
-
-        Log::info('AI Commands Response', [
-            'response' => $aiResponse,
-            'user_input' => $userInput,
-            'session_id' => $sessionId,
-        ]);
-
-        $parsedCommands = $this->parseCommandsResponse($aiResponse);
-
-        if (empty($parsedCommands['commands'])) {
+        $commandIdentificationResponse = $this->identifyCommands($userInput, $user, $sessionId, $isConfirmation, $commands);
+        
+        $sessionId = $commandIdentificationResponse['session_id'] ?? $sessionId;
+        $commandName = $commandIdentificationResponse['command_name'] ?? '';
+        
+        // If no command identified, try fallback
+        if (empty($commandName)) {
+            $context = $this->buildContext($user);
             $fallbackCommands = $this->getFallbackCommands($userInput, $context);
             if (!empty($fallbackCommands)) {
                 Log::info('Using fallback commands', [
@@ -216,15 +197,98 @@ class FlexibleAiAgentService
                 ]);
                 return [
                     'commands' => $fallbackCommands,
-                    'session_id' => $aiResponse['session_id'] ?? $sessionId,
+                    'session_id' => $sessionId,
                 ];
             }
+            
+            // Если не нашли команду, вернем пустой массив
+            return [
+                'commands' => [],
+                'session_id' => $sessionId,
+            ];
+        }
+        
+        // Step 2: Get parameters for the identified command
+        $command = $this->commandRegistry->getCommand($commandName);
+        if (!$command) {
+            Log::warning('Command not found in registry', ['command_name' => $commandName]);
+            return [
+                'commands' => [],
+                'session_id' => $sessionId,
+            ];
+        }
+        
+        // Get parameters with specific context
+        $enhancedCommand = $this->getCommandParameters($commandName, $user, $userInput, $sessionId);
+        
+        return [
+            'commands' => [$enhancedCommand],
+            'session_id' => $sessionId,
+        ];
+    }
+    
+    /**
+     * Получить параметры для команды
+     */
+    private function getCommandParameters(string $commandName, User $user, string $userInput, ?string $sessionId): array
+    {
+        // Загрузить необходимый контекст для конкретной команды
+        $context = $this->buildSpecificContext($commandName, $user, $userInput);
+        $command = $this->commandRegistry->getCommand($commandName);
+        
+        if (!$command) {
+            return ['name' => $commandName, 'parameters' => []];
+        }
+        
+        $commandInfo = [
+            'name' => $commandName,
+            'description' => $command->getDescription(),
+            'parameters' => $command->getParametersSchema()
+        ];
+        
+        $prompt = $this->buildParametersPrompt($userInput, $context, $commandInfo);
+        
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->aiServiceToken,
+            'Content-Type' => 'application/json',
+        ])->post($this->aiServiceUrl, [
+            'model' => $this->aiModel,
+            'input' => $prompt,
+            'session_id' => $sessionId ?? 'flexible-ai-session-' . $user->id,
+            'new_session' => false,
+        ]);
+
+        if (!$response->successful()) {
+            Log::warning('Failed to get command parameters', [
+                'command' => $commandName,
+                'error' => $response->body()
+            ]);
+            return ['name' => $commandName, 'parameters' => []];
         }
 
-        return [
-            'commands' => $parsedCommands['commands'] ?? [],
-            'session_id' => $aiResponse['session_id'] ?? $sessionId,
-        ];
+        $aiResponse = $response->json();
+        $content = $this->extractContent($aiResponse);
+        
+        try {
+            if (preg_match('/\{.*\}/s', $content, $matches)) {
+                $json = json_decode($matches[0], true);
+                if ($json && isset($json['parameters'])) {
+                    return ['name' => $commandName, 'parameters' => $json['parameters']];
+                }
+            }
+            
+            $json = json_decode($content, true);
+            if ($json && isset($json['parameters'])) {
+                return ['name' => $commandName, 'parameters' => $json['parameters']];
+            }
+        } catch (Exception $e) {
+            Log::warning('Failed to parse command parameters', [
+                'command' => $commandName,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return ['name' => $commandName, 'parameters' => []];
     }
 
     /**
@@ -232,9 +296,10 @@ class FlexibleAiAgentService
      */
     private function generateNaturalResponse(string $userInput, array $commandResults, User $user, ?string $sessionId, bool $isConfirmation = false): array
     {
-        $context = $this->buildContext($user);
+        // Для генерации ответа не нужен полный контекст, только основная информация
+        $minimalContext = $this->buildMinimalContext($user);
 
-        $prompt = $this->buildResponsePrompt($userInput, $commandResults, $context);
+        $prompt = $this->buildResponsePrompt($userInput, $commandResults, $minimalContext);
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->aiServiceToken,
@@ -267,7 +332,35 @@ class FlexibleAiAgentService
     }
 
     /**
-     * Построить промпт для получения команд
+     * Построить минимальный промпт для идентификации команд
+     */
+    private function buildCommandIdentificationPrompt(string $userInput, array $commands, bool $isConfirmation = false): string
+    {
+        $prompt = "Ты - ИИ-ассистент для системы управления задачами. Анализируй запрос пользователя и определи ТОЛЬКО НАЗВАНИЕ нужной команды.\n\n";
+        $prompt .= "Запрос пользователя: {$userInput}\n\n";
+
+        $prompt .= "Доступные команды:\n";
+        foreach ($commands as $command) {
+            $prompt .= "- {$command['name']}: {$command['description']}\n";
+        }
+
+        $prompt .= "\nПРАВИЛА:\n";
+        $prompt .= "1. Анализируй запрос и определи ТОЛЬКО НАЗВАНИЕ нужной команды\n";
+        $prompt .= "2. Для вопросов о статусе используй LIST_TASKS\n";
+        $prompt .= "3. Для создания используй CREATE команды\n";
+        $prompt .= "4. Если пользователь говорит 'переведи задачи в статус выполнено' - используй BULK_UPDATE_TASK_STATUS\n";
+        $prompt .= "5. Если пользователь подтверждает действие (да, сделай, ок) - выбери предыдущую команду\n";
+        $prompt .= "6. Для работы со спринтами используй CREATE_SPRINT, LIST_SPRINTS, UPDATE_SPRINT\n";
+        $prompt .= "7. Верни ТОЛЬКО название команды БЕЗ ПАРАМЕТРОВ\n\n";
+
+        $prompt .= "Формат ответа:\n";
+        $prompt .= '{"command": "COMMAND_NAME"}';
+
+        return $prompt;
+    }
+
+    /**
+     * Построить детальный промпт для получения команд с контекстом
      */
     private function buildCommandsPrompt(string $userInput, array $context, array $commands, bool $isConfirmation = false): string
     {
@@ -611,6 +704,327 @@ class FlexibleAiAgentService
         return [];
     }
 
+    /**
+     * Идентификация команды с минимальным контекстом
+     */
+    private function identifyCommands(string $userInput, User $user, ?string $sessionId, bool $isConfirmation, array $commands): array
+    {
+        $prompt = $this->buildCommandIdentificationPrompt($userInput, $commands, $isConfirmation);
+        
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->aiServiceToken,
+            'Content-Type' => 'application/json',
+        ])->post($this->aiServiceUrl, [
+            'model' => $this->aiModel,
+            'input' => $prompt,
+            'session_id' => $sessionId ?? 'flexible-ai-session-' . $user->id,
+            'new_session' => $sessionId === null,
+        ]);
+
+        if (!$response->successful()) {
+            throw new Exception('Ошибка при обращении к ИИ сервису: ' . $response->body());
+        }
+
+        $aiResponse = $response->json();
+
+        Log::info('AI Command Identification Response', [
+            'response' => $aiResponse,
+            'user_input' => $userInput,
+            'session_id' => $sessionId,
+        ]);
+
+        $commandName = $this->extractCommandName($aiResponse);
+        
+        return [
+            'command_name' => $commandName,
+            'session_id' => $aiResponse['session_id'] ?? $sessionId,
+        ];
+    }
+    
+    /**
+     * Извлечь название команды из ответа ИИ
+     */
+    private function extractCommandName(array $aiResponse): string
+    {
+        $content = $this->extractContent($aiResponse);
+        
+        // Пробуем найти JSON формат
+        if (preg_match('/\{.*\}/s', $content, $matches)) {
+            $json = json_decode($matches[0], true);
+            if ($json && isset($json['command'])) {
+                return $json['command'];
+            }
+        }
+        
+        // Пробуем найти команду в тексте
+        $possibleCommands = [
+            'LIST_TASKS',
+            'CREATE_TASK',
+            'UPDATE_TASK',
+            'DELETE_TASK',
+            'LIST_PROJECTS',
+            'CREATE_PROJECT',
+            'UPDATE_PROJECT',
+            'DELETE_PROJECT',
+            'LIST_SPRINTS',
+            'CREATE_SPRINT',
+            'UPDATE_SPRINT',
+            'DELETE_SPRINT',
+            'BULK_UPDATE_TASK_STATUS',
+            'ADD_COMMENT',
+        ];
+        
+        foreach ($possibleCommands as $cmd) {
+            if (stripos($content, $cmd) !== false) {
+                return $cmd;
+            }
+        }
+        
+        // Если не нашли, вернем пустую строку
+        return '';
+    }
+    
+    
+    /**
+     * Построить промпт для получения параметров команды
+     */
+    private function buildParametersPrompt(string $userInput, array $context, array $commandInfo): string
+    {
+        $prompt = "Ты - ИИ-ассистент для системы управления задачами. Тебе нужно определить параметры команды на основе запроса и контекста.\n\n";
+        $prompt .= "Запрос пользователя: {$userInput}\n\n";
+
+        $prompt .= "Команда: {$commandInfo['name']}\n";
+        $prompt .= "Описание: {$commandInfo['description']}\n\n";
+        
+        $prompt .= "Параметры команды:\n";
+        foreach ($commandInfo['parameters'] as $param => $config) {
+            $required = $config['required'] ? 'обязательный' : 'опциональный';
+            $prompt .= "- {$param} ({$config['type']}, {$required}): {$config['description']}\n";
+        }
+        
+        $prompt .= "\nКонтекст:\n";
+        $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
+        
+        // Если это обновление статуса конкретной задачи, выделяем информацию о ней
+        if (isset($context['specific_task'])) {
+            $task = $context['specific_task'];
+            $prompt .= "ИНФОРМАЦИЯ О ЗАДАЧЕ:\n";
+            $prompt .= "- ID: {$task['id']}\n";
+            $prompt .= "- Название: {$task['title']}\n";
+            $prompt .= "- Текущий статус: {$task['current_status']}\n";
+            $prompt .= "- Проект: {$task['project_name']}\n\n";
+            
+            $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ДЛЯ ЭТОЙ ЗАДАЧИ:\n";
+            foreach ($task['status_mapping'] as $statusName => $description) {
+                $prompt .= "- {$statusName}: {$description}\n";
+            }
+            $prompt .= "\n";
+        }
+        // Общие статусы из контекста
+        elseif (isset($context['dynamic_statuses']) && !empty($context['dynamic_statuses']['available_status_names'])) {
+            $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ЗАДАЧ:\n";
+            foreach ($context['dynamic_statuses']['status_mapping'] as $statusName => $description) {
+                $prompt .= "- {$statusName}: {$description}\n";
+            }
+            $prompt .= "\n";
+        }
+        // Резервные статусы, если нет динамических
+        elseif (isset($context['fallback_statuses']) && !empty($context['fallback_statuses']['available_status_names'])) {
+            $prompt .= "ДОСТУПНЫЕ СТАТУСЫ ЗАДАЧ:\n";
+            foreach ($context['fallback_statuses']['status_mapping'] as $statusName => $description) {
+                $prompt .= "- {$statusName}: {$description}\n";
+            }
+            $prompt .= "\n";
+        }
+        
+        $prompt .= "ПРАВИЛА:\n";
+        $prompt .= "1. Определи все необходимые параметры для команды на основе запроса пользователя\n";
+        $prompt .= "2. Используй project_name вместо project_id\n";
+        $prompt .= "3. Для назначения на себя используй assign_to_me: true\n";
+        $prompt .= "4. Используй только точные названия статусов из доступных статусов задач\n";
+        
+        $prompt .= "\nЗадача: Определи параметры команды на основе контекста и запроса пользователя.\n";
+        $prompt .= "Верни ТОЛЬКО JSON с параметрами в формате: {\"parameters\": {\"param1\": \"value1\", \"param2\": \"value2\"}}\n";
+        
+        return $prompt;
+    }
+    
+    /**
+     * Построить специфический контекст для команды
+     */
+    private function buildSpecificContext(string $commandName, User $user, ?string $userInput = null): array
+    {
+        $context = [];
+        
+        // Загружаем только необходимые для конкретной команды провайдеры
+        foreach ($this->contextProviders as $provider) {
+            if (!$provider instanceof ContextProviderInterface) {
+                continue;
+            }
+            
+            $providerName = $provider->getName();
+            
+            // Фильтруем провайдеры в зависимости от команды
+            $isNeeded = false;
+            
+            if (in_array($commandName, ['CREATE_TASK', 'UPDATE_TASK', 'UPDATE_TASK_STATUS', 'BULK_UPDATE_TASK_STATUS']) && 
+                in_array($providerName, ['user', 'project', 'dynamic_statuses'])) {
+                $isNeeded = true;
+            }
+            
+            if (in_array($commandName, ['CREATE_SPRINT', 'UPDATE_SPRINT']) && 
+                in_array($providerName, ['user', 'project'])) {
+                $isNeeded = true;
+            }
+            
+            if ($isNeeded) {
+                try {
+                    $context[$providerName] = $provider->getContext($user);
+                } catch (Exception $e) {
+                    Log::warning("Context provider {$providerName} failed for command {$commandName}", [
+                        'error' => $e->getMessage(),
+                        'user_id' => $user->id
+                    ]);
+                }
+            }
+        }
+        
+        // Добавляем специфический контекст для команды UPDATE_TASK_STATUS
+        if ($commandName === 'UPDATE_TASK_STATUS' && $userInput) {
+            $this->addTaskStatusContext($context, $userInput, $user);
+        }
+        
+        // Проверяем, что у нас есть информация о статусах для команд работы со статусами
+        if (in_array($commandName, ['UPDATE_TASK_STATUS', 'BULK_UPDATE_TASK_STATUS']) && 
+            (!isset($context['dynamic_statuses']) || empty($context['dynamic_statuses']['available_status_names']))) {
+            // Загружаем стандартные статусы, если нет динамических
+            $context['fallback_statuses'] = [
+                'available_status_names' => [
+                    'К выполнению', 'To Do',
+                    'В работе', 'In Progress',
+                    'Завершена', 'Done',
+                    'На проверке', 'Review',
+                    'Тестирование', 'Testing',
+                    'Готова к релизу', 'Ready for Release'
+                ],
+                'status_mapping' => [
+                    'К выполнению' => 'Задачи, которые готовы к выполнению',
+                    'To Do' => 'Tasks ready to be worked on',
+                    'В работе' => 'Задачи, над которыми сейчас работают',
+                    'In Progress' => 'Tasks currently being worked on',
+                    'Завершена' => 'Задачи, которые полностью завершены',
+                    'Done' => 'Tasks that are completely done',
+                    'На проверке' => 'Задачи на проверке кода',
+                    'Review' => 'Tasks being reviewed',
+                    'Тестирование' => 'Задачи на этапе тестирования',
+                    'Testing' => 'Tasks being tested',
+                    'Готова к релизу' => 'Задачи, готовые к выпуску в продакшен',
+                    'Ready for Release' => 'Tasks ready to be released to production'
+                ]
+            ];
+        }
+        
+        return $context;
+    }
+    
+    /**
+     * Добавить контекст статусов для конкретной задачи
+     */
+    private function addTaskStatusContext(array &$context, string $userInput, User $user): void
+    {
+        // Пытаемся извлечь ID задачи из запроса пользователя
+        $taskId = null;
+        
+        // Поиск по шаблонам вроде "#123", "task 123", "задача 123", "задачу 123"
+        if (preg_match('/#(\d+)/', $userInput, $matches)) {
+            $taskId = (int)$matches[1];
+        } elseif (preg_match('/(task|задача|задачу)\s+(\d+)/iu', $userInput, $matches)) {
+            $taskId = (int)$matches[2];
+        }
+        
+        if (!$taskId) {
+            return;
+        }
+        
+        try {
+            // Получаем данные о задаче напрямую из модели
+            $task = \App\Models\Task::with(['status', 'project'])->find($taskId);
+            
+            if ($task && $task->project && $user->can('view', $task)) {
+                // Добавляем информацию о задаче в контекст
+                $context['specific_task'] = [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'current_status' => $task->status->name,
+                    'project_id' => $task->project_id,
+                    'project_name' => $task->project->name,
+                ];
+                
+                // Получаем доступные статусы для этого проекта
+                $taskStatusService = app(TaskStatusService::class);
+                
+                // Получаем статусы для контекста задачи
+                $statuses = $task->project->statuses;
+                if ($task->sprint_id) {
+                    // Если задача в спринте, используем статусы с учетом спринта
+                    $sprint = \App\Models\Sprint::find($task->sprint_id);
+                    if ($sprint) {
+                        $statuses = $taskStatusService->getAvailableStatusesForTask($task, $task->project, $sprint);
+                    }
+                }
+                
+                $availableStatuses = [];
+                $statusMapping = [];
+                
+                foreach ($statuses as $status) {
+                    $availableStatuses[] = $status->name;
+                    $statusMapping[$status->name] = $status->description ?: $status->name;
+                }
+                
+                $context['specific_task']['available_statuses'] = $availableStatuses;
+                $context['specific_task']['status_mapping'] = $statusMapping;
+            }
+        } catch (Exception $e) {
+            Log::warning('Failed to get task status context', [
+                'task_id' => $taskId,
+                'error' => $e->getMessage(),
+                'user_id' => $user->id
+            ]);
+        }
+    }
+
+    /**
+     * Создать минимальный контекст для генерации ответа
+     */
+    private function buildMinimalContext(User $user): array
+    {
+        $context = [
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+            ]
+        ];
+        
+        // Добавляем только статусы для корректного отображения в ответе
+        foreach ($this->contextProviders as $provider) {
+            if ($provider instanceof ContextProviderInterface) {
+                if ($provider->getName() === 'dynamic_statuses') {
+                    try {
+                        $context['dynamic_statuses'] = $provider->getContext($user);
+                    } catch (Exception $e) {
+                        Log::warning("Dynamic statuses provider failed", [
+                            'error' => $e->getMessage(),
+                            'user_id' => $user->id
+                        ]);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return $context;
+    }
+    
     /**
      * Добавить провайдер контекста
      */
