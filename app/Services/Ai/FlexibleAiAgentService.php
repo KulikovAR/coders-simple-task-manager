@@ -813,8 +813,20 @@ class FlexibleAiAgentService
                 $prompt .= "- {$project['name']}" . 
                     (isset($project['description']) && !empty($project['description']) ? " ({$project['description']})" : '') . 
                     "\n";
+                
+                // Выводим участников проекта
+                if (!empty($project['members'])) {
+                    $prompt .= "  УЧАСТНИКИ ПРОЕКТА:\n";
+                    foreach ($project['members'] as $member) {
+                        $prompt .= "  - {$member['name']}" . 
+                            (isset($member['role']) && !empty($member['role']) ? " ({$member['role']})" : '') . 
+                            "\n";
+                    }
+                    $prompt .= "\n";
+                }
             }
-            $prompt .= "\nВАЖНО: Используй ТОЧНОЕ название проекта из списка выше.\n\n";
+            $prompt .= "ВАЖНО: Используй ТОЧНОЕ название проекта из списка выше.\n";
+            $prompt .= "ВАЖНО: При назначении задачи (assign) используй ТОЧНОЕ имя участника из списка выше.\n\n";
         }
         
         // Если это обновление статуса конкретной задачи, выделяем информацию о ней
@@ -853,8 +865,10 @@ class FlexibleAiAgentService
         $prompt .= "1. Определи все необходимые параметры для команды на основе запроса пользователя\n";
         $prompt .= "2. Используй project_name вместо project_id\n";
         $prompt .= "3. Для назначения на себя используй assign_to_me: true\n";
-        $prompt .= "4. Используй только точные названия статусов из доступных статусов задач\n";
-        $prompt .= "5. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
+        $prompt .= "4. Для назначения на другого пользователя используй assign_to с ТОЧНЫМ именем пользователя\n";
+        $prompt .= "5. Используй только точные названия статусов из доступных статусов задач\n";
+        $prompt .= "6. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
+        $prompt .= "7. ВАЖНО: Используй только ТОЧНЫЕ имена участников из списка участников проекта\n";
         
         $prompt .= "\nЗадача: Определи параметры команды на основе контекста и запроса пользователя.\n";
         $prompt .= "Верни ТОЛЬКО JSON с параметрами в формате: {\"parameters\": {\"param1\": \"value1\", \"param2\": \"value2\"}}\n";
@@ -1056,7 +1070,7 @@ class FlexibleAiAgentService
         try {
             // Получаем все проекты пользователя
             $projectService = app(ProjectService::class);
-            $projects = $user->projects()->with('members')->get();
+            $projects = $user->projects()->with(['members', 'members.user'])->get();
             
             if ($projects->isEmpty()) {
                 return;
@@ -1064,9 +1078,11 @@ class FlexibleAiAgentService
             
             $projectList = [];
             $projectNameMapping = [];
+            $projectMembers = [];
+            $userNameMapping = [];
             
             foreach ($projects as $project) {
-                $projectList[] = [
+                $projectData = [
                     'id' => $project->id,
                     'name' => $project->name,
                     'slug' => $project->slug,
@@ -1075,13 +1091,47 @@ class FlexibleAiAgentService
                     'member_count' => $project->members->count(),
                 ];
                 
+                // Собираем информацию о членах проекта
+                $members = [];
+                foreach ($project->members as $member) {
+                    if (!$member->user) {
+                        continue;
+                    }
+                    
+                    $memberUser = $member->user;
+                    $members[] = [
+                        'id' => $memberUser->id,
+                        'name' => $memberUser->name,
+                        'email' => $memberUser->email,
+                        'role' => $member->role ?? 'member',
+                    ];
+                    
+                    // Добавляем варианты написания имени пользователя
+                    $userNameMapping[$memberUser->name] = $memberUser->name;
+                    $userNameMapping[mb_strtolower($memberUser->name)] = $memberUser->name;
+                    
+                    // Добавляем имя и фамилию отдельно, если есть пробел
+                    $nameParts = explode(' ', $memberUser->name);
+                    if (count($nameParts) > 1) {
+                        // Имя
+                        $firstName = $nameParts[0];
+                        $userNameMapping[$firstName] = $memberUser->name;
+                        $userNameMapping[mb_strtolower($firstName)] = $memberUser->name;
+                        
+                        // Фамилия
+                        $lastName = $nameParts[count($nameParts) - 1];
+                        $userNameMapping[$lastName] = $memberUser->name;
+                        $userNameMapping[mb_strtolower($lastName)] = $memberUser->name;
+                    }
+                }
+                
+                $projectData['members'] = $members;
+                $projectList[] = $projectData;
+                $projectMembers[$project->name] = $members;
+                
                 // Добавляем варианты написания названия проекта
                 $projectNameMapping[$project->name] = $project->name;
-                
-                // Добавляем нижний регистр
                 $projectNameMapping[mb_strtolower($project->name)] = $project->name;
-                
-                // Добавляем верхний регистр
                 $projectNameMapping[mb_strtoupper($project->name)] = $project->name;
                 
                 // Добавляем slug
@@ -1093,6 +1143,8 @@ class FlexibleAiAgentService
             $context['user_projects'] = [
                 'projects' => $projectList,
                 'project_name_mapping' => $projectNameMapping,
+                'project_members' => $projectMembers,
+                'user_name_mapping' => $userNameMapping,
                 'total_count' => count($projectList)
             ];
         } catch (Exception $e) {
