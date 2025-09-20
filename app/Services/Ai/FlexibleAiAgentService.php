@@ -521,6 +521,9 @@ class FlexibleAiAgentService
         foreach ($commands as $commandData) {
             $commandName = $commandData['name'] ?? '';
             $parameters = $commandData['parameters'] ?? [];
+            
+            // Применяем маппинг параметров для совместимости
+            $parameters = $this->normalizeCommandParameters($commandName, $parameters);
 
             $command = $this->commandRegistry->getCommand($commandName);
             if (!$command) {
@@ -551,6 +554,50 @@ class FlexibleAiAgentService
         }
 
         return $results;
+    }
+    
+    /**
+     * Нормализация параметров команды
+     */
+    private function normalizeCommandParameters(string $commandName, array $parameters): array
+    {
+        // Маппинг параметров для совместимости с разными названиями
+        $parameterMappings = [
+            'CREATE_TASK' => [
+                'assignee_name' => 'assign_to',
+                'assignee' => 'assign_to',
+            ],
+            'UPDATE_TASK' => [
+                'assignee_name' => 'assign_to',
+                'assignee' => 'assign_to',
+            ],
+        ];
+        
+        // Если для команды есть маппинг параметров
+        if (isset($parameterMappings[$commandName])) {
+            $mapping = $parameterMappings[$commandName];
+            
+            // Проходим по всем маппингам для данной команды
+            foreach ($mapping as $oldParam => $newParam) {
+                // Если старый параметр есть, а нового нет
+                if (isset($parameters[$oldParam]) && !isset($parameters[$newParam])) {
+                    // Копируем значение в новый параметр
+                    $parameters[$newParam] = $parameters[$oldParam];
+                    // Удаляем старый параметр
+                    unset($parameters[$oldParam]);
+                    
+                    // Логируем изменение для отладки
+                    Log::info("Parameter mapping applied", [
+                        'command' => $commandName,
+                        'old_param' => $oldParam,
+                        'new_param' => $newParam,
+                        'value' => $parameters[$newParam]
+                    ]);
+                }
+            }
+        }
+        
+        return $parameters;
     }
 
     /**
@@ -865,10 +912,11 @@ class FlexibleAiAgentService
         $prompt .= "1. Определи все необходимые параметры для команды на основе запроса пользователя\n";
         $prompt .= "2. Используй project_name вместо project_id\n";
         $prompt .= "3. Для назначения на себя используй assign_to_me: true\n";
-        $prompt .= "4. Для назначения на другого пользователя используй assign_to с ТОЧНЫМ именем пользователя\n";
-        $prompt .= "5. Используй только точные названия статусов из доступных статусов задач\n";
-        $prompt .= "6. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
-        $prompt .= "7. ВАЖНО: Используй только ТОЧНЫЕ имена участников из списка участников проекта\n";
+        $prompt .= "4. Для назначения на другого пользователя используй assign_to (НЕ assignee_name) с ТОЧНЫМ именем пользователя\n";
+        $prompt .= "5. ВНИМАНИЕ: Параметр должен быть именно assign_to, а НЕ assignee_name\n";
+        $prompt .= "6. Используй только точные названия статусов из доступных статусов задач\n";
+        $prompt .= "7. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
+        $prompt .= "8. ВАЖНО: Используй только ТОЧНЫЕ имена участников из списка участников проекта\n";
         
         $prompt .= "\nЗадача: Определи параметры команды на основе контекста и запроса пользователя.\n";
         $prompt .= "Верни ТОЛЬКО JSON с параметрами в формате: {\"parameters\": {\"param1\": \"value1\", \"param2\": \"value2\"}}\n";
