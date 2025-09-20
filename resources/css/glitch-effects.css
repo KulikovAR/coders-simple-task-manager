@@ -824,7 +824,7 @@
     background: linear-gradient(
         45deg,
         transparent 30%,
-        rgba(59, 130, 246, 0.05) 50%,
+        rgba(59, 230, 146, 0.05) 50%,
         transparent 70%
     );
     opacity: 0;
@@ -853,7 +853,7 @@
     background: linear-gradient(
         45deg,
         transparent 30%,
-        rgba(34, 197, 94, 0.05) 50%,
+        rgba(42, 97, 261, 0.05) 50%,
         transparent 70%
     );
     opacity: 0;
@@ -864,6 +864,34 @@
 .project-glitch:hover::before {
     opacity: 1;
 }
+
+/* Эффект для желтого   */
+.yellow-glitch {
+    position: relative;
+}
+
+.yellow-glitch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(240, 240, 50, 0.05) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.yellow-glitch:hover::before {
+    opacity: 1;
+}
+
 
 /* Эффект для спринтов */
 .sprint-glitch {

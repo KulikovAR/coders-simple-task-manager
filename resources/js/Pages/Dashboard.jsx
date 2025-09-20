@@ -247,7 +247,7 @@ export default function Dashboard({ auth, stats, projects, telegram, subscriptio
                         </Link>
                         <Link
                             href={route('projects.index')}
-                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30 project-glitch"
+                            className="group relative overflow-hidden bg-secondary-bg rounded-lg p-3 hover:bg-accent-yellow/5 transition-all duration-300 hover:shadow-glow-yellow border border-border-color hover:border-accent-yellow/30 yellow-glitch"
                         >
                             <div className="absolute top-0 right-0 w-12 h-12 bg-accent-yellow/10 rounded-full -translate-y-6 translate-x-6 group-hover:scale-150 transition-transform duration-300"></div>
                             <div className="relative z-10">

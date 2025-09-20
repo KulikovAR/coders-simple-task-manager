@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Services\Ai\Contracts\ContextProviderInterface;
 use App\Services\AiConversationService;
+use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Services\TaskStatusService;
 use Exception;
@@ -805,6 +806,17 @@ class FlexibleAiAgentService
         $prompt .= "\nКонтекст:\n";
         $prompt .= json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
         
+        // Выводим список проектов пользователя
+        if (isset($context['user_projects']) && !empty($context['user_projects']['projects'])) {
+            $prompt .= "ДОСТУПНЫЕ ПРОЕКТЫ:\n";
+            foreach ($context['user_projects']['projects'] as $project) {
+                $prompt .= "- {$project['name']}" . 
+                    (isset($project['description']) && !empty($project['description']) ? " ({$project['description']})" : '') . 
+                    "\n";
+            }
+            $prompt .= "\nВАЖНО: Используй ТОЧНОЕ название проекта из списка выше.\n\n";
+        }
+        
         // Если это обновление статуса конкретной задачи, выделяем информацию о ней
         if (isset($context['specific_task'])) {
             $task = $context['specific_task'];
@@ -842,6 +854,7 @@ class FlexibleAiAgentService
         $prompt .= "2. Используй project_name вместо project_id\n";
         $prompt .= "3. Для назначения на себя используй assign_to_me: true\n";
         $prompt .= "4. Используй только точные названия статусов из доступных статусов задач\n";
+        $prompt .= "5. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
         
         $prompt .= "\nЗадача: Определи параметры команды на основе контекста и запроса пользователя.\n";
         $prompt .= "Верни ТОЛЬКО JSON с параметрами в формате: {\"parameters\": {\"param1\": \"value1\", \"param2\": \"value2\"}}\n";
@@ -877,6 +890,11 @@ class FlexibleAiAgentService
                 $isNeeded = true;
             }
             
+            // Для всех команд добавляем список проектов
+            if ($providerName === 'project') {
+                $isNeeded = true;
+            }
+            
             if ($isNeeded) {
                 try {
                     $context[$providerName] = $provider->getContext($user);
@@ -892,6 +910,11 @@ class FlexibleAiAgentService
         // Добавляем специфический контекст для команды UPDATE_TASK_STATUS
         if ($commandName === 'UPDATE_TASK_STATUS' && $userInput) {
             $this->addTaskStatusContext($context, $userInput, $user);
+        }
+        
+        // Добавляем список всех проектов пользователя для лучшего сопоставления названий
+        if (!isset($context['user_projects'])) {
+            $this->addUserProjectsContext($context, $user);
         }
         
         // Проверяем, что у нас есть информация о статусах для команд работы со статусами
@@ -1023,6 +1046,61 @@ class FlexibleAiAgentService
         }
         
         return $context;
+    }
+    
+    /**
+     * Добавить список проектов пользователя в контекст
+     */
+    private function addUserProjectsContext(array &$context, User $user): void
+    {
+        try {
+            // Получаем все проекты пользователя
+            $projectService = app(ProjectService::class);
+            $projects = $user->projects()->with('members')->get();
+            
+            if ($projects->isEmpty()) {
+                return;
+            }
+            
+            $projectList = [];
+            $projectNameMapping = [];
+            
+            foreach ($projects as $project) {
+                $projectList[] = [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'slug' => $project->slug,
+                    'description' => $project->description,
+                    'is_owner' => $project->user_id === $user->id,
+                    'member_count' => $project->members->count(),
+                ];
+                
+                // Добавляем варианты написания названия проекта
+                $projectNameMapping[$project->name] = $project->name;
+                
+                // Добавляем нижний регистр
+                $projectNameMapping[mb_strtolower($project->name)] = $project->name;
+                
+                // Добавляем верхний регистр
+                $projectNameMapping[mb_strtoupper($project->name)] = $project->name;
+                
+                // Добавляем slug
+                if ($project->slug) {
+                    $projectNameMapping[$project->slug] = $project->name;
+                }
+            }
+            
+            $context['user_projects'] = [
+                'projects' => $projectList,
+                'project_name_mapping' => $projectNameMapping,
+                'total_count' => count($projectList)
+            ];
+        } catch (Exception $e) {
+            Log::warning('Failed to get user projects context', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id
+            ]);
+        }
     }
     
     /**
