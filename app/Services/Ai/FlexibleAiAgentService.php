@@ -564,12 +564,14 @@ class FlexibleAiAgentService
         // Маппинг параметров для совместимости с разными названиями
         $parameterMappings = [
             'CREATE_TASK' => [
-                'assignee_name' => 'assign_to',
-                'assignee' => 'assign_to',
+                'assignee_name' => 'user_id',
+                'assignee' => 'user_id',
+                'assign_to' => 'user_id',
             ],
             'UPDATE_TASK' => [
-                'assignee_name' => 'assign_to',
-                'assignee' => 'assign_to',
+                'assignee_name' => 'user_id',
+                'assignee' => 'user_id',
+                'assign_to' => 'user_id',
             ],
         ];
         
@@ -865,15 +867,15 @@ class FlexibleAiAgentService
                 if (!empty($project['members'])) {
                     $prompt .= "  УЧАСТНИКИ ПРОЕКТА:\n";
                     foreach ($project['members'] as $member) {
-                        $prompt .= "  - {$member['name']}" . 
-                            (isset($member['role']) && !empty($member['role']) ? " ({$member['role']})" : '') . 
+                        $prompt .= "  - ID: {$member['id']}, Имя: {$member['name']}" . 
+                            (isset($member['role']) && !empty($member['role']) ? ", Роль: {$member['role']}" : '') . 
                             "\n";
                     }
                     $prompt .= "\n";
                 }
             }
             $prompt .= "ВАЖНО: Используй ТОЧНОЕ название проекта из списка выше.\n";
-            $prompt .= "ВАЖНО: При назначении задачи (assign) используй ТОЧНОЕ имя участника из списка выше.\n\n";
+            $prompt .= "ВАЖНО: При назначении задачи используй user_id (числовой ID пользователя) из списка выше.\n\n";
         }
         
         // Если это обновление статуса конкретной задачи, выделяем информацию о ней
@@ -912,11 +914,11 @@ class FlexibleAiAgentService
         $prompt .= "1. Определи все необходимые параметры для команды на основе запроса пользователя\n";
         $prompt .= "2. Используй project_name вместо project_id\n";
         $prompt .= "3. Для назначения на себя используй assign_to_me: true\n";
-        $prompt .= "4. Для назначения на другого пользователя используй assign_to (НЕ assignee_name) с ТОЧНЫМ именем пользователя\n";
-        $prompt .= "5. ВНИМАНИЕ: Параметр должен быть именно assign_to, а НЕ assignee_name\n";
+        $prompt .= "4. Для назначения на другого пользователя используй user_id (числовой ID) вместо имени\n";
+        $prompt .= "5. ВНИМАНИЕ: Параметр должен быть именно user_id с числовым значением ID пользователя\n";
         $prompt .= "6. Используй только точные названия статусов из доступных статусов задач\n";
         $prompt .= "7. ВАЖНО: Используй только ТОЧНЫЕ названия проектов из списка доступных проектов\n";
-        $prompt .= "8. ВАЖНО: Используй только ТОЧНЫЕ имена участников из списка участников проекта\n";
+        $prompt .= "8. ВАЖНО: Для назначения задач используй только числовые ID пользователей, а не их имена\n";
         
         $prompt .= "\nЗадача: Определи параметры команды на основе контекста и запроса пользователя.\n";
         $prompt .= "Верни ТОЛЬКО JSON с параметрами в формате: {\"parameters\": {\"param1\": \"value1\", \"param2\": \"value2\"}}\n";
@@ -1141,6 +1143,7 @@ class FlexibleAiAgentService
                 
                 // Собираем информацию о членах проекта
                 $members = [];
+                $userIdMapping = []; // Маппинг имен на ID
                 foreach ($project->members as $member) {
                     if (!$member->user) {
                         continue;
@@ -1154,6 +1157,9 @@ class FlexibleAiAgentService
                         'role' => $member->role ?? 'member',
                     ];
                     
+                    // Маппинг имен на ID пользователя
+                    $userIdMapping[$memberUser->name] = $memberUser->id;
+                    
                     // Добавляем варианты написания имени пользователя
                     $userNameMapping[$memberUser->name] = $memberUser->name;
                     $userNameMapping[mb_strtolower($memberUser->name)] = $memberUser->name;
@@ -1165,11 +1171,13 @@ class FlexibleAiAgentService
                         $firstName = $nameParts[0];
                         $userNameMapping[$firstName] = $memberUser->name;
                         $userNameMapping[mb_strtolower($firstName)] = $memberUser->name;
+                        $userIdMapping[$firstName] = $memberUser->id;
                         
                         // Фамилия
                         $lastName = $nameParts[count($nameParts) - 1];
                         $userNameMapping[$lastName] = $memberUser->name;
                         $userNameMapping[mb_strtolower($lastName)] = $memberUser->name;
+                        $userIdMapping[$lastName] = $memberUser->id;
                     }
                 }
                 
@@ -1193,6 +1201,7 @@ class FlexibleAiAgentService
                 'project_name_mapping' => $projectNameMapping,
                 'project_members' => $projectMembers,
                 'user_name_mapping' => $userNameMapping,
+                'user_id_mapping' => $userIdMapping,
                 'total_count' => count($projectList)
             ];
         } catch (Exception $e) {
