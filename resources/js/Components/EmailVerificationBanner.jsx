@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 
-export default function EmailVerificationBanner({ user, status, isNewUser = false }) {
+export default function EmailVerificationBanner({ user, status }) {
     const [isResending, setIsResending] = useState(false);
 
     const handleResendVerification = () => {
@@ -12,11 +12,6 @@ export default function EmailVerificationBanner({ user, status, isNewUser = fals
     };
 
     if (user.email_verified_at) {
-        return null;
-    }
-
-    // Для старых пользователей показываем плашку только в профиле
-    if (!isNewUser) {
         return null;
     }
 

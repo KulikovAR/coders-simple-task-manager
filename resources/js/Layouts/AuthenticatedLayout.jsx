@@ -298,7 +298,7 @@ export default function Authenticated({ user, header, children, flash }) {
                 <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
                         {/* Плашка подтверждения email */}
-                        <EmailVerificationBanner user={user} status={flash?.status} isNewUser={user?.is_new_user} />
+                        <EmailVerificationBanner user={user} status={flash?.status} />
                         
                         {/* Отображаем flash-сообщения глобально */}
 

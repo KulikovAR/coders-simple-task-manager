@@ -193,15 +193,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new VerifyEmailNotification);
     }
-
-    /**
-     * Check if user is new (registered after September 21, 2025).
-     *
-     * @return bool
-     */
-    public function isNewUser(): bool
-    {
-        $cutoffDate = \Carbon\Carbon::parse('2025-09-21');
-        return $this->created_at >= $cutoffDate;
-    }
 }
