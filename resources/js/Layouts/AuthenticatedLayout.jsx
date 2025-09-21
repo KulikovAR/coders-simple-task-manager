@@ -7,6 +7,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import MobileNotificationBell from '@/Components/MobileNotificationBell';
+import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
 import Waves from '@/Components/Waves';
 
 export default function Authenticated({ user, header, children, flash }) {
@@ -296,6 +297,9 @@ export default function Authenticated({ user, header, children, flash }) {
             <main className="py-12 safe-area-inset-y mobile-main">
                 <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">
                     <div className="animate-fade-in">
+                        {/* Плашка подтверждения email */}
+                        <EmailVerificationBanner user={user} status={flash?.status} isNewUser={user?.is_new_user} />
+                        
                         {/* Отображаем flash-сообщения глобально */}
 
                         {children}

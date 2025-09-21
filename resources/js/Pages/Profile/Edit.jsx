@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import ProfileEmailVerificationBanner from '@/Components/ProfileEmailVerificationBanner';
 
 import PaymentModal from '@/Components/PaymentModal';
 import { useState } from 'react';
@@ -33,6 +34,9 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
             <Head title="Профиль" />
 
             <div className="space-y-8">
+                {/* Плашка подтверждения email */}
+                <ProfileEmailVerificationBanner user={user} status={status} />
+
                 {/* Заголовок */}
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gradient mb-2">
