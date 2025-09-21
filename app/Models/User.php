@@ -34,6 +34,7 @@ class User extends Authenticatable
         'subscription_expires_at',
         'ai_requests_used',
         'ai_requests_reset_at',
+        'google_id',
     ];
 
     /**
