@@ -69,7 +69,7 @@ export default function TaskCard({ task }) {
                     <div className="flex items-center space-x-2 max-w-[60%]">
                         <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {task.assignee.avatar ? (
-                                <img src={`/storage/${task.assignee.avatar}`} alt="avatar" className="object-cover w-full h-full" />
+                                <img src={task.assignee.avatar_url} alt="avatar" className="object-cover w-full h-full" />
                             ) : (
                                 <span className="text-caption font-semibold text-accent-blue">
                                     {task.assignee.name.charAt(0).toUpperCase()}

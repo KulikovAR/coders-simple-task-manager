@@ -154,4 +154,23 @@ class User extends Authenticatable
     {
         return $this->getRemainingAiRequests() > 0;
     }
+
+    /**
+     * Get the avatar URL attribute.
+     * Returns the full URL for Google avatars or storage URL for local avatars.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // Если аватар начинается с http, это Google URL
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        // Иначе это локальный файл в storage
+        return asset('storage/' . $this->avatar);
+    }
 }

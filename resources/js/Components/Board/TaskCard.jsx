@@ -174,7 +174,7 @@ export default function TaskCard({
                             <div className="flex items-center">
                                 <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center overflow-hidden">
                                     {task.assignee.avatar ? (
-                                        <img src={`/storage/${task.assignee.avatar}`} alt="avatar" className="object-cover w-full h-full" />
+                                        <img src={task.assignee.avatar_url} alt="avatar" className="object-cover w-full h-full" />
                                     ) : (
                                         <span className="text-xs font-semibold text-accent-blue">
                                             {task.assignee.name.charAt(0).toUpperCase()}
@@ -306,7 +306,7 @@ export default function TaskCard({
                             <div className="flex items-center">
                                 <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center overflow-hidden">
                                     {task.assignee.avatar ? (
-                                        <img src={`/storage/${task.assignee.avatar}`} alt="avatar" className="object-cover w-full h-full" />
+                                        <img src={task.assignee.avatar_url} alt="avatar" className="object-cover w-full h-full" />
                                     ) : (
                                         <span className="text-xs font-semibold text-accent-blue">
                                             {task.assignee.name.charAt(0).toUpperCase()}

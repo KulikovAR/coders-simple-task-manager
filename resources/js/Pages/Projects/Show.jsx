@@ -354,7 +354,7 @@ export default function Show({ auth, project, flash, canAddMember, subscriptionI
                             <div className="flex items-center min-w-0 flex-1">
                                 <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0 overflow-hidden">
                                     {project.owner?.avatar ? (
-                                        <img src={`/storage/${project.owner.avatar}`} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+                                        <img src={project.owner.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
                                     ) : (
                                         <span>{project.owner?.name?.charAt(0) || 'U'}</span>
                                     )}
@@ -375,7 +375,7 @@ export default function Show({ auth, project, flash, canAddMember, subscriptionI
                                 <div className="flex items-center min-w-0 flex-1">
                                     <div className="w-8 h-8 bg-card-bg rounded-full flex items-center justify-center text-text-primary font-medium border border-border-color flex-shrink-0 overflow-hidden">
                                         {member.user?.avatar ? (
-                                            <img src={`/storage/${member.user.avatar}`} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+                                            <img src={member.user.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
                                         ) : (
                                             <span>{member.user?.name?.charAt(0) || 'U'}</span>
                                         )}

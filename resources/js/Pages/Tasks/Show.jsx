@@ -250,7 +250,7 @@ export default function Show({ auth, task, boardUrl }) {
                                         <span className="text-sm text-text-muted">Исполнитель:</span>
                                         <div className="flex items-center gap-2 text-right sm:text-left">
                                             {task.assignee.avatar ? (
-                                                <img src={`/storage/${task.assignee.avatar}`} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-border-color" />
+                                                <img src={task.assignee.avatar_url} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-border-color" />
                                             ) : (
                                                 <span className="w-7 h-7 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center border border-border-color">
                                                     {task.assignee.name.charAt(0).toUpperCase()}
@@ -270,7 +270,7 @@ export default function Show({ auth, task, boardUrl }) {
                                         <span className="text-sm text-text-muted">Автор:</span>
                                         <div className="flex items-center gap-2 text-right sm:text-left">
                                             {task.reporter.avatar ? (
-                                                <img src={`/storage/${task.reporter.avatar}`} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-border-color" />
+                                                <img src={task.reporter.avatar_url} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-border-color" />
                                             ) : (
                                                 <span className="w-7 h-7 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center border border-border-color">
                                                     {task.reporter.name.charAt(0).toUpperCase()}

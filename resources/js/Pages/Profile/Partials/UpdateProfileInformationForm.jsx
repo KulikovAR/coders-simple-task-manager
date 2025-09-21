@@ -25,7 +25,7 @@ export default function UpdateProfileInformation({
             avatar: null,
         });
 
-    const [preview, setPreview] = useState(user.avatar ? `/storage/${user.avatar}` : null);
+    const [preview, setPreview] = useState(user.avatar_url || null);
     const fileInputRef = useRef();
 
     const handleAvatarChange = (e) => {
@@ -36,7 +36,7 @@ export default function UpdateProfileInformation({
             reader.onload = (ev) => setPreview(ev.target.result);
             reader.readAsDataURL(file);
         } else {
-            setPreview(user.avatar ? `/storage/${user.avatar}` : null);
+            setPreview(user.avatar_url || null);
         }
     };
 

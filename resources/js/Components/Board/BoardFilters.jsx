@@ -45,7 +45,7 @@ export default function BoardFilters({
         if (user.avatar) {
             return (
                 <img
-                    src={`/storage/${user.avatar}`}
+                    src={user.avatar_url}
                     alt={`${user.name} avatar`}
                     className="w-5 h-5 rounded-full object-cover"
                 />

@@ -39,9 +39,9 @@ export default function UserAvatar({
     return (
         <div className="flex items-center gap-2">
             <div className={avatarClasses}>
-                {user?.avatar ? (
+                {user?.avatar_url ? (
                     <img 
-                        src={`/storage/${user.avatar}`} 
+                        src={user.avatar_url} 
                         alt={user.name || 'User'}
                         className="w-full h-full object-cover"
                     />

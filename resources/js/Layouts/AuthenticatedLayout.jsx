@@ -115,7 +115,7 @@ export default function Authenticated({ user, header, children, flash }) {
                                         >
                                             <div className="w-6 h-6 bg-accent-blue/20 rounded-lg flex items-center justify-center mr-2 overflow-hidden">
                                                 {user.avatar ? (
-                                                    <img src={`/storage/${user.avatar}`} alt="avatar" className="object-cover w-full h-full" />
+                                                    <img src={user.avatar_url} alt="avatar" className="object-cover w-full h-full" />
                                                 ) : (
                                                     <span className="text-xs font-semibold text-accent-blue">
                                                         {user.name.charAt(0).toUpperCase()}

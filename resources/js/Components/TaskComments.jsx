@@ -375,7 +375,7 @@ export default function TaskComments({
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center space-x-2">
                                     {comment.user.avatar ? (
-                                        <img src={`/storage/${comment.user.avatar}`} alt="avatar" className="w-6 h-6 rounded-full object-cover border border-border-color" />
+                                        <img src={comment.user.avatar_url} alt="avatar" className="w-6 h-6 rounded-full object-cover border border-border-color" />
                                     ) : (
                                         <span className="w-6 h-6 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center border border-border-color">
                                             {comment.user.name.charAt(0).toUpperCase()}
