@@ -12,6 +12,7 @@ import BenefitsSection from '@/Components/Landing/BenefitsSection';
 import PricingSection from '@/Components/Landing/PricingSection';
 import CtaSection from '@/Components/Landing/CtaSection';
 import Footer from '@/Components/Landing/Footer';
+import YandexMetrika from '@/Components/YandexMetrika';
 
 export default function Landing({ auth }) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -94,6 +95,9 @@ export default function Landing({ auth }) {
             </Head>
 
             <div className="min-h-screen bg-black text-text-primary relative overflow-hidden">
+                {/* Yandex Metrika */}
+                <YandexMetrika />
+                
                 {/* Навигация */}
                 <header className={`fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
                     <nav className="max-w-7xl mx-auto px-6 py-4">

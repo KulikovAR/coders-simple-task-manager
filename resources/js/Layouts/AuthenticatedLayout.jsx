@@ -9,6 +9,7 @@ import NotificationBell from '@/Components/NotificationBell';
 import MobileNotificationBell from '@/Components/MobileNotificationBell';
 import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
 import Waves from '@/Components/Waves';
+import YandexMetrika from '@/Components/YandexMetrika';
 
 export default function Authenticated({ user, header, children, flash }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -49,6 +50,9 @@ export default function Authenticated({ user, header, children, flash }) {
 
     return (
         <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden mobile-no-min-height">
+            {/* Yandex Metrika */}
+            <YandexMetrika />
+            
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}

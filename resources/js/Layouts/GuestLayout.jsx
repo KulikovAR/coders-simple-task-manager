@@ -1,6 +1,7 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 import { useEffect } from 'react';
+import YandexMetrika from '@/Components/YandexMetrika';
 
 export default function GuestLayout({ children }) {
     useEffect(() => {
@@ -16,6 +17,9 @@ export default function GuestLayout({ children }) {
 
     return (
         <div className="flex min-h-screen flex-col items-center bg-primary-bg pt-6 sm:justify-center sm:pt-0">
+            {/* Yandex Metrika */}
+            <YandexMetrika />
+            
             <div>
                 <Link href="/" className="hover:opacity-80 transition-opacity">
                     <ApplicationLogo className="h-20 w-20 fill-current text-text-secondary" />
