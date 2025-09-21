@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -37,7 +36,11 @@ class GoogleController extends Controller
 
             if ($user) {
                 if (!$user->hasVerifiedEmail()) {
-                    $user->update(['email_verified_at' => now()]);
+                    $user->update(
+                        [
+                            'email_verified_at' => now(),
+                            'avatar' => $googleUser->getAvatar() ?? $user->avatar,
+                        ]);
                 }
             } else {
                 $user = User::where('email', $googleUser->getEmail())->first();

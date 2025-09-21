@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'ai_requests_used',
         'ai_requests_reset_at',
         'google_id',
+        'email_verified_at',
     ];
 
     /**
