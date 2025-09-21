@@ -95,4 +95,24 @@ class RegistrationEmailTest extends TestCase
         $response->assertRedirect('/dashboard');
         Notification::assertNothingSent();
     }
+
+    public function test_google_users_get_email_verified_on_login(): void
+    {
+        $user = User::create([
+            'name' => 'Google User',
+            'email' => 'google@example.com',
+            'google_id' => '123456789',
+            'password' => bcrypt('password'),
+            // email_verified_at не установлен
+        ]);
+
+        $this->assertNull($user->email_verified_at);
+        $this->assertFalse($user->hasVerifiedEmail());
+
+        // Симулируем вход через Google
+        $user->update(['email_verified_at' => now()]);
+
+        $this->assertNotNull($user->fresh()->email_verified_at);
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    }
 }
