@@ -26,7 +26,7 @@ jobs:
         
     - name: Deploy to server
       run: |
-        sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "~/deploy/379tm_deploy.sh"
+        sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "chmod +x ~/deploy/379tm_deploy.sh && ~/deploy/379tm_deploy.sh"
         
     - name: Verify deployment
       run: |
