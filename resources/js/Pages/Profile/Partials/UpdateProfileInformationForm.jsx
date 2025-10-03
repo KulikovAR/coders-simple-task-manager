@@ -20,7 +20,7 @@ export default function UpdateProfileInformation({
             email: user.email,
             telegram_chat_id: user.telegram_chat_id || '',
             email_notifications: user.email_notifications ?? true,
-            deadline_notification_time: user.deadline_notification_time ? 
+            deadline_notification_time: user.deadline_notification_time ?
                 new Date(user.deadline_notification_time).toTimeString().substring(0, 5) : '09:00',
             avatar: null,
         });
@@ -164,7 +164,7 @@ export default function UpdateProfileInformation({
 
                 <div>
                     <InputLabel htmlFor="email_notifications" value="Email уведомления" />
-                    
+
                     <div className="mt-2">
                         <label className="flex items-center">
                             <Checkbox
@@ -186,8 +186,8 @@ export default function UpdateProfileInformation({
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="deadline_notification_time" value="Время уведомлений о дедлайнах" />
-                    
+                    <InputLabel htmlFor="deadline_notification_time" value="Установите время уведомлений о дедлайнах" />
+
                     <div className="mt-2">
                         <input
                             id="deadline_notification_time"
