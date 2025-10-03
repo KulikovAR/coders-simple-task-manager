@@ -14,10 +14,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Install SSH client and sshpass
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openssh-client sshpass
         
     - name: Add server to known hosts
       run: |
@@ -25,7 +25,7 @@ jobs:
         
     - name: Deploy to server
       run: |
-        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "~/deploy/379tm_deploy.sh"
+        sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "~/deploy/379tm_deploy.sh"
         
     - name: Verify deployment
       run: |
