@@ -53,7 +53,7 @@ return [
     ],
 
     'seo_microservice' => [
-        'url' => 'http://host.docker.internal:8087',
+        'url' => env('SEO_API_URL', 'http://host.docker.internal:8087'),
         'timeout' => 60,
     ],
 
