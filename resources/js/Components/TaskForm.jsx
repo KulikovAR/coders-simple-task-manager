@@ -1197,8 +1197,8 @@ const [hasChanges, setHasChanges] = useState(false);
                     {showDeleteModal && ( 
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> 
                             <div className="bg-card-bg border border-border-color rounded-xl p-4 sm:p-6 w-full max-w-md shadow-2xl"> 
-                                <h2 className="text-lg font-bold mb-3 sm:mb-4">Удалить задачу?</h2> 
-                                <p className="mb-4 sm:mb-6 text-sm sm:text-base">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p> 
+                                <h2 className="text-text-primary text-lg font-bold mb-3 sm:mb-4">Удалить задачу?</h2> 
+                                <p className="text-text-primary mb-4 sm:mb-6 text-sm sm:text-base">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p> 
                                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end"> 
                                     <button 
                                         className="btn btn-secondary text-center order-2 sm:order-1" 
