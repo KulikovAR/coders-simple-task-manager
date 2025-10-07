@@ -13,9 +13,9 @@ class SeoMicroserviceService
 
     public function __construct()
     {
-        $this->baseUrl = 'http://host.docker.internal:8087';
+        $this->baseUrl = config('services.seo_microservice.url', 'http://host.docker.internal:8087');
         $this->client = new Client([
-            'timeout' => 30,
+            'timeout' => config('services.seo_microservice.timeout', 30),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
