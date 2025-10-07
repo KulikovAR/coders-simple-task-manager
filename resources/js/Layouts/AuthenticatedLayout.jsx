@@ -87,6 +87,9 @@ export default function Authenticated({ user, header, children, flash }) {
                                 <NavLink href={route('tasks.index')} active={route().current('tasks.*')}>
                                     Задачи
                                 </NavLink>
+                                <NavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
+                                    SEO Статистика
+                                </NavLink>
                             </div>
                         </div>
                         <div className="hidden sm:flex sm:items-center sm:ml-6 dropdown-glitch">
@@ -222,6 +225,9 @@ export default function Authenticated({ user, header, children, flash }) {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('tasks.index')} active={route().current('tasks.*')}>
                             Задачи
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
+                            SEO Статистика
                         </ResponsiveNavLink>
                     </div>
 

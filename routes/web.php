@@ -178,6 +178,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'destroy'])->name('webhooks.destroy');
     Route::post('/projects/{project}/webhooks/{webhook}/test', [App\Http\Controllers\WebhookController::class, 'test'])->name('webhooks.test');
     Route::post('/projects/{project}/webhooks/{webhook}/toggle', [App\Http\Controllers\WebhookController::class, 'toggle'])->name('webhooks.toggle');
+
+    // SEO Статистика
+    Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
+    Route::get('/seo-test', function() {
+        return Inertia::render('SeoStats/Test', [
+            'auth' => [
+                'user' => Auth::user(),
+            ],
+        ]);
+    })->name('seo-test');
+    Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
+    Route::post('/seo-stats/keywords', [App\Http\Controllers\SeoStatsController::class, 'storeKeyword'])->name('seo-stats.store-keyword');
+    Route::delete('/seo-stats/keywords/{keyword}', [App\Http\Controllers\SeoStatsController::class, 'destroyKeyword'])->name('seo-stats.destroy-keyword');
+    Route::post('/seo-stats/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
 });
 
 // ИИ-агент API (без CSRF)
