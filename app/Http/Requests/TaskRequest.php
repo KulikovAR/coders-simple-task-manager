@@ -21,7 +21,7 @@ class TaskRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:65535',
             'priority' => 'nullable|in:low,medium,high',
-            'sprint_id' => 'nullable|string',
+            'sprint_id' => 'nullable|integer',
             'assignee_id' => 'nullable|exists:users,id',
             'deadline' => 'nullable|date',
             'result' => 'nullable|string|max:65535',
