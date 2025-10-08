@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { getTaskStatusOptions, getTaskPriorityOptions } from '@/utils/statusUtils';
 import { useState, useEffect, useRef } from 'react';
 import TaskComments from '@/Components/TaskComments';
@@ -51,6 +51,16 @@ const [hasChanges, setHasChanges] = useState(false);
     // Состояние для отслеживания изменения спринта
     const [sprintChanged, setSprintChanged] = useState(false);
     const [originalSprintId, setOriginalSprintId] = useState(task?.sprint_id || '');
+
+    // Состояние для модального окна подтверждения удаления задачи
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Удаление задачи
+    const handleDelete = () => {
+        router.delete(route('tasks.destroy', task.id), {
+            onSuccess: () => router.visit(route('tasks.index')),
+        });
+    };
 
 // Функция для безопасного преобразования тегов в строку
     const tagsToString = (tags) => {
@@ -807,6 +817,7 @@ const [hasChanges, setHasChanges] = useState(false);
                                             />
                                         </div>
                                     )}
+
                                 </div>
                             </div>
 
@@ -863,6 +874,20 @@ const [hasChanges, setHasChanges] = useState(false);
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Кнопка удаления задачи */}
+                                {isEditing && (
+                                    <div className="flex justify-start ps-4">
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-danger text-center" 
+                                            onClick={() => setShowDeleteModal(true)} 
+                                        > 
+                                            Удалить 
+                                        </button>
+                                    </div>
+                                )}
+
                             </div>
                         </div>
 
@@ -1139,6 +1164,19 @@ const [hasChanges, setHasChanges] = useState(false);
                                             />
                                         </div>
                                     )}
+
+                                    {/* Кнопка удаления задачи */}
+                                    {isEditing && (
+                                        <div className="flex justify-end mt-4">
+                                            <button 
+                                                type="button" 
+                                                className="btn btn-danger text-center" 
+                                                onClick={() => setShowDeleteModal(true)} 
+                                            > 
+                                                Удалить 
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1154,6 +1192,30 @@ const [hasChanges, setHasChanges] = useState(false);
                             </div>
                         )}
                     </form>
+                    
+                    {/* Модальное окно подтверждения удаления */} 
+                    {showDeleteModal && ( 
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"> 
+                            <div className="bg-card-bg border border-border-color rounded-xl p-4 sm:p-6 w-full max-w-md shadow-2xl"> 
+                                <h2 className="text-text-primary text-lg font-bold mb-3 sm:mb-4">Удалить задачу?</h2> 
+                                <p className="text-text-primary mb-4 sm:mb-6 text-sm sm:text-base">Вы уверены, что хотите удалить эту задачу? Это действие необратимо.</p> 
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end"> 
+                                    <button 
+                                        className="btn btn-secondary text-center order-2 sm:order-1" 
+                                        onClick={() => setShowDeleteModal(false)} 
+                                    > 
+                                        Отмена 
+                                    </button> 
+                                    <button 
+                                        className="btn btn-danger text-center order-1 sm:order-2" 
+                                        onClick={handleDelete} 
+                                    > 
+                                        Удалить 
+                                    </button> 
+                                </div> 
+                            </div> 
+                        </div> 
+                    )}
                 </>
             );
         }
@@ -1466,6 +1528,19 @@ const [hasChanges, setHasChanges] = useState(false);
                                     onCommentUpdated={onCommentUpdated}
                                     onCommentDeleted={onCommentDeleted}
                                 />
+                            </div>
+                        )}
+
+                        {/* Кнопка удаления задачи */}
+                        {isEditing && (
+                            <div className="flex justify-end mt-4">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger text-center" 
+                                    onClick={() => setShowDeleteModal(true)} 
+                                > 
+                                    Удалить 
+                                </button>
                             </div>
                         )}
                     </div>
