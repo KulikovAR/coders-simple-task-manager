@@ -1927,6 +1927,25 @@ const [hasChanges, setHasChanges] = useState(false);
 
                 {/* Боковая панель */}
                 <div className={isModal ? "space-y-4" : "space-y-6"}>
+                    {/* Предупреждение о необходимости выбора статуса при изменении спринта */}
+                    {sprintChanged && !data.status_id && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                            <div className="flex items-center">
+                                <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <div>
+                                    <p className="text-amber-800 dark:text-amber-200 text-xs font-medium">
+                                        Спринт изменен
+                                    </p>
+                                    <p className="text-amber-700 dark:text-amber-300 text-xs mt-1">
+                                        Выберите статус для нового спринта
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Параметры задачи */}
                     <div className={modalStyles.card}>
                         <h3 className={modalStyles.cardTitle}>Параметры задачи</h3>
@@ -1980,6 +1999,11 @@ const [hasChanges, setHasChanges] = useState(false);
                                     }))
                                 ]
                             })}
+                            {sprintChanged && !data.status_id && (
+                                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                    Обязательно выберите статус для нового спринта
+                                </p>
+                            )}
 
                             {/* Приоритет */}
                             {renderField('priority', 'Приоритет', 'select', {
