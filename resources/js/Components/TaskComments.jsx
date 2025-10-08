@@ -287,7 +287,7 @@ export default function TaskComments({
                                                 onChange={(e) => handleCommentTypeChange(e.target.value)}
                                                 className="form-radio text-accent-blue"
                                             />
-                                            <span className="text-xs">{option.icon} {option.label}</span>
+                                            <span className="text-xs text-text-primary">{option.icon} {option.label}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -309,7 +309,7 @@ export default function TaskComments({
                                                 onChange={(e) => handleCommentTypeChange(e.target.value)}
                                                 className="form-radio text-accent-blue"
                                             />
-                                            <span className="text-xs">{option.icon} {option.label}</span>
+                                            <span className="text-xs text-text-primary">{option.icon} {option.label}</span>
                                         </label>
                                     ))}
                                 </div>
