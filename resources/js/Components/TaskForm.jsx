@@ -876,7 +876,7 @@ const [hasChanges, setHasChanges] = useState(false);
                                 </div>
 
                                 {/* Кнопка удаления задачи */}
-                                {isEditing && (
+                                {isEditing && task?.id && (
                                     <div className="flex justify-start ps-4">
                                         <button 
                                             type="button" 
@@ -1166,7 +1166,7 @@ const [hasChanges, setHasChanges] = useState(false);
                                     )}
 
                                     {/* Кнопка удаления задачи */}
-                                    {isEditing && (
+                                    {isEditing && task?.id && (
                                         <div className="flex justify-end mt-4">
                                             <button 
                                                 type="button" 
@@ -1532,7 +1532,7 @@ const [hasChanges, setHasChanges] = useState(false);
                         )}
 
                         {/* Кнопка удаления задачи */}
-                        {isEditing && (
+                        {isEditing && task?.id && (
                             <div className="flex justify-end mt-4">
                                 <button 
                                     type="button" 
