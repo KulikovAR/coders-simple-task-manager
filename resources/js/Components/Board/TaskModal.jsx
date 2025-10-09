@@ -21,8 +21,10 @@ export default function TaskModal({
 
     // Синхронизируем чек-листы при изменении задачи
     useEffect(() => {
-        setChecklists(selectedTask?.checklists || []);
-    }, [selectedTask?.checklists]);
+        if (selectedTask?.checklists) {
+            setChecklists(selectedTask.checklists);
+        }
+    }, [selectedTask?.checklists, selectedTask?.id]);
 
     // Функция для отправки формы
     const handleFormSubmit = (formData) => {
@@ -34,6 +36,8 @@ export default function TaskModal({
             status: formData.status_id ? taskStatuses.find(s => s.id == formData.status_id) : selectedTask?.status,
             assignee: formData.assignee_id ? members.find(m => m.id == formData.assignee_id) : selectedTask?.assignee,
             sprint: formData.sprint_id ? sprints.find(s => s.id == formData.sprint_id) : null,
+            // Сохраняем текущие чек-листы
+            checklists: checklists
         };
         setSelectedTask(updatedTask);
 
