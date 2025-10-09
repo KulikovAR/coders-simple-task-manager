@@ -16,13 +16,14 @@ class TagHelper
             return null;
         }
 
-        // Разбиваем строку на теги, удаляем пробелы и пустые значения
-        $tags = array_filter(array_map('trim', explode(' ', $tagsString)));
+        // Заменяем все запятые на пробелы
+        $tagsString = str_replace(',', ' ', $tagsString);
 
-        // Приводим к нижнему регистру и удаляем дубликаты
+        // Разбиваем по пробелам, чистим пробелы и убираем пустые значения
+        $tags = array_filter(array_map('trim', preg_split('/\s+/', $tagsString)));
+
+        // Приводим к нижнему регистру, убираем дубликаты и сортируем
         $tags = array_unique(array_map('mb_strtolower', $tags));
-
-        // Сортируем теги для консистентности
         sort($tags);
 
         return !empty($tags) ? array_values($tags) : null;
