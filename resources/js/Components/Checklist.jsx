@@ -8,7 +8,7 @@ const Checklist = forwardRef(({
     className = '',
     useAjax = true
 }, ref) => {
-    const [items, setItems] = useState(checklists);
+    const [items, setItems] = useState(Array.isArray(checklists) ? checklists : checklists.items || []);
     const [newItemTitle, setNewItemTitle] = useState('');
     const [editingId, setEditingId] = useState(null);
     const [editingTitle, setEditingTitle] = useState('');
@@ -19,7 +19,7 @@ const Checklist = forwardRef(({
     const editInputRef = useRef(null);
 
     useEffect(() => {
-        setItems(checklists);
+        setItems(Array.isArray(checklists) ? checklists : checklists.items || []);
     }, [checklists]);
 
     useEffect(() => {
@@ -285,8 +285,8 @@ const Checklist = forwardRef(({
 
             {items.length > 0 && (
                 <div className="space-y-2">
-                    {items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 group">
+                    {items.map((item, index) => (
+                        <div key={item.id || item.title + index} className="flex items-center gap-3 group">
                             <button
                                 onClick={() => handleToggleItem(item)}
                                 disabled={isProcessing}
