@@ -403,24 +403,23 @@ const [hasChanges, setHasChanges] = useState(false);
 
         if (onSubmit) {
             // Получаем изменения чек-листов, если компонент существует
-            let checklistData = null;
-            if (checklistRef.current) {
-                const localChanges = checklistRef.current.getLocalChanges();
-                const currentItems = checklistRef.current.getItems();
+            let checklistData = { items: [] }; // по умолчанию пустой массив
 
-                if (localChanges.length > 0 || currentItems.length > 0) {
-                    checklistData = {
-                        changes: localChanges,
-                        items: currentItems
-                    };
-                }
+            if (checklistRef.current) {
+                const currentItems = checklistRef.current.getItems() || [];
+                checklistData.items = currentItems.map(item => ({
+                    title: item.title,
+                    is_completed: item.is_completed || false,
+                    sort_order: item.sort_order || 1,
+                }));
             }
 
             // Передаем данные формы вместе с чек-листами
             const formData = {
                 ...data,
-                checklists: checklistData
+                checklists: JSON.stringify(checklistData)
             };
+            console.log('Sending task data:', formData); 
 
             onSubmit(formData);
             setHasChanges(false);
@@ -824,13 +823,15 @@ const [hasChanges, setHasChanges] = useState(false);
                             {/* Правая колонка - Чек-лист и дополнительные элементы (25%) */}
                             <div className="w-1/4 bg-secondary-bg/30 overflow-y-auto task-modal-scroll">
                                 {/* Чек-лист для существующих задач */}
-                                {task?.id && (
+                                {isModal && (
                                     <div className="p-4 border-b border-border-color">
                                         <Checklist
-                                            taskId={task.id}
+                                            ref={checklistRef}
+                                            taskId={task?.id || null}
                                             checklists={externalChecklists}
                                             onChecklistChange={onChecklistChange}
                                             isModal={true}
+                                            useAjax={!!task?.id}
                                         />
                                     </div>
                                 )}
@@ -894,13 +895,15 @@ const [hasChanges, setHasChanges] = useState(false);
                         {/* Мобильная версия - вертикальное расположение с общим скроллом */}
                         <div className="lg:hidden overflow-y-auto h-full task-modal-scroll">
                             {/* 1. Чек-лист для мобильных устройств */}
-                            {task?.id && (
+                            {isModal && (
                                 <div className="p-2 sm:p-4 border-b border-border-color bg-secondary-bg/30">
                                     <Checklist
-                                        taskId={task.id}
+                                        ref={checklistRef}
+                                        taskId={task?.id || null}
                                         checklists={externalChecklists}
                                         onChecklistChange={onChecklistChange}
                                         isModal={true}
+                                        useAjax={!!task?.id}
                                     />
                                 </div>
                             )}
@@ -1920,6 +1923,17 @@ const [hasChanges, setHasChanges] = useState(false);
                                 {renderField('merge_request', 'Ссылка на Merge Request', 'url', {
                                     placeholder: 'https://github.com/...'
                                 })}
+                            </div>
+
+                            {/* Чек-лист */}
+                            <div className={modalStyles.card}>
+                                <Checklist
+                                    taskId={task.id}
+                                    checklists={externalChecklists}
+                                    onChecklistChange={onChecklistChange}
+                                    isModal={false}
+                                    useAjax={true} 
+                                />
                             </div>
                         </>
                     )}
