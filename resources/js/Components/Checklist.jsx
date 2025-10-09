@@ -35,7 +35,10 @@ const Checklist = forwardRef(({
         }
     }, [editingId]);
 
-    const handleAddItem = async () => {
+    const handleAddItem = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         if (!newItemTitle.trim()) return;
 
         if (useAjax) {
@@ -93,7 +96,10 @@ const Checklist = forwardRef(({
         }
     };
 
-    const handleToggleItem = async (item) => {
+    const handleToggleItem = async (item, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         if (useAjax) {
             setIsProcessing(true);
             try {
@@ -139,12 +145,17 @@ const Checklist = forwardRef(({
         }
     };
 
-    const handleStartEdit = (item) => {
+    const handleStartEdit = (item, e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setEditingId(item.id);
         setEditingTitle(item.title);
     };
 
-    const handleSaveEdit = async (item) => {
+    const handleSaveEdit = async (item, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         if (!editingTitle.trim()) return;
 
         if (useAjax) {
@@ -197,12 +208,17 @@ const Checklist = forwardRef(({
         }
     };
 
-    const handleCancelEdit = () => {
+    const handleCancelEdit = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setEditingId(null);
         setEditingTitle('');
     };
 
-    const handleDeleteItem = async (item) => {
+    const handleDeleteItem = async (item, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         if (!confirm('Вы уверены, что хотите удалить этот пункт?')) return;
 
         if (useAjax) {
@@ -245,17 +261,29 @@ const Checklist = forwardRef(({
         }
     };
 
-    const handleKeyPress = (e, action, ...args) => {
+    const handleStartAdding = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsAdding(true);
+    };
+
+    const handleCancelAdding = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsAdding(false);
+        setNewItemTitle('');
+    };
+
+    const handleKeyPress = (e, action) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            action(...args);
+            action(e);
         } else if (e.key === 'Escape') {
             e.preventDefault();
-            if (action === handleCancelEdit) {
-                handleCancelEdit();
-            } else if (action === handleAddItem) {
-                setIsAdding(false);
-                setNewItemTitle('');
+            if (action.toString().includes('handleCancelEdit')) {
+                handleCancelEdit(e);
+            } else if (action.toString().includes('handleAddItem')) {
+                handleCancelAdding(e);
             }
         }
     };
@@ -288,7 +316,7 @@ const Checklist = forwardRef(({
                     {items.map((item, index) => (
                         <div key={item.id || item.title + index} className="flex items-center gap-3 group">
                             <button
-                                onClick={() => handleToggleItem(item)}
+                                onClick={(e) => handleToggleItem(item, e)}
                                 disabled={isProcessing}
                                 className={`flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-card-bg ${
                                     item.is_completed
@@ -310,7 +338,7 @@ const Checklist = forwardRef(({
                                         type="text"
                                         value={editingTitle}
                                         onChange={(e) => setEditingTitle(e.target.value)}
-                                        onKeyDown={(e) => handleKeyPress(e, handleSaveEdit, item)}
+                                        onKeyDown={(e) => handleKeyPress(e, (e) => handleSaveEdit(item, e))}
                                         className="w-full bg-card-bg border border-border-color rounded px-2 py-1 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
                                         placeholder="Название пункта"
                                     />
@@ -326,7 +354,7 @@ const Checklist = forwardRef(({
                                     <>
                                         <button
                                             type="button"
-                                            onClick={() => handleSaveEdit(item)}
+                                            onClick={(e) => handleSaveEdit(item, e)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-green hover:text-accent-green/80 transition-colors duration-200"
                                             title="Сохранить"
@@ -337,7 +365,7 @@ const Checklist = forwardRef(({
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={handleCancelEdit}
+                                            onClick={(e) => handleCancelEdit(e)}
                                             className="p-1 text-accent-red hover:text-accent-red/80 transition-colors duration-200"
                                             title="Отменить"
                                         >
@@ -350,7 +378,7 @@ const Checklist = forwardRef(({
                                     <>
                                         <button
                                             type="button"
-                                            onClick={() => handleStartEdit(item)}
+                                            onClick={(e) => handleStartEdit(item, e)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
                                             title="Редактировать"
@@ -361,7 +389,7 @@ const Checklist = forwardRef(({
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => handleDeleteItem(item)}
+                                            onClick={(e) => handleDeleteItem(item, e)}
                                             disabled={isProcessing}
                                             className="p-1 text-accent-red hover:text-accent-red/80 transition-colors duration-200"
                                             title="Удалить"
@@ -388,14 +416,14 @@ const Checklist = forwardRef(({
                         type="text"
                         value={newItemTitle}
                         onChange={(e) => setNewItemTitle(e.target.value)}
-                        onKeyDown={(e) => handleKeyPress(e, handleAddItem)}
+                        onKeyDown={(e) => handleKeyPress(e, (e) => handleAddItem(e))}
                         placeholder="Добавить новый пункт..."
                         className="flex-1 bg-card-bg border border-border-color rounded px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
                     />
                     <div className="flex items-center gap-1">
                         <button
                             type="button"
-                            onClick={handleAddItem}
+                            onClick={(e) => handleAddItem(e)}
                             disabled={isProcessing || !newItemTitle.trim()}
                             className="p-1 text-accent-green hover:text-accent-green/80 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Добавить"
@@ -406,10 +434,7 @@ const Checklist = forwardRef(({
                         </button>
                         <button
                             type="button"
-                            onClick={() => {
-                                setIsAdding(false);
-                                setNewItemTitle('');
-                            }}
+                            onClick={handleCancelAdding}
                             className="p-1 text-accent-red hover:text-accent-red/80 transition-colors duration-200"
                             title="Отменить"
                         >
@@ -422,7 +447,7 @@ const Checklist = forwardRef(({
             ) : (
                 <button
                     type="button"
-                    onClick={() => setIsAdding(true)}
+                    onClick={handleStartAdding}
                     className="flex items-center gap-2 text-sm text-accent-blue hover:text-accent-blue/80 transition-colors duration-200"
                 >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
