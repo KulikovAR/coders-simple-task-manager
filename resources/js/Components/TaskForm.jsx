@@ -1924,6 +1924,17 @@ const [hasChanges, setHasChanges] = useState(false);
                                     placeholder: 'https://github.com/...'
                                 })}
                             </div>
+
+                            {/* Чек-лист */}
+                            <div className={modalStyles.card}>
+                                <Checklist
+                                    taskId={task.id}
+                                    checklists={externalChecklists}
+                                    onChecklistChange={onChecklistChange}
+                                    isModal={false}
+                                    useAjax={true} 
+                                />
+                            </div>
                         </>
                     )}
                 </div>
