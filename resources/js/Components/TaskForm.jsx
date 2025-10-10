@@ -58,7 +58,7 @@ const [hasChanges, setHasChanges] = useState(false);
     // Удаление задачи
     const handleDelete = () => {
         router.delete(route('tasks.destroy', task.id), {
-            onSuccess: () => router.visit(route('tasks.index')),
+            onSuccess: () => router.visit(route('projects.board', task.project_id)),
         });
     };
 

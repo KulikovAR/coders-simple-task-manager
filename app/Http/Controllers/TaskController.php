@@ -290,9 +290,18 @@ class TaskController extends Controller
         if (!$this->taskService->canUserViewTask(Auth::user(), $task)) {
             abort(403, 'Доступ запрещен');
         }
-
+        
         $this->taskService->deleteTask($task);
 
+        // Проверяем, пришёл ли запрос с доски проекта
+        $referer = request()->header('Referer');
+        if ($referer && str_contains($referer, '/projects/') && str_contains($referer, '/board')) {
+            $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);
+            return redirect($boardUrl)
+                ->with('success', 'Задача успешно удалена.');
+        }
+
+        // Иначе редирект на список задач
         return redirect()->route('tasks.index')
             ->with('success', 'Задача успешно удалена.');
     }
