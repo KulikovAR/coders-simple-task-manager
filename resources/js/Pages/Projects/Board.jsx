@@ -857,8 +857,14 @@ export default function Board({ auth, project, tasks, taskStatuses, sprints = []
             sprintOk = parseInt(task.sprint_id) === parseInt(currentSprintId); // Показать задачи конкретного спринта
         }
 
-        const assigneeOk = assigneeId ? parseInt(task.assignee_id) === parseInt(assigneeId) : true;
-        const myOk = myTasks ? parseInt(task.assignee_id) === parseInt(auth.user.id) : true;
+        const assigneeOk = assigneeId
+            ? task.assignees.some(a => a.id === parseInt(assigneeId))
+            : true;
+
+        const myOk = myTasks
+            ? task.assignees.some(a => a.id === parseInt(auth.user.id))
+            : true;
+        // const myOk = myTasks ? parseInt(task.assignee_id) === parseInt(auth.user.id) : true;
 
         // Фильтрация по тегам
         let tagsOk = true;

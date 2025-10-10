@@ -29,6 +29,8 @@ class UpdateTaskRequest extends FormRequest
             'merge_request' => 'nullable|url|max:255',
             'sprint_id' => 'nullable|exists:sprints,id',
             'assignee_id' => 'nullable|exists:users,id',
+            'assignee_ids' => 'nullable|array',
+            'assignee_ids.*' => 'exists:users,id',
             'priority' => 'nullable|in:low,medium,high,critical',
             'tags' => ['nullable', 'string', new ValidTags],
         ];
@@ -45,6 +47,8 @@ class UpdateTaskRequest extends FormRequest
             'description.max' => 'слишком много символов',
             'sprint_id.exists' => 'Указанный спринт не существует',
             'assignee_id.exists' => 'Указанный исполнитель не существует',
+            'assignee_ids.array' => 'Список исполнителей должен быть массивом',
+            'assignee_ids.*.exists' => 'Некоторые исполнители не существуют',
             'priority.in' => 'Приоритет должен быть одним из: low, medium, high, critical',
             'result.max' => 'слишком много символов',
         ];

@@ -63,6 +63,12 @@ class Task extends Model
         return $this->belongsTo(User::class, 'assignee_id');
     }
 
+    public function assignees()
+    {
+        return $this->belongsToMany(User::class, 'task_assignees')
+            ->withTimestamps();
+    }
+
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reporter_id');
