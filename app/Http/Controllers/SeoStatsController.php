@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\UpdateSiteDTO;
+use App\Http\Requests\CreateSiteRequest;
+use App\Http\Requests\UpdateSiteRequest;
 use App\Models\SeoSiteUser;
 use App\Services\SeoMicroserviceService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -22,117 +24,140 @@ class SeoStatsController extends Controller
 
         $data = $this->seoService->getUserData($userSites);
 
-        return Inertia::render('SeoStats/Index', [
-            'auth' => ['user' => Auth::user()],
-            'sites' => $data['sites'],
-            'keywords' => $data['keywords'],
-            'positions' => $data['positions'],
-        ]);
+        return Inertia::render('SeoStats/Index', $data);
     }
 
-    public function storeSite(Request $request)
+    public function create()
     {
-        $request->validate([
-            'domain' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-        ]);
-
-        $site = $this->seoService->createSite($request->domain, $request->name);
-
-        if ($site) {
-            SeoSiteUser::create([
-                'user_id' => Auth::id(),
-                'go_seo_site_id' => $site['id'],
-            ]);
-
-            return redirect()->back()->with('success', 'Сайт успешно добавлен');
-        }
-
-        return redirect()->back()->with('error', 'Ошибка при создании сайта');
+        return Inertia::render('SeoStats/Create');
     }
 
-    public function storeKeyword(Request $request)
+    public function storeSite(CreateSiteRequest $request)
     {
-        $request->validate([
-            'site_id' => 'required|integer',
-            'value' => 'required|string|max:255',
-        ]);
-
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $request->site_id)
-            ->exists();
-
-        if (!$hasAccess) {
-            return redirect()->back()->with('error', 'Нет доступа к этому сайту');
-        }
-
-        $keyword = $this->seoService->createKeyword($request->site_id, $request->value);
-
-        if ($keyword) {
-            return redirect()->back()->with('success', 'Ключевое слово успешно добавлено');
-        }
-
-        return redirect()->back()->with('error', 'Ошибка при создании ключевого слова');
-    }
-
-    public function destroyKeyword(Request $request, int $keywordId)
-    {
-        $keyword = $this->seoService->getKeywords($request->site_id);
-        $keywordExists = collect($keyword)->contains('id', $keywordId);
-
-        if (!$keywordExists) {
-            return redirect()->back()->with('error', 'Ключевое слово не найдено');
-        }
-
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $request->site_id)
-            ->exists();
-
-        if (!$hasAccess) {
-            return redirect()->back()->with('error', 'Нет доступа к этому сайту');
-        }
-
-        $success = $this->seoService->deleteKeyword($keywordId);
-
-        if ($success) {
-            return redirect()->back()->with('success', 'Ключевое слово успешно удалено');
-        }
-
-        return redirect()->back()->with('error', 'Ошибка при удалении ключевого слова');
-    }
-
-    public function trackPositions(Request $request)
-    {
-        $request->validate([
-            'site_id' => 'required|integer',
-            'device' => 'required|string|in:desktop,tablet,mobile',
-            'country' => 'nullable|string|max:10',
-            'lang' => 'nullable|string|max:10',
-            'os' => 'nullable|string|in:ios,android',
-            'ads' => 'nullable|boolean',
-        ]);
-
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $request->site_id)
-            ->exists();
-
-        if (!$hasAccess) {
-            return redirect()->back()->with('error', 'Нет доступа к этому сайту');
-        }
-
-        $result = $this->seoService->trackSitePositions(
-            $request->site_id,
-            $request->device,
-            $request->country,
-            $request->lang,
-            $request->os,
-            $request->ads
+        $site = $this->seoService->createSite(
+            $request->input('domain'),
+            $request->input('name')
         );
 
-        if ($result) {
-            return redirect()->back()->with('success', 'Отслеживание позиций запущено');
+        if (!$site) {
+            return redirect()->back()->withErrors(['error' => 'Ошибка создания проекта']);
         }
 
-        return redirect()->back()->with('error', 'Ошибка при запуске отслеживания позиций');
+        SeoSiteUser::create([
+            'user_id' => Auth::id(),
+            'go_seo_site_id' => $site->id,
+        ]);
+
+        if ($request->input('keywords')) {
+            $this->seoService->updateSiteKeywords($site->id, $request->input('keywords'));
+        }
+
+        return redirect()->route('seo-stats.index')->with('success', 'Проект создан');
+    }
+
+    public function getProjectData(int $siteId)
+    {
+        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $site = $this->seoService->getSite($siteId);
+
+        if (!$site) {
+            return response()->json(['error' => 'Сайт не найден'], 404);
+        }
+
+        $keywords = $this->seoService->getKeywords($siteId);
+        $keywordsText = implode("\n", array_column($keywords, 'value'));
+
+        return response()->json([
+            'site' => $site->toArray(),
+            'keywords' => $keywordsText,
+        ]);
+    }
+
+    public function updateSite(int $siteId, UpdateSiteRequest $request)
+    {
+        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $dto = UpdateSiteDTO::fromRequest($request->validated());
+        $success = $this->seoService->updateSite($siteId, $dto);
+
+        if (!$success) {
+            return redirect()->back()->withErrors(['error' => 'Ошибка обновления']);
+        }
+
+        return redirect()->back()->with('success', 'Проект обновлен');
+    }
+
+    public function destroy(int $siteId)
+    {
+        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->delete();
+
+        return redirect()->route('seo-stats.index')->with('success', 'Проект удален');
+    }
+
+    public function reports(int $siteId)
+    {
+        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403);
+        }
+
+        $site = $this->seoService->getSite($siteId);
+
+        if (!$site) {
+            abort(404);
+        }
+
+        $keywords = $this->seoService->getKeywords($siteId);
+        $positions = $this->seoService->getPositionHistory($siteId);
+
+        return Inertia::render('SeoStats/Reports', [
+            'site' => $site->toArray(),
+            'keywords' => $keywords,
+            'positions' => $positions,
+        ]);
+    }
+
+    public function trackPositions(int $siteId)
+    {
+        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
+            ->where('go_seo_site_id', $siteId)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        try {
+            $this->seoService->trackSitePositions($siteId);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка отслеживания'], 500);
+        }
     }
 }

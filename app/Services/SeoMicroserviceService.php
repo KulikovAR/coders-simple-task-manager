@@ -2,17 +2,19 @@
 
 namespace App\Services;
 
+use App\DTOs\SiteDTO;
+use App\DTOs\UpdateSiteDTO;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Log;
 
 class SeoMicroserviceService
 {
     private Client $client;
     private string $baseUrl;
 
-    public function __construct()
-    {
+    public function __construct(
+        private SeoSiteService $seoSiteService
+    ) {
         $this->baseUrl = config('services.seo_microservice.url', 'http://host.docker.internal:8087');
         $this->client = new Client([
             'timeout' => config('services.seo_microservice.timeout', 30),
@@ -27,36 +29,24 @@ class SeoMicroserviceService
     {
         try {
             $response = $this->client->get($this->baseUrl . '/api/sites');
-            $data = json_decode($response->getBody()->getContents(), true);
-            return is_array($data) ? $data : [];
+            return json_decode($response->getBody()->getContents(), true) ?: [];
         } catch (GuzzleException $e) {
-            Log::error('Failed to fetch sites from SEO microservice', [
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            Log::error('Unexpected error fetching sites', [
-                'error' => $e->getMessage(),
-            ]);
             return [];
         }
     }
 
-    public function getSite(int $siteId): ?array
+    public function getSite(int $siteId): ?SiteDTO
     {
-        try {
-            $response = $this->client->get($this->baseUrl . '/api/sites/' . $siteId);
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            Log::error('Failed to fetch site from SEO microservice', [
-                'site_id' => $siteId,
-                'error' => $e->getMessage(),
-            ]);
+        $localData = $this->seoSiteService->findByMicroserviceId($siteId);
+        
+        if (!$localData) {
             return null;
         }
+
+        return $localData;
     }
 
-    public function createSite(string $domain, string $name): ?array
+    public function createSite(string $domain, string $name): ?SiteDTO
     {
         try {
             $response = $this->client->post($this->baseUrl . '/api/sites', [
@@ -65,15 +55,28 @@ class SeoMicroserviceService
                     'name' => $name,
                 ],
             ]);
-            return json_decode($response->getBody()->getContents(), true);
+            $data = json_decode($response->getBody()->getContents(), true);
+            
+            if ($data && isset($data['id'])) {
+                $this->seoSiteService->create($data['id'], $name);
+                return SiteDTO::fromMicroservice($data);
+            }
+            
+            return null;
         } catch (GuzzleException $e) {
-            Log::error('Failed to create site in SEO microservice', [
-                'domain' => $domain,
-                'name' => $name,
-                'error' => $e->getMessage(),
-            ]);
             return null;
         }
+    }
+
+    public function updateSite(int $siteId, UpdateSiteDTO $dto): bool
+    {
+        $success = $this->seoSiteService->update($siteId, $dto);
+
+        if ($dto->keywords !== null && !empty($dto->keywords)) {
+            $this->updateSiteKeywords($siteId, $dto->keywords);
+        }
+
+        return $success;
     }
 
     public function getKeywords(int $siteId): array
@@ -85,16 +88,6 @@ class SeoMicroserviceService
             $data = json_decode($response->getBody()->getContents(), true);
             return is_array($data) ? $data : [];
         } catch (GuzzleException $e) {
-            Log::error('Failed to fetch keywords from SEO microservice', [
-                'site_id' => $siteId,
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        } catch (\Exception $e) {
-            Log::error('Unexpected error fetching keywords', [
-                'site_id' => $siteId,
-                'error' => $e->getMessage(),
-            ]);
             return [];
         }
     }
@@ -110,11 +103,6 @@ class SeoMicroserviceService
             ]);
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            Log::error('Failed to create keyword in SEO microservice', [
-                'site_id' => $siteId,
-                'value' => $value,
-                'error' => $e->getMessage(),
-            ]);
             return null;
         }
     }
@@ -125,23 +113,16 @@ class SeoMicroserviceService
             $response = $this->client->delete($this->baseUrl . '/api/keywords/' . $keywordId);
             return $response->getStatusCode() === 200;
         } catch (GuzzleException $e) {
-            Log::error('Failed to delete keyword from SEO microservice', [
-                'keyword_id' => $keywordId,
-                'error' => $e->getMessage(),
-            ]);
             return false;
         }
     }
 
-    public function getPositionHistory(int $siteId, ?string $dateFrom = null, ?string $dateTo = null): array
+    public function getPositionHistory(int $siteId, ?int $keywordId = null): array
     {
         try {
             $query = ['site_id' => $siteId];
-            if ($dateFrom) {
-                $query['date_from'] = $dateFrom;
-            }
-            if ($dateTo) {
-                $query['date_to'] = $dateTo;
+            if ($keywordId) {
+                $query['keyword_id'] = $keywordId;
             }
 
             $response = $this->client->get($this->baseUrl . '/api/positions/history', [
@@ -150,70 +131,7 @@ class SeoMicroserviceService
             $data = json_decode($response->getBody()->getContents(), true);
             return is_array($data) ? $data : [];
         } catch (GuzzleException $e) {
-            Log::error('Failed to fetch position history from SEO microservice', [
-                'site_id' => $siteId,
-                'date_from' => $dateFrom,
-                'date_to' => $dateTo,
-                'error' => $e->getMessage(),
-            ]);
             return [];
-        } catch (\Exception $e) {
-            Log::error('Unexpected error fetching position history', [
-                'site_id' => $siteId,
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        }
-    }
-
-    public function getLatestPositions(int $siteId): array
-    {
-        try {
-            $response = $this->client->get($this->baseUrl . '/api/positions/latest', [
-                'query' => ['site_id' => $siteId],
-            ]);
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            Log::error('Failed to fetch latest positions from SEO microservice', [
-                'site_id' => $siteId,
-                'error' => $e->getMessage(),
-            ]);
-            return [];
-        }
-    }
-
-    public function trackSitePositions(int $siteId, string $device, ?string $country = null, ?string $lang = null, ?string $os = null, ?bool $ads = null): ?array
-    {
-        try {
-            $data = [
-                'site_id' => $siteId,
-                'device' => $device,
-            ];
-
-            if ($country) {
-                $data['country'] = $country;
-            }
-            if ($lang) {
-                $data['lang'] = $lang;
-            }
-            if ($os) {
-                $data['os'] = $os;
-            }
-            if ($ads !== null) {
-                $data['ads'] = $ads;
-            }
-
-            $response = $this->client->post($this->baseUrl . '/api/positions/track-site', [
-                'json' => $data,
-            ]);
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            Log::error('Failed to track site positions in SEO microservice', [
-                'site_id' => $siteId,
-                'device' => $device,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
         }
     }
 
@@ -234,6 +152,8 @@ class SeoMicroserviceService
                     return isset($site['id']) && in_array($site['id'], $userSites);
                 });
 
+                $sites = $this->seoSiteService->mergeSitesWithLocalData($sites);
+
                 foreach ($userSites as $siteId) {
                     $siteKeywords = $this->getKeywords($siteId);
                     if (is_array($siteKeywords)) {
@@ -242,7 +162,6 @@ class SeoMicroserviceService
 
                     $sitePositions = $this->getPositionHistory($siteId);
                     if (is_array($sitePositions)) {
-                        // Группируем по keyword_id + дата (только день) и берем последний элемент
                         $groupedByKeywordAndDate = [];
                         foreach ($sitePositions as $position) {
                             $date = date('Y-m-d', strtotime($position['date']));
@@ -256,7 +175,7 @@ class SeoMicroserviceService
                 }
             }
         } catch (\Exception $e) {
-            Log::error('SEO Stats error: ' . $e->getMessage());
+            // Silent fail
         }
 
         return [
@@ -264,5 +183,35 @@ class SeoMicroserviceService
             'keywords' => $keywords,
             'positions' => $positions,
         ];
+    }
+
+    public function trackSitePositions(int $siteId): bool
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/sites/' . $siteId . '/track');
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function updateSiteKeywords(int $siteId, string $keywords): void
+    {
+        $existingKeywords = $this->getKeywords($siteId);
+        $existingValues = array_column($existingKeywords, 'value');
+
+        $newKeywords = array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
+        
+        foreach ($existingKeywords as $keyword) {
+            if (!in_array($keyword['value'], $newKeywords)) {
+                $this->deleteKeyword($keyword['id']);
+            }
+        }
+
+        foreach ($newKeywords as $keywordValue) {
+            if (!empty($keywordValue) && !in_array($keywordValue, $existingValues)) {
+                $this->createKeyword($siteId, $keywordValue);
+            }
+        }
     }
 }
