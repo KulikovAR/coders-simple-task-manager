@@ -142,7 +142,7 @@ export default function PositionsTable({
 
                             {/* Даты */}
                             {uniqueDates.map((date, index) => (
-                                <th key={`${date}-${index}`} className="px-3 py-3 text-center text-sm font-medium text-text-primary min-w-[80px]">
+                                <th key={`${date}-${index}`} className="px-3 py-3 text-center text-sm font-medium text-text-primary min-w-[100px]">
                                     <div className="flex flex-col">
                                         <span className="font-medium">
                                             {new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
@@ -177,21 +177,24 @@ export default function PositionsTable({
                                         const change = getPositionChange(keyword.id, date);
                                         
                                         return (
-                                            <td key={`${date}-${keyword.id}-${index}`} className="px-3 py-4 text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <span className={`text-sm font-medium ${
-                                                        position === null ? 'text-text-muted' : 
-                                                        position <= 3 ? 'text-green-500' :
-                                                        position <= 10 ? 'text-yellow-500' :
-                                                        'text-red-500'
+                                            <td key={`${date}-${keyword.id}-${index}`} className="w-12 h-12 px-1 py-1 text-center min-w-[100px]">
+                                                <div className={`w-full h-full flex flex-col items-center justify-center ${
+                                                    position === null ? 'bg-gray-200' : 
+                                                    position <= 3 ? 'bg-green-500' :
+                                                    position <= 10 ? 'bg-yellow-500' :
+                                                    'bg-red-500'
+                                                }`}>
+                                                    <span className={`text-sm font-bold ${
+                                                        position === null ? 'text-gray-600' : 
+                                                        'text-white'
                                                     }`}>
                                                         {position || '-'}
                                                     </span>
                                                     {change !== null && (
-                                                        <span className={`text-xs ${
-                                                            change > 0 ? 'text-green-500' : 
-                                                            change < 0 ? 'text-red-500' : 
-                                                            'text-text-muted'
+                                                        <span className={`text-xs font-medium ${
+                                                            change > 0 ? 'text-green-200' : 
+                                                            change < 0 ? 'text-red-200' : 
+                                                            'text-gray-200'
                                                         }`}>
                                                             {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
                                                         </span>

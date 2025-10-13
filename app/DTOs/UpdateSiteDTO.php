@@ -10,7 +10,8 @@ class UpdateSiteDTO
         public readonly ?array $regions = null,
         public readonly ?array $deviceSettings = null,
         public readonly ?string $keywords = null,
-        public readonly ?int $positionLimit = null
+        public readonly ?int $positionLimit = null,
+        public readonly ?bool $subdomains = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -21,7 +22,8 @@ class UpdateSiteDTO
             regions: $data['regions'] ?? null,
             deviceSettings: $data['device_settings'] ?? null,
             keywords: $data['keywords'] ?? null,
-            positionLimit: $data['position_limit'] ?? null
+            positionLimit: $data['position_limit'] ?? null,
+            subdomains: $data['subdomains'] ?? null
         );
     }
 
@@ -34,6 +36,7 @@ class UpdateSiteDTO
             'device_settings' => $this->deviceSettings,
             'keywords' => $this->keywords,
             'position_limit' => $this->positionLimit,
+            'subdomains' => $this->subdomains,
         ], fn($value) => $value !== null);
     }
 }

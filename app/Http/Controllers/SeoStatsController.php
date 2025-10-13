@@ -49,13 +49,9 @@ class SeoStatsController extends Controller
             'go_seo_site_id' => $site->id,
         ]);
 
-        if ($request->input('keywords')) {
-            $this->seoService->updateSiteKeywords($site->id, $request->input('keywords'));
-        }
-
-        if ($request->input('position_limit')) {
-            $this->seoService->updateSitePositionLimit($site->id, $request->input('position_limit'));
-        }
+        // Создаем DTO для обновления всех настроек
+        $dto = UpdateSiteDTO::fromRequest($request->validated());
+        $this->seoService->updateSite($site->id, $dto);
 
         return redirect()->route('seo-stats.index')->with('success', 'Проект создан');
     }

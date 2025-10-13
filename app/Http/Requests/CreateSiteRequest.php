@@ -21,6 +21,7 @@ class CreateSiteRequest extends FormRequest
             'regions' => 'nullable|array',
             'device_settings' => 'nullable|array',
             'position_limit' => 'nullable|integer|min:1|max:100',
+            'subdomains' => 'nullable|boolean',
         ];
     }
 }

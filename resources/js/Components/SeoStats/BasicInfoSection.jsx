@@ -63,6 +63,24 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
                 </p>
                 {errors?.position_limit && <p className="text-accent-red text-sm mt-1">{errors.position_limit}</p>}
             </div>
+
+            <div className="mt-4">
+                <label className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        checked={siteData.subdomains || false}
+                        onChange={(e) => setSiteData('subdomains', e.target.checked)}
+                        className="w-4 h-4 text-accent-blue bg-secondary-bg border-border-color rounded focus:ring-accent-blue/20 focus:ring-2"
+                    />
+                    <div>
+                        <span className="text-sm font-medium text-text-primary">Включать поддомены</span>
+                        <p className="text-xs text-text-muted">
+                            Отслеживать позиции не только основного домена, но и всех его поддоменов
+                        </p>
+                    </div>
+                </label>
+                {errors?.subdomains && <p className="text-accent-red text-sm mt-1">{errors.subdomains}</p>}
+            </div>
         </div>
     );
 }

@@ -12,6 +12,7 @@ class SiteDTO
         public readonly array $regions = [],
         public readonly array $deviceSettings = [],
         public readonly ?int $positionLimit = null,
+        public readonly ?bool $subdomains = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null
     ) {}
@@ -21,7 +22,7 @@ class SiteDTO
         return new self(
             id: $data['id'],
             domain: $data['domain'],
-            name: $data['name']
+            name: '' // Имя больше не приходит из микросервиса
         );
     }
 
@@ -35,6 +36,7 @@ class SiteDTO
             regions: $data['regions'] ?? [],
             deviceSettings: $data['device_settings'] ?? [],
             positionLimit: $data['position_limit'] ?? null,
+            subdomains: $data['subdomains'] ?? null,
             updatedAt: $data['updated_at'] ?? null,
             lastTrackedAt: $data['updated_at'] ?? null
         );
@@ -50,6 +52,7 @@ class SiteDTO
             'regions' => $this->regions,
             'device_settings' => $this->deviceSettings,
             'position_limit' => $this->positionLimit,
+            'subdomains' => $this->subdomains,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
         ];
@@ -65,6 +68,7 @@ class SiteDTO
             regions: $other->regions ?: $this->regions,
             deviceSettings: $other->deviceSettings ?: $this->deviceSettings,
             positionLimit: $other->positionLimit ?: $this->positionLimit,
+            subdomains: $other->subdomains !== null ? $other->subdomains : $this->subdomains,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
         );

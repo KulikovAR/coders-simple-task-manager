@@ -53,6 +53,9 @@ class SeoSiteService
         if ($dto->positionLimit !== null) {
             $updateData['position_limit'] = $dto->positionLimit;
         }
+        if ($dto->subdomains !== null) {
+            $updateData['subdomains'] = $dto->subdomains;
+        }
 
         return $site->update($updateData);
     }

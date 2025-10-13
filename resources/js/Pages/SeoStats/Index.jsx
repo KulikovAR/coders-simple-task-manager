@@ -18,6 +18,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         regions: {},
         device_settings: {},
         position_limit: 10,
+        subdomains: false,
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -28,6 +29,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         regions: {},
         device_settings: {},
         position_limit: 10,
+        subdomains: false,
     });
 
     const handleViewReports = (project) => {
@@ -57,6 +59,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     regions: data.site.regions || {},
                     device_settings: data.site.device_settings || {},
                     position_limit: data.site.position_limit || 10,
+                    subdomains: data.site.subdomains || false,
                 };
                 
                 console.log('Setting edit form data:', editFormData);
@@ -72,6 +75,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     regions: project.regions || {},
                     device_settings: project.device_settings || {},
                     position_limit: project.position_limit || 10,
+                    subdomains: project.subdomains || false,
                 };
                 console.log('Using fallback data:', fallbackData);
                 setEditData(fallbackData);
@@ -87,15 +91,11 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 regions: project.regions || {},
                 device_settings: project.device_settings || {},
                 position_limit: project.position_limit || 10,
+                subdomains: project.subdomains || false,
             };
             console.log('Using fallback data after error:', fallbackData);
             setEditData(fallbackData);
         }
-    };
-
-    const handleTrackPositions = (project) => {
-        // TODO: Реализовать запуск отслеживания позиций
-        console.log('Track positions for project:', project);
     };
 
     const handleAddSite = (e) => {
@@ -103,7 +103,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10 });
+                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false });
             },
         });
     };
@@ -118,7 +118,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10 });
+                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);
@@ -201,7 +201,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                                 keywords={keywords}
                                                 onViewReports={handleViewReports}
                                                 onEditProject={handleEditProject}
-                                                onTrackPositions={handleTrackPositions}
                                             />
                                         ))}
                                     </tbody>

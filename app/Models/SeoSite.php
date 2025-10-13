@@ -16,6 +16,7 @@ class SeoSite extends Model
         'regions',
         'device_settings',
         'position_limit',
+        'subdomains',
     ];
 
     protected $casts = [
