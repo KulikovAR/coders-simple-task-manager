@@ -781,8 +781,12 @@ export default function RichTextEditor({
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
             try {
-                // Проверяем, что редактор готов
-                if (editor.view && editor.view.dom && !editor.isDestroyed) {
+                // Сравниваем текущий HTML без пробелов и переносов строк
+                const currentHTML = editor.getHTML().replace(/\s+/g, '');
+                const newHTML = value.replace(/\s+/g, '');
+                
+                // Обновляем контент только если есть существенные изменения
+                if (currentHTML !== newHTML) {
                     editor.commands.setContent(value);
                 }
             } catch (error) {

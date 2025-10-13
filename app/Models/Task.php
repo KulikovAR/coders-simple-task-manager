@@ -45,6 +45,7 @@ class Task extends Model
         'progress_percent' => 'integer',
         'is_milestone' => 'boolean',
         'sort_order' => 'integer',
+        'assignee_id' => 'integer',
     ];
 
     public function project(): BelongsTo
