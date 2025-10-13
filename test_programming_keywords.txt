@@ -1,0 +1,30 @@
+курсы программирования
+обучение Python
+изучение JavaScript
+веб разработка
+frontend разработчик
+backend разработчик
+fullstack разработчик
+React курсы
+Vue.js обучение
+Angular разработка
+Node.js программирование
+PHP разработка
+Laravel фреймворк
+Django Python
+Flask Python
+SQL базы данных
+MySQL обучение
+PostgreSQL курсы
+MongoDB NoSQL
+Git версионирование
+Docker контейнеризация
+Kubernetes оркестрация
+AWS облачные сервисы
+Google Cloud Platform
+Azure Microsoft
+DevOps практики
+CI/CD пайплайны
+Jenkins автоматизация
+Ansible конфигурация
+Terraform инфраструктура

@@ -14,6 +14,7 @@ use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskStatusController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\TelegramController;
@@ -181,17 +182,13 @@ Route::middleware('auth')->group(function () {
 
     // SEO Статистика
     Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
-    Route::get('/seo-test', function() {
-        return Inertia::render('SeoStats/Test', [
-            'auth' => [
-                'user' => Auth::user(),
-            ],
-        ]);
-    })->name('seo-test');
+    Route::get('/seo-stats/{site}/reports', [App\Http\Controllers\SeoStatsController::class, 'reports'])->name('seo-stats.reports');
     Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
+    Route::put('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'updateSite'])->name('seo-stats.update-site');
+    Route::get('/seo-stats/sites/{site}/data', [App\Http\Controllers\SeoStatsController::class, 'getProjectData'])->name('seo-stats.project-data');
     Route::post('/seo-stats/keywords', [App\Http\Controllers\SeoStatsController::class, 'storeKeyword'])->name('seo-stats.store-keyword');
     Route::delete('/seo-stats/keywords/{keyword}', [App\Http\Controllers\SeoStatsController::class, 'destroyKeyword'])->name('seo-stats.destroy-keyword');
-    Route::post('/seo-stats/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
+    Route::post('/seo-stats/{site}/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
 });
 
 // ИИ-агент API (без CSRF)
