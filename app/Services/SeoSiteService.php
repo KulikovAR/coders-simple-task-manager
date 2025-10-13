@@ -50,6 +50,9 @@ class SeoSiteService
         if ($dto->deviceSettings !== null) {
             $updateData['device_settings'] = $dto->deviceSettings;
         }
+        if ($dto->positionLimit !== null) {
+            $updateData['position_limit'] = $dto->positionLimit;
+        }
 
         return $site->update($updateData);
     }

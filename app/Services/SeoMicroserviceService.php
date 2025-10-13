@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DTOs\SiteDTO;
 use App\DTOs\UpdateSiteDTO;
+use App\DTOs\TrackPositionsDTO;
+use App\DTOs\PositionFiltersDTO;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -38,7 +40,7 @@ class SeoMicroserviceService
     public function getSite(int $siteId): ?SiteDTO
     {
         $localData = $this->seoSiteService->findByMicroserviceId($siteId);
-        
+
         if (!$localData) {
             return null;
         }
@@ -56,12 +58,12 @@ class SeoMicroserviceService
                 ],
             ]);
             $data = json_decode($response->getBody()->getContents(), true);
-            
+
             if ($data && isset($data['id'])) {
                 $this->seoSiteService->create($data['id'], $name);
                 return SiteDTO::fromMicroservice($data);
             }
-            
+
             return null;
         } catch (GuzzleException $e) {
             return null;
@@ -74,6 +76,10 @@ class SeoMicroserviceService
 
         if ($dto->keywords !== null && !empty($dto->keywords)) {
             $this->updateSiteKeywords($siteId, $dto->keywords);
+        }
+
+        if ($dto->positionLimit !== null) {
+            $this->updateSitePositionLimit($siteId, $dto->positionLimit);
         }
 
         return $success;
@@ -127,6 +133,19 @@ class SeoMicroserviceService
 
             $response = $this->client->get($this->baseUrl . '/api/positions/history', [
                 'query' => $query,
+            ]);
+            $data = json_decode($response->getBody()->getContents(), true);
+            return is_array($data) ? $data : [];
+        } catch (GuzzleException $e) {
+            return [];
+        }
+    }
+
+    public function getPositionHistoryWithFilters(PositionFiltersDTO $filters): array
+    {
+        try {
+            $response = $this->client->get($this->baseUrl . '/api/positions/history', [
+                'query' => $filters->toQueryParams(),
             ]);
             $data = json_decode($response->getBody()->getContents(), true);
             return is_array($data) ? $data : [];
@@ -195,13 +214,91 @@ class SeoMicroserviceService
         }
     }
 
+    public function trackSitePositionsWithFilters(TrackPositionsDTO $trackData): bool
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/positions/track-site', [
+                'json' => $trackData->toArray(),
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function trackSitePositionsFromProject(int $siteId): bool
+    {
+        $site = $this->getSite($siteId);
+
+        if (!$site) {
+            return false;
+        }
+
+        $trackData = $this->buildTrackDataFromProject($site);
+
+        return $this->trackSitePositionsWithFilters($trackData);
+    }
+
+    private function buildTrackDataFromProject(SiteDTO $site): TrackPositionsDTO
+    {
+        // Получаем настройки из проекта
+        $searchEngines = $site->searchEngines;
+        $regions = $site->regions;
+        $deviceSettings = $site->deviceSettings;
+
+        // Определяем поисковую систему (по умолчанию google)
+        $source = 'google';
+        if (!empty($searchEngines)) {
+            $source = in_array('yandex', $searchEngines) ? 'yandex' : 'google';
+        }
+
+        // Определяем устройство (по умолчанию desktop)
+        $device = 'desktop';
+        if (!empty($deviceSettings)) {
+            if (isset($deviceSettings['device'])) {
+                $device = $deviceSettings['device'];
+            }
+        }
+
+        // Определяем страну и язык из регионов
+        $country = null;
+        $lang = null;
+        if (!empty($regions)) {
+            $country = $regions['country'] ?? null;
+            $lang = $regions['lang'] ?? null;
+        }
+
+        // Определяем ОС из настроек устройства
+        $os = null;
+        if (!empty($deviceSettings) && isset($deviceSettings['os'])) {
+            $os = $deviceSettings['os'];
+        }
+
+        // Реклама по умолчанию выключена
+        $ads = false;
+        if (!empty($deviceSettings) && isset($deviceSettings['ads'])) {
+            $ads = $deviceSettings['ads'];
+        }
+
+        return new TrackPositionsDTO(
+            siteId: $site->id,
+            device: $device,
+            source: $source,
+            country: $country,
+            lang: $lang,
+            os: $os,
+            ads: $ads,
+            pages: 1
+        );
+    }
+
     public function updateSiteKeywords(int $siteId, string $keywords): void
     {
         $existingKeywords = $this->getKeywords($siteId);
         $existingValues = array_column($existingKeywords, 'value');
 
         $newKeywords = array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
-        
+
         foreach ($existingKeywords as $keyword) {
             if (!in_array($keyword['value'], $newKeywords)) {
                 $this->deleteKeyword($keyword['id']);
@@ -212,6 +309,20 @@ class SeoMicroserviceService
             if (!empty($keywordValue) && !in_array($keywordValue, $existingValues)) {
                 $this->createKeyword($siteId, $keywordValue);
             }
+        }
+    }
+
+    public function updateSitePositionLimit(int $siteId, int $positionLimit): void
+    {
+        try {
+            $this->client->put($this->baseUrl . '/api/sites/' . $siteId . '/position-limit', [
+                'json' => [
+                    'position_limit' => $positionLimit
+                ]
+            ]);
+        } catch (GuzzleException $e) {
+            // Логируем ошибку, но не прерываем выполнение
+            \Log::error('Failed to update position limit for site ' . $siteId . ': ' . $e->getMessage());
         }
     }
 }

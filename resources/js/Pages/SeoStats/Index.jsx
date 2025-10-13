@@ -17,6 +17,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         search_engines: [],
         regions: {},
         device_settings: {},
+        position_limit: 10,
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -26,6 +27,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         search_engines: [],
         regions: {},
         device_settings: {},
+        position_limit: 10,
     });
 
     const handleViewReports = (project) => {
@@ -54,6 +56,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     search_engines: data.site.search_engines || [],
                     regions: data.site.regions || {},
                     device_settings: data.site.device_settings || {},
+                    position_limit: data.site.position_limit || 10,
                 };
                 
                 console.log('Setting edit form data:', editFormData);
@@ -68,6 +71,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     search_engines: project.search_engines || [],
                     regions: project.regions || {},
                     device_settings: project.device_settings || {},
+                    position_limit: project.position_limit || 10,
                 };
                 console.log('Using fallback data:', fallbackData);
                 setEditData(fallbackData);
@@ -82,6 +86,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 search_engines: project.search_engines || [],
                 regions: project.regions || {},
                 device_settings: project.device_settings || {},
+                position_limit: project.position_limit || 10,
             };
             console.log('Using fallback data after error:', fallbackData);
             setEditData(fallbackData);
@@ -98,7 +103,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {} });
+                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10 });
             },
         });
     };
@@ -113,7 +118,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {} });
+                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10 });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);

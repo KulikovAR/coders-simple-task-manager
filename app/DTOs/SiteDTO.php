@@ -11,6 +11,7 @@ class SiteDTO
         public readonly array $searchEngines = [],
         public readonly array $regions = [],
         public readonly array $deviceSettings = [],
+        public readonly ?int $positionLimit = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null
     ) {}
@@ -33,6 +34,7 @@ class SiteDTO
             searchEngines: $data['search_engines'] ?? [],
             regions: $data['regions'] ?? [],
             deviceSettings: $data['device_settings'] ?? [],
+            positionLimit: $data['position_limit'] ?? null,
             updatedAt: $data['updated_at'] ?? null,
             lastTrackedAt: $data['updated_at'] ?? null
         );
@@ -47,6 +49,7 @@ class SiteDTO
             'search_engines' => $this->searchEngines,
             'regions' => $this->regions,
             'device_settings' => $this->deviceSettings,
+            'position_limit' => $this->positionLimit,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
         ];
@@ -61,6 +64,7 @@ class SiteDTO
             searchEngines: $other->searchEngines ?: $this->searchEngines,
             regions: $other->regions ?: $this->regions,
             deviceSettings: $other->deviceSettings ?: $this->deviceSettings,
+            positionLimit: $other->positionLimit ?: $this->positionLimit,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
         );

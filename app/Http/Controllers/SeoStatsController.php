@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTOs\UpdateSiteDTO;
+use App\DTOs\PositionFiltersDTO;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
 use App\Models\SeoSiteUser;
@@ -50,6 +51,10 @@ class SeoStatsController extends Controller
 
         if ($request->input('keywords')) {
             $this->seoService->updateSiteKeywords($site->id, $request->input('keywords'));
+        }
+
+        if ($request->input('position_limit')) {
+            $this->seoService->updateSitePositionLimit($site->id, $request->input('position_limit'));
         }
 
         return redirect()->route('seo-stats.index')->with('success', 'Проект создан');
@@ -134,12 +139,26 @@ class SeoStatsController extends Controller
         }
 
         $keywords = $this->seoService->getKeywords($siteId);
-        $positions = $this->seoService->getPositionHistory($siteId);
+
+        // Получаем фильтры из запроса
+        $filters = PositionFiltersDTO::fromRequest([
+            'site_id' => $siteId,
+            'source' => request('source'),
+            'date_from' => request('date_from'),
+            'date_to' => request('date_to'),
+        ]);
+
+        $positions = $this->seoService->getPositionHistoryWithFilters($filters);
 
         return Inertia::render('SeoStats/Reports', [
-            'site' => $site->toArray(),
+            'project' => $site->toArray(),
             'keywords' => $keywords,
             'positions' => $positions,
+            'filters' => [
+                'source' => $filters->source,
+                'date_from' => $filters->dateFrom,
+                'date_to' => $filters->dateTo,
+            ],
         ]);
     }
 
@@ -154,10 +173,30 @@ class SeoStatsController extends Controller
         }
 
         try {
-            $this->seoService->trackSitePositions($siteId);
-            return response()->json(['success' => true]);
+            $success = $this->seoService->trackSitePositionsFromProject($siteId);
+            
+            if ($success) {
+                return response()->json(['success' => true, 'message' => 'Отслеживание запущено']);
+            } else {
+                return response()->json(['error' => 'Ошибка запуска отслеживания'], 500);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Ошибка отслеживания'], 500);
+        }
+    }
+
+    public function destroyKeyword(int $keywordId)
+    {
+        try {
+            $success = $this->seoService->deleteKeyword($keywordId);
+
+            if ($success) {
+                return response()->json(['success' => true, 'message' => 'Ключевое слово удалено']);
+            } else {
+                return response()->json(['error' => 'Ошибка удаления ключевого слова'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка удаления'], 500);
         }
     }
 }

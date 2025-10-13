@@ -44,6 +44,25 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
                     {errors?.domain && <p className="text-accent-red text-sm mt-1">{errors.domain}</p>}
                 </div>
             </div>
+
+            <div className="mt-4">
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                    Количество позиций для отслеживания
+                </label>
+                <select
+                    value={siteData.position_limit || 10}
+                    onChange={(e) => setSiteData('position_limit', parseInt(e.target.value))}
+                    className="w-full px-4 py-3 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-colors"
+                >
+                    <option value={10}>1-10 страниц (10 позиций)</option>
+                    <option value={50}>1-50 страниц (50 позиций)</option>
+                    <option value={100}>1-100 страниц (100 позиций)</option>
+                </select>
+                <p className="text-xs text-text-muted mt-2">
+                    Определяет максимальное количество позиций, которые будут отслеживаться для каждого ключевого слова
+                </p>
+                {errors?.position_limit && <p className="text-accent-red text-sm mt-1">{errors.position_limit}</p>}
+            </div>
         </div>
     );
 }

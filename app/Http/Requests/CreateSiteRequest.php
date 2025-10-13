@@ -20,6 +20,7 @@ class CreateSiteRequest extends FormRequest
             'search_engines' => 'nullable|array',
             'regions' => 'nullable|array',
             'device_settings' => 'nullable|array',
+            'position_limit' => 'nullable|integer|min:1|max:100',
         ];
     }
 }
