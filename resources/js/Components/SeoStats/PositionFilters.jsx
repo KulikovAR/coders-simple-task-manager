@@ -6,8 +6,11 @@ export default function PositionFilters({
     projectId,
     project = {}
 }) {
+    // Определяем значение по умолчанию для поисковика
+    const defaultSource = filters.source || project.search_engines?.[0] || '';
+    
     const [localFilters, setLocalFilters] = useState({
-        source: filters.source || '',
+        source: defaultSource,
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
     });
@@ -36,7 +39,7 @@ export default function PositionFilters({
 
     const clearFilters = () => {
         setLocalFilters({
-            source: '',
+            source: project.search_engines?.[0] || '',
             date_from: '',
             date_to: '',
         });
@@ -47,9 +50,7 @@ export default function PositionFilters({
         });
     };
 
-    const hasActiveFilters = Object.values(localFilters).some(value => 
-        value !== '' && value !== false && value !== null
-    );
+    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '';
 
     return (
         <div className="bg-card-bg border border-border-color rounded-xl p-6 mb-6">
@@ -82,7 +83,6 @@ export default function PositionFilters({
                         onChange={(e) => handleFilterChange('source', e.target.value)}
                         className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                     >
-                        <option value="">Все системы</option>
                         {project.search_engines?.map(searchEngine => (
                             <option key={searchEngine} value={searchEngine}>
                                 {searchEngine === 'google' ? 'Google' : 

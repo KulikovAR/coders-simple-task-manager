@@ -8,6 +8,7 @@ use App\DTOs\TrackPositionsDTO;
 use App\DTOs\PositionFiltersDTO;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 class SeoMicroserviceService
 {
@@ -261,25 +262,34 @@ class SeoMicroserviceService
             return false;
         }
 
-        $trackData = $this->buildTrackDataFromProject($site);
+        $searchEngines = $site->searchEngines;
 
-        return $this->trackSitePositionsWithFilters($trackData);
+        if (empty($searchEngines)) {
+            $searchEngines = ['google'];
+        }
+
+        $success = true;
+
+        foreach ($searchEngines as $searchEngine) {
+            $trackData = $this->buildTrackDataFromProject($site, $searchEngine);
+
+            $result = $this->trackSitePositionsWithFilters($trackData);
+
+            if (!$result) {
+                $success = false;
+            }
+        }
+        
+        return $success;
     }
 
-    private function buildTrackDataFromProject(SiteDTO $site): TrackPositionsDTO
+    private function buildTrackDataFromProject(SiteDTO $site, string $searchEngine): TrackPositionsDTO
     {
-        // Получаем настройки из проекта
-        $searchEngines = $site->searchEngines;
         $regions = $site->regions;
         $deviceSettings = $site->deviceSettings;
 
-        // Определяем поисковую систему (по умолчанию google)
-        $source = 'google';
-        if (!empty($searchEngines)) {
-            $source = in_array('yandex', $searchEngines) ? 'yandex' : 'google';
-        }
+        $source = $searchEngine;
 
-        // Определяем устройство (по умолчанию desktop)
         $device = 'desktop';
         if (!empty($deviceSettings)) {
             if (isset($deviceSettings['device'])) {
@@ -287,7 +297,6 @@ class SeoMicroserviceService
             }
         }
 
-        // Определяем страну и язык из регионов
         $country = null;
         $lang = null;
         if (!empty($regions)) {
@@ -295,13 +304,11 @@ class SeoMicroserviceService
             $lang = $regions['lang'] ?? null;
         }
 
-        // Определяем ОС из настроек устройства
         $os = null;
         if (!empty($deviceSettings) && isset($deviceSettings['os'])) {
             $os = $deviceSettings['os'];
         }
 
-        // Реклама по умолчанию выключена
         $ads = false;
         if (!empty($deviceSettings) && isset($deviceSettings['ads'])) {
             $ads = $deviceSettings['ads'];
