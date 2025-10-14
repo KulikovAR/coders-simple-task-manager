@@ -110,13 +110,8 @@ class SeoMicroserviceService
             $this->updateSiteKeywords($siteId, $dto->keywords);
         }
 
-        if ($dto->positionLimit !== null) {
-            $this->updateSitePositionLimit($siteId, $dto->positionLimit);
-        }
-
-        if ($dto->subdomains !== null) {
-            $this->updateSiteSubdomains($siteId, $dto->subdomains);
-        }
+        // positionLimit и subdomains сохраняются только в локальной базе данных
+        // Микросервис не поддерживает эти endpoints
 
         return $success;
     }
@@ -344,31 +339,4 @@ class SeoMicroserviceService
         }
     }
 
-    public function updateSitePositionLimit(int $siteId, int $positionLimit): void
-    {
-        try {
-            $this->client->put($this->baseUrl . '/api/sites/' . $siteId . '/position-limit', [
-                'json' => [
-                    'position_limit' => $positionLimit
-                ]
-            ]);
-        } catch (GuzzleException $e) {
-            // Логируем ошибку, но не прерываем выполнение
-            \Illuminate\Support\Facades\Log::error('Failed to update position limit for site ' . $siteId . ': ' . $e->getMessage());
-        }
-    }
-
-    public function updateSiteSubdomains(int $siteId, bool $subdomains): void
-    {
-        try {
-            $this->client->put($this->baseUrl . '/api/sites/' . $siteId . '/subdomains', [
-                'json' => [
-                    'subdomains' => $subdomains
-                ]
-            ]);
-        } catch (GuzzleException $e) {
-            // Логируем ошибку, но не прерываем выполнение
-            \Illuminate\Support\Facades\Log::error('Failed to update subdomains for site ' . $siteId . ': ' . $e->getMessage());
-        }
-    }
 }
