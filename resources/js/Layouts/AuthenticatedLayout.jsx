@@ -53,7 +53,7 @@ export default function Authenticated({ user, header, children, flash }) {
         <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden mobile-no-min-height">
             {/* Yandex Metrika */}
             <YandexMetrika />
-            
+
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
@@ -90,9 +90,6 @@ export default function Authenticated({ user, header, children, flash }) {
                                 </NavLink>
                                 <NavLink href={route('tasks.index')} active={route().current('tasks.*')}>
                                     Задачи
-                                </NavLink>
-                                <NavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
-                                    SEO Статистика
                                 </NavLink>
                             </div>
                         </div>
@@ -230,9 +227,6 @@ export default function Authenticated({ user, header, children, flash }) {
                         <ResponsiveNavLink href={route('tasks.index')} active={route().current('tasks.*')}>
                             Задачи
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
-                            SEO Статистика
-                        </ResponsiveNavLink>
                     </div>
 
                     {/* Мобильное переключение темы */}
@@ -313,7 +307,7 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="animate-fade-in">
                         {/* Плашка подтверждения email */}
                         <EmailVerificationBanner user={user} status={flash?.status} />
-                        
+
                         {/* Отображаем flash-сообщения глобально */}
 
                         {children}
