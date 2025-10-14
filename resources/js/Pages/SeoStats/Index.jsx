@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import SeoLayout from '@/Layouts/SeoLayout';
 import CreateSiteModal from '@/Components/SeoStats/CreateSiteModal';
 import EditProjectModal from '@/Components/SeoStats/EditProjectModal';
 import ProjectTableRow from '@/Components/SeoStats/ProjectTableRow';
@@ -132,7 +132,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
 
 
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <SeoLayout user={auth.user}>
             <Head title="SEO Проекты" />
 
             <div className="min-h-screen bg-primary-bg p-6">
@@ -241,6 +241,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 processing={editProcessing}
                 errors={editErrors}
             />
-        </AuthenticatedLayout>
+        </SeoLayout>
     );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from '@inertiajs/react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import ApplicationLogoSeo from '@/Components/ApplicationLogoSeo';
 import Dropdown from '@/Components/Dropdown';
 
 import NavLink from '@/Components/NavLink';
@@ -8,11 +8,11 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import MobileNotificationBell from '@/Components/MobileNotificationBell';
 import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
-import ServiceSelector from '@/Components/ServiceSelector';
 import Waves from '@/Components/Waves';
 import YandexMetrika from '@/Components/YandexMetrika';
+import ServiceSelector from '@/Components/ServiceSelector';
 
-export default function Authenticated({ user, header, children, flash }) {
+export default function SeoLayout({ user, header, children, flash }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [theme, setTheme] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -74,26 +74,24 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href="/dashboard" className="hover:opacity-80 transition-all duration-200 hover:scale-105 icon-glitch">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-text-primary" />
+                                <Link href="/seo-stats" className="hover:opacity-80 transition-all duration-200 hover:scale-105 icon-glitch">
+                                    <ApplicationLogoSeo className="block h-9 w-auto fill-current text-text-primary" />
                                 </Link>
                                 <div className="ml-4">
                                     <ServiceSelector />
                                 </div>
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Главная
-                                </NavLink>
-                                <NavLink href={route('projects.index')} active={route().current('projects.*')}>
-                                    Проекты
-                                </NavLink>
-                                <NavLink href={route('tasks.index')} active={route().current('tasks.*')}>
-                                    Задачи
-                                </NavLink>
-                                <NavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
-                                    SEO Статистика
-                                </NavLink>
+                                <Link 
+                                    href={route('seo-stats.index')} 
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
+                                        route().current('seo-stats.*') 
+                                            ? 'border-accent-blue text-text-primary' 
+                                            : 'border-transparent text-text-muted hover:text-text-secondary hover:border-gray-300'
+                                    }`}
+                                >
+                                    SEO Проекты
+                                </Link>
                             </div>
                         </div>
                         <div className="hidden sm:flex sm:items-center sm:ml-6 dropdown-glitch">
@@ -221,17 +219,8 @@ export default function Authenticated({ user, header, children, flash }) {
                 </div>
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden w-full max-w-full overflow-hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Главная
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('projects.index')} active={route().current('projects.*')}>
-                            Проекты
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('tasks.index')} active={route().current('tasks.*')}>
-                            Задачи
-                        </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
-                            SEO Статистика
+                            SEO Проекты
                         </ResponsiveNavLink>
                     </div>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import SeoLayout from '@/Layouts/SeoLayout';
 import PositionFilters from '@/Components/SeoStats/PositionFilters';
 import PositionsTable from '@/Components/SeoStats/PositionsTable';
 
@@ -18,7 +18,7 @@ export default function SeoReports({
     // Проверяем, что project существует
     if (!project) {
         return (
-            <AuthenticatedLayout user={auth.user}>
+            <SeoLayout user={auth.user}>
                 <Head title="Ошибка" />
                 <div className="min-h-screen bg-primary-bg p-6 flex items-center justify-center">
                     <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center">
@@ -32,7 +32,7 @@ export default function SeoReports({
                         </button>
                     </div>
                 </div>
-            </AuthenticatedLayout>
+            </SeoLayout>
         );
     }
 
@@ -112,7 +112,7 @@ export default function SeoReports({
     const uniqueDates = getUniqueDates();
 
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <SeoLayout user={auth.user}>
             <Head title={`Отчеты - ${project.name}`} />
 
             <div className="min-h-screen bg-primary-bg p-6">
@@ -222,6 +222,6 @@ export default function SeoReports({
                     />
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </SeoLayout>
     );
 }
