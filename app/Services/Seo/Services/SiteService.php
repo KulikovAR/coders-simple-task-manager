@@ -166,15 +166,16 @@ class SiteService
 
                     $sitePositions = $this->microserviceClient->getPositionHistory($siteId);
                     if (is_array($sitePositions)) {
-                        $groupedByKeywordAndDate = [];
+                        $groupedByKeywordDateAndSource = [];
                         foreach ($sitePositions as $position) {
                             $date = date('Y-m-d', strtotime($position['date']));
-                            $key = $position['keyword_id'] . '_' . $date;
-                            if (!isset($groupedByKeywordAndDate[$key]) || $position['id'] > $groupedByKeywordAndDate[$key]['id']) {
-                                $groupedByKeywordAndDate[$key] = $position;
+                            $source = $position['source'] ?? 'unknown';
+                            $key = $position['keyword_id'] . '_' . $date . '_' . $source;
+                            if (!isset($groupedByKeywordDateAndSource[$key]) || $position['id'] > $groupedByKeywordDateAndSource[$key]['id']) {
+                                $groupedByKeywordDateAndSource[$key] = $position;
                             }
                         }
-                        $positions = array_merge($positions, array_values($groupedByKeywordAndDate));
+                        $positions = array_merge($positions, array_values($groupedByKeywordDateAndSource));
                     }
                 }
             }
