@@ -62,7 +62,7 @@ class SiteDTO
     {
         return new self(
             id: $this->id,
-            domain: $this->domain,
+            domain: $other->domain ?: $this->domain,
             name: $other->name ?: $this->name,
             searchEngines: $other->searchEngines ?: $this->searchEngines,
             regions: $other->regions ?: $this->regions,

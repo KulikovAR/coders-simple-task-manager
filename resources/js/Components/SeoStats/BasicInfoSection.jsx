@@ -65,20 +65,37 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
             </div>
 
             <div className="mt-4">
-                <label className="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        checked={siteData.subdomains || false}
-                        onChange={(e) => setSiteData('subdomains', e.target.checked)}
-                        className="w-4 h-4 text-accent-blue bg-secondary-bg border-border-color rounded focus:ring-accent-blue/20 focus:ring-2"
-                    />
-                    <div>
-                        <span className="text-sm font-medium text-text-primary">Включать поддомены</span>
-                        <p className="text-xs text-text-muted">
-                            Отслеживать позиции не только основного домена, но и всех его поддоменов
-                        </p>
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <input
+                            type="checkbox"
+                            id="subdomains"
+                            checked={siteData.subdomains || false}
+                            onChange={(e) => setSiteData('subdomains', e.target.checked)}
+                            className="sr-only"
+                        />
+                        <label 
+                            htmlFor="subdomains"
+                            className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                                siteData.subdomains 
+                                    ? 'bg-accent-blue border-accent-blue' 
+                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                            }`}
+                        >
+                            {siteData.subdomains && (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                            )}
+                        </label>
                     </div>
-                </label>
+                    <label htmlFor="subdomains" className="flex flex-col cursor-pointer">
+                        <span className="text-sm font-medium text-text-primary">Включать поддомены</span>
+                        <span className="text-xs text-text-muted">
+                            Отслеживать позиции не только основного домена, но и всех его поддоменов
+                        </span>
+                    </label>
+                </div>
                 {errors?.subdomains && <p className="text-accent-red text-sm mt-1">{errors.subdomains}</p>}
             </div>
         </div>
