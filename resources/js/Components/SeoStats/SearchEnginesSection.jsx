@@ -8,30 +8,6 @@ export default function SearchEnginesSection({
     deviceSettings,
     onDeviceSettingsChange
 }) {
-    const googleRegions = [
-        { value: 'ru', label: 'Россия' },
-        { value: 'us', label: 'США' },
-        { value: 'uk', label: 'Великобритания' },
-        { value: 'de', label: 'Германия' },
-        { value: 'fr', label: 'Франция' },
-        { value: 'es', label: 'Испания' },
-        { value: 'it', label: 'Италия' },
-        { value: 'ca', label: 'Канада' },
-        { value: 'au', label: 'Австралия' },
-        { value: 'jp', label: 'Япония' },
-        { value: 'cn', label: 'Китай' },
-        { value: 'br', label: 'Бразилия' },
-        { value: 'in', label: 'Индия' }
-    ];
-
-    const yandexRegions = [
-        { value: 'ru', label: 'Россия' },
-        { value: 'ua', label: 'Украина' },
-        { value: 'by', label: 'Беларусь' },
-        { value: 'kz', label: 'Казахстан' },
-        { value: 'tr', label: 'Турция' }
-    ];
-
     return (
         <div className="space-y-4">
             <h4 className="text-lg font-semibold text-text-primary flex items-center gap-2">
@@ -48,7 +24,6 @@ export default function SearchEnginesSection({
                     onToggle={() => onEngineToggle('google')}
                     region={regions?.google}
                     onRegionChange={(region) => onRegionChange('google', region)}
-                    regions={googleRegions}
                     device={deviceSettings?.google?.device}
                     onDeviceChange={(device) => onDeviceSettingsChange('google', 'device', device)}
                     os={deviceSettings?.google?.os}
@@ -61,7 +36,6 @@ export default function SearchEnginesSection({
                     onToggle={() => onEngineToggle('yandex')}
                     region={regions?.yandex}
                     onRegionChange={(region) => onRegionChange('yandex', region)}
-                    regions={yandexRegions}
                     device={deviceSettings?.yandex?.device}
                     onDeviceChange={(device) => onDeviceSettingsChange('yandex', 'device', device)}
                     os={deviceSettings?.yandex?.os}

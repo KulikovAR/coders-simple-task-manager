@@ -17,12 +17,14 @@ class SeoSite extends Model
         'device_settings',
         'position_limit',
         'subdomains',
+        'schedule',
     ];
 
     protected $casts = [
         'search_engines' => 'array',
         'regions' => 'array',
         'device_settings' => 'array',
+        'schedule' => 'array',
     ];
 
     public function users()

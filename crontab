@@ -1,0 +1,2 @@
+# Запуск проверки расписания парсинга каждую минуту
+* * * * * cd /var/www && php artisan seo:run-scheduled-parsing >> /var/www/storage/logs/scheduled-parsing.log 2>&1

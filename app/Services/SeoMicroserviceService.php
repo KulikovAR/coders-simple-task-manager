@@ -37,51 +37,47 @@ class SeoMicroserviceService
         }
     }
 
+    public function getByIds(array $siteIds): array
+    {
+        if (empty($siteIds)) {
+            return [];
+        }
+
+        try {
+            $response = $this->client->get($this->baseUrl . '/api/sites', [
+                'query' => ['ids' => implode(',', $siteIds)]
+            ]);
+            return json_decode($response->getBody()->getContents(), true) ?: [];
+        } catch (GuzzleException $e) {
+            return [];
+        }
+    }
+
+    public function getById(int $siteId): ?array
+    {
+        try {
+            $response = $this->client->get($this->baseUrl . '/api/sites/' . $siteId);
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            return null;
+        }
+    }
+
     public function getSite(int $siteId): ?SiteDTO
     {
         $localData = $this->seoSiteService->findByMicroserviceId($siteId);
 
         if (!$localData) {
-            \Illuminate\Support\Facades\Log::info('getSite - no local data for site: ' . $siteId);
             return null;
         }
 
-        \Illuminate\Support\Facades\Log::info('getSite - local data:', $localData->toArray());
-
-        // Получаем данные из микросервиса для получения актуального domain
-        try {
-            $response = $this->client->get($this->baseUrl . '/api/sites/' . $siteId);
-            $microserviceData = json_decode($response->getBody()->getContents(), true);
-
-            \Illuminate\Support\Facades\Log::info('getSite - microservice data:', $microserviceData);
-
-            if ($microserviceData) {
-                $microserviceDTO = SiteDTO::fromMicroservice($microserviceData);
-                $result = $microserviceDTO->mergeWith($localData);
-                \Illuminate\Support\Facades\Log::info('getSite - merged result:', $result->toArray());
-                return $result;
-            }
-        } catch (GuzzleException $e) {
-            // Если не удалось получить данные из микросервиса, попробуем получить из списка всех сайтов
-            \Illuminate\Support\Facades\Log::error('Failed to get site data from microservice for site ' . $siteId . ': ' . $e->getMessage());
-            // TODO убрать!
-            try {
-                $allSites = $this->getSites();
-                $siteData = collect($allSites)->firstWhere('id', $siteId);
-
-                if ($siteData) {
-                    \Illuminate\Support\Facades\Log::info('getSite - found site in all sites list:', $siteData);
-                    $microserviceDTO = SiteDTO::fromMicroservice($siteData);
-                    $result = $microserviceDTO->mergeWith($localData);
-                    \Illuminate\Support\Facades\Log::info('getSite - merged result from all sites:', $result->toArray());
-                    return $result;
-                }
-            } catch (GuzzleException $e2) {
-                \Illuminate\Support\Facades\Log::error('Failed to get all sites from microservice: ' . $e2->getMessage());
-            }
+        $microserviceData = $this->getById($siteId);
+        
+        if ($microserviceData) {
+            $microserviceDTO = SiteDTO::fromMicroservice($microserviceData);
+            return $microserviceDTO->mergeWith($localData);
         }
 
-        \Illuminate\Support\Facades\Log::info('getSite - returning local data only:', $localData->toArray());
         return $localData;
     }
 
@@ -205,12 +201,8 @@ class SeoMicroserviceService
         }
 
         try {
-            $allSites = $this->getSites();
-            if (is_array($allSites)) {
-                $sites = array_filter($allSites, function ($site) use ($userSites) {
-                    return isset($site['id']) && in_array($site['id'], $userSites);
-                });
-
+            $sites = $this->getByIds($userSites);
+            if (is_array($sites)) {
                 $sites = $this->seoSiteService->mergeSitesWithLocalData($sites);
 
                 foreach ($userSites as $siteId) {

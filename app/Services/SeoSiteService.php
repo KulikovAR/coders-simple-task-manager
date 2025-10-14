@@ -56,6 +56,9 @@ class SeoSiteService
         if ($dto->subdomains !== null) {
             $updateData['subdomains'] = $dto->subdomains;
         }
+        if ($dto->schedule !== null) {
+            $updateData['schedule'] = $dto->schedule;
+        }
 
         return $site->update($updateData);
     }

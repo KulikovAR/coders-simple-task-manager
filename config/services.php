@@ -57,4 +57,9 @@ return [
         'timeout' => 60,
     ],
 
+    'dadata' => [
+        'token' => env('DADATA_TOKEN'),
+        'url' => env('DADATA_URL', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/country'),
+    ],
+
 ];

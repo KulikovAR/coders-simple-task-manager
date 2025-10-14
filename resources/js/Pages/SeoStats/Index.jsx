@@ -19,6 +19,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         device_settings: {},
         position_limit: 10,
         subdomains: false,
+        schedule: null,
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -30,6 +31,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         device_settings: {},
         position_limit: 10,
         subdomains: false,
+        schedule: null,
     });
 
     const handleViewReports = (project) => {
@@ -60,6 +62,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     device_settings: data.site.device_settings || {},
                     position_limit: data.site.position_limit || 10,
                     subdomains: data.site.subdomains || false,
+                    schedule: data.site.schedule || null,
                 };
                 
                 console.log('Setting edit form data:', editFormData);
@@ -76,6 +79,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                     device_settings: project.device_settings || {},
                     position_limit: project.position_limit || 10,
                     subdomains: project.subdomains || false,
+                    schedule: project.schedule || null,
                 };
                 console.log('Using fallback data:', fallbackData);
                 setEditData(fallbackData);
@@ -103,7 +107,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false });
+                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null });
             },
         });
     };
@@ -118,7 +122,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false });
+                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);

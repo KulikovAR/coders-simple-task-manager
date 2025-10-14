@@ -10,6 +10,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Resources\ApiResponse;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\AiTextOptimizationController;
+use App\Http\Controllers\Api\DaDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,3 +91,7 @@ Route::get('/health', function () {
 
 // Telegram bot webhook (публичный, без CSRF). Проверка по заголовку X-Telegram-Bot-Api-Secret-Token
 Route::post('/telegram/webhook', [TelegramController::class, 'webhook'])->name('telegram.webhook');
+
+// DaData API роуты (публичные)
+Route::get('/dadata/countries/popular', [DaDataController::class, 'getPopularCountries'])->name('api.dadata.countries.popular');
+Route::post('/dadata/countries/search', [DaDataController::class, 'searchCountries'])->name('api.dadata.countries.search');

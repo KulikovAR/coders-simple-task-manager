@@ -1,3 +1,5 @@
+import ScheduleSection from './ScheduleSection';
+
 export default function BasicInfoSection({ siteData, setSiteData, errors, isEditMode = false }) {
     return (
         <div className="space-y-4">
@@ -98,6 +100,12 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
                 </div>
                 {errors?.subdomains && <p className="text-accent-red text-sm mt-1">{errors.subdomains}</p>}
             </div>
+
+            <ScheduleSection 
+                siteData={siteData} 
+                setSiteData={setSiteData} 
+                errors={errors} 
+            />
         </div>
     );
 }

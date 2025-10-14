@@ -1,10 +1,12 @@
+import SearchableSelect from './SearchableSelect';
+import CountrySearchableSelect from './CountrySearchableSelect';
+
 export default function SearchEngineCard({ 
     engine, 
     isSelected, 
     onToggle, 
     region, 
     onRegionChange, 
-    regions,
     device,
     onDeviceChange,
     os,
@@ -74,19 +76,12 @@ export default function SearchEngineCard({
                         <label className="block text-sm font-medium text-text-primary mb-2">
                             Регион для {config.name}
                         </label>
-                        <select
-                            value={region || ''}
-                            onChange={(e) => onRegionChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                        <CountrySearchableSelect
+                            value={region}
+                            onChange={onRegionChange}
+                            placeholder="Выберите страну"
                             required={isSelected}
-                        >
-                            <option value="">Выберите регион</option>
-                            {regions.map((regionOption) => (
-                                <option key={regionOption.value} value={regionOption.value}>
-                                    {regionOption.label}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
                     
                     <div>
@@ -100,9 +95,9 @@ export default function SearchEngineCard({
                             required={isSelected}
                         >
                             <option value="">Выберите устройство</option>
-                            <option value="desktop">Desktop</option>
-                            <option value="tablet">Tablet</option>
-                            <option value="mobile">Mobile</option>
+                            <option value="desktop">Компьютер</option>
+                            <option value="tablet">Планшет</option>
+                            <option value="mobile">Мобильный</option>
                         </select>
                     </div>
                     

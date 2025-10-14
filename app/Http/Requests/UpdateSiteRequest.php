@@ -21,6 +21,7 @@ class UpdateSiteRequest extends FormRequest
             'device_settings' => 'nullable|array',
             'position_limit' => 'nullable|integer|min:1|max:100',
             'subdomains' => 'nullable|boolean',
+            'schedule' => 'nullable|array',
         ];
     }
 }

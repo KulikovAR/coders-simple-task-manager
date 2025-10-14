@@ -13,6 +13,7 @@ class SiteDTO
         public readonly array $deviceSettings = [],
         public readonly ?int $positionLimit = null,
         public readonly ?bool $subdomains = null,
+        public readonly ?array $schedule = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null
     ) {}
@@ -37,6 +38,7 @@ class SiteDTO
             deviceSettings: $data['device_settings'] ?? [],
             positionLimit: $data['position_limit'] ?? null,
             subdomains: $data['subdomains'] ?? null,
+            schedule: $data['schedule'] ?? null,
             updatedAt: $data['updated_at'] ?? null,
             lastTrackedAt: $data['updated_at'] ?? null
         );
@@ -53,6 +55,7 @@ class SiteDTO
             'device_settings' => $this->deviceSettings,
             'position_limit' => $this->positionLimit,
             'subdomains' => $this->subdomains,
+            'schedule' => $this->schedule,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
         ];
@@ -69,6 +72,7 @@ class SiteDTO
             deviceSettings: $other->deviceSettings ?: $this->deviceSettings,
             positionLimit: $other->positionLimit ?: $this->positionLimit,
             subdomains: $other->subdomains !== null ? $other->subdomains : $this->subdomains,
+            schedule: $other->schedule ?: $this->schedule,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
         );
