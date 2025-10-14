@@ -72,7 +72,7 @@ class SeoMicroserviceService
         }
 
         $microserviceData = $this->getById($siteId);
-        
+
         if ($microserviceData) {
             $microserviceDTO = SiteDTO::fromMicroservice($microserviceData);
             return $microserviceDTO->mergeWith($localData);
