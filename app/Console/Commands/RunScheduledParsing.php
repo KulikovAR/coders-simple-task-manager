@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\SeoSite;
-use App\Services\SeoMicroserviceService;
+use App\Services\Seo\Services\MicroserviceClient;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 
@@ -14,7 +14,7 @@ class RunScheduledParsing extends Command
     protected $description = 'Запускает парсинг позиций для сайтов согласно их расписанию';
 
     public function __construct(
-        private SeoMicroserviceService $seoService
+        private \App\Services\Seo\Services\MicroserviceClient $microserviceClient
     ) {
         parent::__construct();
     }
@@ -113,14 +113,14 @@ class RunScheduledParsing extends Command
         try {
             $this->info("Запуск парсинга для сайта: {$site->name} (ID: {$site->go_seo_site_id})");
             
-            $keywords = $this->seoService->getKeywords($site->go_seo_site_id);
+            $keywords = $this->microserviceClient->getKeywords($site->go_seo_site_id);
             
             if (empty($keywords)) {
                 $this->warn("Нет ключевых слов для сайта: {$site->name}");
                 return;
             }
 
-            $result = $this->seoService->trackSitePositions($site->go_seo_site_id);
+            $result = $this->microserviceClient->trackSitePositions($site->go_seo_site_id);
             
             if ($result) {
                 $this->info("✓ Парсинг успешно запущен для: {$site->name}");
