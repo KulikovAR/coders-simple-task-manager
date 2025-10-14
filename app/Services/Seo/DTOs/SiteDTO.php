@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\Services\Seo\DTOs;
 
 class SiteDTO
 {
@@ -76,5 +76,43 @@ class SiteDTO
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
         );
+    }
+
+    public function getDevice(string $searchEngine): string
+    {
+        $deviceData = $this->deviceSettings[$searchEngine] ?? null;
+        return is_array($deviceData) ? ($deviceData['device'] ?? 'desktop') : 'desktop';
+    }
+
+    public function getCountry(string $searchEngine): ?string
+    {
+        $regionData = $this->regions[$searchEngine] ?? null;
+        
+        if (is_string($regionData)) {
+            return mb_strtolower($regionData);
+        }
+        
+        if (is_array($regionData) && isset($regionData['code'])) {
+            return mb_strtolower($regionData['code']);
+        }
+        
+        return null;
+    }
+
+    public function getLang(string $searchEngine): ?string
+    {
+        $regionData = $this->regions[$searchEngine] ?? null;
+        return is_array($regionData) ? ($regionData['name'] ?? null) : null;
+    }
+
+    public function getOs(string $searchEngine): ?string
+    {
+        $deviceData = $this->deviceSettings[$searchEngine] ?? null;
+        return is_array($deviceData) ? ($deviceData['os'] ?? null) : null;
+    }
+
+    public function getAds(): bool
+    {
+        return $this->deviceSettings['ads'] ?? false;
     }
 }

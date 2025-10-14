@@ -2,29 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\DTOs\UpdateSiteDTO;
-use App\DTOs\PositionFiltersDTO;
+use App\Services\Seo\DTOs\UpdateSiteDTO;
+use App\Services\Seo\DTOs\PositionFiltersDTO;
+use App\Services\Seo\Services\SiteUserService;
+use App\Services\Seo\Services\ReportsService;
+use App\Services\Seo\Services\PositionTrackingService;
+use App\Services\Seo\Services\MicroserviceClient;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
-use App\Models\SeoSiteUser;
-use App\Services\SeoMicroserviceService;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class SeoStatsController extends Controller
 {
     public function __construct(
-        private SeoMicroserviceService $seoService
+        private SiteUserService $siteUserService,
+        private ReportsService $reportsService,
+        private PositionTrackingService $positionTrackingService,
+        private MicroserviceClient $microserviceClient
     ) {}
 
     public function index()
     {
-        $userSites = SeoSiteUser::where('user_id', Auth::id())
-            ->pluck('go_seo_site_id')
-            ->toArray();
-
-        $data = $this->seoService->getUserData($userSites);
-
+        $data = $this->siteUserService->getUserSites();
         return Inertia::render('SeoStats/Index', $data);
     }
 
@@ -35,67 +34,37 @@ class SeoStatsController extends Controller
 
     public function storeSite(CreateSiteRequest $request)
     {
-        $site = $this->seoService->createSite(
+        $site = $this->siteUserService->createSiteForUser(
             $request->input('domain'),
-            $request->input('name')
+            $request->input('name'),
+            $request->validated()
         );
 
         if (!$site) {
             return redirect()->back()->withErrors(['error' => 'Ошибка создания проекта']);
         }
 
-        SeoSiteUser::create([
-            'user_id' => Auth::id(),
-            'go_seo_site_id' => $site->id,
-        ]);
-
-        // Создаем DTO для обновления всех настроек
-        $dto = UpdateSiteDTO::fromRequest($request->validated());
-        $this->seoService->updateSite($site->id, $dto);
-
         return redirect()->route('seo-stats.index')->with('success', 'Проект создан');
     }
 
     public function getProjectData(int $siteId)
     {
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->exists();
+        $data = $this->siteUserService->getSiteData($siteId);
 
-        if (!$hasAccess) {
-            return response()->json(['error' => 'Нет доступа'], 403);
+        if (!$data) {
+            return response()->json(['error' => 'Нет доступа или сайт не найден'], 403);
         }
 
-        $site = $this->seoService->getSite($siteId);
-
-        if (!$site) {
-            return response()->json(['error' => 'Сайт не найден'], 404);
-        }
-
-        $keywords = $this->seoService->getKeywords($siteId);
-        $keywordsText = implode("\n", array_column($keywords, 'value'));
-
-        return response()->json([
-            'site' => $site->toArray(),
-            'keywords' => $keywordsText,
-        ]);
+        return response()->json($data);
     }
 
     public function updateSite(int $siteId, UpdateSiteRequest $request)
     {
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->exists();
-
-        if (!$hasAccess) {
-            return response()->json(['error' => 'Нет доступа'], 403);
-        }
-
         $dto = UpdateSiteDTO::fromRequest($request->validated());
-        $success = $this->seoService->updateSite($siteId, $dto);
+        $success = $this->siteUserService->updateSite($siteId, $dto);
 
         if (!$success) {
-            return redirect()->back()->withErrors(['error' => 'Ошибка обновления']);
+            return redirect()->back()->withErrors(['error' => 'Нет доступа или ошибка обновления']);
         }
 
         return redirect()->back()->with('success', 'Проект обновлен');
@@ -103,74 +72,41 @@ class SeoStatsController extends Controller
 
     public function destroy(int $siteId)
     {
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->exists();
+        $success = $this->siteUserService->deleteSite($siteId);
 
-        if (!$hasAccess) {
+        if (!$success) {
             return response()->json(['error' => 'Нет доступа'], 403);
         }
-
-        SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->delete();
 
         return redirect()->route('seo-stats.index')->with('success', 'Проект удален');
     }
 
     public function reports(int $siteId)
     {
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->exists();
-
-        if (!$hasAccess) {
-            abort(403);
-        }
-
-        $site = $this->seoService->getSite($siteId);
-
-        if (!$site) {
-            abort(404);
-        }
-
-        $keywords = $this->seoService->getKeywords($siteId);
-
-        // Получаем фильтры из запроса
-        $filters = PositionFiltersDTO::fromRequest([
-            'site_id' => $siteId,
+        $filters = [
             'source' => request('source'),
             'date_from' => request('date_from'),
             'date_to' => request('date_to'),
-        ]);
+        ];
 
-        $positions = $this->seoService->getPositionHistoryWithFilters($filters);
+        $data = $this->reportsService->getReportsData($siteId, $filters);
 
-        return Inertia::render('SeoStats/Reports', [
-            'project' => $site->toArray(),
-            'keywords' => $keywords,
-            'positions' => $positions,
-            'filters' => [
-                'source' => $filters->source,
-                'date_from' => $filters->dateFrom,
-                'date_to' => $filters->dateTo,
-            ],
-        ]);
+        if (!$data) {
+            abort(403);
+        }
+
+        return Inertia::render('SeoStats/Reports', $data);
     }
 
     public function trackPositions(int $siteId)
     {
-        $hasAccess = SeoSiteUser::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->exists();
-
-        if (!$hasAccess) {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
             return response()->json(['error' => 'Нет доступа'], 403);
         }
 
         try {
-            $success = $this->seoService->trackSitePositionsFromProject($siteId);
-            
+            $success = $this->positionTrackingService->trackSitePositionsFromProject($siteId);
+
             if ($success) {
                 return response()->json(['success' => true, 'message' => 'Отслеживание запущено']);
             } else {
@@ -184,7 +120,7 @@ class SeoStatsController extends Controller
     public function destroyKeyword(int $keywordId)
     {
         try {
-            $success = $this->seoService->deleteKeyword($keywordId);
+            $success = $this->microserviceClient->deleteKeyword($keywordId);
 
             if ($success) {
                 return response()->json(['success' => true, 'message' => 'Ключевое слово удалено']);
