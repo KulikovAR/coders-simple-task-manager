@@ -53,7 +53,7 @@ export default function SeoLayout({ user, header, children, flash }) {
         <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden mobile-no-min-height">
             {/* Yandex Metrika */}
             <YandexMetrika />
-            
+
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
@@ -82,15 +82,15 @@ export default function SeoLayout({ user, header, children, flash }) {
                                 </div>
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <Link 
-                                    href={route('seo-stats.index')} 
+                                <Link
+                                    href={route('seo-stats.index')}
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
-                                        route().current('seo-stats.*') 
-                                            ? 'border-accent-blue text-text-primary' 
+                                        route().current('seo-stats.*')
+                                            ? 'border-accent-blue text-text-primary'
                                             : 'border-transparent text-text-muted hover:text-text-secondary hover:border-gray-300'
                                     }`}
                                 >
-                                    SEO Проекты
+                                    Проекты
                                 </Link>
                             </div>
                         </div>
@@ -302,7 +302,7 @@ export default function SeoLayout({ user, header, children, flash }) {
                     <div className="animate-fade-in">
                         {/* Плашка подтверждения email */}
                         <EmailVerificationBanner user={user} status={flash?.status} />
-                        
+
                         {/* Отображаем flash-сообщения глобально */}
 
                         {children}
