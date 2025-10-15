@@ -66,7 +66,29 @@ export default function EditProjectModal({
                     </button>
                 </div>
 
-                <form onSubmit={onSubmit} className="space-y-6">
+                {processing ? (
+                    <div className="flex flex-col items-center justify-center py-16">
+                        {/* Стильный прелоадер */}
+                        <div className="relative mb-8">
+                            {/* Внешний круг */}
+                            <div className="w-20 h-20 border-4 border-accent-blue/10 rounded-full"></div>
+                            {/* Вращающийся круг */}
+                            <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-accent-blue border-r-accent-blue rounded-full animate-spin"></div>
+                            {/* Внутренний пульсирующий круг */}
+                            <div className="absolute top-2 left-2 w-16 h-16 bg-accent-blue/20 rounded-full animate-pulse"></div>
+                            {/* Центральная точка */}
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-accent-blue rounded-full animate-ping"></div>
+                        </div>
+                        
+                        {/* Анимированные точки */}
+                        <div className="flex items-center justify-center gap-1">
+                            <div className="w-2 h-2 bg-accent-blue rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                            <div className="w-2 h-2 bg-accent-blue rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                            <div className="w-2 h-2 bg-accent-blue rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={onSubmit} className="space-y-6">
                     <BasicInfoSection 
                         siteData={siteData}
                         setSiteData={setSiteData}
@@ -123,6 +145,7 @@ export default function EditProjectModal({
                         </button>
                     </div>
                 </form>
+                )}
             </div>
         </div>
     );

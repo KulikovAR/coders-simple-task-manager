@@ -77,9 +77,19 @@ export default function SeoLayout({ user, header, children, flash }) {
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <Link
+                                    href={route('seo-stats.dashboard')}
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
+                                        route().current('seo-stats.dashboard')
+                                            ? 'border-accent-blue text-text-primary'
+                                            : 'border-transparent text-text-muted hover:text-text-secondary hover:border-gray-300'
+                                    }`}
+                                >
+                                    Дашборд
+                                </Link>
+                                <Link
                                     href={route('seo-stats.index')}
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
-                                        route().current('seo-stats.*')
+                                        route().current('seo-stats.index')
                                             ? 'border-accent-blue text-text-primary'
                                             : 'border-transparent text-text-muted hover:text-text-secondary hover:border-gray-300'
                                     }`}
@@ -213,8 +223,11 @@ export default function SeoLayout({ user, header, children, flash }) {
                 </div>
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden w-full max-w-full overflow-hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('seo-stats.index')} active={route().current('seo-stats.*')}>
-                            SEO Проекты
+                        <ResponsiveNavLink href={route('seo-stats.dashboard')} active={route().current('seo-stats.dashboard')}>
+                            Дашборд
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('seo-stats.index')} active={route().current('seo-stats.index')}>
+                            Проекты
                         </ResponsiveNavLink>
                     </div>
 

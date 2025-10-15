@@ -181,7 +181,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/webhooks/{webhook}/toggle', [App\Http\Controllers\WebhookController::class, 'toggle'])->name('webhooks.toggle');
 
     // SEO Статистика
-    Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
+    Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'dashboard'])->name('seo-stats.dashboard');
+    Route::get('/seo-stats/projects', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
     Route::get('/seo-stats/{site}/reports', [App\Http\Controllers\SeoStatsController::class, 'reports'])->name('seo-stats.reports');
     Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
     Route::put('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'updateSite'])->name('seo-stats.update-site');

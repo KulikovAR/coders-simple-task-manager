@@ -27,6 +27,11 @@ class SeoStatsController extends Controller
         return Inertia::render('SeoStats/Index', $data);
     }
 
+    public function dashboard()
+    {
+        return Inertia::render('SeoStats/Dashboard');
+    }
+
     public function create()
     {
         return Inertia::render('SeoStats/Create');

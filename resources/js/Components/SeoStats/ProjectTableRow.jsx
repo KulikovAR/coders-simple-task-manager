@@ -2,7 +2,8 @@ export default function ProjectTableRow({
     project, 
     keywords, 
     onViewReports, 
-    onEditProject
+    onEditProject,
+    isEditingProject = false
 }) {
     const keywordsCount = keywords.filter(kw => kw.site_id === project.id).length;
     const lastUpdate = project.updated_at ? new Date(project.updated_at).toLocaleDateString('ru-RU') : '-';
@@ -81,13 +82,21 @@ export default function ProjectTableRow({
                     
                     <button
                         onClick={() => onEditProject(project)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-accent-purple bg-accent-purple/10 rounded-lg hover:bg-accent-purple/20 transition-colors"
-                        title="Редактировать проект"
+                        disabled={isEditingProject}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                            isEditingProject 
+                                ? 'text-accent-purple/60 bg-accent-purple/5 cursor-not-allowed' 
+                                : 'text-accent-purple bg-accent-purple/10 hover:bg-accent-purple/20'
+                        }`}
+                        title={isEditingProject ? "Загрузка данных..." : "Редактировать проект"}
                     >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Редактировать
+                        {isEditingProject ? (
+                            <div className="w-3 h-3 border border-accent-purple/40 border-t-accent-purple rounded-full animate-spin"></div>
+                        ) : (
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        )}
                     </button>
                 </div>
             </td>

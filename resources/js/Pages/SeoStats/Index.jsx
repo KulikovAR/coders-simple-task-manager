@@ -9,6 +9,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
     const [showAddSiteModal, setShowAddSiteModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
+    const [isLoadingProjectData, setIsLoadingProjectData] = useState(false);
 
     const { data: siteData, setData: setSiteData, post: postSite, processing: siteProcessing, errors: siteErrors } = useForm({
         domain: '',
@@ -39,9 +40,9 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
     };
 
     const handleEditProject = async (project) => {
-        console.log('Opening edit modal for project:', project);
+        console.log('Loading project data for:', project);
         setEditingProject(project);
-        setShowEditModal(true);
+        setIsLoadingProjectData(true);
         
         try {
             const url = route('seo-stats.project-data', project.id);
@@ -96,9 +97,13 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 device_settings: project.device_settings || {},
                 position_limit: project.position_limit || 10,
                 subdomains: project.subdomains || false,
+                schedule: project.schedule || null,
             };
             console.log('Using fallback data after error:', fallbackData);
             setEditData(fallbackData);
+        } finally {
+            setIsLoadingProjectData(false);
+            setShowEditModal(true);
         }
     };
 
@@ -136,6 +141,27 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
             <Head title="SEO Проекты" />
 
             <div className="min-h-screen bg-primary-bg p-6">
+                {/* Стильный прелоадер для загрузки данных проекта */}
+                {isLoadingProjectData && (
+                    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-40">
+                        <div className="bg-card-bg border border-border-color rounded-2xl p-8 shadow-2xl">
+                            <div className="flex flex-col items-center">
+                                {/* Анимированный логотип */}
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-accent-blue to-accent-purple rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg className="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    {/* Вращающиеся кольца */}
+                                    <div className="absolute -inset-2 border-2 border-accent-blue/20 rounded-2xl animate-spin"></div>
+                                    <div className="absolute -inset-1 border-2 border-transparent border-t-accent-purple rounded-2xl animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 <div className="max-w-7xl mx-auto">
                     {/* Заголовок и кнопка создания */}
                     <div className="flex items-center justify-between mb-8">
@@ -205,6 +231,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                                 keywords={keywords}
                                                 onViewReports={handleViewReports}
                                                 onEditProject={handleEditProject}
+                                                isEditingProject={isLoadingProjectData && editingProject?.id === site.id}
                                             />
                                         ))}
                                     </tbody>
@@ -233,12 +260,13 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                 onClose={() => {
                     setShowEditModal(false);
                     setEditingProject(null);
+                    setIsLoadingProjectData(false);
                 }}
                 project={editingProject}
                 siteData={editData}
                 setSiteData={setEditData}
                 onSubmit={handleUpdateSite}
-                processing={editProcessing}
+                processing={editProcessing || isLoadingProjectData}
                 errors={editErrors}
             />
         </SeoLayout>
