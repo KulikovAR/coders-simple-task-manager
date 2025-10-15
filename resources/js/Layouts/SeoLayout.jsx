@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from '@inertiajs/react';
-import ApplicationLogoSeo from '@/Components/ApplicationLogoSeo';
 import Dropdown from '@/Components/Dropdown';
 
 import NavLink from '@/Components/NavLink';
@@ -10,7 +9,7 @@ import MobileNotificationBell from '@/Components/MobileNotificationBell';
 import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
 import Waves from '@/Components/Waves';
 import YandexMetrika from '@/Components/YandexMetrika';
-import ServiceSelector from '@/Components/ServiceSelector';
+import ServiceSwitcher from '@/Components/ServiceSwitcher';
 
 export default function SeoLayout({ user, header, children, flash }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -74,12 +73,7 @@ export default function SeoLayout({ user, header, children, flash }) {
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href="/seo-stats" className="hover:opacity-80 transition-all duration-200 hover:scale-105 icon-glitch">
-                                    <ApplicationLogoSeo className="block h-9 w-auto fill-current text-text-primary" />
-                                </Link>
-                                <div className="ml-4">
-                                    <ServiceSelector />
-                                </div>
+                                <ServiceSwitcher />
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <Link
