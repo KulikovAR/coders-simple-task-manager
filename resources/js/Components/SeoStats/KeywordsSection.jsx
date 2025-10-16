@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import ValidationError from './ValidationError';
 
 export default function KeywordsSection({ keywords, onKeywordsChange, errors }) {
     const [isDragOver, setIsDragOver] = useState(false);
@@ -95,7 +96,7 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
             
             <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
-                    Ключевые слова и фразы
+                    Ключевые слова и фразы <span className="text-accent-red">*</span>
                 </label>
                 
                 {/* Кнопка загрузки файла */}
@@ -141,7 +142,9 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
                 <textarea
                     value={keywords}
                     onChange={(e) => onKeywordsChange(e.target.value)}
-                    className="w-full px-4 py-3 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-purple/20 focus:border-accent-purple transition-colors resize-none"
+                    className={`w-full px-4 py-3 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-purple/20 focus:border-accent-purple transition-colors resize-none ${
+                        errors?.keywords ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''
+                    }`}
                     rows="6"
                     placeholder="Введите ключевые слова и фразы, каждое с новой строки:&#10;купить телефон&#10;лучший смартфон&#10;мобильные телефоны"
                     required
@@ -149,7 +152,7 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
                 <p className="text-xs text-text-muted mt-2">
                     Каждое ключевое слово или фразу вводите с новой строки. Поддерживаются файлы CSV и TXT
                 </p>
-                {errors?.keywords && <p className="text-accent-red text-sm mt-1">{errors.keywords}</p>}
+                <ValidationError message={errors?.keywords} />
             </div>
         </div>
     );

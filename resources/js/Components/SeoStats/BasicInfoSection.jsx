@@ -1,4 +1,5 @@
 import ScheduleSection from './ScheduleSection';
+import ValidationError from './ValidationError';
 
 export default function BasicInfoSection({ siteData, setSiteData, errors, isEditMode = false }) {
     return (
@@ -13,22 +14,24 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
-                        Название проекта
+                        Название проекта <span className="text-accent-red">*</span>
                     </label>
                     <input
                         type="text"
                         value={siteData.name}
                         onChange={(e) => setSiteData('name', e.target.value)}
-                        className="w-full px-4 py-3 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-colors"
+                        className={`w-full px-4 py-3 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-colors ${
+                            errors?.name ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''
+                        }`}
                         placeholder="Мой сайт"
                         required
                     />
-                    {errors?.name && <p className="text-accent-red text-sm mt-1">{errors.name}</p>}
+                    <ValidationError message={errors?.name} />
                 </div>
                 
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
-                        URL сайта
+                        URL сайта <span className="text-accent-red">*</span>
                     </label>
                     <input
                         type="url"
@@ -38,12 +41,14 @@ export default function BasicInfoSection({ siteData, setSiteData, errors, isEdit
                             isEditMode 
                                 ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed' 
                                 : 'bg-secondary-bg'
+                        } ${
+                            errors?.domain ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''
                         }`}
                         placeholder="https://example.com"
                         required
                         disabled={isEditMode}
                     />
-                    {errors?.domain && <p className="text-accent-red text-sm mt-1">{errors.domain}</p>}
+                    <ValidationError message={errors?.domain} />
                 </div>
             </div>
 

@@ -6,7 +6,8 @@ export default function SearchEnginesSection({
     onEngineToggle, 
     onRegionChange,
     deviceSettings,
-    onDeviceSettingsChange
+    onDeviceSettingsChange,
+    errors = {}
 }) {
     return (
         <div className="space-y-4">
@@ -28,6 +29,10 @@ export default function SearchEnginesSection({
                     onDeviceChange={(device) => onDeviceSettingsChange('google', 'device', device)}
                     os={deviceSettings?.google?.os}
                     onOsChange={(os) => onDeviceSettingsChange('google', 'os', os)}
+                    errors={{
+                        regions: errors?.regions,
+                        device_settings: errors?.device_settings
+                    }}
                 />
 
                 <SearchEngineCard
@@ -40,6 +45,10 @@ export default function SearchEnginesSection({
                     onDeviceChange={(device) => onDeviceSettingsChange('yandex', 'device', device)}
                     os={deviceSettings?.yandex?.os}
                     onOsChange={(os) => onDeviceSettingsChange('yandex', 'os', os)}
+                    errors={{
+                        regions: errors?.regions,
+                        device_settings: errors?.device_settings
+                    }}
                 />
             </div>
         </div>

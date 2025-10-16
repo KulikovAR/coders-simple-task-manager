@@ -1,6 +1,10 @@
 import BasicInfoSection from './BasicInfoSection';
 import KeywordsSection from './KeywordsSection';
 import SearchEnginesSection from './SearchEnginesSection';
+import CollapsibleSection from './CollapsibleSection';
+import { useFormValidation } from './useFormValidation';
+import ValidationError from './ValidationError';
+import ProjectLoadingOverlay from './ProjectLoadingOverlay';
 
 export default function CreateSiteModal({ 
     showModal, 
@@ -9,8 +13,17 @@ export default function CreateSiteModal({
     setSiteData, 
     onSubmit, 
     processing, 
-    errors 
+    errors: serverErrors = {}
 }) {
+    const { errors: validationErrors, validateForm, clearErrors, getSectionStatus } = useFormValidation();
+    
+    // Объединяем ошибки сервера и валидации
+    const allErrors = { ...serverErrors, ...validationErrors };
+    
+    // Получаем статусы секций
+    const basicStatus = getSectionStatus(siteData, 'basic');
+    const keywordsStatus = getSectionStatus(siteData, 'keywords');
+    const searchEnginesStatus = getSectionStatus(siteData, 'searchEngines');
     const handleSearchEngineToggle = (engine) => {
         const currentEngines = siteData.search_engines || [];
         const newEngines = currentEngines.includes(engine)
@@ -48,6 +61,24 @@ export default function CreateSiteModal({
         setSiteData('keywords', keywords);
     };
 
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        
+        // Очищаем предыдущие ошибки валидации
+        clearErrors();
+        
+        // Валидируем форму
+        const validation = validateForm(siteData);
+        
+        if (validation.isValid) {
+            // Если валидация прошла успешно, отправляем форму
+            onSubmit(e);
+        } else {
+            // Показываем ошибки валидации
+            console.log('Validation errors:', validation.errors);
+        }
+    };
+
     if (!showModal) return null;
 
     return (
@@ -65,31 +96,77 @@ export default function CreateSiteModal({
                     </button>
                 </div>
 
-                <form onSubmit={onSubmit} className="space-y-6">
-                    <BasicInfoSection 
-                        siteData={siteData}
-                        setSiteData={setSiteData}
-                        errors={errors}
+                {processing ? (
+                    <ProjectLoadingOverlay 
+                        isVisible={true}
+                        title="Создание проекта"
+                        subtitle="Сохраняем данные проекта..."
                     />
+                ) : (
+                    <form onSubmit={handleFormSubmit} className="space-y-6">
+                    {/* Основная информация */}
+                    <CollapsibleSection
+                        title="Основная информация"
+                        icon={
+                            <svg className="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        }
+                        defaultOpen={false}
+                        hasErrors={basicStatus.hasErrors}
+                        isValid={basicStatus.isValid}
+                    >
+                        <BasicInfoSection 
+                            siteData={siteData}
+                            setSiteData={setSiteData}
+                            errors={allErrors}
+                        />
+                    </CollapsibleSection>
 
-                    <KeywordsSection 
-                        keywords={siteData.keywords}
-                        onKeywordsChange={handleKeywordsChange}
-                        errors={errors}
-                    />
+                    {/* Ключевые слова */}
+                    <CollapsibleSection
+                        title="Поисковые запросы"
+                        icon={
+                            <svg className="w-5 h-5 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        }
+                        defaultOpen={false}
+                        hasErrors={keywordsStatus.hasErrors}
+                        isValid={keywordsStatus.isValid}
+                    >
+                        <KeywordsSection 
+                            keywords={siteData.keywords}
+                            onKeywordsChange={handleKeywordsChange}
+                            errors={allErrors}
+                        />
+                    </CollapsibleSection>
 
-                    <SearchEnginesSection 
-                        searchEngines={siteData.search_engines}
-                        regions={siteData.regions}
-                        onEngineToggle={handleSearchEngineToggle}
-                        onRegionChange={handleRegionChange}
-                        deviceSettings={siteData.device_settings}
-                        onDeviceSettingsChange={handleDeviceSettingsChange}
-                    />
-
-                    {/* Ошибки для поисковых систем */}
-                    {errors?.search_engines && <p className="text-accent-red text-sm mt-1">{errors.search_engines}</p>}
-                    {errors?.regions && <p className="text-accent-red text-sm mt-1">{errors.regions}</p>}
+                    {/* Поисковые системы */}
+                    <CollapsibleSection
+                        title="Поисковые системы и регионы"
+                        icon={
+                            <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        }
+                        defaultOpen={false}
+                        hasErrors={searchEnginesStatus.hasErrors}
+                        isValid={searchEnginesStatus.isValid}
+                    >
+                        <SearchEnginesSection 
+                            searchEngines={siteData.search_engines}
+                            regions={siteData.regions}
+                            onEngineToggle={handleSearchEngineToggle}
+                            onRegionChange={handleRegionChange}
+                            deviceSettings={siteData.device_settings}
+                            onDeviceSettingsChange={handleDeviceSettingsChange}
+                            errors={allErrors}
+                        />
+                        
+                        {/* Общие ошибки для поисковых систем */}
+                        <ValidationError message={allErrors?.search_engines} />
+                    </CollapsibleSection>
 
                     {/* Кнопки */}
                     <div className="flex justify-end gap-4 pt-6 border-t border-border-color">
@@ -121,6 +198,7 @@ export default function CreateSiteModal({
                         </button>
                     </div>
                 </form>
+                )}
             </div>
         </div>
     );

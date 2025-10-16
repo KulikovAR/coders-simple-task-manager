@@ -50,12 +50,7 @@ class MicroserviceClient
 
     public function getById(int $siteId): ?array
     {
-        try {
-            $response = $this->client->get($this->baseUrl . '/api/sites/' . $siteId);
-            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (GuzzleException $e) {
-            return null;
-        }
+        return $this->getByIds([$siteId])[0] ?? null;
     }
 
     public function createSite(string $domain): ?array

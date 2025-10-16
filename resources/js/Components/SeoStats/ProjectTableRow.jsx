@@ -1,11 +1,9 @@
 export default function ProjectTableRow({ 
     project, 
-    keywords, 
     onViewReports, 
     onEditProject,
     isEditingProject = false
 }) {
-    const keywordsCount = keywords.filter(kw => kw.site_id === project.id).length;
     const lastUpdate = project.updated_at ? new Date(project.updated_at).toLocaleDateString('ru-RU') : '-';
 
     return (
@@ -43,21 +41,6 @@ export default function ProjectTableRow({
                     {(!project.search_engines || project.search_engines.length === 0) && (
                         <span className="text-xs text-text-muted">Не настроено</span>
                     )}
-                </div>
-            </td>
-
-            {/* Ключевые слова */}
-            <td className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-accent-purple/10 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-text-primary">{keywordsCount}</p>
-                        <p className="text-xs text-text-muted">ключевых слов</p>
-                    </div>
                 </div>
             </td>
 

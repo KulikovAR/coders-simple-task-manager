@@ -146,38 +146,15 @@ class SiteService
     public function getUserData(array $userSites): array
     {
         $sites = [];
-        $keywords = [];
-        $positions = [];
 
         if (empty($userSites)) {
-            return compact('sites', 'keywords', 'positions');
+            return ['sites' => []];
         }
 
         try {
             $sites = $this->microserviceClient->getByIds($userSites);
             if (is_array($sites)) {
                 $sites = $this->mergeSitesWithLocalData($sites);
-
-                foreach ($userSites as $siteId) {
-                    $siteKeywords = $this->microserviceClient->getKeywords($siteId);
-                    if (is_array($siteKeywords)) {
-                        $keywords = array_merge($keywords, $siteKeywords);
-                    }
-
-                    $sitePositions = $this->microserviceClient->getPositionHistory($siteId);
-                    if (is_array($sitePositions)) {
-                        $groupedByKeywordDateAndSource = [];
-                        foreach ($sitePositions as $position) {
-                            $date = date('Y-m-d', strtotime($position['date']));
-                            $source = $position['source'] ?? 'unknown';
-                            $key = $position['keyword_id'] . '_' . $date . '_' . $source;
-                            if (!isset($groupedByKeywordDateAndSource[$key]) || $position['id'] > $groupedByKeywordDateAndSource[$key]['id']) {
-                                $groupedByKeywordDateAndSource[$key] = $position;
-                            }
-                        }
-                        $positions = array_merge($positions, array_values($groupedByKeywordDateAndSource));
-                    }
-                }
             }
         } catch (\Exception $e) {
             // Silent fail
@@ -185,8 +162,6 @@ class SiteService
 
         return [
             'sites' => array_values($sites),
-            'keywords' => $keywords,
-            'positions' => $positions,
         ];
     }
 }

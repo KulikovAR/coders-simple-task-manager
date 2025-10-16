@@ -4,8 +4,9 @@ import SeoLayout from '@/Layouts/SeoLayout';
 import CreateSiteModal from '@/Components/SeoStats/CreateSiteModal';
 import EditProjectModal from '@/Components/SeoStats/EditProjectModal';
 import ProjectTableRow from '@/Components/SeoStats/ProjectTableRow';
+import ProjectLoadingOverlay from '@/Components/SeoStats/ProjectLoadingOverlay';
 
-export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
+export default function SeoStatsIndex({ auth, sites = [] }) {
     const [showAddSiteModal, setShowAddSiteModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
@@ -141,26 +142,12 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
             <Head title="SEO Проекты" />
 
             <div className="min-h-screen bg-primary-bg p-6">
-                {/* Стильный прелоадер для загрузки данных проекта */}
-                {isLoadingProjectData && (
-                    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-40">
-                        <div className="bg-card-bg border border-border-color rounded-2xl p-8 shadow-2xl">
-                            <div className="flex flex-col items-center">
-                                {/* Анимированный логотип */}
-                                <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-accent-blue to-accent-purple rounded-2xl flex items-center justify-center shadow-lg">
-                                        <svg className="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </div>
-                                    {/* Вращающиеся кольца */}
-                                    <div className="absolute -inset-2 border-2 border-accent-blue/20 rounded-2xl animate-spin"></div>
-                                    <div className="absolute -inset-1 border-2 border-transparent border-t-accent-purple rounded-2xl animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* Прелоадер для загрузки данных проекта */}
+                <ProjectLoadingOverlay 
+                    isVisible={isLoadingProjectData}
+                    title="Загрузка данных проекта"
+                    subtitle="Пожалуйста, подождите..."
+                />
                 
                 <div className="max-w-7xl mx-auto">
                     {/* Заголовок и кнопка создания */}
@@ -213,9 +200,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                                 Поисковые системы
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
-                                                Ключевые слова
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
                                                 Последнее обновление
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
@@ -228,7 +212,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                             <ProjectTableRow
                                                 key={site.id}
                                                 project={site}
-                                                keywords={keywords}
                                                 onViewReports={handleViewReports}
                                                 onEditProject={handleEditProject}
                                                 isEditingProject={isLoadingProjectData && editingProject?.id === site.id}

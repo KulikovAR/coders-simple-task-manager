@@ -4,7 +4,7 @@ import SeoLayout from '@/Layouts/SeoLayout';
 import CreateSiteModal from '@/Components/SeoStats/CreateSiteModal';
 import ProjectCard from '@/Components/SeoStats/ProjectCard';
 
-export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
+export default function SeoStatsIndex({ auth, sites = [] }) {
     const [showAddSiteModal, setShowAddSiteModal] = useState(false);
 
     const handleViewReports = (project) => {
@@ -70,7 +70,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                 <ProjectCard
                                     key={site.id}
                                     project={site}
-                                    keywords={keywords}
                                     onViewReports={handleViewReports}
                                     onAddKeywords={handleAddKeywords}
                                     onTrackPositions={handleTrackPositions}
@@ -81,7 +80,7 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
 
                     {/* Статистика */}
                     {sites.length > 0 && (
-                        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-card-bg border border-border-color rounded-xl p-6">
                                 <div className="flex items-center gap-3">
                                     <div className="p-3 bg-accent-blue/10 rounded-lg">
@@ -92,22 +91,6 @@ export default function SeoStatsIndex({ auth, sites = [], keywords = [] }) {
                                     <div>
                                         <p className="text-2xl font-bold text-text-primary">{sites.length}</p>
                                         <p className="text-text-muted text-sm">Проектов</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-card-bg border border-border-color rounded-xl p-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-accent-purple/10 rounded-lg">
-                                        <svg className="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-text-primary">
-                                            {keywords.reduce((total, kw) => total + 1, 0)}
-                                        </p>
-                                        <p className="text-text-muted text-sm">Ключевых слов</p>
                                     </div>
                                 </div>
                             </div>

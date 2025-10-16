@@ -1,5 +1,6 @@
 import SearchableSelect from './SearchableSelect';
 import CountrySearchableSelect from './CountrySearchableSelect';
+import ValidationError from './ValidationError';
 
 export default function SearchEngineCard({ 
     engine, 
@@ -10,7 +11,8 @@ export default function SearchEngineCard({
     device,
     onDeviceChange,
     os,
-    onOsChange
+    onOsChange,
+    errors = {}
 }) {
     const engineConfig = {
         google: {
@@ -74,24 +76,28 @@ export default function SearchEngineCard({
                 <div className="ml-7 space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-text-primary mb-2">
-                            Регион для {config.name}
+                            Регион для {config.name} <span className="text-accent-red">*</span>
                         </label>
                         <CountrySearchableSelect
                             value={region}
                             onChange={onRegionChange}
                             placeholder="Выберите страну"
                             required={isSelected}
+                            className={errors?.regions?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
                         />
+                        <ValidationError message={errors?.regions?.[engine]} />
                     </div>
                     
                     <div>
                         <label className="block text-sm font-medium text-text-primary mb-2">
-                            Устройство
+                            Устройство <span className="text-accent-red">*</span>
                         </label>
                         <select
                             value={device || ''}
                             onChange={(e) => onDeviceChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                            className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
+                                errors?.device_settings?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''
+                            }`}
                             required={isSelected}
                         >
                             <option value="">Выберите устройство</option>
@@ -99,22 +105,26 @@ export default function SearchEngineCard({
                             <option value="tablet">Планшет</option>
                             <option value="mobile">Мобильный</option>
                         </select>
+                        <ValidationError message={errors?.device_settings?.[engine]} />
                     </div>
                     
                     {device === 'mobile' && (
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-2">
-                                Операционная система
+                                Операционная система <span className="text-accent-red">*</span>
                             </label>
                             <select
                                 value={os || ''}
                                 onChange={(e) => onOsChange(e.target.value)}
-                                className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                                className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
+                                    errors?.device_settings?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''
+                                }`}
                             >
                                 <option value="">Выберите ОС</option>
                                 <option value="ios">iOS</option>
                                 <option value="android">Android</option>
                             </select>
+                            <ValidationError message={errors?.device_settings?.[engine]} />
                         </div>
                     )}
                 </div>
