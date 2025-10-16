@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import SeoLayout from '@/Layouts/SeoLayout';
 import PositionFilters from '@/Components/SeoStats/PositionFilters';
 import PositionsTable from '@/Components/SeoStats/PositionsTable';
+import StatsSection from '@/Components/SeoStats/StatsSection';
 
 export default function SeoReports({ 
     auth, 
@@ -213,6 +214,12 @@ export default function SeoReports({
                             <p className="text-text-muted">Пожалуйста, подождите...</p>
                         </div>
                     )}
+
+                    {/* Статистика позиций */}
+                    <StatsSection 
+                        keywords={keywords}
+                        positions={positions}
+                    />
 
                     {/* Таблица позиций */}
                     <PositionsTable
