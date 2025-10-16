@@ -47,10 +47,10 @@ class PositionTrackingService
             device: $site->getDevice($searchEngine),
             source: $searchEngine,
             country: $site->getCountry($searchEngine),
-            lang: $site->getLang($searchEngine),
             os: $site->getOs($searchEngine),
             ads: $site->getAds(),
-            pages: 1
+            pages: 1,
+            subdomains: $site->getSubdomains()
         );
     }
 }

@@ -12,7 +12,8 @@ class TrackPositionsDTO
         public readonly ?string $lang = null,
         public readonly ?string $os = null,
         public readonly bool $ads = false,
-        public readonly int $pages = 1
+        public readonly int $pages = 1,
+        public readonly ?bool $subdomains = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -25,7 +26,8 @@ class TrackPositionsDTO
             lang: $data['lang'] ?? null,
             os: $data['os'] ?? null,
             ads: $data['ads'] ?? false,
-            pages: $data['pages'] ?? 1
+            pages: $data['pages'] ?? 1,
+            subdomains: $data['subdomains'] ?? null
         );
     }
 
@@ -40,6 +42,7 @@ class TrackPositionsDTO
             'os' => $this->os,
             'ads' => $this->ads,
             'pages' => $this->pages,
+            'subdomains' => $this->subdomains,
         ], fn($value) => $value !== null);
     }
 

@@ -115,4 +115,9 @@ class SiteDTO
     {
         return $this->deviceSettings['ads'] ?? false;
     }
+
+    public function getSubdomains(): ?bool
+    {
+        return $this->subdomains;
+    }
 }
