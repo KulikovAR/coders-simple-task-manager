@@ -39,9 +39,11 @@ class MicroserviceClient
         }
 
         try {
-            $response = $this->client->get($this->baseUrl . '/api/sites', [
-                'query' => ['ids' => $this->formatIds($siteIds)]
-            ]);
+            $response = $this->client->get($this->baseUrl . '/api/sites',
+                [
+                    'ids' => $this->formatIds($siteIds)
+                ]
+            );
             return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR) ?: [];
         } catch (GuzzleException $e) {
             return [];
