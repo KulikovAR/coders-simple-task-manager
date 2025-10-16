@@ -180,6 +180,7 @@ export default function PositionsTable({
                                             <td key={`${date}-${keyword.id}-${index}`} className="w-12 h-12 px-1 py-1 text-center min-w-[100px]">
                                                 <div className={`w-full h-full flex flex-col items-center justify-center ${
                                                     position === null ? 'bg-gray-200' : 
+                                                    position === 0 ? 'bg-gray-400' :
                                                     position <= 3 ? 'bg-green-500' :
                                                     position <= 10 ? 'bg-yellow-500' :
                                                     'bg-red-500'
@@ -188,7 +189,7 @@ export default function PositionsTable({
                                                         position === null ? 'text-gray-600' : 
                                                         'text-white'
                                                     }`}>
-                                                        {position || '-'}
+                                                        {position !== null ? position : '-'}
                                                     </span>
                                                     {change !== null && (
                                                         <span className={`text-xs font-medium ${

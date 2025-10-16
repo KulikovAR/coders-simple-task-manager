@@ -6,16 +6,22 @@ import PositionDistribution from './PositionDistribution';
 export default function StatsSection({ keywords = [], positions = [] }) {
     // Подготавливаем данные для круговой диаграммы
     const pieChartData = useMemo(() => {
-        // Фильтруем только валидные позиции
+        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
         const validPositions = positions
-            .filter(pos => pos && pos.rank && pos.rank > 0)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
             .map(pos => pos.rank);
 
-        const green = validPositions.filter(pos => pos <= 3).length;
+        const green = validPositions.filter(pos => pos > 0 && pos <= 3).length;
         const yellow = validPositions.filter(pos => pos > 3 && pos <= 10).length;
         const red = validPositions.filter(pos => pos > 10).length;
+        const zero = validPositions.filter(pos => pos === 0).length;
 
         return [
+            {
+                label: 'Не найдено',
+                value: zero,
+                color: '#6B7280'
+            },
             {
                 label: 'Топ-3 позиции',
                 value: green,
@@ -67,7 +73,7 @@ export default function StatsSection({ keywords = [], positions = [] }) {
                             <p className="text-text-muted text-sm">Распределение по диапазонам</p>
                         </div>
                     </div>
-                    <PieChart data={pieChartData} size={140} strokeWidth={10} />
+                    <PieChart data={pieChartData} />
                 </div>
 
                 {/* Статистика видимости */}

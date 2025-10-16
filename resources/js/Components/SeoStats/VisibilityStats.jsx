@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 export default function VisibilityStats({ positions = [] }) {
+    const [animatedStats, setAnimatedStats] = useState({ average: 0, median: 0, total: 0, visible: 0, notFound: 0 });
+    const [isAnimating, setIsAnimating] = useState(false);
+
     const stats = useMemo(() => {
-        // Фильтруем только валидные позиции (исключаем null, undefined, 0)
+        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
         const validPositions = positions
-            .filter(pos => pos && pos.rank && pos.rank > 0)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
             .map(pos => pos.rank);
 
         if (validPositions.length === 0) {
@@ -27,16 +30,65 @@ export default function VisibilityStats({ positions = [] }) {
             ? (sortedPositions[sortedPositions.length / 2 - 1] + sortedPositions[sortedPositions.length / 2]) / 2
             : sortedPositions[Math.floor(sortedPositions.length / 2)];
 
-        // Количество видимых позиций (в топ-100)
-        const visible = validPositions.filter(pos => pos <= 100).length;
+        // Количество видимых позиций (в топ-100, исключаем позицию 0)
+        const visible = validPositions.filter(pos => pos > 0 && pos <= 100).length;
+        
+        // Количество не найденных позиций (позиция 0)
+        const notFound = validPositions.filter(pos => pos === 0).length;
 
         return {
             average: Math.round(average * 10) / 10,
             median: Math.round(median * 10) / 10,
             total: validPositions.length,
-            visible
+            visible,
+            notFound
         };
     }, [positions]);
+
+    // Анимация чисел
+    useEffect(() => {
+        setIsAnimating(true);
+        const duration = 1000; // 1 секунда
+        const steps = 60; // 60 FPS
+        const stepDuration = duration / steps;
+        
+        const animateValue = (start, end, callback) => {
+            let current = start;
+            const increment = (end - start) / steps;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                    setIsAnimating(false);
+                }
+                callback(Math.round(current * 10) / 10);
+            }, stepDuration);
+        };
+
+        animateValue(0, stats.average, (value) => {
+            setAnimatedStats(prev => ({ ...prev, average: value }));
+        });
+
+        setTimeout(() => {
+            animateValue(0, stats.median, (value) => {
+                setAnimatedStats(prev => ({ ...prev, median: value }));
+            });
+        }, 200);
+
+        setTimeout(() => {
+            animateValue(0, stats.total, (value) => {
+                setAnimatedStats(prev => ({ ...prev, total: value }));
+            });
+        }, 400);
+
+        setTimeout(() => {
+            animateValue(0, stats.notFound, (value) => {
+                setAnimatedStats(prev => ({ ...prev, notFound: value }));
+            });
+        }, 800);
+    }, [stats]);
 
     const formatValue = (value) => {
         return value === 0 ? '0' : value.toString();
@@ -59,17 +111,21 @@ export default function VisibilityStats({ positions = [] }) {
 
             <div className="grid grid-cols-2 gap-4">
                 {/* Средняя позиция */}
-                <div className="text-center p-4 bg-secondary-bg rounded-lg">
-                    <div className="text-2xl font-bold text-text-primary mb-1">
-                        {formatValue(stats.average)}
+                <div className="text-center p-4 bg-secondary-bg rounded-lg transition-all duration-300 hover:bg-secondary-bg/80">
+                    <div className={`text-2xl font-bold text-text-primary mb-1 transition-all duration-500 ${
+                        isAnimating ? 'scale-110' : 'scale-100'
+                    }`}>
+                        {formatValue(animatedStats.average)}
                     </div>
                     <div className="text-sm text-text-muted">Средняя</div>
                 </div>
 
                 {/* Медианная позиция */}
-                <div className="text-center p-4 bg-secondary-bg rounded-lg">
-                    <div className="text-2xl font-bold text-text-primary mb-1">
-                        {formatValue(stats.median)}
+                <div className="text-center p-4 bg-secondary-bg rounded-lg transition-all duration-300 hover:bg-secondary-bg/80">
+                    <div className={`text-2xl font-bold text-text-primary mb-1 transition-all duration-500 ${
+                        isAnimating ? 'scale-110' : 'scale-100'
+                    }`}>
+                        {formatValue(animatedStats.median)}
                     </div>
                     <div className="text-sm text-text-muted">Медианная</div>
                 </div>
@@ -77,9 +133,19 @@ export default function VisibilityStats({ positions = [] }) {
 
             {/* Дополнительная информация */}
             <div className="mt-4 pt-4 border-t border-border-color">
-                <div className="flex justify-between text-sm text-text-muted">
-                    <span>Всего позиций: {stats.total}</span>
-                    <span>Видимых (≤100): {stats.visible}</span>
+                <div className="grid grid-cols-3 gap-2 text-sm text-text-muted">
+                    <div className="text-center">
+                        <div className="font-medium text-text-primary">{animatedStats.total}</div>
+                        <div className="text-xs">Всего</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="font-medium text-text-primary">{animatedStats.visible}</div>
+                        <div className="text-xs">Видимых</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="font-medium text-text-primary">{animatedStats.notFound}</div>
+                        <div className="text-xs">Не найдено</div>
+                    </div>
                 </div>
             </div>
         </div>

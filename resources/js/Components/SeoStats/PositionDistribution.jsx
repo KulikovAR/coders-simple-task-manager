@@ -1,8 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 export default function PositionDistribution({ positions = [] }) {
+    const [animatedDistribution, setAnimatedDistribution] = useState([]);
+    const [isAnimating, setIsAnimating] = useState(false);
+
     const distribution = useMemo(() => {
         const ranges = [
+            { label: 'Не найдено', min: 0, max: 0, color: '#6B7280' }, // серый для позиции 0
             { label: '1-3', min: 1, max: 3, color: '#10B981' }, // зеленый
             { label: '4-10', min: 4, max: 10, color: '#F59E0B' }, // желтый
             { label: '11-30', min: 11, max: 30, color: '#EF4444' }, // красный
@@ -11,9 +15,9 @@ export default function PositionDistribution({ positions = [] }) {
             { label: '100+', min: 101, max: Infinity, color: '#374151' } // темно-серый
         ];
 
-        // Фильтруем только валидные позиции
+        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
         const validPositions = positions
-            .filter(pos => pos && pos.rank && pos.rank > 0)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
             .map(pos => pos.rank);
 
         const total = validPositions.length;
@@ -41,6 +45,37 @@ export default function PositionDistribution({ positions = [] }) {
         });
     }, [positions]);
 
+    // Анимация прогресс-баров
+    useEffect(() => {
+        setIsAnimating(true);
+        const duration = 1200; // 1.2 секунды
+        const steps = 60;
+        const stepDuration = duration / steps;
+        
+        const animateDistribution = () => {
+            let step = 0;
+            const timer = setInterval(() => {
+                step++;
+                const progress = step / steps;
+                
+                const animated = distribution.map(item => ({
+                    ...item,
+                    animatedPercentage: Math.round(item.percentage * progress * 10) / 10,
+                    animatedCount: Math.round(item.count * progress)
+                }));
+                
+                setAnimatedDistribution(animated);
+                
+                if (step >= steps) {
+                    clearInterval(timer);
+                    setIsAnimating(false);
+                }
+            }, stepDuration);
+        };
+
+        animateDistribution();
+    }, [distribution]);
+
     const formatValue = (value) => {
         return value === 0 ? '0' : value.toString();
     };
@@ -60,7 +95,7 @@ export default function PositionDistribution({ positions = [] }) {
             </div>
 
             <div className="space-y-3">
-                {distribution.map((range, index) => (
+                {(animatedDistribution.length > 0 ? animatedDistribution : distribution).map((range, index) => (
                     <div key={index} className="flex items-center gap-3">
                         {/* Цветовой индикатор */}
                         <div 
@@ -75,11 +110,13 @@ export default function PositionDistribution({ positions = [] }) {
                                     {range.label}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm text-text-primary font-medium">
-                                        {formatValue(range.count)}
+                                    <span className={`text-sm text-text-primary font-medium transition-all duration-300 ${
+                                        isAnimating ? 'scale-105' : 'scale-100'
+                                    }`}>
+                                        {formatValue(range.animatedCount || range.count)}
                                     </span>
                                     <span className="text-sm text-text-muted">
-                                        ({formatValue(range.percentage)}%)
+                                        ({formatValue(range.animatedPercentage || range.percentage)}%)
                                     </span>
                                 </div>
                             </div>
@@ -87,9 +124,9 @@ export default function PositionDistribution({ positions = [] }) {
                             {/* Прогресс-бар */}
                             <div className="mt-1 w-full bg-secondary-bg rounded-full h-2">
                                 <div 
-                                    className="h-2 rounded-full transition-all duration-500 ease-in-out"
+                                    className="h-2 rounded-full transition-all duration-1000 ease-out"
                                     style={{ 
-                                        width: `${range.percentage}%`,
+                                        width: `${range.animatedPercentage || range.percentage}%`,
                                         backgroundColor: range.color 
                                     }}
                                 />
@@ -103,8 +140,10 @@ export default function PositionDistribution({ positions = [] }) {
             <div className="mt-4 pt-4 border-t border-border-color">
                 <div className="flex justify-between text-sm text-text-muted">
                     <span>Всего позиций:</span>
-                    <span className="font-medium text-text-primary">
-                        {distribution.reduce((sum, range) => sum + range.count, 0)}
+                    <span className={`font-medium text-text-primary transition-all duration-300 ${
+                        isAnimating ? 'scale-105' : 'scale-100'
+                    }`}>
+                        {(animatedDistribution.length > 0 ? animatedDistribution : distribution).reduce((sum, range) => sum + (range.animatedCount || range.count), 0)}
                     </span>
                 </div>
             </div>
