@@ -4,7 +4,6 @@ namespace App\Services\Seo\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Log;
 
 class MicroserviceClient
 {
@@ -123,30 +122,12 @@ class MicroserviceClient
     public function getPositionHistoryWithFilters(array $filters): array
     {
         try {
-            // Логирование запроса
-            Log::info('MicroserviceClient request', [
-                'url' => $this->baseUrl . '/api/positions/history',
-                'filters' => $filters
-            ]);
-            
             $response = $this->client->get($this->baseUrl . '/api/positions/history', [
                 'query' => $filters,
             ]);
             $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-            
-            // Логирование ответа
-            Log::info('MicroserviceClient response', [
-                'status' => $response->getStatusCode(),
-                'data_count' => is_array($data) ? count($data) : 0,
-                'sample' => is_array($data) ? array_slice($data, 0, 2) : null
-            ]);
-            
             return is_array($data) ? $data : [];
         } catch (GuzzleException $e) {
-            Log::error('MicroserviceClient error', [
-                'error' => $e->getMessage(),
-                'filters' => $filters
-            ]);
             return [];
         }
     }

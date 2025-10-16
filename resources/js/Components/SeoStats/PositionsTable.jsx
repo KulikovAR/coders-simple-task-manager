@@ -44,21 +44,9 @@ export default function PositionsTable({
 
     // Получение частоты для ключевого слова
     const getFrequencyForKeyword = (keywordId) => {
-        // Ищем позицию Wordstat для данного ключевого слова
         const wordstatPosition = positions.find(pos => 
             pos.keyword_id === keywordId && pos.source === 'wordstat'
         );
-        
-        // Логирование для отладки
-        if (keywordId === 1) { // Логируем только для первого ключевого слова
-            console.log('Debug frequency lookup:', {
-                keywordId,
-                positionsCount: positions.length,
-                wordstatPosition,
-                allWordstatPositions: positions.filter(pos => pos.source === 'wordstat')
-            });
-        }
-        
         return wordstatPosition ? wordstatPosition.rank : null;
     };
 

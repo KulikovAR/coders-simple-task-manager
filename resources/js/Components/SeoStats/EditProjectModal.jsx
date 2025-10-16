@@ -16,8 +16,6 @@ export default function EditProjectModal({
     processing, 
     errors: serverErrors = {}
 }) {
-    console.log('EditProjectModal siteData:', siteData);
-    console.log('EditProjectModal wordstat_enabled:', siteData.wordstat_enabled);
     const { errors: validationErrors, validateForm, clearErrors, getSectionStatus } = useFormValidation();
     
     // Объединяем ошибки сервера и валидации

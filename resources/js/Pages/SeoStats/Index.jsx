@@ -54,10 +54,6 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
             const response = await fetch(url);
             const data = await response.json();
             
-            console.log('Project data response:', { response: response.ok, data });
-            console.log('Site data from server:', data.site);
-            console.log('Wordstat enabled from server:', data.site?.wordstat_enabled);
-            
             if (response.ok) {
                 const editFormData = {
                     domain: data.site.domain || '',
@@ -72,11 +68,9 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                     wordstat_enabled: data.site.wordstat_enabled || false,
                 };
                 
-                console.log('Setting edit form data:', editFormData);
                 setEditData(editFormData);
             } else {
                 console.error('Ошибка загрузки данных проекта:', data.error);
-                // Устанавливаем базовые данные из проекта
                 const fallbackData = {
                     domain: project.domain || '',
                     name: project.name || '',
@@ -89,8 +83,6 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                     schedule: project.schedule || null,
                     wordstat_enabled: project.wordstat_enabled || false,
                 };
-                console.log('Using fallback data:', fallbackData);
-                console.log('Project wordstat_enabled:', project.wordstat_enabled);
                 setEditData(fallbackData);
             }
         } catch (error) {
@@ -108,8 +100,6 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                 schedule: project.schedule || null,
                 wordstat_enabled: project.wordstat_enabled || false,
             };
-            console.log('Using fallback data after error:', fallbackData);
-            console.log('Project wordstat_enabled after error:', project.wordstat_enabled);
             setEditData(fallbackData);
         } finally {
             setIsLoadingProjectData(false);
