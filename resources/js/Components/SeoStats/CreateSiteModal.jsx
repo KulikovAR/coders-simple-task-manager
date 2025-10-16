@@ -61,6 +61,10 @@ export default function CreateSiteModal({
         setSiteData('wordstat_enabled', enabled);
     };
 
+    const handleKeywordsChange = (keywords) => {
+        setSiteData('keywords', keywords);
+    };
+
     const handleFormSubmit = (e) => {
         e.preventDefault();
         
