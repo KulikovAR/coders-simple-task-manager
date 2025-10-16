@@ -23,6 +23,11 @@ class ReportsService
             return null;
         }
 
+        // Устанавливаем фильтр по умолчанию, если не указан поисковик
+        if (empty($filters['source']) && !empty($site->searchEngines)) {
+            $filters['source'] = $site->searchEngines[0];
+        }
+
         $keywords = $this->microserviceClient->getKeywords($siteId);
 
         $positionFilters = PositionFiltersDTO::fromRequest(array_merge([

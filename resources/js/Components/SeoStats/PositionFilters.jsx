@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 
 export default function PositionFilters({ 
@@ -14,6 +14,15 @@ export default function PositionFilters({
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
     });
+
+    // Обновляем локальные фильтры при изменении пропсов
+    React.useEffect(() => {
+        setLocalFilters({
+            source: filters.source || project.search_engines?.[0] || '',
+            date_from: filters.date_from || '',
+            date_to: filters.date_to || '',
+        });
+    }, [filters.source, filters.date_from, filters.date_to, project.search_engines]);
 
     const handleFilterChange = (key, value) => {
         setLocalFilters(prev => ({
