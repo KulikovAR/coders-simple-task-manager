@@ -2,7 +2,7 @@
 
 namespace App\Services\Seo\Services;
 
-use App\Models\SeoSiteUser;
+use App\Models\SeoSite;
 use App\Services\Seo\DTOs\SiteDTO;
 use App\Services\Seo\DTOs\UpdateSiteDTO;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +16,7 @@ class SiteUserService
 
     public function getUserSites(): array
     {
-        $userSites = SeoSiteUser::where('user_id', Auth::id())
+        $userSites = SeoSite::where('user_id', Auth::id())
             ->pluck('go_seo_site_id')
             ->toArray();
 
@@ -25,16 +25,11 @@ class SiteUserService
 
     public function createSiteForUser(string $domain, string $name, array $siteData = []): ?SiteDTO
     {
-        $site = $this->siteService->createSite($domain, $name);
+        $site = $this->siteService->createSite($domain, $name, Auth::id());
 
         if (!$site) {
             return null;
         }
-
-        SeoSiteUser::create([
-            'user_id' => Auth::id(),
-            'go_seo_site_id' => $site->id,
-        ]);
 
         if (!empty($siteData)) {
             $dto = UpdateSiteDTO::fromRequest($siteData);
@@ -46,7 +41,7 @@ class SiteUserService
 
     public function hasAccessToSite(int $siteId): bool
     {
-        return SeoSiteUser::where('user_id', Auth::id())
+        return SeoSite::where('user_id', Auth::id())
             ->where('go_seo_site_id', $siteId)
             ->exists();
     }
@@ -87,7 +82,7 @@ class SiteUserService
             return false;
         }
 
-        SeoSiteUser::where('user_id', Auth::id())
+        SeoSite::where('user_id', Auth::id())
             ->where('go_seo_site_id', $siteId)
             ->delete();
 

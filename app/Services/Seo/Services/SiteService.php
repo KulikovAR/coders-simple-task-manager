@@ -19,10 +19,11 @@ class SiteService
         return $site ? SiteDTO::fromLocal($site->toArray()) : null;
     }
 
-    public function create(int $microserviceId, string $name): SiteDTO
+    public function create(int $microserviceId, string $name, ?int $userId = null): SiteDTO
     {
         $site = SeoSite::create([
             'go_seo_site_id' => $microserviceId,
+            'user_id' => $userId,
             'name' => $name,
             'search_engines' => [],
             'regions' => [],
@@ -88,12 +89,12 @@ class SiteService
         return $localData;
     }
 
-    public function createSite(string $domain, string $name): ?SiteDTO
+    public function createSite(string $domain, string $name, ?int $userId = null): ?SiteDTO
     {
         $data = $this->microserviceClient->createSite($domain);
 
         if ($data && isset($data['id'])) {
-            $this->create($data['id'], $name);
+            $this->create($data['id'], $name, $userId);
             return SiteDTO::fromMicroservice($data);
         }
 

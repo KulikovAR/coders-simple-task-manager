@@ -11,6 +11,7 @@ class SeoSite extends Model
 
     protected $fillable = [
         'go_seo_site_id',
+        'user_id',
         'name',
         'search_engines',
         'regions',
@@ -28,8 +29,8 @@ class SeoSite extends Model
         'schedule' => 'array',
     ];
 
-    public function users()
+    public function user()
     {
-        return $this->belongsToMany(User::class, 'seo_site_users', 'go_seo_site_id', 'user_id');
+        return $this->belongsTo(User::class);
     }
 }
