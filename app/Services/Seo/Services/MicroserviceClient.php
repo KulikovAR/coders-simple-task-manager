@@ -40,7 +40,7 @@ class MicroserviceClient
 
         try {
             $response = $this->client->get($this->baseUrl . '/api/sites', [
-                'query' => ['ids' => implode(',', $siteIds)]
+                'query' => ['ids' => $this->formatIds($siteIds)]
             ]);
             return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR) ?: [];
         } catch (GuzzleException $e) {
@@ -152,5 +152,18 @@ class MicroserviceClient
         } catch (GuzzleException $e) {
             return false;
         }
+    }
+
+    private function formatIds(array $ids): ?string
+    {
+        if (empty($ids)) {
+            return null;
+        }
+
+        if (count($ids) === 1) {
+            return $ids[array_key_first($ids)];
+        }
+
+        return implode(',', $ids);
     }
 }
