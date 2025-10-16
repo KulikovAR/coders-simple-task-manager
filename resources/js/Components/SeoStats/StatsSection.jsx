@@ -8,7 +8,7 @@ export default function StatsSection({ keywords = [], positions = [] }) {
     const pieChartData = useMemo(() => {
         // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
         const validPositions = positions
-            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined && pos.source !== 'wordstat')
             .map(pos => pos.rank);
 
         const green = validPositions.filter(pos => pos > 0 && pos <= 3).length;

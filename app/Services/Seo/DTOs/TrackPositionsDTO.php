@@ -6,7 +6,7 @@ class TrackPositionsDTO
 {
     public function __construct(
         public readonly int $siteId,
-        public readonly string $device,
+        public readonly ?string $device,
         public readonly string $source,
         public readonly ?string $country = null,
         public readonly ?string $lang = null,
@@ -20,7 +20,7 @@ class TrackPositionsDTO
     {
         return new self(
             siteId: $data['site_id'],
-            device: $data['device'],
+            device: $data['device'] ?? null,
             source: $data['source'],
             country: $data['country'] ?? null,
             lang: $data['lang'] ?? null,
@@ -53,7 +53,7 @@ class TrackPositionsDTO
 
     public function getSourceOptions(): array
     {
-        return ['google', 'yandex'];
+        return ['google', 'yandex', 'wordstat'];
     }
 
     public function getOsOptions(): array

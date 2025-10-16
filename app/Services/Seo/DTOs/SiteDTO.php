@@ -14,6 +14,7 @@ class SiteDTO
         public readonly ?int $positionLimit = null,
         public readonly ?bool $subdomains = null,
         public readonly ?array $schedule = null,
+        public readonly ?bool $wordstatEnabled = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null
     ) {}
@@ -39,6 +40,7 @@ class SiteDTO
             positionLimit: $data['position_limit'] ?? null,
             subdomains: $data['subdomains'] ?? null,
             schedule: $data['schedule'] ?? null,
+            wordstatEnabled: $data['wordstat_enabled'] ?? null,
             updatedAt: $data['updated_at'] ?? null,
             lastTrackedAt: $data['updated_at'] ?? null
         );
@@ -56,6 +58,7 @@ class SiteDTO
             'position_limit' => $this->positionLimit,
             'subdomains' => $this->subdomains,
             'schedule' => $this->schedule,
+            'wordstat_enabled' => $this->wordstatEnabled,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
         ];
@@ -73,6 +76,7 @@ class SiteDTO
             positionLimit: $other->positionLimit ?: $this->positionLimit,
             subdomains: $other->subdomains !== null ? $other->subdomains : $this->subdomains,
             schedule: $other->schedule ?: $this->schedule,
+            wordstatEnabled: $other->wordstatEnabled !== null ? $other->wordstatEnabled : $this->wordstatEnabled,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
         );

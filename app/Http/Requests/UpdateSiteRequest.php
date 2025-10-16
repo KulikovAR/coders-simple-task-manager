@@ -22,6 +22,7 @@ class UpdateSiteRequest extends FormRequest
             'position_limit' => 'nullable|integer|min:1|max:100',
             'subdomains' => 'nullable|boolean',
             'schedule' => 'nullable|array',
+            'wordstat_enabled' => 'nullable|boolean',
         ];
     }
 }

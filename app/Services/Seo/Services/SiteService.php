@@ -63,6 +63,9 @@ class SiteService
         if ($dto->schedule !== null) {
             $updateData['schedule'] = $dto->schedule;
         }
+        if ($dto->wordstatEnabled !== null) {
+            $updateData['wordstat_enabled'] = $dto->wordstatEnabled;
+        }
 
         return $site->update($updateData);
     }

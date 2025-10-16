@@ -42,11 +42,31 @@ export default function PositionsTable({
         return filtered;
     }, [keywords, searchTerm, sortConfig]);
 
+    // Получение частоты для ключевого слова
+    const getFrequencyForKeyword = (keywordId) => {
+        // Ищем позицию Wordstat для данного ключевого слова
+        const wordstatPosition = positions.find(pos => 
+            pos.keyword_id === keywordId && pos.source === 'wordstat'
+        );
+        
+        // Логирование для отладки
+        if (keywordId === 1) { // Логируем только для первого ключевого слова
+            console.log('Debug frequency lookup:', {
+                keywordId,
+                positionsCount: positions.length,
+                wordstatPosition,
+                allWordstatPositions: positions.filter(pos => pos.source === 'wordstat')
+            });
+        }
+        
+        return wordstatPosition ? wordstatPosition.rank : null;
+    };
+
     // Получение позиции для ключевого слова и даты
     const getPositionForKeyword = (keywordId, date) => {
         const position = positions.find(pos => {
             const posDateOnly = pos.date ? pos.date.split('T')[0] : '';
-            return pos.keyword_id === keywordId && posDateOnly === date;
+            return pos.keyword_id === keywordId && posDateOnly === date && pos.source !== 'wordstat';
         });
         return position ? position.rank : null;
     };
@@ -140,6 +160,11 @@ export default function PositionsTable({
                                 </button>
                             </th>
 
+                            {/* Частота */}
+                            <th className="px-6 py-3 text-center text-sm font-medium text-text-primary min-w-[120px]">
+                                Частота
+                            </th>
+
                             {/* Даты */}
                             {uniqueDates.map((date, index) => (
                                 <th key={`${date}-${index}`} className="px-3 py-3 text-center text-sm font-medium text-text-primary min-w-[100px]">
@@ -169,6 +194,20 @@ export default function PositionsTable({
                                                 </div>
                                             </div>
                                         </div>
+                                    </td>
+
+                                    {/* Частота */}
+                                    <td className="px-6 py-4 text-center">
+                                        {(() => {
+                                            const frequency = getFrequencyForKeyword(keyword.id);
+                                            return frequency !== null ? (
+                                                <div className="text-text-primary font-medium text-sm">
+                                                    {frequency.toLocaleString('ru-RU')}
+                                                </div>
+                                            ) : (
+                                                <div className="text-text-muted text-sm">-</div>
+                                            );
+                                        })()}
                                     </td>
 
                                     {/* Позиции по датам */}

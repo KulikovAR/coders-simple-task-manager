@@ -57,8 +57,8 @@ export default function CreateSiteModal({
         });
     };
 
-    const handleKeywordsChange = (keywords) => {
-        setSiteData('keywords', keywords);
+    const handleWordstatToggle = (enabled) => {
+        setSiteData('wordstat_enabled', enabled);
     };
 
     const handleFormSubmit = (e) => {
@@ -161,6 +161,8 @@ export default function CreateSiteModal({
                             onRegionChange={handleRegionChange}
                             deviceSettings={siteData.device_settings}
                             onDeviceSettingsChange={handleDeviceSettingsChange}
+                            wordstatEnabled={siteData.wordstat_enabled}
+                            onWordstatToggle={handleWordstatToggle}
                             errors={allErrors}
                         />
                         

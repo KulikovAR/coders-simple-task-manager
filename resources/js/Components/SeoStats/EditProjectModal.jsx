@@ -16,6 +16,8 @@ export default function EditProjectModal({
     processing, 
     errors: serverErrors = {}
 }) {
+    console.log('EditProjectModal siteData:', siteData);
+    console.log('EditProjectModal wordstat_enabled:', siteData.wordstat_enabled);
     const { errors: validationErrors, validateForm, clearErrors, getSectionStatus } = useFormValidation();
     
     // Объединяем ошибки сервера и валидации
@@ -56,6 +58,10 @@ export default function EditProjectModal({
                 [setting]: value
             }
         });
+    };
+
+    const handleWordstatToggle = (enabled) => {
+        setSiteData('wordstat_enabled', enabled);
     };
 
     const handleKeywordsChange = (keywords) => {
@@ -163,6 +169,8 @@ export default function EditProjectModal({
                                 onRegionChange={handleRegionChange}
                                 deviceSettings={siteData.device_settings}
                                 onDeviceSettingsChange={handleDeviceSettingsChange}
+                                wordstatEnabled={siteData.wordstat_enabled}
+                                onWordstatToggle={handleWordstatToggle}
                                 errors={allErrors}
                             />
                             

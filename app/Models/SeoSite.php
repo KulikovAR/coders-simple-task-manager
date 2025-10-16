@@ -18,6 +18,7 @@ class SeoSite extends Model
         'position_limit',
         'subdomains',
         'schedule',
+        'wordstat_enabled',
     ];
 
     protected $casts = [

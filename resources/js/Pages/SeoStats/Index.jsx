@@ -22,6 +22,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
         position_limit: 10,
         subdomains: false,
         schedule: null,
+        wordstat_enabled: false,
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -34,6 +35,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
         position_limit: 10,
         subdomains: false,
         schedule: null,
+        wordstat_enabled: false,
     });
 
     const handleViewReports = (project) => {
@@ -53,6 +55,8 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
             const data = await response.json();
             
             console.log('Project data response:', { response: response.ok, data });
+            console.log('Site data from server:', data.site);
+            console.log('Wordstat enabled from server:', data.site?.wordstat_enabled);
             
             if (response.ok) {
                 const editFormData = {
@@ -65,6 +69,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                     position_limit: data.site.position_limit || 10,
                     subdomains: data.site.subdomains || false,
                     schedule: data.site.schedule || null,
+                    wordstat_enabled: data.site.wordstat_enabled || false,
                 };
                 
                 console.log('Setting edit form data:', editFormData);
@@ -82,8 +87,10 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                     position_limit: project.position_limit || 10,
                     subdomains: project.subdomains || false,
                     schedule: project.schedule || null,
+                    wordstat_enabled: project.wordstat_enabled || false,
                 };
                 console.log('Using fallback data:', fallbackData);
+                console.log('Project wordstat_enabled:', project.wordstat_enabled);
                 setEditData(fallbackData);
             }
         } catch (error) {
@@ -99,8 +106,10 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                 position_limit: project.position_limit || 10,
                 subdomains: project.subdomains || false,
                 schedule: project.schedule || null,
+                wordstat_enabled: project.wordstat_enabled || false,
             };
             console.log('Using fallback data after error:', fallbackData);
+            console.log('Project wordstat_enabled after error:', project.wordstat_enabled);
             setEditData(fallbackData);
         } finally {
             setIsLoadingProjectData(false);
@@ -113,7 +122,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null });
+                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false });
             },
         });
     };
@@ -128,7 +137,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null });
+                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);

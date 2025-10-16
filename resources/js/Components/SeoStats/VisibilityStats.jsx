@@ -7,7 +7,7 @@ export default function VisibilityStats({ positions = [] }) {
     const stats = useMemo(() => {
         // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
         const validPositions = positions
-            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined && pos.source !== 'wordstat')
             .map(pos => pos.rank);
 
         if (validPositions.length === 0) {

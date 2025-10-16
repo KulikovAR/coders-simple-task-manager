@@ -37,6 +37,16 @@ class PositionTrackingService
             }
         }
 
+        // Если включен Wordstat, отправляем дополнительный запрос
+        if ($site->wordstatEnabled) {
+            $wordstatTrackData = $this->buildWordstatTrackData($site);
+            $wordstatResult = $this->microserviceClient->trackSitePositionsWithFilters($wordstatTrackData->toArray());
+
+            if (!$wordstatResult) {
+                $success = false;
+            }
+        }
+
         return $success;
     }
 
@@ -51,6 +61,21 @@ class PositionTrackingService
             ads: $site->getAds(),
             pages: 1,
             subdomains: $site->getSubdomains()
+        );
+    }
+
+    private function buildWordstatTrackData(SiteDTO $site): TrackPositionsDTO
+    {
+        return new TrackPositionsDTO(
+            siteId: $site->id,
+            device: null,
+            source: 'wordstat',
+            country: null,
+            lang: null,
+            os: null,
+            ads: false,
+            pages: 1,
+            subdomains: null
         );
     }
 }

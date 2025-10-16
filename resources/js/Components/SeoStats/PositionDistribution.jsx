@@ -15,9 +15,9 @@ export default function PositionDistribution({ positions = [] }) {
             { label: '100+', min: 101, max: Infinity, color: '#374151' } // темно-серый
         ];
 
-        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
+        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined, wordstat)
         const validPositions = positions
-            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined)
+            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined && pos.source !== 'wordstat')
             .map(pos => pos.rank);
 
         const total = validPositions.length;
