@@ -4,6 +4,9 @@ import SeoLayout from '@/Layouts/SeoLayout';
 import PositionFilters from '@/Components/SeoStats/PositionFilters';
 import PositionsTable from '@/Components/SeoStats/PositionsTable';
 import StatsSection from '@/Components/SeoStats/StatsSection';
+import RecognitionStatus from '@/Components/SeoStats/RecognitionStatus';
+import TrackPositionsButton from '@/Components/SeoStats/TrackPositionsButton';
+import { useSeoRecognition } from '@/hooks/useSeoRecognition';
 
 export default function SeoReports({ 
     auth, 
@@ -13,8 +16,12 @@ export default function SeoReports({
     filters = {},
     filterOptions = {}
 }) {
-    const [dateRange, setDateRange] = useState('7'); // 7, 30, 90 дней
-    const [isTracking, setIsTracking] = useState(false);
+    const [dateRange, setDateRange] = useState('7');
+    const { recognitionStatus } = useSeoRecognition(project.id);
+
+    const handleRefreshData = () => {
+        router.reload({ only: ['positions'] });
+    };
 
     // Проверяем, что project существует
     if (!project) {
@@ -36,34 +43,6 @@ export default function SeoReports({
             </SeoLayout>
         );
     }
-
-    const handleTrackPositions = async () => {
-        setIsTracking(true);
-        
-        try {
-            const response = await fetch(route('seo-stats.track-positions', project.id), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setTimeout(() => {
-                    setIsTracking(false);
-                    // Обновляем данные после успешного отслеживания
-                    router.reload({ only: ['positions'] });
-                }, 2000);
-            } else {
-                setIsTracking(false);
-            }
-        } catch (error) {
-            setIsTracking(false);
-        }
-    };
 
     const handleDeleteKeyword = (keywordId) => {
         if (confirm('Вы уверены, что хотите удалить это ключевое слово?')) {
@@ -186,34 +165,16 @@ export default function SeoReports({
                                     <option value="90">90 дней</option>
                                 </select>
                                 
-                                <button
-                                    onClick={handleTrackPositions}
-                                    className="bg-accent-green text-white px-4 py-2 rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Запустить отслеживание
-                                </button>
+                                <TrackPositionsButton siteId={project.id} />
                             </div>
                         </div>
                     </div>
 
-                    {/* Индикатор загрузки отслеживания */}
-                    {isTracking && (
-                        <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
-                            <div className="relative">
-                                <div className="w-16 h-16 border-4 border-accent-blue/20 border-t-accent-blue rounded-full animate-spin mx-auto mb-4"></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-accent-blue animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-text-primary mb-2">Запуск отслеживания позиций</h3>
-                            <p className="text-text-muted">Пожалуйста, подождите...</p>
-                        </div>
-                    )}
+                    {/* Статус распознавания */}
+                    <RecognitionStatus 
+                        siteId={project.id} 
+                        onComplete={handleRefreshData}
+                    />
 
                     {/* Статистика позиций */}
                     <StatsSection 

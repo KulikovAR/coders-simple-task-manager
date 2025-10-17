@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import SeoLayout from '@/Layouts/SeoLayout';
 import CreateSiteModal from '@/Components/SeoStats/CreateSiteModal';
 import ProjectCard from '@/Components/SeoStats/ProjectCard';
+import TrackPositionsButton from '@/Components/SeoStats/TrackPositionsButton';
 
 export default function SeoStatsIndex({ auth, sites = [] }) {
     const [showAddSiteModal, setShowAddSiteModal] = useState(false);
@@ -12,13 +13,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
     };
 
     const handleAddKeywords = (project) => {
-        // TODO: Реализовать модальное окно для добавления ключевых слов
         console.log('Add keywords for project:', project);
-    };
-
-    const handleTrackPositions = (project) => {
-        // TODO: Реализовать запуск отслеживания позиций
-        console.log('Track positions for project:', project);
     };
 
     return (
@@ -72,7 +67,6 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                                     project={site}
                                     onViewReports={handleViewReports}
                                     onAddKeywords={handleAddKeywords}
-                                    onTrackPositions={handleTrackPositions}
                                 />
                             ))}
                         </div>

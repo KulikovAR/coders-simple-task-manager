@@ -1,3 +1,5 @@
+import TrackPositionsButton from './TrackPositionsButton';
+
 export default function ProjectTableRow({ 
     project, 
     onViewReports, 
@@ -84,6 +86,8 @@ export default function ProjectTableRow({
                         </svg>
                         Отчеты
                     </button>
+                    
+                    <TrackPositionsButton siteId={project.id} size="small" />
                     
                     <button
                         onClick={() => onEditProject(project)}
