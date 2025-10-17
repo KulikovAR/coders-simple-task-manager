@@ -16,7 +16,8 @@ class SiteDTO
         public readonly ?array $schedule = null,
         public readonly ?bool $wordstatEnabled = null,
         public readonly ?string $updatedAt = null,
-        public readonly ?string $lastTrackedAt = null
+        public readonly ?string $lastTrackedAt = null,
+        public readonly ?int $keywordsCount = null
     ) {}
 
     public static function fromMicroservice(array $data): self
@@ -24,7 +25,8 @@ class SiteDTO
         return new self(
             id: $data['id'],
             domain: $data['domain'],
-            name: '' // Имя больше не приходит из микросервиса
+            name: '', // Имя больше не приходит из микросервиса
+            keywordsCount: $data['keywords_count'] ?? null
         );
     }
 
@@ -61,6 +63,7 @@ class SiteDTO
             'wordstat_enabled' => $this->wordstatEnabled,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
+            'keywords_count' => $this->keywordsCount,
         ];
     }
 
@@ -78,7 +81,8 @@ class SiteDTO
             schedule: $other->schedule ?: $this->schedule,
             wordstatEnabled: $other->wordstatEnabled !== null ? $other->wordstatEnabled : $this->wordstatEnabled,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
-            lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt
+            lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt,
+            keywordsCount: $other->keywordsCount !== null ? $other->keywordsCount : $this->keywordsCount
         );
     }
 

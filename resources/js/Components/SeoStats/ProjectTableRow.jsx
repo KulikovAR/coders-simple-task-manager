@@ -11,8 +11,20 @@ export default function ProjectTableRow({
             {/* Проект */}
             <td className="px-6 py-4">
                 <div>
-                    <h3 className="text-sm font-semibold text-text-primary">{project.name}</h3>
-                    <p className="text-xs text-text-muted">{project.domain}</p>
+                    <h3 
+                        className="text-sm font-semibold text-text-primary cursor-pointer hover:text-accent-blue transition-colors"
+                        onClick={() => onViewReports(project)}
+                    >
+                        {project.name}
+                    </h3>
+                    <a 
+                        href={project.domain}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-text-muted hover:text-accent-blue transition-colors block"
+                    >
+                        {project.domain}
+                    </a>
                 </div>
             </td>
 
@@ -41,6 +53,16 @@ export default function ProjectTableRow({
                     {(!project.search_engines || project.search_engines.length === 0) && (
                         <span className="text-xs text-text-muted">Не настроено</span>
                     )}
+                </div>
+            </td>
+
+            {/* Ключевые слова */}
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span className="text-sm text-text-primary">{project.keywords_count || 0}</span>
                 </div>
             </td>
 

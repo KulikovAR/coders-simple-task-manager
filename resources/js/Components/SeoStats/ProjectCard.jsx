@@ -1,12 +1,24 @@
 export default function ProjectCard({ project, keywords, onViewReports, onAddKeywords, onTrackPositions }) {
-    const keywordsCount = keywords.filter(kw => kw.site_id === project.id).length;
+    const keywordsCount = project.keywords_count || 0;
 
     return (
         <div className="bg-card-bg border border-border-color rounded-xl p-6 hover:shadow-lg transition-shadow duration-200">
             <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">{project.name}</h3>
-                    <p className="text-text-muted text-sm mb-3">{project.domain}</p>
+                    <h3 
+                        className="text-xl font-semibold text-text-primary mb-2 cursor-pointer hover:text-accent-blue transition-colors"
+                        onClick={() => onViewReports(project)}
+                    >
+                        {project.name}
+                    </h3>
+                    <a 
+                        href={project.domain}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-text-muted text-sm mb-3 hover:text-accent-blue transition-colors block"
+                    >
+                        {project.domain}
+                    </a>
                     
                     <div className="flex items-center gap-4 text-sm text-text-muted">
                         <div className="flex items-center gap-1">
