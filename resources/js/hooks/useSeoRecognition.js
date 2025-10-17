@@ -1,18 +1,34 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useSeoRecognition(siteId) {
-    const [recognitionStatus, setRecognitionStatus] = useState({
-        status: 'none',
-        taskId: null,
-        progressPercentage: 0,
-        totalKeywords: 0,
-        processedKeywords: 0,
-        errorMessage: null,
-        startedAt: null,
-        completedAt: null,
+export function useSeoRecognition(siteId, initialData = null) {
+    const [recognitionStatus, setRecognitionStatus] = useState(() => {
+        if (initialData) {
+            return {
+                status: initialData.status,
+                taskId: initialData.task_id,
+                progressPercentage: initialData.progress_percentage || 0,
+                totalKeywords: initialData.total_keywords || 0,
+                processedKeywords: initialData.processed_keywords || 0,
+                errorMessage: initialData.error_message,
+                startedAt: initialData.started_at,
+                completedAt: initialData.completed_at,
+            };
+        }
+        return {
+            status: 'none',
+            taskId: null,
+            progressPercentage: 0,
+            totalKeywords: 0,
+            processedKeywords: 0,
+            errorMessage: null,
+            startedAt: null,
+            completedAt: null,
+        };
     });
-    const [isPolling, setIsPolling] = useState(false);
-    const previousStatusRef = useRef('none');
+    const [isPolling, setIsPolling] = useState(() => {
+        return initialData && (initialData.status === 'pending' || initialData.status === 'processing');
+    });
+    const previousStatusRef = useRef(initialData?.status || 'none');
 
     const checkStatus = useCallback(async () => {
         try {

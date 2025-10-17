@@ -6,7 +6,7 @@ import EditProjectModal from '@/Components/SeoStats/EditProjectModal';
 import ProjectTableRow from '@/Components/SeoStats/ProjectTableRow';
 import ProjectLoadingOverlay from '@/Components/SeoStats/ProjectLoadingOverlay';
 
-export default function SeoStatsIndex({ auth, sites = [] }) {
+export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
     const [showAddSiteModal, setShowAddSiteModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
@@ -217,6 +217,7 @@ export default function SeoStatsIndex({ auth, sites = [] }) {
                                                 onViewReports={handleViewReports}
                                                 onEditProject={handleEditProject}
                                                 isEditingProject={isLoadingProjectData && editingProject?.id === site.id}
+                                                activeTask={activeTasks[site.id] || null}
                                             />
                                         ))}
                                     </tbody>

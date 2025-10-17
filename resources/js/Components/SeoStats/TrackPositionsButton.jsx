@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
 
-export default function TrackPositionsButton({ siteId, size = 'default' }) {
-    const { recognitionStatus, startRecognition } = useSeoRecognition(siteId);
+export default function TrackPositionsButton({ siteId, size = 'default', initialData = null }) {
+    const { recognitionStatus, startRecognition } = useSeoRecognition(siteId, initialData);
     const [isStarting, setIsStarting] = useState(false);
 
     const handleStartRecognition = async () => {
@@ -19,11 +19,11 @@ export default function TrackPositionsButton({ siteId, size = 'default' }) {
 
     const getButtonClasses = () => {
         const baseClasses = 'rounded-lg transition-colors flex items-center gap-2';
-        
+
         if (size === 'small') {
             return `${baseClasses} px-3 py-1.5 text-xs font-medium`;
         }
-        
+
         return `${baseClasses} px-4 py-2 text-sm font-medium`;
     };
 
@@ -68,7 +68,6 @@ export default function TrackPositionsButton({ siteId, size = 'default' }) {
             <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Снять позиции
         </button>
     );
 }

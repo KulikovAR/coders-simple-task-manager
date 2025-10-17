@@ -1,8 +1,8 @@
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
 import { useEffect } from 'react';
 
-export default function RecognitionStatus({ siteId, onComplete }) {
-    const { recognitionStatus, isPolling, startRecognition } = useSeoRecognition(siteId);
+export default function RecognitionStatus({ siteId, onComplete, initialData = null }) {
+    const { recognitionStatus, isPolling, startRecognition } = useSeoRecognition(siteId, initialData);
 
     useEffect(() => {
         const handleRecognitionCompleted = (event) => {

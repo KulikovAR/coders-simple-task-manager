@@ -26,6 +26,25 @@ class SeoStatsController extends Controller
     public function index()
     {
         $data = $this->siteUserService->getUserSites();
+        
+        // Добавляем информацию об активных задачах для каждого сайта
+        $data['activeTasks'] = [];
+        foreach ($data['sites'] as $site) {
+            $activeTask = $this->recognitionTaskService->getActiveTaskForSite($site['id']);
+            if ($activeTask) {
+                $data['activeTasks'][$site['id']] = [
+                    'status' => $activeTask->status,
+                    'task_id' => $activeTask->id,
+                    'progress_percentage' => $activeTask->progress_percentage,
+                    'total_keywords' => $activeTask->total_keywords,
+                    'processed_keywords' => $activeTask->processed_keywords,
+                    'error_message' => $activeTask->error_message,
+                    'started_at' => $activeTask->started_at,
+                    'completed_at' => $activeTask->completed_at,
+                ];
+            }
+        }
+        
         return Inertia::render('SeoStats/Index', $data);
     }
 
@@ -100,6 +119,21 @@ class SeoStatsController extends Controller
 
         if (!$data) {
             abort(403);
+        }
+
+        // Добавляем информацию об активной задаче для текущего сайта
+        $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
+        if ($activeTask) {
+            $data['activeTask'] = [
+                'status' => $activeTask->status,
+                'task_id' => $activeTask->id,
+                'progress_percentage' => $activeTask->progress_percentage,
+                'total_keywords' => $activeTask->total_keywords,
+                'processed_keywords' => $activeTask->processed_keywords,
+                'error_message' => $activeTask->error_message,
+                'started_at' => $activeTask->started_at,
+                'completed_at' => $activeTask->completed_at,
+            ];
         }
 
         return Inertia::render('SeoStats/Reports', $data);

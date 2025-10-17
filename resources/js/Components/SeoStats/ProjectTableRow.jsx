@@ -4,7 +4,8 @@ export default function ProjectTableRow({
     project, 
     onViewReports, 
     onEditProject,
-    isEditingProject = false
+    isEditingProject = false,
+    activeTask = null
 }) {
     const lastUpdate = project.updated_at ? new Date(project.updated_at).toLocaleDateString('ru-RU') : '-';
 
@@ -87,7 +88,7 @@ export default function ProjectTableRow({
                         Отчеты
                     </button>
                     
-                    <TrackPositionsButton siteId={project.id} size="small" />
+                    <TrackPositionsButton siteId={project.id} size="small" initialData={activeTask} />
                     
                     <button
                         onClick={() => onEditProject(project)}

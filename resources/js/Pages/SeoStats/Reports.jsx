@@ -14,7 +14,8 @@ export default function SeoReports({
     keywords = [], 
     positions = [], 
     filters = {},
-    filterOptions = {}
+    filterOptions = {},
+    activeTask = null
 }) {
     const [dateRange, setDateRange] = useState('7');
     const { recognitionStatus } = useSeoRecognition(project.id);
@@ -165,7 +166,7 @@ export default function SeoReports({
                                     <option value="90">90 дней</option>
                                 </select>
                                 
-                                <TrackPositionsButton siteId={project.id} />
+                                <TrackPositionsButton siteId={project.id} initialData={activeTask} />
                             </div>
                         </div>
                     </div>
@@ -174,6 +175,7 @@ export default function SeoReports({
                     <RecognitionStatus 
                         siteId={project.id} 
                         onComplete={handleRefreshData}
+                        initialData={activeTask}
                     />
 
                     {/* Статистика позиций */}
