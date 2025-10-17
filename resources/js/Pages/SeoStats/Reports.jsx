@@ -219,6 +219,7 @@ export default function SeoReports({
                     <StatsSection 
                         keywords={keywords}
                         positions={positions}
+                        filters={filters}
                     />
 
                     {/* Таблица позиций */}

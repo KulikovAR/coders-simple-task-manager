@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 
-export default function PositionDistribution({ positions = [] }) {
+export default function PositionDistribution({ positions = [], filters = {} }) {
     const [animatedDistribution, setAnimatedDistribution] = useState([]);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -15,11 +15,32 @@ export default function PositionDistribution({ positions = [] }) {
             { label: '100+', min: 101, max: Infinity, color: '#374151' } // темно-серый
         ];
 
-        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined, wordstat)
-        const validPositions = positions
-            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined && pos.source !== 'wordstat')
-            .map(pos => pos.rank);
+        // Фильтруем позиции по примененным фильтрам
+        let filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
+        
+        // Фильтруем по поисковику, если указан
+        if (filters.source) {
+            filteredPositions = filteredPositions.filter(pos => pos.source === filters.source);
+        }
+        
+        // Фильтруем по датам, если указаны
+        if (filters.date_from) {
+            filteredPositions = filteredPositions.filter(pos => {
+                const posDate = new Date(pos.date);
+                const fromDate = new Date(filters.date_from);
+                return posDate >= fromDate;
+            });
+        }
+        
+        if (filters.date_to) {
+            filteredPositions = filteredPositions.filter(pos => {
+                const posDate = new Date(pos.date);
+                const toDate = new Date(filters.date_to);
+                return posDate <= toDate;
+            });
+        }
 
+        const validPositions = filteredPositions.map(pos => pos.rank);
         const total = validPositions.length;
 
         if (total === 0) {
@@ -43,7 +64,7 @@ export default function PositionDistribution({ positions = [] }) {
                 percentage: Math.round(percentage * 10) / 10
             };
         });
-    }, [positions]);
+    }, [positions, filters]);
 
     // Анимация прогресс-баров
     useEffect(() => {

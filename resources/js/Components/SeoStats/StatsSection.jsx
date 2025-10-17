@@ -3,13 +3,35 @@ import PieChart from './PieChart';
 import VisibilityStats from './VisibilityStats';
 import PositionDistribution from './PositionDistribution';
 
-export default function StatsSection({ keywords = [], positions = [] }) {
+export default function StatsSection({ keywords = [], positions = [], filters = {} }) {
     // Подготавливаем данные для круговой диаграммы
     const pieChartData = useMemo(() => {
-        // Фильтруем только валидные позиции (включаем 0, исключаем null, undefined)
-        const validPositions = positions
-            .filter(pos => pos && pos.rank !== null && pos.rank !== undefined && pos.source !== 'wordstat')
-            .map(pos => pos.rank);
+        // Фильтруем позиции по примененным фильтрам
+        let filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
+        
+        // Фильтруем по поисковику, если указан
+        if (filters.source) {
+            filteredPositions = filteredPositions.filter(pos => pos.source === filters.source);
+        }
+        
+        // Фильтруем по датам, если указаны
+        if (filters.date_from) {
+            filteredPositions = filteredPositions.filter(pos => {
+                const posDate = new Date(pos.date);
+                const fromDate = new Date(filters.date_from);
+                return posDate >= fromDate;
+            });
+        }
+        
+        if (filters.date_to) {
+            filteredPositions = filteredPositions.filter(pos => {
+                const posDate = new Date(pos.date);
+                const toDate = new Date(filters.date_to);
+                return posDate <= toDate;
+            });
+        }
+
+        const validPositions = filteredPositions.map(pos => pos.rank);
 
         const green = validPositions.filter(pos => pos > 0 && pos <= 3).length;
         const yellow = validPositions.filter(pos => pos > 3 && pos <= 10).length;
@@ -38,7 +60,7 @@ export default function StatsSection({ keywords = [], positions = [] }) {
                 color: '#EF4444'
             }
         ];
-    }, [positions]);
+    }, [positions, filters]);
 
     // Если нет данных, показываем пустое состояние
     if (keywords.length === 0 || positions.length === 0) {
@@ -77,10 +99,10 @@ export default function StatsSection({ keywords = [], positions = [] }) {
                 </div>
 
                 {/* Статистика видимости */}
-                <VisibilityStats positions={positions} />
+                <VisibilityStats positions={positions} filters={filters} />
 
                 {/* Распределение позиций */}
-                <PositionDistribution positions={positions} />
+                <PositionDistribution positions={positions} filters={filters} />
             </div>
         </div>
     );
