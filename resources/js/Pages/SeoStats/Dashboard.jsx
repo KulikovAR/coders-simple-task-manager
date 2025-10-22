@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import SeoLayout from '@/Layouts/SeoLayout';
 import XmlRiverLogo from '@/Components/XmlRiverLogo';
+import DashboardXmlApiSettings from '@/Components/SeoStats/DashboardXmlApiSettings';
 
 export default function SeoDashboard({ auth }) {
     const features = [
@@ -132,6 +133,11 @@ export default function SeoDashboard({ auth }) {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Настройки XML API */}
+                    <div className="mt-12">
+                        <DashboardXmlApiSettings />
                     </div>
 
                     {/* Информация об интеграции с XML River */}

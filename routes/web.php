@@ -192,6 +192,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/seo-stats/{site}/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
+    
+    // XML API настройки пользователя
+    Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
+    Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');
 });
 
 // ИИ-агент API (без CSRF)

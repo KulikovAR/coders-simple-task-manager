@@ -4,13 +4,15 @@ namespace App\Services\Seo\Services;
 
 use App\Models\SeoRecognitionTask;
 use App\Services\Seo\DTOs\TrackPositionsDTO;
+use App\Services\Seo\Services\UserXmlApiSettingsService;
 use Illuminate\Support\Facades\Log;
 
 class SeoRecognitionService
 {
     public function __construct(
         private MicroserviceClient $microserviceClient,
-        private SiteService $siteService
+        private SiteService $siteService,
+        private UserXmlApiSettingsService $xmlApiSettingsService
     ) {}
 
     public function processRecognitionTask(SeoRecognitionTask $task): void
@@ -54,8 +56,8 @@ class SeoRecognitionService
             Log::info("SearchEngines", compact('searchEngines'));
 
             foreach ($searchEngines as $searchEngine) {
-                $trackData = $this->buildTrackDataForEngine($site, $searchEngine);
-
+                $trackData = $this->buildTrackDataForEngine($site, $searchEngine, $task->user_id);
+                Log::info("Track Data", compact('searchEngine', 'trackData'));
                 $result = $this->callMicroserviceMethod($searchEngine, $trackData->toArray());
 
                 if ($result) {
@@ -114,7 +116,55 @@ class SeoRecognitionService
         return $searchEngines;
     }
 
-    private function buildTrackDataForEngine($site, string $searchEngine): TrackPositionsDTO
+    private function buildTrackDataForEngine($site, string $searchEngine, int $userId): TrackPositionsDTO
+    {
+        return match ($searchEngine) {
+            'google' => $this->buildGoogleTrackData($site, $userId),
+            'yandex' => $this->buildYandexTrackData($site, $userId),
+            default => $this->buildDefaultTrackData($site, $searchEngine)
+        };
+    }
+
+    private function buildGoogleTrackData($site, int $userId): TrackPositionsDTO
+    {
+        $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
+        
+        return new TrackPositionsDTO(
+            siteId: $site->id,
+            device: $site->getDevice('google'),
+            source: 'google',
+            country: $site->getCountry('google'),
+            os: $site->getOs('google'),
+            ads: $site->getAds(),
+            pages: 1,
+            subdomains: $site->getSubdomains(),
+            xmlApiKey: $googleApiData['apiKey'] ?: null,
+            xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
+            xmlUserId: $googleApiData['userId'] ?: null
+        );
+    }
+
+    private function buildYandexTrackData($site, int $userId): TrackPositionsDTO
+    {
+        $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
+        
+        return new TrackPositionsDTO(
+            siteId: $site->id,
+            device: $site->getDevice('yandex'),
+            source: 'yandex',
+            country: $site->getCountry('yandex'),
+            os: $site->getOs('yandex'),
+            ads: $site->getAds(),
+            pages: 1,
+            subdomains: $site->getSubdomains(),
+            lr: $site->getYandexRegion(),
+            xmlApiKey: $googleApiData['apiKey'] ?: null,
+            xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
+            xmlUserId: $googleApiData['userId'] ?: null
+        );
+    }
+
+    private function buildDefaultTrackData($site, string $searchEngine): TrackPositionsDTO
     {
         return new TrackPositionsDTO(
             siteId: $site->id,
@@ -128,8 +178,10 @@ class SeoRecognitionService
         );
     }
 
-    private function buildWordstatTrackData($site): TrackPositionsDTO
+    private function buildWordstatTrackData($site, int $userId): TrackPositionsDTO
     {
+        $wordstatApiData = $this->xmlApiSettingsService->getWordstatApiDataForUser($userId);
+        
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: null,
@@ -139,7 +191,11 @@ class SeoRecognitionService
             os: null,
             ads: false,
             pages: 1,
-            subdomains: null
+            subdomains: null,
+            regions: $site->getWordstatRegion(),
+            xmlApiKey: $wordstatApiData['apiKey'] ?: null,
+            xmlBaseUrl: $wordstatApiData['baseUrl'] ?: null,
+            xmlUserId: $wordstatApiData['userId'] ?: null
         );
     }
 
@@ -156,7 +212,7 @@ class SeoRecognitionService
     private function processWordstatIfEnabled($site, SeoRecognitionTask $task, int $totalKeywords, int $successfulEngines): void
     {
         if ($site->wordstatEnabled) {
-            $wordstatTrackData = $this->buildWordstatTrackData($site);
+            $wordstatTrackData = $this->buildWordstatTrackData($site, $task->user_id);
             $wordstatResult = $this->callMicroserviceMethod('wordstat', $wordstatTrackData->toArray());
 
             if ($wordstatResult) {

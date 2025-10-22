@@ -14,7 +14,7 @@ class UpdateSiteDTO
         public readonly ?bool $subdomains = null,
         public readonly ?array $schedule = null,
         public readonly ?bool $wordstatEnabled = null,
-        public readonly ?int $wordstatRegion = null
+        public readonly ?int $wordstatRegion = null,
     ) {}
 
     public static function fromRequest(array $data): self
@@ -29,7 +29,7 @@ class UpdateSiteDTO
             subdomains: $data['subdomains'] ?? null,
             schedule: $data['schedule'] ?? null,
             wordstatEnabled: $data['wordstat_enabled'] ?? null,
-            wordstatRegion: $data['wordstat_region'] ?? null
+            wordstatRegion: $data['wordstat_region'] ?? null,
         );
     }
 

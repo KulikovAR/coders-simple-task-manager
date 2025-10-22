@@ -128,6 +128,17 @@ class SiteDTO
         return $this->deviceSettings['ads'] ?? false;
     }
 
+    public function getYandexRegion(): ?int
+    {
+        $regionData = $this->regions['yandex'] ?? null;
+        return is_numeric($regionData) ? (int)$regionData : null;
+    }
+
+    public function getWordstatRegion(): ?int
+    {
+        return $this->wordstatRegion;
+    }
+
     public function getSubdomains(): ?bool
     {
         return $this->subdomains;
