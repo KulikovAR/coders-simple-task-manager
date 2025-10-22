@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -42,15 +43,9 @@ return new class extends Migration
             }
         });
         
-        // Добавляем внешние ключи только если колонки существуют
-        Schema::table('seo_recognition_tasks', function (Blueprint $table) {
-            if (Schema::hasColumn('seo_recognition_tasks', 'user_id') && !Schema::hasColumn('seo_recognition_tasks', 'seo_recognition_tasks_user_id_foreign')) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            }
-            if (Schema::hasColumn('seo_recognition_tasks', 'site_id') && !Schema::hasColumn('seo_recognition_tasks', 'seo_recognition_tasks_site_id_foreign')) {
-                $table->foreign('site_id')->references('id')->on('seo_sites')->onDelete('cascade');
-            }
-        });
+        // Добавляем внешние ключи только если они не существуют
+        $this->addForeignKeyIfNotExists('seo_recognition_tasks', 'user_id', 'users', 'id');
+        $this->addForeignKeyIfNotExists('seo_recognition_tasks', 'site_id', 'seo_sites', 'id');
     }
 
     /**
@@ -74,5 +69,27 @@ return new class extends Migration
                 'completed_at'
             ]);
         });
+    }
+    
+    /**
+     * Добавляет внешний ключ только если он не существует
+     */
+    private function addForeignKeyIfNotExists($table, $column, $referencedTable, $referencedColumn)
+    {
+        $constraintName = "{$table}_{$column}_foreign";
+        
+        $exists = DB::select("
+            SELECT COUNT(*) as count 
+            FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE CONSTRAINT_NAME = ? 
+            AND TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = ?
+        ", [$constraintName, $table]);
+        
+        if ($exists[0]->count == 0) {
+            Schema::table($table, function (Blueprint $table) use ($column, $referencedTable, $referencedColumn) {
+                $table->foreign($column)->references($referencedColumn)->on($referencedTable)->onDelete('cascade');
+            });
+        }
     }
 };
