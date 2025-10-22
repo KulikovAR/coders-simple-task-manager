@@ -3,7 +3,7 @@
 # Скрипт для управления Laravel Queue Worker
 # Использование: ./queue-worker.sh {start|stop|restart|status}
 
-PROJECT_PATH="/var/www"
+PROJECT_PATH="/var/www/dev.379tm.ru"
 LOG_FILE="$PROJECT_PATH/storage/logs/queue-worker.log"
 PID_FILE="$PROJECT_PATH/storage/logs/queue-worker.pid"
 
@@ -13,7 +13,7 @@ start_worker() {
         echo "Queue worker уже запущен (PID: $(cat $PID_FILE))"
         return 1
     fi
-    
+
     echo "Запуск queue worker..."
     cd "$PROJECT_PATH"
     nohup php artisan queue:work \
@@ -24,7 +24,7 @@ start_worker() {
         --max-jobs=1000 \
         --max-time=3600 \
         >> "$LOG_FILE" 2>&1 &
-    
+
     echo $! > "$PID_FILE"
     echo "Queue worker запущен (PID: $!)"
 }
@@ -35,17 +35,17 @@ stop_worker() {
         echo "PID файл не найден. Queue worker может быть не запущен."
         return 1
     fi
-    
+
     PID=$(cat "$PID_FILE")
     if ! kill -0 "$PID" 2>/dev/null; then
         echo "Queue worker не запущен"
         rm -f "$PID_FILE"
         return 1
     fi
-    
+
     echo "Остановка queue worker (PID: $PID)..."
     kill "$PID"
-    
+
     # Ждем завершения процесса
     for i in {1..30}; do
         if ! kill -0 "$PID" 2>/dev/null; then
@@ -53,13 +53,13 @@ stop_worker() {
         fi
         sleep 1
     done
-    
+
     # Принудительная остановка если процесс все еще работает
     if kill -0 "$PID" 2>/dev/null; then
         echo "Принудительная остановка..."
         kill -9 "$PID"
     fi
-    
+
     rm -f "$PID_FILE"
     echo "Queue worker остановлен"
 }
