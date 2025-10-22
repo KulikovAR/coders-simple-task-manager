@@ -86,7 +86,9 @@ class SeoStatsController extends Controller
 
     public function updateSite(int $siteId, UpdateSiteRequest $request)
     {
+        \Log::info('UpdateSite request data:', $request->all());
         $dto = UpdateSiteDTO::fromRequest($request->validated());
+        \Log::info('UpdateSite DTO:', $dto->toArray());
         $success = $this->siteUserService->updateSite($siteId, $dto);
 
         if (!$success) {

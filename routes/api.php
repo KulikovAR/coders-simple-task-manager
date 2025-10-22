@@ -95,3 +95,6 @@ Route::post('/telegram/webhook', [TelegramController::class, 'webhook'])->name('
 // DaData API роуты (публичные)
 Route::get('/dadata/countries/popular', [DaDataController::class, 'getPopularCountries'])->name('api.dadata.countries.popular');
 Route::post('/dadata/countries/search', [DaDataController::class, 'searchCountries'])->name('api.dadata.countries.search');
+
+// Регионы API роуты (публичные)
+Route::get('/regions', [DaDataController::class, 'getRegions'])->name('api.regions');

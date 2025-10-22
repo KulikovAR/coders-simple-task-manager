@@ -23,6 +23,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         subdomains: false,
         schedule: null,
         wordstat_enabled: false,
+        wordstat_region: null,
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -36,6 +37,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         subdomains: false,
         schedule: null,
         wordstat_enabled: false,
+        wordstat_region: null,
     });
 
     const handleViewReports = (project) => {
@@ -43,13 +45,11 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
     };
 
     const handleEditProject = async (project) => {
-        console.log('Loading project data for:', project);
         setEditingProject(project);
         setIsLoadingProjectData(true);
         
         try {
             const url = route('seo-stats.project-data', project.id);
-            console.log('Fetching project data from:', url);
             
             const response = await fetch(url);
             const data = await response.json();
@@ -66,6 +66,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     subdomains: data.site.subdomains || false,
                     schedule: data.site.schedule || null,
                     wordstat_enabled: data.site.wordstat_enabled || false,
+                    wordstat_region: data.site.wordstat_region || null,
                 };
                 
                 setEditData(editFormData);

@@ -13,7 +13,8 @@ class UpdateSiteDTO
         public readonly ?int $positionLimit = null,
         public readonly ?bool $subdomains = null,
         public readonly ?array $schedule = null,
-        public readonly ?bool $wordstatEnabled = null
+        public readonly ?bool $wordstatEnabled = null,
+        public readonly ?int $wordstatRegion = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -27,7 +28,8 @@ class UpdateSiteDTO
             positionLimit: $data['position_limit'] ?? null,
             subdomains: $data['subdomains'] ?? null,
             schedule: $data['schedule'] ?? null,
-            wordstatEnabled: $data['wordstat_enabled'] ?? null
+            wordstatEnabled: $data['wordstat_enabled'] ?? null,
+            wordstatRegion: $data['wordstat_region'] ?? null
         );
     }
 
@@ -43,6 +45,7 @@ class UpdateSiteDTO
             'subdomains' => $this->subdomains,
             'schedule' => $this->schedule,
             'wordstat_enabled' => $this->wordstatEnabled,
+            'wordstat_region' => $this->wordstatRegion,
         ], fn($value) => $value !== null);
     }
 }

@@ -67,6 +67,9 @@ class SiteService
         if ($dto->wordstatEnabled !== null) {
             $updateData['wordstat_enabled'] = $dto->wordstatEnabled;
         }
+        if ($dto->wordstatRegion !== null) {
+            $updateData['wordstat_region'] = $dto->wordstatRegion;
+        }
 
         return $site->update($updateData);
     }

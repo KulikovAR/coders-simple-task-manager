@@ -20,6 +20,7 @@ class SeoSite extends Model
         'subdomains',
         'schedule',
         'wordstat_enabled',
+        'wordstat_region',
     ];
 
     protected $casts = [

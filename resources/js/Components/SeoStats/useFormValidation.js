@@ -46,11 +46,20 @@ export function useFormValidation() {
                 if (!formData.regions || !formData.regions[engine]) {
                     regionErrors[engine] = `Выберите регион для ${engine === 'google' ? 'Google' : 'Yandex'}`;
                     hasRegionErrors = true;
+                } else if (engine === 'yandex') {
+                    if (typeof formData.regions[engine] !== 'number') {
+                        regionErrors[engine] = `Выберите корректный регион для Yandex`;
+                        hasRegionErrors = true;
+                    }
                 } else if (!formData.regions[engine].code || !formData.regions[engine].name) {
-                    regionErrors[engine] = `Выберите корректный регион для ${engine === 'google' ? 'Google' : 'Yandex'}`;
+                    regionErrors[engine] = `Выберите корректный регион для Google`;
                     hasRegionErrors = true;
                 }
             });
+
+            if (formData.wordstat_enabled && (!formData.wordstat_region || typeof formData.wordstat_region !== 'number')) {
+                newErrors.wordstat_region = 'Выберите регион для Яндекс.Вордстат';
+            }
 
             if (hasRegionErrors) {
                 newErrors.regions = regionErrors;
@@ -151,10 +160,19 @@ export function useFormValidation() {
                 } else {
                     // Проверяем регионы
                     formData.search_engines.forEach(engine => {
-                        if (!formData.regions || !formData.regions[engine] || !formData.regions[engine].code) {
+                        if (!formData.regions || !formData.regions[engine]) {
+                            searchEngineErrors.push(`region_${engine}`);
+                        } else if (engine === 'yandex' && typeof formData.regions[engine] !== 'number') {
+                            searchEngineErrors.push(`region_${engine}`);
+                        } else if (engine === 'google' && !formData.regions[engine].code) {
                             searchEngineErrors.push(`region_${engine}`);
                         }
                     });
+                    
+                    // Проверяем регион для Вордстат
+                    if (formData.wordstat_enabled && (!formData.wordstat_region || typeof formData.wordstat_region !== 'number')) {
+                        searchEngineErrors.push('wordstat_region');
+                    }
                     
                     // Проверяем настройки устройств
                     formData.search_engines.forEach(engine => {

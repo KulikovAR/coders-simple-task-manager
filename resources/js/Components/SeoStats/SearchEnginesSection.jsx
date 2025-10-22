@@ -1,5 +1,7 @@
 import SearchEngineCard from './SearchEngineCard';
 import ToggleSwitch from './ToggleSwitch';
+import RegionSelect from './RegionSelect';
+import ValidationError from './ValidationError';
 
 export default function SearchEnginesSection({ 
     searchEngines, 
@@ -10,6 +12,8 @@ export default function SearchEnginesSection({
     onDeviceSettingsChange,
     wordstatEnabled,
     onWordstatToggle,
+    wordstatRegion,
+    onWordstatRegionChange,
     errors = {}
 }) {
     return (
@@ -68,6 +72,22 @@ export default function SearchEnginesSection({
                         </svg>
                     }
                 />
+                
+                {wordstatEnabled && (
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                            Регион для Вордстат <span className="text-accent-red">*</span>
+                        </label>
+                        <RegionSelect
+                            value={wordstatRegion}
+                            onChange={onWordstatRegionChange}
+                            placeholder="Выберите регион"
+                            required={wordstatEnabled}
+                            className={errors?.wordstat_region ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
+                        />
+                        <ValidationError message={errors?.wordstat_region} />
+                    </div>
+                )}
             </div>
         </div>
     );

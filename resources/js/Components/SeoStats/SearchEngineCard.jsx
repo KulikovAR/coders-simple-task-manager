@@ -1,5 +1,6 @@
 import SearchableSelect from './SearchableSelect';
 import CountrySearchableSelect from './CountrySearchableSelect';
+import RegionSelect from './RegionSelect';
 import ValidationError from './ValidationError';
 
 export default function SearchEngineCard({ 
@@ -78,13 +79,23 @@ export default function SearchEngineCard({
                         <label className="block text-sm font-medium text-text-primary mb-2">
                             Регион для {config.name} <span className="text-accent-red">*</span>
                         </label>
-                        <CountrySearchableSelect
-                            value={region}
-                            onChange={onRegionChange}
-                            placeholder="Выберите страну"
-                            required={isSelected}
-                            className={errors?.regions?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
-                        />
+                        {engine === 'yandex' ? (
+                            <RegionSelect
+                                value={region}
+                                onChange={onRegionChange}
+                                placeholder="Выберите регион"
+                                required={isSelected}
+                                className={errors?.regions?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
+                            />
+                        ) : (
+                            <CountrySearchableSelect
+                                value={region}
+                                onChange={onRegionChange}
+                                placeholder="Выберите страну"
+                                required={isSelected}
+                                className={errors?.regions?.[engine] ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
+                            />
+                        )}
                         <ValidationError message={errors?.regions?.[engine]} />
                     </div>
                     

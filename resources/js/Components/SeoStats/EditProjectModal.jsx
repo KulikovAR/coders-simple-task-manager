@@ -42,10 +42,17 @@ export default function EditProjectModal({
     };
 
     const handleRegionChange = (engine, region) => {
-        setSiteData('regions', {
-            ...siteData.regions,
-            [engine]: region
-        });
+        if (engine === 'yandex') {
+            setSiteData('regions', {
+                ...siteData.regions,
+                [engine]: region
+            });
+        } else {
+            setSiteData('regions', {
+                ...siteData.regions,
+                [engine]: region
+            });
+        }
     };
 
     const handleDeviceSettingsChange = (engine, setting, value) => {
@@ -60,6 +67,10 @@ export default function EditProjectModal({
 
     const handleWordstatToggle = (enabled) => {
         setSiteData('wordstat_enabled', enabled);
+    };
+
+    const handleWordstatRegionChange = (region) => {
+        setSiteData('wordstat_region', region);
     };
 
     const handleKeywordsChange = (keywords) => {
@@ -169,6 +180,8 @@ export default function EditProjectModal({
                                 onDeviceSettingsChange={handleDeviceSettingsChange}
                                 wordstatEnabled={siteData.wordstat_enabled}
                                 onWordstatToggle={handleWordstatToggle}
+                                wordstatRegion={siteData.wordstat_region}
+                                onWordstatRegionChange={handleWordstatRegionChange}
                                 errors={allErrors}
                             />
                             

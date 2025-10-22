@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\DaDataService;
+use App\Enums\RegionType;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -49,6 +50,21 @@ class DaDataController extends Controller
         return response()->json([
             'success' => true,
             'data' => $countries
+        ]);
+    }
+
+    /**
+     * Получить список регионов
+     *
+     * @return JsonResponse
+     */
+    public function getRegions(): JsonResponse
+    {
+        $regions = RegionType::getOptions();
+
+        return response()->json([
+            'success' => true,
+            'data' => $regions
         ]);
     }
 }
