@@ -12,6 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Сначала очищаем проблемные данные с несуществующими site_id
+        $this->cleanupOrphanedRecords();
+        
         Schema::table('seo_recognition_tasks', function (Blueprint $table) {
             // Проверяем существование колонок перед добавлением
             if (!Schema::hasColumn('seo_recognition_tasks', 'user_id')) {
@@ -69,6 +72,18 @@ return new class extends Migration
                 'completed_at'
             ]);
         });
+    }
+    
+    /**
+     * Очищает записи с несуществующими site_id
+     */
+    private function cleanupOrphanedRecords()
+    {
+        // Удаляем записи с site_id, которых нет в таблице seo_sites
+        DB::statement('DELETE FROM seo_recognition_tasks WHERE site_id NOT IN (SELECT id FROM seo_sites)');
+        
+        // Также удаляем записи с user_id, которых нет в таблице users
+        DB::statement('DELETE FROM seo_recognition_tasks WHERE user_id NOT IN (SELECT id FROM users)');
     }
     
     /**
