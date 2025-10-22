@@ -71,8 +71,6 @@ class SeoRecognitionService
                 ]);
             }
 
-            $this->processWordstatIfEnabled($site, $task, $totalKeywords, $successfulEngines);
-
             $task->update([
                 'status' => 'completed',
                 'completed_at' => now(),
@@ -209,19 +207,6 @@ class SeoRecognitionService
         };
     }
 
-    private function processWordstatIfEnabled($site, SeoRecognitionTask $task, int $totalKeywords, int $successfulEngines): void
-    {
-        if ($site->wordstatEnabled) {
-            $wordstatTrackData = $this->buildWordstatTrackData($site, $task->user_id);
-            $wordstatResult = $this->callMicroserviceMethod('wordstat', $wordstatTrackData->toArray());
-
-            if ($wordstatResult) {
-                $task->update([
-                    'processed_keywords' => $totalKeywords * ($successfulEngines + 1),
-                ]);
-            }
-        }
-    }
 }
 
 

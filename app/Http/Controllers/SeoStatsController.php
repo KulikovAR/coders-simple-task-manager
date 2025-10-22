@@ -9,8 +9,10 @@ use App\Services\Seo\Services\ReportsService;
 use App\Services\Seo\Services\PositionTrackingService;
 use App\Services\Seo\Services\MicroserviceClient;
 use App\Services\Seo\Services\RecognitionTaskService;
+use App\Services\Seo\Services\WordstatRecognitionTaskService;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SeoStatsController extends Controller
@@ -20,13 +22,14 @@ class SeoStatsController extends Controller
         private ReportsService $reportsService,
         private PositionTrackingService $positionTrackingService,
         private MicroserviceClient $microserviceClient,
-        private RecognitionTaskService $recognitionTaskService
+        private RecognitionTaskService $recognitionTaskService,
+        private WordstatRecognitionTaskService $wordstatRecognitionTaskService
     ) {}
 
     public function index()
     {
         $data = $this->siteUserService->getUserSites();
-        
+
         // Добавляем информацию об активных задачах для каждого сайта
         $data['activeTasks'] = [];
         foreach ($data['sites'] as $site) {
@@ -44,7 +47,7 @@ class SeoStatsController extends Controller
                 ];
             }
         }
-        
+
         return Inertia::render('SeoStats/Index', $data);
     }
 
@@ -86,9 +89,8 @@ class SeoStatsController extends Controller
 
     public function updateSite(int $siteId, UpdateSiteRequest $request)
     {
-        \Log::info('UpdateSite request data:', $request->all());
         $dto = UpdateSiteDTO::fromRequest($request->validated());
-        \Log::info('UpdateSite DTO:', $dto->toArray());
+
         $success = $this->siteUserService->updateSite($siteId, $dto);
 
         if (!$success) {
@@ -148,7 +150,7 @@ class SeoStatsController extends Controller
         }
 
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
-        
+
         if ($activeTask) {
             return response()->json([
                 'success' => true,
@@ -159,7 +161,7 @@ class SeoStatsController extends Controller
 
         try {
             $task = $this->recognitionTaskService->createTask($siteId);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Отслеживание запущено',
@@ -177,7 +179,7 @@ class SeoStatsController extends Controller
         }
 
         $task = $this->recognitionTaskService->getActiveTaskForSite($siteId);
-        
+
         if (!$task) {
             return response()->json(['status' => 'none']);
         }
@@ -197,6 +199,79 @@ class SeoStatsController extends Controller
     public function getTaskStatus(int $taskId)
     {
         $task = $this->recognitionTaskService->getTaskStatus($taskId);
+
+        if (!$task) {
+            return response()->json(['error' => 'Задача не найдена'], 404);
+        }
+
+        return response()->json([
+            'status' => $task->status,
+            'task_id' => $task->id,
+            'progress_percentage' => $task->progress_percentage,
+            'total_keywords' => $task->total_keywords,
+            'processed_keywords' => $task->processed_keywords,
+            'error_message' => $task->error_message,
+            'started_at' => $task->started_at,
+            'completed_at' => $task->completed_at,
+        ]);
+    }
+
+    public function trackWordstatPositions(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $activeTask = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
+        
+        if ($activeTask) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Парсинг Wordstat уже запущен',
+                'task_id' => $activeTask->id
+            ]);
+        }
+
+        try {
+            $task = $this->wordstatRecognitionTaskService->createTask($siteId);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Парсинг Wordstat запущен',
+                'task_id' => $task->id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка запуска парсинга Wordstat'], 500);
+        }
+    }
+
+    public function getWordstatRecognitionStatus(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $task = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
+        
+        if (!$task) {
+            return response()->json(['status' => 'none']);
+        }
+
+        return response()->json([
+            'status' => $task->status,
+            'task_id' => $task->id,
+            'progress_percentage' => $task->progress_percentage,
+            'total_keywords' => $task->total_keywords,
+            'processed_keywords' => $task->processed_keywords,
+            'error_message' => $task->error_message,
+            'started_at' => $task->started_at,
+            'completed_at' => $task->completed_at,
+        ]);
+    }
+
+    public function getWordstatTaskStatus(int $taskId)
+    {
+        $task = $this->wordstatRecognitionTaskService->getTaskStatus($taskId);
         
         if (!$task) {
             return response()->json(['error' => 'Задача не найдена'], 404);

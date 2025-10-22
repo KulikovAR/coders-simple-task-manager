@@ -39,17 +39,19 @@ class PositionTrackingService
             }
         }
 
-        // Если включен Wordstat, отправляем дополнительный запрос
-        if ($site->wordstatEnabled) {
-            $wordstatTrackData = $this->buildWordstatTrackData($site);
-            $wordstatResult = $this->callMicroserviceMethod('wordstat', $wordstatTrackData->toArray());
+        return $success;
+    }
 
-            if (!$wordstatResult) {
-                $success = false;
-            }
+    public function trackWordstatPositions(int $siteId): bool
+    {
+        $site = $this->siteService->getSite($siteId);
+
+        if (!$site || !$site->wordstatEnabled) {
+            return false;
         }
 
-        return $success;
+        $wordstatTrackData = $this->buildWordstatTrackData($site);
+        return $this->callMicroserviceMethod('wordstat', $wordstatTrackData->toArray());
     }
 
     private function callMicroserviceMethod(string $searchEngine, array $trackData): bool
@@ -74,7 +76,7 @@ class PositionTrackingService
     private function buildGoogleTrackData(SiteDTO $site): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiData();
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: $site->getDevice('google'),
@@ -93,7 +95,7 @@ class PositionTrackingService
     private function buildYandexTrackData(SiteDTO $site): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiData();
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: $site->getDevice('yandex'),
@@ -103,10 +105,10 @@ class PositionTrackingService
             ads: $site->getAds(),
             pages: 1,
             subdomains: $site->getSubdomains(),
-            lr: $site->getYandexRegion(),
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
-            xmlUserId: $googleApiData['userId'] ?: null
+            xmlUserId: $googleApiData['userId'] ?: null,
+            lr: $site->getYandexRegion()
         );
     }
 
@@ -127,7 +129,7 @@ class PositionTrackingService
     private function buildWordstatTrackData(SiteDTO $site): TrackPositionsDTO
     {
         $wordstatApiData = $this->xmlApiSettingsService->getWordstatApiData();
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: null,
@@ -138,10 +140,10 @@ class PositionTrackingService
             ads: false,
             pages: 1,
             subdomains: null,
-            regions: $site->getWordstatRegion(),
             xmlApiKey: $wordstatApiData['apiKey'] ?: null,
             xmlBaseUrl: $wordstatApiData['baseUrl'] ?: null,
-            xmlUserId: $wordstatApiData['userId'] ?: null
+            xmlUserId: $wordstatApiData['userId'] ?: null,
+            regions: $site->getWordstatRegion()
         );
     }
 

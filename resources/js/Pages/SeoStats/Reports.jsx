@@ -6,6 +6,7 @@ import PositionsTable from '@/Components/SeoStats/PositionsTable';
 import StatsSection from '@/Components/SeoStats/StatsSection';
 import RecognitionStatus from '@/Components/SeoStats/RecognitionStatus';
 import TrackPositionsButton from '@/Components/SeoStats/TrackPositionsButton';
+import TrackWordstatButton from '@/Components/SeoStats/TrackWordstatButton';
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
 
 export default function SeoReports({ 
@@ -167,6 +168,9 @@ export default function SeoReports({
                                 </select>
                                 
                                 <TrackPositionsButton siteId={project.id} initialData={activeTask} />
+                                {project.wordstat_enabled && (
+                                    <TrackWordstatButton siteId={project.id} initialData={activeTask} />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -176,6 +180,7 @@ export default function SeoReports({
                         siteId={project.id} 
                         onComplete={handleRefreshData}
                         initialData={activeTask}
+                        wordstatEnabled={project.wordstat_enabled}
                     />
 
                     {/* Статистика позиций */}

@@ -1,8 +1,10 @@
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
+import { useWordstatRecognition } from '@/hooks/useWordstatRecognition';
 import { useEffect } from 'react';
 
-export default function RecognitionStatus({ siteId, onComplete, initialData = null }) {
+export default function RecognitionStatus({ siteId, onComplete, initialData = null, wordstatEnabled = false }) {
     const { recognitionStatus, isPolling, startRecognition } = useSeoRecognition(siteId, initialData);
+    const { wordstatStatus, isWordstatPolling, startWordstatRecognition } = useWordstatRecognition(siteId, initialData);
 
     useEffect(() => {
         const handleRecognitionCompleted = (event) => {
@@ -11,10 +13,18 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
             }
         };
 
+        const handleWordstatCompleted = (event) => {
+            if (event.detail.siteId === siteId && onComplete) {
+                onComplete();
+            }
+        };
+
         window.addEventListener('seo-recognition-completed', handleRecognitionCompleted);
+        window.addEventListener('wordstat-recognition-completed', handleWordstatCompleted);
         
         return () => {
             window.removeEventListener('seo-recognition-completed', handleRecognitionCompleted);
+            window.removeEventListener('wordstat-recognition-completed', handleWordstatCompleted);
         };
     }, [siteId, onComplete]);
 
@@ -27,12 +37,22 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
         }
     };
 
+    const handleStartWordstatRecognition = async () => {
+        const result = await startWordstatRecognition();
+        if (result.success) {
+            console.log(result.message);
+        } else {
+            alert(result.message);
+        }
+    };
 
-    if (recognitionStatus.status === 'none') {
+
+    if (recognitionStatus.status === 'none' && wordstatStatus.status === 'none') {
         return null;
     }
 
-    if (recognitionStatus.status === 'pending' || recognitionStatus.status === 'processing') {
+    if (recognitionStatus.status === 'pending' || recognitionStatus.status === 'processing' || 
+        wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing') {
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
                 <div className="relative">
@@ -43,13 +63,23 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
                         </svg>
                     </div>
                 </div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">Снятие позиций</h3>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">
+                    {wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' 
+                        ? 'Парсинг Wordstat' 
+                        : 'Снятие позиций'
+                    }
+                </h3>
                 <p className="text-text-muted">Пожалуйста, подождите...</p>
             </div>
         );
     }
 
-    if (recognitionStatus.status === 'failed') {
+    if (recognitionStatus.status === 'failed' || wordstatStatus.status === 'failed') {
+        const isWordstatFailed = wordstatStatus.status === 'failed';
+        const errorMessage = isWordstatFailed ? wordstatStatus.errorMessage : recognitionStatus.errorMessage;
+        const handleRetry = isWordstatFailed ? handleStartWordstatRecognition : handleStartRecognition;
+        const title = isWordstatFailed ? 'Ошибка парсинга Wordstat' : 'Ошибка снятия позиций';
+        
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-6 mb-6">
                 <div className="text-center">
@@ -58,12 +88,12 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-text-primary mb-2">Ошибка снятия позиций</h3>
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">{title}</h3>
                     <p className="text-text-muted mb-4">
-                        {recognitionStatus.errorMessage || 'Произошла ошибка при обработке'}
+                        {errorMessage || 'Произошла ошибка при обработке'}
                     </p>
                     <button
-                        onClick={handleStartRecognition}
+                        onClick={handleRetry}
                         className="bg-accent-green text-white px-4 py-2 rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2 mx-auto"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +106,10 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
         );
     }
 
-    if (recognitionStatus.status === 'completed' && onComplete) {
+    if ((recognitionStatus.status === 'completed' || wordstatStatus.status === 'completed') && onComplete) {
+        const isWordstatCompleted = wordstatStatus.status === 'completed';
+        const title = isWordstatCompleted ? 'Парсинг Wordstat завершен' : 'Снятие позиций завершено';
+        
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-6 mb-6">
                 <div className="text-center">
@@ -85,7 +118,7 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-text-primary mb-2">Снятие позиций завершено</h3>
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">{title}</h3>
                     <p className="text-text-muted mb-4">Данные успешно обновлены</p>
                     <button
                         onClick={onComplete}

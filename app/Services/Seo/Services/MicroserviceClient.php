@@ -132,6 +132,24 @@ class MicroserviceClient
         }
     }
 
+    public function getPositionHistoryWithFiltersAndLast(array $filters, bool $last = false): array
+    {
+        try {
+            $queryParams = $filters;
+            if ($last) {
+                $queryParams['last'] = 'true';
+            }
+            
+            $response = $this->client->get($this->baseUrl . '/api/positions/history', [
+                'query' => $queryParams,
+            ]);
+            $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            return is_array($data) ? $data : [];
+        } catch (GuzzleException $e) {
+            return [];
+        }
+    }
+
     public function trackSitePositions(int $siteId): bool
     {
         try {

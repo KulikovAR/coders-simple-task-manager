@@ -23,32 +23,27 @@ class ReportsService
             return null;
         }
 
-        // Устанавливаем фильтр по умолчанию, если не указан поисковик
         if (empty($filters['source']) && !empty($site->searchEngines)) {
             $filters['source'] = $site->searchEngines[0];
         }
 
         $keywords = $this->microserviceClient->getKeywords($siteId);
 
-        $positionFilters = PositionFiltersDTO::fromRequest(array_merge([
-            'site_id' => $siteId,
-        ], $filters));
+        $positionFilters = PositionFiltersDTO::fromRequest(['site_id' => $siteId, ...$filters]);
 
-        // Загружаем позиции для основного поисковика
         $positions = $this->microserviceClient->getPositionHistoryWithFilters($positionFilters->toQueryParams());
 
-        // Если включен Wordstat, загружаем также данные частоты
         $wordstatPositions = [];
         if ($site->wordstatEnabled) {
-            $wordstatFilters = PositionFiltersDTO::fromRequest(array_merge($filters, [
-                'site_id' => $siteId,
-                'source' => 'wordstat',
-            ]));
-            
+            $wordstatFilters = PositionFiltersDTO::fromRequest([...$filters, 'site_id' => $siteId, 'source' => 'wordstat']);
+
             $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFilters($wordstatFilters->toQueryParams());
+            
+            if (empty($wordstatPositions)) {
+                $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFiltersAndLast($wordstatFilters->toQueryParams(), true);
+            }
         }
 
-        // Объединяем позиции с данными частоты
         $mergedPositions = $this->mergePositionsWithWordstat($positions, $wordstatPositions);
 
         return [
