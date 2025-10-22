@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Дропаем таблицу
         Schema::dropIfExists('seo_recognition_tasks');
-        
-        // Создаем таблицу заново с правильной структурой
+
         Schema::create('seo_recognition_tasks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
@@ -27,12 +25,9 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
-            // Внешние ключи
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('site_id')->references('id')->on('seo_sites')->onDelete('cascade');
-            
-            // Индексы
+
             $table->index(['user_id', 'status']);
             $table->index(['site_id', 'status']);
             $table->index('status');
@@ -46,7 +41,7 @@ return new class extends Migration
     {
         // Дропаем таблицу
         Schema::dropIfExists('seo_recognition_tasks');
-        
+
         // Восстанавливаем старую структуру (только id и timestamps)
         Schema::create('seo_recognition_tasks', function (Blueprint $table) {
             $table->id();
