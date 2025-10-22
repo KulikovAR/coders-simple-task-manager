@@ -4,6 +4,7 @@ namespace App\Services\Seo\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 class MicroserviceClient
 {
@@ -145,6 +146,42 @@ class MicroserviceClient
     {
         try {
             $response = $this->client->post($this->baseUrl . '/api/positions/track-site', [
+                'json' => $trackData,
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function trackGooglePositions(array $trackData): bool
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/positions/track-google', [
+                'json' => $trackData,
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function trackYandexPositions(array $trackData): bool
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/positions/track-yandex', [
+                'json' => $trackData,
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function trackWordstatPositions(array $trackData): bool
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/positions/track-wordstat', [
                 'json' => $trackData,
             ]);
             return $response->getStatusCode() === 200;

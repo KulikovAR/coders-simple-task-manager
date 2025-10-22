@@ -30,7 +30,7 @@ class PositionTrackingService
 
         foreach ($searchEngines as $searchEngine) {
             $trackData = $this->buildTrackDataFromProject($site, $searchEngine);
-            $result = $this->microserviceClient->trackSitePositionsWithFilters($trackData->toArray());
+            $result = $this->callMicroserviceMethod($searchEngine, $trackData->toArray());
 
             if (!$result) {
                 $success = false;
@@ -40,7 +40,7 @@ class PositionTrackingService
         // Если включен Wordstat, отправляем дополнительный запрос
         if ($site->wordstatEnabled) {
             $wordstatTrackData = $this->buildWordstatTrackData($site);
-            $wordstatResult = $this->microserviceClient->trackSitePositionsWithFilters($wordstatTrackData->toArray());
+            $wordstatResult = $this->callMicroserviceMethod('wordstat', $wordstatTrackData->toArray());
 
             if (!$wordstatResult) {
                 $success = false;
@@ -48,6 +48,16 @@ class PositionTrackingService
         }
 
         return $success;
+    }
+
+    private function callMicroserviceMethod(string $searchEngine, array $trackData): bool
+    {
+        return match ($searchEngine) {
+            'google' => $this->microserviceClient->trackGooglePositions($trackData),
+            'yandex' => $this->microserviceClient->trackYandexPositions($trackData),
+            'wordstat' => $this->microserviceClient->trackWordstatPositions($trackData),
+            default => $this->microserviceClient->trackSitePositionsWithFilters($trackData),
+        };
     }
 
     private function buildTrackDataFromProject(SiteDTO $site, string $searchEngine): TrackPositionsDTO
@@ -78,4 +88,5 @@ class PositionTrackingService
             subdomains: null
         );
     }
+
 }

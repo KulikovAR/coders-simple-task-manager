@@ -25,7 +25,7 @@ class SiteDTO
         return new self(
             id: $data['id'],
             domain: $data['domain'],
-            name: '', // Имя больше не приходит из микросервиса
+            name: '',
             keywordsCount: $data['keywords_count'] ?? null
         );
     }
@@ -95,15 +95,15 @@ class SiteDTO
     public function getCountry(string $searchEngine): ?string
     {
         $regionData = $this->regions[$searchEngine] ?? null;
-        
+
         if (is_string($regionData)) {
             return mb_strtolower($regionData);
         }
-        
+
         if (is_array($regionData) && isset($regionData['code'])) {
             return mb_strtolower($regionData['code']);
         }
-        
+
         return null;
     }
 

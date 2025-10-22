@@ -13,7 +13,11 @@ class TrackPositionsDTO
         public readonly ?string $os = null,
         public readonly bool $ads = false,
         public readonly int $pages = 1,
-        public readonly ?bool $subdomains = null
+        public readonly ?bool $subdomains = null,
+        public readonly ?string $xmlApiKey = null,
+        public readonly ?string $xmlBaseUrl = null,
+        public readonly ?string $xmlUserId = null,
+        public readonly ?int $lr = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -27,7 +31,11 @@ class TrackPositionsDTO
             os: $data['os'] ?? null,
             ads: $data['ads'] ?? false,
             pages: $data['pages'] ?? 1,
-            subdomains: $data['subdomains'] ?? null
+            subdomains: $data['subdomains'] ?? null,
+            xmlApiKey: $data['xml_api_key'] ?? null,
+            xmlBaseUrl: $data['xml_base_url'] ?? null,
+            xmlUserId: $data['xml_user_id'] ?? null,
+            lr: $data['lr'] ?? null
         );
     }
 
@@ -43,6 +51,10 @@ class TrackPositionsDTO
             'ads' => $this->ads,
             'pages' => $this->pages,
             'subdomains' => $this->subdomains,
+            'xml_api_key' => $this->xmlApiKey,
+            'xml_base_url' => $this->xmlBaseUrl,
+            'xml_user_id' => $this->xmlUserId,
+            'lr' => $this->lr,
         ], fn($value) => $value !== null);
     }
 
