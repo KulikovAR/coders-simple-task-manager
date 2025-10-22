@@ -40,14 +40,14 @@ class ReportController extends Controller
         }
 
         $reports = $query->paginate(20);
-        $sites = SeoSite::whereHas('users', function($q) {
+        $sites = SeoSite::whereHas('user', function($q) {
             $q->where('user_id', Auth::id());
         })->get();
 
         return inertia('Reports/Index', [
             'reports' => $reports,
             'filters' => $request->only(['site_id', 'date_from', 'date_to']),
-            'sites' => $sites
+            'sites' => $sites,
         ]);
     }
 
