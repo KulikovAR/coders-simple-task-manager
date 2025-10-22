@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Регистрируем middleware для ИИ-агента
         $middleware->alias([
             'ai.agent' => AiAgentMiddleware::class,
+            'ajax' => \App\Http\Middleware\AjaxMiddleware::class,
         ]);
 
         // Исключаем все маршруты из CSRF проверки

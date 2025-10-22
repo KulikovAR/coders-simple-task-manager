@@ -199,6 +199,14 @@ Route::middleware('auth')->group(function () {
     // XML API настройки пользователя
     Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
     Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');
+    
+    // Отчеты
+    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/export', [App\Http\Controllers\ReportController::class, 'export'])
+        ->middleware('ajax')
+        ->name('reports.export');
+    Route::get('/reports/{report}/download', [App\Http\Controllers\ReportController::class, 'download'])->name('reports.download');
+    Route::get('/reports/{report}/show', [App\Http\Controllers\ReportController::class, 'show'])->name('reports.show');
 });
 
 // ИИ-агент API (без CSRF)

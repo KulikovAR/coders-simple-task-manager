@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
+import { Download, FileText } from 'lucide-react';
 
 export default function PositionFilters({ 
     filters = {}, 
@@ -13,6 +14,11 @@ export default function PositionFilters({
         source: defaultSource,
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
+    });
+
+    const [reportLinks, setReportLinks] = useState({
+        excel: null,
+        html: null
     });
 
     // Обновляем локальные фильтры при изменении пропсов
@@ -61,25 +67,118 @@ export default function PositionFilters({
 
     const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '';
 
+    const handleExport = async (type) => {
+        try {
+            // Получаем CSRF токен
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            const response = await fetch(route('reports.export'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    site_id: projectId,
+                    type: type,
+                    filters: localFilters
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Сохраняем ссылку в состоянии
+            setReportLinks(prev => ({
+                ...prev,
+                [type]: data.url
+            }));
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('Ошибка при создании отчета. Проверьте логи сервера.');
+        }
+    };
+
     return (
-        <div className="bg-card-bg border border-border-color rounded-xl p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-text-primary">Фильтры позиций</h3>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={clearFilters}
-                        className="text-text-muted hover:text-text-primary transition-colors text-sm"
-                    >
-                        Сбросить
-                    </button>
-                    <button
-                        onClick={applyFilters}
-                        className="bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-accent-blue/90 transition-colors text-sm"
-                    >
-                        Применить
-                    </button>
+        <>
+            {/* Блок экспорта отчетов */}
+            <div className="card mb-6">
+                <div className="card-header">
+                    <div>
+                        <h3 className="card-title mb-1">Экспорт отчетов</h3>
+                        <p className="card-subtitle">Создайте отчеты в различных форматах</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handleExport('excel')}
+                                className="btn btn-success"
+                                title="Экспорт в Excel"
+                            >
+                                <Download className="w-4 h-4 mr-2" />
+                                Excel
+                            </button>
+                            {reportLinks.excel && (
+                                <a
+                                    href={reportLinks.excel}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-success"
+                                >
+                                    <Download className="w-3 h-3 mr-1" />
+                                    Скачать
+                                </a>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handleExport('html')}
+                                className="btn btn-info"
+                                title="Экспорт в HTML"
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                HTML
+                            </button>
+                            {reportLinks.html && (
+                                <a
+                                    href={reportLinks.html}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-info"
+                                >
+                                    <FileText className="w-3 h-3 mr-1" />
+                                    Открыть
+                                </a>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Блок фильтров */}
+            <div className="card mb-6">
+                <div className="card-header">
+                    <h3 className="card-title">Фильтры позиций</h3>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={clearFilters}
+                            className="btn btn-secondary"
+                        >
+                            Сбросить
+                        </button>
+                        <button
+                            onClick={applyFilters}
+                            className="btn btn-primary"
+                        >
+                            Применить
+                        </button>
+                    </div>
+                </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Поисковая система */}
@@ -139,6 +238,7 @@ export default function PositionFilters({
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </>
     );
 }

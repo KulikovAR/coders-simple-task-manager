@@ -13,6 +13,7 @@
         "laravel/socialite": "^5.23",
         "laravel/telescope": "^5.11",
         "laravel/tinker": "^2.10.1",
+        "phpoffice/phpspreadsheet": "^5.1",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

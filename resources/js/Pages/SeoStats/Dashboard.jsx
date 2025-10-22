@@ -101,17 +101,20 @@ export default function SeoDashboard({ auth }) {
                                 </div>
                             </Link>
 
-                            <div className="flex items-center gap-4 p-4 bg-secondary-bg border border-border-color rounded-lg opacity-50">
-                                <div className="w-10 h-10 bg-gray-400/20 rounded-lg flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <Link
+                                href={route('reports.index')}
+                                className="flex items-center gap-4 p-4 bg-secondary-bg border border-border-color rounded-lg hover:bg-accent-blue/5 hover:border-accent-blue/30 transition-all duration-200 group"
+                            >
+                                <div className="w-10 h-10 bg-accent-blue/20 rounded-lg flex items-center justify-center group-hover:bg-accent-blue/30 transition-colors">
+                                    <svg className="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-text-primary">Отчеты</h3>
-                                    <p className="text-sm text-text-muted">Скоро будет доступно</p>
+                                    <p className="text-sm text-text-muted">Просмотр всех отчетов</p>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                     </div>
 
