@@ -26,7 +26,7 @@ class RunScheduledParsing extends Command
         $this->info('Запуск проверки расписания парсинга...');
         
         $force = $this->option('force');
-        $sites = SeoSite::with('users')->get();
+        $sites = SeoSite::with('user')->get();
         
         $processedCount = 0;
         $skippedCount = 0;
