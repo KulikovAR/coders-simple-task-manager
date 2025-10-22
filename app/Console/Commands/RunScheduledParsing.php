@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\SeoSite;
 use App\Services\Seo\Services\MicroserviceClient;
+use App\Services\Seo\Services\PositionTrackingService;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 
@@ -14,7 +15,8 @@ class RunScheduledParsing extends Command
     protected $description = 'Запускает парсинг позиций для сайтов согласно их расписанию';
 
     public function __construct(
-        private \App\Services\Seo\Services\MicroserviceClient $microserviceClient
+        private \App\Services\Seo\Services\MicroserviceClient $microserviceClient,
+        private \App\Services\Seo\Services\PositionTrackingService $positionTrackingService
     ) {
         parent::__construct();
     }
@@ -120,7 +122,7 @@ class RunScheduledParsing extends Command
                 return;
             }
 
-            $result = $this->microserviceClient->trackSitePositions($site->go_seo_site_id);
+            $result = $this->positionTrackingService->trackSitePositionsFromProject($site->go_seo_site_id);
             
             if ($result) {
                 $this->info("✓ Парсинг успешно запущен для: {$site->name}");
