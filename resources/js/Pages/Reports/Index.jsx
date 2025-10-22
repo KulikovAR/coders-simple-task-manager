@@ -46,7 +46,7 @@ export default function ReportsIndex({ reports, filters, sites }) {
             processing: { color: 'bg-yellow-100 text-yellow-800', text: 'Обработка' },
             failed: { color: 'bg-red-100 text-red-800', text: 'Ошибка' }
         };
-        
+
         const config = statusConfig[status] || statusConfig.failed;
         return (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
@@ -68,9 +68,11 @@ export default function ReportsIndex({ reports, filters, sites }) {
     };
 
     return (
+      <h1>В разработке ;)</h1>
+    );
+    var a = (
         <SeoLayout>
             <Head title="Отчеты" />
-            
             <div className="min-h-screen bg-primary-bg p-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Хлебные крошки */}
@@ -94,7 +96,7 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                 <h1 className="text-3xl font-bold text-text-primary mb-2">Отчеты</h1>
                                 <p className="text-text-muted">Управление экспортированными отчетами</p>
                             </div>
-                            
+
                             <div className="flex items-center gap-4">
                                 <div className="text-sm text-text-muted">
                                     <div className="flex items-center gap-2">
@@ -121,7 +123,7 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                 <h3 className="text-lg font-semibold text-text-primary">
                                     Все отчеты ({reports?.data?.length || 0})
                                 </h3>
-                                
+
                                 <button
                                     onClick={() => setShowExportModal(true)}
                                     className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors text-sm font-medium flex items-center gap-2"
