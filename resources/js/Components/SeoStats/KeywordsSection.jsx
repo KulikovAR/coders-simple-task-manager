@@ -8,7 +8,7 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
     const parseKeywordsFromFile = (content, filename) => {
         const lines = content.split('\n');
         const keywordsList = [];
-        
+
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (trimmedLine) {
@@ -25,7 +25,7 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
                 }
             }
         }
-        
+
         return keywordsList.join('\n');
     };
 
@@ -36,16 +36,16 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
         reader.onload = (e) => {
             const content = e.target.result;
             const parsedKeywords = parseKeywordsFromFile(content, file.name);
-            
+
             // Добавляем к существующим ключевым словам
             const currentKeywords = keywords || '';
-            const newKeywords = currentKeywords 
+            const newKeywords = currentKeywords
                 ? `${currentKeywords}\n${parsedKeywords}`
                 : parsedKeywords;
-            
+
             onKeywordsChange(newKeywords);
         };
-        
+
         reader.readAsText(file, 'UTF-8');
     };
 
@@ -59,13 +59,13 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
     const handleDrop = (e) => {
         e.preventDefault();
         setIsDragOver(false);
-        
+
         const files = Array.from(e.dataTransfer.files);
-        const file = files.find(f => 
-            f.name.toLowerCase().endsWith('.csv') || 
+        const file = files.find(f =>
+            f.name.toLowerCase().endsWith('.csv') ||
             f.name.toLowerCase().endsWith('.txt')
         );
-        
+
         if (file) {
             handleFileUpload(file);
         }
@@ -87,18 +87,11 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
 
     return (
         <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                <svg className="w-5 h-5 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Поисковые запросы
-            </h4>
-            
             <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                     Ключевые слова и фразы <span className="text-accent-red">*</span>
                 </label>
-                
+
                 {/* Кнопка загрузки файла */}
                 <div className="mb-3">
                     <button
@@ -123,8 +116,8 @@ export default function KeywordsSection({ keywords, onKeywordsChange, errors }) 
                 {/* Область для перетаскивания файлов */}
                 <div
                     className={`border-2 border-dashed rounded-lg p-4 mb-3 transition-colors ${
-                        isDragOver 
-                            ? 'border-accent-blue bg-accent-blue/5' 
+                        isDragOver
+                            ? 'border-accent-blue bg-accent-blue/5'
                             : 'border-border-color hover:border-accent-blue/50'
                     }`}
                     onDrop={handleDrop}

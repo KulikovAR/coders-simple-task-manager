@@ -426,7 +426,7 @@ app.post('/webhook', (req, res) => {
                                 <div className="flex items-center space-x-2 ml-4">
                                     <button
                                         onClick={() => handleToggle(webhook)}
-                                        className={`btn btn-sm ${
+                                        className={`btn btn-sm text-white ${
                                             webhook.is_active
                                                 ? "btn-warning"
                                                 : "btn-success"

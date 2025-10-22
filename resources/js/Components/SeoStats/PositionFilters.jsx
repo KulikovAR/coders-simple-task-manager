@@ -117,7 +117,7 @@ export default function PositionFilters({
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => handleExport('excel')}
-                                className="btn btn-success"
+                                className="btn btn-success text-white"
                                 title="Экспорт в Excel"
                             >
                                 <Download className="w-4 h-4 mr-2" />
@@ -128,7 +128,7 @@ export default function PositionFilters({
                                     href={reportLinks.excel}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="btn btn-sm btn-success"
+                                    className="btn btn-sm btn-success text-white"
                                 >
                                     <Download className="w-3 h-3 mr-1" />
                                     Скачать
@@ -138,7 +138,7 @@ export default function PositionFilters({
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => handleExport('html')}
-                                className="btn btn-info"
+                                className="btn btn-info text-white"
                                 title="Экспорт в HTML"
                             >
                                 <FileText className="w-4 h-4 mr-2" />
@@ -149,7 +149,7 @@ export default function PositionFilters({
                                     href={reportLinks.html}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="btn btn-sm btn-info"
+                                    className="btn btn-sm btn-info text-white"
                                 >
                                     <FileText className="w-3 h-3 mr-1" />
                                     Открыть

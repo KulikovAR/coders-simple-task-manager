@@ -147,7 +147,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/tasks/{task}/priority', [App\Http\Controllers\TaskController::class, 'updatePriority'])->name('tasks.priority.update');
     Route::get('/projects/{project}/sprints-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectSprints'])->name('tasks.project.sprints');
     Route::get('/projects/{project}/statuses-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectStatuses'])->name('tasks.project.statuses');
-    
+
     // Задачи по коду
     Route::get('/tasks/code/{code}', [App\Http\Controllers\TaskController::class, 'showByCode'])->name('tasks.show.by-code');
 
@@ -168,7 +168,7 @@ Route::middleware('auth')->group(function () {
 
     // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
-    
+
     // Оптимизация текста с помощью ИИ
     Route::post('/ai-text-optimize', [AiTextOptimizationController::class, 'optimizeText'])->name('ai-text-optimize');
 
@@ -195,13 +195,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/wordstat-tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatTaskStatus'])->name('seo-stats.wordstat-task-status');
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
-    
+
     // XML API настройки пользователя
     Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
     Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');
-    
+
     // Отчеты
-    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports-history', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/export', [App\Http\Controllers\ReportController::class, 'export'])
         ->middleware('ajax')
         ->name('reports.export');

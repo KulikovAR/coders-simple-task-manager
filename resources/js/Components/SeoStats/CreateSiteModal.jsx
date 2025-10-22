@@ -6,20 +6,20 @@ import { useFormValidation } from './useFormValidation';
 import ValidationError from './ValidationError';
 import ProjectLoadingOverlay from './ProjectLoadingOverlay';
 
-export default function CreateSiteModal({ 
-    showModal, 
-    onClose, 
-    siteData, 
-    setSiteData, 
-    onSubmit, 
-    processing, 
+export default function CreateSiteModal({
+    showModal,
+    onClose,
+    siteData,
+    setSiteData,
+    onSubmit,
+    processing,
     errors: serverErrors = {}
 }) {
     const { errors: validationErrors, validateForm, clearErrors, getSectionStatus } = useFormValidation();
-    
+
     // Объединяем ошибки сервера и валидации
     const allErrors = { ...serverErrors, ...validationErrors };
-    
+
     // Получаем статусы секций
     const basicStatus = getSectionStatus(siteData, 'basic');
     const keywordsStatus = getSectionStatus(siteData, 'keywords');
@@ -29,9 +29,9 @@ export default function CreateSiteModal({
         const newEngines = currentEngines.includes(engine)
             ? currentEngines.filter(e => e !== engine)
             : [...currentEngines, engine];
-        
+
         setSiteData('search_engines', newEngines);
-        
+
         // Если убираем поисковик, убираем и его регион
         if (!newEngines.includes(engine)) {
             const newRegions = { ...siteData.regions };
@@ -78,13 +78,13 @@ export default function CreateSiteModal({
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        
+
         // Очищаем предыдущие ошибки валидации
         clearErrors();
-        
+
         // Валидируем форму
         const validation = validateForm(siteData);
-        
+
         if (validation.isValid) {
             // Если валидация прошла успешно, отправляем форму
             onSubmit(e);
@@ -112,7 +112,7 @@ export default function CreateSiteModal({
                 </div>
 
                 {processing ? (
-                    <ProjectLoadingOverlay 
+                    <ProjectLoadingOverlay
                         isVisible={true}
                         title="Создание проекта"
                         subtitle="Сохраняем данные проекта..."
@@ -131,7 +131,7 @@ export default function CreateSiteModal({
                         hasErrors={basicStatus.hasErrors}
                         isValid={basicStatus.isValid}
                     >
-                        <BasicInfoSection 
+                        <BasicInfoSection
                             siteData={siteData}
                             setSiteData={setSiteData}
                             errors={allErrors}
@@ -150,7 +150,7 @@ export default function CreateSiteModal({
                         hasErrors={keywordsStatus.hasErrors}
                         isValid={keywordsStatus.isValid}
                     >
-                        <KeywordsSection 
+                        <KeywordsSection
                             keywords={siteData.keywords}
                             onKeywordsChange={handleKeywordsChange}
                             errors={allErrors}
@@ -169,7 +169,7 @@ export default function CreateSiteModal({
                         hasErrors={searchEnginesStatus.hasErrors}
                         isValid={searchEnginesStatus.isValid}
                     >
-                        <SearchEnginesSection 
+                        <SearchEnginesSection
                             searchEngines={siteData.search_engines}
                             regions={siteData.regions}
                             onEngineToggle={handleSearchEngineToggle}
@@ -182,7 +182,7 @@ export default function CreateSiteModal({
                             onWordstatRegionChange={handleWordstatRegionChange}
                             errors={allErrors}
                         />
-                        
+
                         {/* Общие ошибки для поисковых систем */}
                         <ValidationError message={allErrors?.search_engines} />
                     </CollapsibleSection>

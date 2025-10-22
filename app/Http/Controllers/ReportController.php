@@ -83,16 +83,16 @@ class ReportController extends Controller
             if ($type === 'excel') {
                 $filePath = $this->excelReportService->exportToExcel($reportData, $report->id);
                 $fullPath = storage_path('app/' . $filePath);
-                
+
                 if (!file_exists($fullPath)) {
                     throw new \Exception("Excel file was not created");
                 }
-                
+
                 $fileSize = filesize($fullPath);
                 if ($fileSize === 0) {
                     throw new \Exception("Excel file is empty");
                 }
-                
+
                 $report->update([
                     'file_path' => $filePath,
                     'status' => 'completed'
@@ -140,11 +140,11 @@ class ReportController extends Controller
         }
 
         $fullPath = storage_path('app/' . $report->file_path);
-        
+
         if (!file_exists($fullPath)) {
             abort(404);
         }
-        
+
         $fileSize = filesize($fullPath);
         if ($fileSize === 0) {
             abort(404);
@@ -170,7 +170,7 @@ class ReportController extends Controller
     {
         $dateFrom = $filters['date_from'] ?? now()->subMonth()->format('Y-m-d');
         $dateTo = $filters['date_to'] ?? now()->format('Y-m-d');
-        
+
         return "{$siteName} отчет {$dateFrom} - {$dateTo}";
     }
 }

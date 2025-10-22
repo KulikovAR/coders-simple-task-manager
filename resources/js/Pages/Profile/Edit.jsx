@@ -75,7 +75,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                             </div>
                             <div className="flex flex-col gap-3 mb-4">
                                 {availableSubscriptions && availableSubscriptions.map(subscription => (
-                                    <div key={subscription.id} className={`rounded px-3 py-3 flex items-center gap-3 border ${subscriptionInfo?.name === subscription.name ? 'border-green-500 bg-green-500/10' : 'border-border-color'}`} 
+                                    <div key={subscription.id} className={`rounded px-3 py-3 flex items-center gap-3 border ${subscriptionInfo?.name === subscription.name ? 'border-green-500 bg-green-500/10' : 'border-border-color'}`}
                                          style={{ color: subscriptionInfo?.name === subscription.name ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                                         <span className="font-bold">{subscription.name}</span>
                                         <span className="ml-auto text-gray-400">{subscription.price > 0 ? `${subscription.price} ₽/мес` : 'Бесплатно'}</span>
@@ -90,7 +90,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div className="mb-4">
                                 <div className="font-semibold text-base mb-2">Информация о вашем тарифе</div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -105,7 +105,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                             <span className="font-bold">{subscriptionInfo?.projects_limit === -1 ? 'Не ограничено' : subscriptionInfo?.projects_limit || 0}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-secondary-bg border border-border-color rounded p-3">
                                         <div className="font-semibold mb-1">Участники</div>
                                         <div className="flex items-center justify-between">
@@ -113,7 +113,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                             <span className="font-bold">{subscriptionInfo?.members_limit === -1 ? 'Не ограничено' : subscriptionInfo?.members_limit || 0}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-secondary-bg border border-border-color rounded p-3">
                                         <div className="font-semibold mb-1">Хранилище</div>
                                         <div className="flex items-center justify-between">
@@ -125,7 +125,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                             <span className="font-bold">{subscriptionInfo?.storage_limit === -1 ? 'Не ограничено' : `${subscriptionInfo?.storage_limit || 0} ГБ`}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-secondary-bg border border-border-color rounded p-3">
                                         <div className="font-semibold mb-1">Запросы к ИИ</div>
                                         <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                         <div className="flex items-center justify-between">
                                             <span>Лимит:</span>
                                             <span className="font-bold">
-                                                {subscriptionInfo?.ai_requests_limit || 0} 
+                                                {subscriptionInfo?.ai_requests_limit || 0}
                                                 {subscriptionInfo?.ai_requests_period === 'daily' ? ' в день' : ' в месяц'}
                                             </span>
                                         </div>
@@ -148,7 +148,7 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="mb-2">
                                 <span className="font-semibold">Статус подписки:</span>{' '}
                                 {hasActiveSubscription ? (
@@ -157,14 +157,14 @@ export default function Edit({ auth, mustVerifyEmail, status, user, subscription
                                     <span className="text-red-400 font-bold">Неактивна</span>
                                 )}
                             </div>
-                            
+
                             <button
                                 className="btn btn-primary"
                                 onClick={handlePay}
                             >
                                 {hasActiveSubscription ? 'Изменить тариф' : 'Выбрать тариф'}
                             </button>
-                            
+
                             {hasActiveSubscription && expiresAt && (
                                 <div className="text-xs text-gray-500 mt-2">Подписка продлевается вручную</div>
                             )}

@@ -35,7 +35,7 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
         return (
             <button
                 disabled
-                className={`${getButtonClasses()} bg-gray-400 text-gray-200 cursor-not-allowed`}
+                className={`${getButtonClasses()} bg-gray-400 text-white cursor-not-allowed`}
                 title="Снятие позиций в процессе..."
             >
                 <div className={`${getIconSize()} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>

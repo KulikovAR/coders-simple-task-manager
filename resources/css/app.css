@@ -657,6 +657,196 @@ body[data-page="Welcome"] {
     box-shadow: var(--shadow-md);
 }
 
+[data-theme='light'] .btn-success {
+    background-color: var(--accent-green) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-green) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme='light'] .btn-success:hover, [data-theme='light'] .btn-success:focus {
+    background-color: #047857 !important;
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme='light'] .btn-info {
+    background-color: #06b6d4 !important;
+    color: #ffffff !important;
+    border-color: #06b6d4 !important;
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme='light'] .btn-info:hover, [data-theme='light'] .btn-info:focus {
+    background-color: #0891b2 !important;
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
+
+/* Дополнительные правила для всех кнопок в белой теме */
+[data-theme='light'] .btn,
+[data-theme='light'] .btn-primary,
+[data-theme='light'] .btn-secondary,
+[data-theme='light'] .btn-success,
+[data-theme='light'] .btn-info,
+[data-theme='light'] .btn-danger,
+[data-theme='light'] .btn-warning {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .btn:hover,
+[data-theme='light'] .btn-primary:hover,
+[data-theme='light'] .btn-secondary:hover,
+[data-theme='light'] .btn-success:hover,
+[data-theme='light'] .btn-info:hover,
+[data-theme='light'] .btn-danger:hover,
+[data-theme='light'] .btn-warning:hover {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .btn-warning {
+    background-color: var(--accent-yellow) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-yellow) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme='light'] .btn-warning:hover, [data-theme='light'] .btn-warning:focus {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme='light'] .bg-accent-purple {
+    background-color: var(--accent-purple) !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-accent-purple:hover {
+    background-color: #7c3aed !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-accent-blue {
+    background-color: var(--accent-blue) !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-accent-blue:hover {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-blue-500 {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-blue-500:hover {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-red-500 {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-red-500:hover {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-gray-400 {
+    background-color: #9ca3af !important;
+    color: #ffffff !important;
+}
+
+/* Дополнительные правила для кнопок в белой теме */
+[data-theme='light'] button.bg-blue-500,
+[data-theme='light'] button.bg-red-500,
+[data-theme='light'] button.bg-gray-400,
+[data-theme='light'] button.bg-accent-purple,
+[data-theme='light'] button.bg-accent-blue {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] button.bg-blue-500:hover,
+[data-theme='light'] button.bg-red-500:hover,
+[data-theme='light'] button.bg-gray-400:hover,
+[data-theme='light'] button.bg-accent-purple:hover,
+[data-theme='light'] button.bg-accent-blue:hover {
+    color: #ffffff !important;
+}
+
+/* Универсальные правила для всех элементов с цветными фонами в белой теме */
+[data-theme='light'] .bg-blue-500,
+[data-theme='light'] .bg-red-500,
+[data-theme='light'] .bg-gray-400,
+[data-theme='light'] .bg-accent-purple,
+[data-theme='light'] .bg-accent-blue,
+[data-theme='light'] .bg-accent-green,
+[data-theme='light'] .bg-accent-yellow,
+[data-theme='light'] .bg-accent-cyan {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-blue-500:hover,
+[data-theme='light'] .bg-red-500:hover,
+[data-theme='light'] .bg-gray-400:hover,
+[data-theme='light'] .bg-accent-purple:hover,
+[data-theme='light'] .bg-accent-blue:hover,
+[data-theme='light'] .bg-accent-green:hover,
+[data-theme='light'] .bg-accent-yellow:hover,
+[data-theme='light'] .bg-accent-cyan:hover {
+    color: #ffffff !important;
+}
+
+/* Специальные правила для таблицы позиций SEO */
+[data-theme='light'] .bg-green-500,
+[data-theme='light'] .bg-yellow-500,
+[data-theme='light'] .bg-red-500,
+[data-theme='light'] .bg-gray-400 {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] .bg-green-500 span,
+[data-theme='light'] .bg-yellow-500 span,
+[data-theme='light'] .bg-red-500 span,
+[data-theme='light'] .bg-gray-400 span {
+    color: #ffffff !important;
+}
+
+/* Правила для индикаторов изменений в таблице позиций */
+[data-theme='light'] .text-green-200,
+[data-theme='light'] .text-red-200,
+[data-theme='light'] .text-gray-200 {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Дополнительные правила для таблицы позиций SEO */
+[data-theme='light'] table .bg-green-500,
+[data-theme='light'] table .bg-yellow-500,
+[data-theme='light'] table .bg-red-500,
+[data-theme='light'] table .bg-gray-400 {
+    color: #ffffff !important;
+}
+
+[data-theme='light'] table .bg-green-500 *,
+[data-theme='light'] table .bg-yellow-500 *,
+[data-theme='light'] table .bg-red-500 *,
+[data-theme='light'] table .bg-gray-400 * {
+    color: #ffffff !important;
+}
+
+/* Правила для всех элементов внутри цветных ячеек */
+[data-theme='light'] .bg-green-500 *,
+[data-theme='light'] .bg-yellow-500 *,
+[data-theme='light'] .bg-red-500 *,
+[data-theme='light'] .bg-gray-400 * {
+    color: #ffffff !important;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--primary-bg) !important;

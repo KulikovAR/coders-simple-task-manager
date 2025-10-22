@@ -3,10 +3,10 @@ import ToggleSwitch from './ToggleSwitch';
 import RegionSelect from './RegionSelect';
 import ValidationError from './ValidationError';
 
-export default function SearchEnginesSection({ 
-    searchEngines, 
-    regions, 
-    onEngineToggle, 
+export default function SearchEnginesSection({
+    searchEngines,
+    regions,
+    onEngineToggle,
     onRegionChange,
     deviceSettings,
     onDeviceSettingsChange,
@@ -18,13 +18,6 @@ export default function SearchEnginesSection({
 }) {
     return (
         <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Поисковые системы и регионы
-            </h4>
-            
             <div className="space-y-4">
                 <SearchEngineCard
                     engine="google"
@@ -72,7 +65,7 @@ export default function SearchEnginesSection({
                         </svg>
                     }
                 />
-                
+
                 {wordstatEnabled && (
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-text-primary mb-2">
