@@ -37,7 +37,7 @@ class ReportsService
             $filters['date_from'] = now()->subMonth()->format('Y-m-d');
         }
         if (empty($filters['date_to'])) {
-            $filters['date_to'] = now()->format('Y-m-d');
+            unset($filters['date_to']);
         }
 
         $keywords = $this->microserviceClient->getKeywords($siteId);
@@ -77,38 +77,38 @@ class ReportsService
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Отчет по позициям');
-            
+
             $this->buildExcelHeader($sheet, $reportData);
             $this->buildExcelData($sheet, $reportData);
             $this->buildExcelCharts($sheet, $reportData);
-            
+
             $fileName = "report_{$reportId}_" . now()->format('Y_m_d_H_i_s') . '.xlsx';
             $filePath = "reports/excel/{$fileName}";
             $fullPath = storage_path("app/{$filePath}");
-            
+
             $directory = dirname($fullPath);
             if (!is_dir($directory)) {
                 if (!mkdir($directory, 0755, true)) {
                     throw new \Exception("Cannot create directory: {$directory}");
                 }
             }
-            
+
             if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
-            
+
             $writer = new Xlsx($spreadsheet);
             $writer->save($fullPath);
-            
+
             if (!file_exists($fullPath)) {
                 throw new \Exception("Excel file was not created");
             }
-            
+
             $fileSize = filesize($fullPath);
             if ($fileSize === 0) {
                 throw new \Exception("Excel file is empty");
             }
-            
+
             return $filePath;
         } catch (\Exception $e) {
             Log::error("Error creating Excel file for report {$reportId}: " . $e->getMessage());
@@ -119,12 +119,12 @@ class ReportsService
     public function exportToHtml(array $reportData, int $reportId): string
     {
         $html = $this->generateHtmlReport($reportData);
-        
+
         $fileName = "report_{$reportId}_" . now()->format('Y_m_d_H_i_s') . '.html';
         $filePath = "public/reports/{$fileName}";
-        
+
         file_put_contents(base_path($filePath), $html);
-        
+
         return "/reports/{$fileName}";
     }
 
@@ -142,24 +142,24 @@ class ReportsService
         try {
             $sheet->setCellValue('A1', 'Отчет по позициям');
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-            
+
             $projectName = $reportData['project']['name'] ?? 'Неизвестный проект';
             $sheet->setCellValue('A2', 'Проект: ' . $projectName);
-            
+
             $dateFrom = $reportData['filters']['date_from'] ?? 'Не указано';
             $dateTo = $reportData['filters']['date_to'] ?? 'Не указано';
             $sheet->setCellValue('A3', 'Период: ' . $dateFrom . ' - ' . $dateTo);
-            
+
             $source = $reportData['filters']['source'] ?? 'Не указано';
             $sheet->setCellValue('A4', 'Источник: ' . $source);
-            
+
             $sheet->getStyle('A2:A4')->getFont()->setSize(12);
-            
+
             $sheet->setCellValue('A6', 'Ключевое слово');
             $sheet->setCellValue('B6', 'Позиция');
             $sheet->setCellValue('C6', 'Дата');
             $sheet->setCellValue('D6', 'Источник');
-            
+
             $headerStyle = [
                 'font' => ['bold' => true],
                 'fill' => [
@@ -175,14 +175,14 @@ class ReportsService
                     'horizontal' => Alignment::HORIZONTAL_CENTER
                 ]
             ];
-            
+
             $sheet->getStyle('A6:D6')->applyFromArray($headerStyle);
-            
+
             $sheet->getColumnDimension('A')->setAutoSize(true);
             $sheet->getColumnDimension('B')->setAutoSize(true);
             $sheet->getColumnDimension('C')->setAutoSize(true);
             $sheet->getColumnDimension('D')->setAutoSize(true);
-            
+
         } catch (\Exception $e) {
             Log::error("Error building Excel header: " . $e->getMessage());
             throw $e;
@@ -194,7 +194,7 @@ class ReportsService
         try {
             $row = 7;
             $positions = $reportData['positions'] ?? [];
-            
+
             if (empty($positions)) {
                 $sheet->setCellValue("A{$row}", 'Нет данных для отображения');
                 $sheet->mergeCells("A{$row}:D{$row}");
@@ -202,7 +202,7 @@ class ReportsService
                 $sheet->getStyle("A{$row}")->getFont()->setItalic(true);
                 return;
             }
-            
+
             $dataCount = 0;
             foreach ($positions as $index => $position) {
                 try {
@@ -210,12 +210,12 @@ class ReportsService
                     $positionValue = $this->extractPosition($position);
                     $date = $this->extractDate($position);
                     $source = $this->extractSource($position);
-                    
+
                     $sheet->setCellValue("A{$row}", $keyword);
                     $sheet->setCellValue("B{$row}", $positionValue);
                     $sheet->setCellValue("C{$row}", $date);
                     $sheet->setCellValue("D{$row}", $source);
-                    
+
                     $dataCount++;
                     $row++;
                 } catch (\Exception $e) {
@@ -223,7 +223,7 @@ class ReportsService
                     continue;
                 }
             }
-            
+
             $dataStyle = [
                 'borders' => [
                     'allBorders' => [
@@ -234,60 +234,60 @@ class ReportsService
                     'horizontal' => Alignment::HORIZONTAL_LEFT
                 ]
             ];
-            
+
             $lastRow = $row - 1;
             if ($lastRow >= 7 && $dataCount > 0) {
                 $sheet->getStyle("A7:D{$lastRow}")->applyFromArray($dataStyle);
             }
-            
+
         } catch (\Exception $e) {
             Log::error("Error building Excel data: " . $e->getMessage());
             throw $e;
         }
     }
-    
+
     private function extractKeyword(array $position): string
     {
-        return $position['keyword'] ?? 
-               $position['keyword_value'] ?? 
-               $position['query'] ?? 
-               $position['text'] ?? 
+        return $position['keyword'] ??
+               $position['keyword_value'] ??
+               $position['query'] ??
+               $position['text'] ??
                '';
     }
-    
+
     private function extractPosition(array $position): string
     {
-        $pos = $position['position'] ?? 
-               $position['rank'] ?? 
-               $position['pos'] ?? 
-               $position['position_value'] ?? 
+        $pos = $position['position'] ??
+               $position['rank'] ??
+               $position['pos'] ??
+               $position['position_value'] ??
                '';
-        
+
         return is_numeric($pos) ? (string)$pos : $pos;
     }
-    
+
     private function extractDate(array $position): string
     {
-        $date = $position['date'] ?? 
-                $position['created_at'] ?? 
-                $position['tracked_at'] ?? 
-                $position['timestamp'] ?? 
+        $date = $position['date'] ??
+                $position['created_at'] ??
+                $position['tracked_at'] ??
+                $position['timestamp'] ??
                 '';
-        
+
         if (is_numeric($date)) {
             return date('Y-m-d H:i:s', $date);
         }
-        
+
         return $date;
     }
-    
+
     private function extractSource(array $position): string
     {
-        $source = $position['source'] ?? 
-                  $position['search_engine'] ?? 
-                  $position['engine'] ?? 
+        $source = $position['source'] ??
+                  $position['search_engine'] ??
+                  $position['engine'] ??
                   '';
-        
+
         return match($source) {
             'google' => 'Google',
             'yandex' => 'Яндекс',
@@ -299,7 +299,7 @@ class ReportsService
     private function buildExcelCharts($sheet, array $reportData): void
     {
         $chartRow = count($reportData['positions']) + 10;
-        
+
         $sheet->setCellValue("A{$chartRow}", 'График движения позиций');
         $sheet->getStyle("A{$chartRow}")->getFont()->setBold(true)->setSize(14);
     }
@@ -309,7 +309,7 @@ class ReportsService
         $project = $reportData['project'];
         $positions = $reportData['positions'];
         $filters = $reportData['filters'];
-        
+
         $html = '<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -341,7 +341,7 @@ class ReportsService
         <div class="header">
             <h1>Отчет по позициям</h1>
         </div>
-        
+
         <div class="info">
             <div class="info-item">
                 <div class="info-label">Проект</div>
@@ -360,7 +360,7 @@ class ReportsService
                 <div class="info-value">' . count($positions) . '</div>
             </div>
         </div>
-        
+
         <table>
             <thead>
                 <tr>
@@ -371,7 +371,7 @@ class ReportsService
                 </tr>
             </thead>
             <tbody>';
-        
+
         foreach ($positions as $position) {
             $html .= '<tr>
                 <td>' . htmlspecialchars($position['keyword'] ?? '') . '</td>
@@ -380,10 +380,10 @@ class ReportsService
                 <td>' . htmlspecialchars($position['source'] ?? '') . '</td>
             </tr>';
         }
-        
+
         $html .= '</tbody>
         </table>
-        
+
         <div class="chart-container">
             <div class="chart-title">График движения позиций</div>
             <div class="chart-wrapper">
@@ -391,10 +391,10 @@ class ReportsService
             </div>
         </div>
     </div>
-    
+
     <script>
         const positions = ' . json_encode($positions) . ';
-        
+
         const keywordGroups = {};
         positions.forEach(pos => {
             const keyword = pos.keyword;
@@ -406,7 +406,7 @@ class ReportsService
                 position: parseInt(pos.position) || 0
             });
         });
-        
+
         const datasets = Object.keys(keywordGroups).slice(0, 10).map((keyword, index) => {
             const data = keywordGroups[keyword].sort((a, b) => new Date(a.date) - new Date(b.date));
             return {
@@ -418,7 +418,7 @@ class ReportsService
                 fill: false
             };
         });
-        
+
         const ctx = document.getElementById("positionChart").getContext("2d");
         new Chart(ctx, {
             type: "line",
@@ -459,7 +459,7 @@ class ReportsService
     </script>
 </body>
 </html>';
-        
+
         return $html;
     }
 }

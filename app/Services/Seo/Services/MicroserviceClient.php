@@ -139,7 +139,7 @@ class MicroserviceClient
             if ($last) {
                 $queryParams['last'] = 'true';
             }
-            
+
             $response = $this->client->get($this->baseUrl . '/api/positions/history', [
                 'query' => $queryParams,
             ]);

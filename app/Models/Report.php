@@ -40,3 +40,4 @@ class Report extends Model
     }
 }
 
+
