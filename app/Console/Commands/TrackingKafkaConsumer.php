@@ -3,8 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Services\Seo\Services\TrackingCompletionService;
+use Enqueue\RdKafka\RdKafkaConnectionFactory;
+use Enqueue\RdKafka\RdKafkaContext;
+use Enqueue\RdKafka\RdKafkaConsumer;
+use Enqueue\RdKafka\RdKafkaMessage;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class TrackingKafkaConsumer extends Command
@@ -22,58 +25,67 @@ class TrackingKafkaConsumer extends Command
     {
         $this->info('Starting Kafka tracking consumer...');
 
-        $kafkaRestUrl = config('kafka.rest_url');
+        $brokers = config('kafka.brokers');
         $topic = config('kafka.topics.tracking_jobs');
         $consumerGroup = config('kafka.consumer.group_id');
 
-        if (!$kafkaRestUrl) {
-            $this->error('Kafka REST URL not configured');
-            return;
-        }
+        $connectionFactory = new RdKafkaConnectionFactory([
+            'global' => [
+                'group.id' => $consumerGroup,
+                'metadata.broker.list' => $brokers,
+                'enable.auto.commit' => 'true',
+                'auto.offset.reset' => 'earliest',
+            ],
+            'topic' => [
+                'auto.offset.reset' => 'earliest',
+            ],
+        ]);
+
+        $context = $connectionFactory->createContext();
+        $queue = $context->createQueue($topic);
+        $consumer = $context->createConsumer($queue);
 
         $this->info("Subscribed to topic: {$topic}");
 
-        while (true) {
+        $running = true;
+        pcntl_signal(SIGTERM, function () use (&$running) {
+            $running = false;
+        });
+        pcntl_signal(SIGINT, function () use (&$running) {
+            $running = false;
+        });
+
+        while ($running) {
+            pcntl_signal_dispatch();
+            
             try {
-                $response = Http::timeout(30)->get("{$kafkaRestUrl}/consumers/{$consumerGroup}/instances/tracking-consumer/records", [
-                    'format' => 'json'
-                ]);
+                $message = $consumer->receive(1000);
 
-                if ($response->successful()) {
-                    $messages = $response->json();
-                    
-                    if (!empty($messages)) {
-                        foreach ($messages as $message) {
-                            $this->processMessage($message);
-                        }
-                    }
-                } else {
-                    Log::warning('Failed to fetch messages from Kafka', [
-                        'status' => $response->status(),
-                        'body' => $response->body()
-                    ]);
+                if ($message) {
+                    $this->processMessage($message);
+                    $consumer->acknowledge($message);
                 }
-
-                sleep(1);
 
             } catch (\Exception $e) {
                 Log::error('Kafka consumer error', [
                     'error' => $e->getMessage()
                 ]);
-                sleep(5);
+                sleep(1);
             }
         }
+
+        $this->info('Kafka consumer stopped');
     }
 
-    private function processMessage(array $message): void
+    private function processMessage(RdKafkaMessage $message): void
     {
         try {
-            $payload = json_decode($message['value'] ?? '', true, 512, JSON_THROW_ON_ERROR);
+            $payload = json_decode($message->getBody(), true, 512, JSON_THROW_ON_ERROR);
             
             Log::info('Received Kafka message', [
-                'topic' => $message['topic'] ?? 'unknown',
-                'partition' => $message['partition'] ?? 'unknown',
-                'offset' => $message['offset'] ?? 'unknown',
+                'topic' => $message->getProperty('topic'),
+                'partition' => $message->getProperty('partition'),
+                'offset' => $message->getProperty('offset'),
                 'payload' => $payload
             ]);
 
@@ -84,12 +96,12 @@ class TrackingKafkaConsumer extends Command
         } catch (\JsonException $e) {
             Log::error('Failed to decode Kafka message', [
                 'error' => $e->getMessage(),
-                'message' => $message
+                'body' => $message->getBody()
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to process Kafka message', [
                 'error' => $e->getMessage(),
-                'message' => $message
+                'body' => $message->getBody()
             ]);
         }
     }

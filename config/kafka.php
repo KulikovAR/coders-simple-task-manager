@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'rest_url' => env('KAFKA_REST_URL', 'http://localhost:8082'),
     'brokers' => env('KAFKA_BROKERS', 'localhost:9092'),
     'topics' => [
         'tracking_jobs' => 'tracking-jobs',
