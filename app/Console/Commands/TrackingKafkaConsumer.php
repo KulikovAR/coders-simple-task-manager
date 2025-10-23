@@ -88,7 +88,23 @@ class TrackingKafkaConsumer extends Command
     private function processMessage(RdKafkaMessage $message): void
     {
         try {
-            $body = $message->getBody();
+            Log::info('Processing message', [
+                'message_class' => get_class($message)
+            ]);
+            
+            $body = null;
+            if (method_exists($message, 'getBody')) {
+                $body = $message->getBody();
+            } elseif (method_exists($message, 'getPayload')) {
+                $body = $message->getPayload();
+            } elseif (method_exists($message, 'getMessageBody')) {
+                $body = $message->getMessageBody();
+            } else {
+                Log::error('Unknown message type', [
+                    'methods' => get_class_methods($message)
+                ]);
+                return;
+            }
             
             Log::info('Debug message body', [
                 'body_type' => gettype($body),
@@ -129,7 +145,9 @@ class TrackingKafkaConsumer extends Command
         } catch (\Exception $e) {
             Log::error('Failed to process Kafka message', [
                 'error' => $e->getMessage(),
-                'body' => $body ?? 'not set'
+                'body' => $body ?? 'not set',
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
         }
     }
