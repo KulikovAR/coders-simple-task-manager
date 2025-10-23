@@ -81,6 +81,14 @@ class TrackingKafkaConsumer extends Command
     {
         try {
             $body = $message->getBody();
+            
+            Log::info('Debug message body', [
+                'body_type' => gettype($body),
+                'body_content' => $body,
+                'is_array' => is_array($body),
+                'array_keys' => is_array($body) ? array_keys($body) : null
+            ]);
+            
             if (is_array($body) && isset($body['body'])) {
                 $payload = json_decode($body['body'], true, 512, JSON_THROW_ON_ERROR);
             } else {
