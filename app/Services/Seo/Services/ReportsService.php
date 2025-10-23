@@ -48,7 +48,7 @@ class ReportsService
         if ($site->wordstatEnabled) {
             $wordstatFilters = PositionFiltersDTO::fromRequest([...$filters, 'site_id' => $siteId, 'source' => 'wordstat']);
             $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFilters($wordstatFilters->toQueryParams());
-            
+
             if (empty($wordstatPositions)) {
                 $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFiltersAndLast($wordstatFilters->toQueryParams(), true);
             }

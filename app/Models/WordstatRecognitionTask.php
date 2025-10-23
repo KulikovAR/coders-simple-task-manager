@@ -16,6 +16,7 @@ class WordstatRecognitionTask extends Model
         'total_keywords',
         'processed_keywords',
         'error_message',
+        'external_task_id',
         'started_at',
         'completed_at',
     ];

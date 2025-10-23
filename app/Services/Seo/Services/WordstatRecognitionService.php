@@ -56,21 +56,20 @@ class WordstatRecognitionService
             $wordstatTrackData = $this->buildWordstatTrackData($site, $task->user_id);
             $result = $this->microserviceClient->trackWordstatPositions($wordstatTrackData->toArray());
 
-            if (!$result) {
+            if ($result && isset($result['task_id'])) {
+                $task->update([
+                    'external_task_id' => $result['task_id'],
+                    'processed_keywords' => $totalKeywords,
+                ]);
+                
+                Log::info("Wordstat tracking started successfully", [
+                    'external_task_id' => $result['task_id'],
+                    'task_id' => $task->id,
+                    'site_id' => $task->site_id
+                ]);
+            } else {
                 throw new \Exception("Failed to track Wordstat positions");
             }
-
-            $task->update([
-                'processed_keywords' => $totalKeywords,
-                'status' => 'completed',
-                'completed_at' => now(),
-            ]);
-
-            Log::info("Wordstat recognition processing completed successfully", [
-                'task_id' => $task->id,
-                'site_id' => $task->site_id,
-                'processed_keywords' => $totalKeywords
-            ]);
 
         } catch (\Exception $e) {
             Log::error("Wordstat recognition processing failed", [

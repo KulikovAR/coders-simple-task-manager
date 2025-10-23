@@ -172,39 +172,66 @@ class MicroserviceClient
         }
     }
 
-    public function trackGooglePositions(array $trackData): bool
+    public function trackGooglePositions(array $trackData): ?array
     {
         try {
             $response = $this->client->post($this->baseUrl . '/api/positions/track-google', [
                 'json' => $trackData,
             ]);
-            return $response->getStatusCode() === 200;
+            
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            }
+            
+            return null;
         } catch (GuzzleException $e) {
-            return false;
+            Log::error('Failed to track Google positions', [
+                'error' => $e->getMessage(),
+                'trackData' => $trackData
+            ]);
+            return null;
         }
     }
 
-    public function trackYandexPositions(array $trackData): bool
+    public function trackYandexPositions(array $trackData): ?array
     {
         try {
             $response = $this->client->post($this->baseUrl . '/api/positions/track-yandex', [
                 'json' => $trackData,
             ]);
-            return $response->getStatusCode() === 200;
+            
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            }
+            
+            return null;
         } catch (GuzzleException $e) {
-            return false;
+            Log::error('Failed to track Yandex positions', [
+                'error' => $e->getMessage(),
+                'trackData' => $trackData
+            ]);
+            return null;
         }
     }
 
-    public function trackWordstatPositions(array $trackData): bool
+    public function trackWordstatPositions(array $trackData): ?array
     {
         try {
             $response = $this->client->post($this->baseUrl . '/api/positions/track-wordstat', [
                 'json' => $trackData,
             ]);
-            return $response->getStatusCode() === 200;
+            
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            }
+            
+            return null;
         } catch (GuzzleException $e) {
-            return false;
+            Log::error('Failed to track Wordstat positions', [
+                'error' => $e->getMessage(),
+                'trackData' => $trackData
+            ]);
+            return null;
         }
     }
 

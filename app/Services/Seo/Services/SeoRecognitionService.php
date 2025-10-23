@@ -51,7 +51,7 @@ class SeoRecognitionService
 
             $searchEngines = $site->searchEngines;
             $successfulEngines = 0;
-
+            $externalTaskIds = [];
 
             Log::info("SearchEngines", compact('searchEngines'));
 
@@ -60,26 +60,30 @@ class SeoRecognitionService
                 Log::info("Track Data", compact('searchEngine', 'trackData'));
                 $result = $this->callMicroserviceMethod($searchEngine, $trackData->toArray());
 
-                if ($result) {
+                if ($result && isset($result['task_id'])) {
                     $successfulEngines++;
+                    $externalTaskIds[] = $result['task_id'];
+                    
+                    Log::info("Tracking started successfully", [
+                        'search_engine' => $searchEngine,
+                        'external_task_id' => $result['task_id'],
+                        'task_id' => $task->id
+                    ]);
                 } else {
                     throw new \Exception("Failed to track positions for search engine: {$searchEngine}");
                 }
-
-                $task->update([
-                    'processed_keywords' => $totalKeywords * $successfulEngines,
-                ]);
             }
 
             $task->update([
-                'status' => 'completed',
-                'completed_at' => now(),
+                'external_task_id' => implode(',', $externalTaskIds),
+                'processed_keywords' => $totalKeywords * $successfulEngines,
             ]);
 
-            Log::info("SEO recognition processing completed successfully", [
+            Log::info("All tracking requests sent successfully", [
                 'task_id' => $task->id,
                 'site_id' => $task->site_id,
-                'processed_keywords' => $totalKeywords * $successfulEngines
+                'successful_engines' => $successfulEngines,
+                'external_task_ids' => $externalTaskIds
             ]);
 
         } catch (\Exception $e) {
@@ -197,7 +201,7 @@ class SeoRecognitionService
         );
     }
 
-    private function callMicroserviceMethod(string $searchEngine, array $trackData): bool
+    private function callMicroserviceMethod(string $searchEngine, array $trackData): ?array
     {
         return match ($searchEngine) {
             'google' => $this->microserviceClient->trackGooglePositions($trackData),
