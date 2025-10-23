@@ -62,13 +62,21 @@ class TrackingKafkaConsumer extends Command
                 $message = $consumer->receive(1000);
 
                 if ($message) {
+                    Log::info('Received message from Kafka', [
+                        'message_type' => get_class($message),
+                        'message_methods' => get_class_methods($message)
+                    ]);
+                    
                     $this->processMessage($message);
                     $consumer->acknowledge($message);
                 }
 
             } catch (\Exception $e) {
                 Log::error('Kafka consumer error', [
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
                 ]);
                 sleep(1);
             }
