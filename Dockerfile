@@ -10,7 +10,17 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
+    libssl-dev \
+    libsasl2-dev \
+    liblz4-dev \
+    libzstd-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Установка rdkafka и php-rdkafka
+RUN pecl install rdkafka \
+    && docker-php-ext-enable rdkafka \
+    && pecl install php-rdkafka \
+    && docker-php-ext-enable php-rdkafka
 
 # Установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

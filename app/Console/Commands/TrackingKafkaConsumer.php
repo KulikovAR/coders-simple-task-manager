@@ -95,13 +95,11 @@ class TrackingKafkaConsumer extends Command
 
         } catch (\JsonException $e) {
             Log::error('Failed to decode Kafka message', [
-                'error' => $e->getMessage(),
-                'body' => $message->getBody()
+                'error' => $e->getMessage()
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to process Kafka message', [
-                'error' => $e->getMessage(),
-                'body' => $message->getBody()
+                'error' => $e->getMessage()
             ]);
         }
     }
