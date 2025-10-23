@@ -80,7 +80,12 @@ class TrackingKafkaConsumer extends Command
     private function processMessage(RdKafkaMessage $message): void
     {
         try {
-            $payload = json_decode($message->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $body = $message->getBody();
+            if (is_array($body) && isset($body['body'])) {
+                $payload = json_decode($body['body'], true, 512, JSON_THROW_ON_ERROR);
+            } else {
+                $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            }
             
             Log::info('Received Kafka message', [
                 'topic' => $message->getProperty('topic'),
