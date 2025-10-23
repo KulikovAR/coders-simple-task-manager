@@ -11,11 +11,11 @@ class TrackingCompletionService
     public function handleTrackingCompletion(array $message): void
     {
         try {
-            $taskId = $message['task_id'] ?? null;
+            $taskId = $message['job_id'] ?? $message['task_id'] ?? null;
             $status = $message['status'] ?? null;
             
             if (!$taskId) {
-                Log::warning('Received tracking completion message without task_id', [
+                Log::warning('Received tracking completion message without job_id or task_id', [
                     'message' => $message
                 ]);
                 return;
