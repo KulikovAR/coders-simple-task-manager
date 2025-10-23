@@ -7,6 +7,7 @@ use Enqueue\RdKafka\RdKafkaConnectionFactory;
 use Enqueue\RdKafka\RdKafkaContext;
 use Enqueue\RdKafka\RdKafkaConsumer;
 use Enqueue\RdKafka\RdKafkaMessage;
+use Enqueue\RdKafka\Serializer\RawSerializer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -39,10 +40,10 @@ class TrackingKafkaConsumer extends Command
             'topic' => [
                 'auto.offset.reset' => 'earliest',
             ],
-            'serializer' => 'raw',
         ]);
 
         $context = $connectionFactory->createContext();
+        $context->setSerializer(new RawSerializer());
         $queue = $context->createQueue($topic);
         $consumer = $context->createConsumer($queue);
 
