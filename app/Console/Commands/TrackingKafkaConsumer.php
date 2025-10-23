@@ -7,9 +7,24 @@ use Enqueue\RdKafka\RdKafkaConnectionFactory;
 use Enqueue\RdKafka\RdKafkaContext;
 use Enqueue\RdKafka\RdKafkaConsumer;
 use Enqueue\RdKafka\RdKafkaMessage;
-use Enqueue\RdKafka\Serializer\RawSerializer;
+use Enqueue\RdKafka\Serializer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+
+class SimpleSerializer implements Serializer
+{
+    public function toString(RdKafkaMessage $message): string
+    {
+        return $message->getBody();
+    }
+
+    public function toMessage(string $string): RdKafkaMessage
+    {
+        $message = new RdKafkaMessage();
+        $message->setBody($string);
+        return $message;
+    }
+}
 
 class TrackingKafkaConsumer extends Command
 {
@@ -43,7 +58,7 @@ class TrackingKafkaConsumer extends Command
         ]);
 
         $context = $connectionFactory->createContext();
-        $context->setSerializer(new RawSerializer());
+        $context->setSerializer(new SimpleSerializer());
         $queue = $context->createQueue($topic);
         $consumer = $context->createConsumer($queue);
 
