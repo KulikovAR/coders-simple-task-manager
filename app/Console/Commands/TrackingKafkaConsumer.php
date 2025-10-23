@@ -2,29 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Kafka\SimpleSerializer;
 use App\Services\Seo\Services\TrackingCompletionService;
 use Enqueue\RdKafka\RdKafkaConnectionFactory;
 use Enqueue\RdKafka\RdKafkaContext;
 use Enqueue\RdKafka\RdKafkaConsumer;
 use Enqueue\RdKafka\RdKafkaMessage;
-use Enqueue\RdKafka\Serializer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-
-class SimpleSerializer implements Serializer
-{
-    public function toString(RdKafkaMessage $message): string
-    {
-        return $message->getBody();
-    }
-
-    public function toMessage(string $string): RdKafkaMessage
-    {
-        $message = new RdKafkaMessage();
-        $message->setBody($string);
-        return $message;
-    }
-}
 
 class TrackingKafkaConsumer extends Command
 {
@@ -79,21 +64,13 @@ class TrackingKafkaConsumer extends Command
                 $message = $consumer->receive(1000);
 
                 if ($message) {
-                    Log::info('Received message from Kafka', [
-                        'message_type' => get_class($message),
-                        'message_methods' => get_class_methods($message)
-                    ]);
-                    
                     $this->processMessage($message);
                     $consumer->acknowledge($message);
                 }
 
             } catch (\Exception $e) {
                 Log::error('Kafka consumer error', [
-                    'error' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
+                    'error' => $e->getMessage()
                 ]);
                 sleep(1);
             }
@@ -105,41 +82,18 @@ class TrackingKafkaConsumer extends Command
     private function processMessage(RdKafkaMessage $message): void
     {
         try {
-            Log::info('Processing message', [
-                'message_class' => get_class($message)
-            ]);
-            
             $body = $message->getBody();
-            
-            Log::info('Debug message body', [
-                'body_type' => gettype($body),
-                'body_content' => $body
-            ]);
-            
             $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             
-            Log::info('Received Kafka message', [
-                'topic' => $message->getProperty('topic'),
-                'partition' => $message->getProperty('partition'),
-                'offset' => $message->getProperty('offset'),
-                'payload' => $payload
-            ]);
-
             $this->trackingCompletionService->handleTrackingCompletion($payload);
-
-            $this->info('Message processed successfully');
 
         } catch (\JsonException $e) {
             Log::error('Failed to decode Kafka message', [
-                'error' => $e->getMessage(),
-                'body' => $body ?? 'not set'
+                'error' => $e->getMessage()
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to process Kafka message', [
-                'error' => $e->getMessage(),
-                'body' => $body ?? 'not set',
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'error' => $e->getMessage()
             ]);
         }
     }
