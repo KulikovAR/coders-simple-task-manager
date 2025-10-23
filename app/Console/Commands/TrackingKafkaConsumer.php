@@ -89,8 +89,15 @@ class TrackingKafkaConsumer extends Command
                 'array_keys' => is_array($body) ? array_keys($body) : null
             ]);
             
-            if (is_array($body) && isset($body['body'])) {
-                $payload = json_decode($body['body'], true, 512, JSON_THROW_ON_ERROR);
+            $payload = null;
+            if (is_array($body)) {
+                if (isset($body['body'])) {
+                    $payload = json_decode($body['body'], true, 512, JSON_THROW_ON_ERROR);
+                } elseif (isset($body['value'])) {
+                    $payload = json_decode($body['value'], true, 512, JSON_THROW_ON_ERROR);
+                } else {
+                    $payload = $body;
+                }
             } else {
                 $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             }
@@ -108,11 +115,13 @@ class TrackingKafkaConsumer extends Command
 
         } catch (\JsonException $e) {
             Log::error('Failed to decode Kafka message', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'body' => $body ?? 'not set'
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to process Kafka message', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'body' => $body ?? 'not set'
             ]);
         }
     }
