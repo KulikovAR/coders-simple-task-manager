@@ -39,6 +39,7 @@ class TrackingKafkaConsumer extends Command
             'topic' => [
                 'auto.offset.reset' => 'earliest',
             ],
+            'serializer' => 'raw',
         ]);
 
         $context = $connectionFactory->createContext();
@@ -92,39 +93,14 @@ class TrackingKafkaConsumer extends Command
                 'message_class' => get_class($message)
             ]);
             
-            $body = null;
-            if (method_exists($message, 'getBody')) {
-                $body = $message->getBody();
-            } elseif (method_exists($message, 'getPayload')) {
-                $body = $message->getPayload();
-            } elseif (method_exists($message, 'getMessageBody')) {
-                $body = $message->getMessageBody();
-            } else {
-                Log::error('Unknown message type', [
-                    'methods' => get_class_methods($message)
-                ]);
-                return;
-            }
+            $body = $message->getBody();
             
             Log::info('Debug message body', [
                 'body_type' => gettype($body),
-                'body_content' => $body,
-                'is_array' => is_array($body),
-                'array_keys' => is_array($body) ? array_keys($body) : null
+                'body_content' => $body
             ]);
             
-            $payload = null;
-            if (is_array($body)) {
-                if (isset($body['body'])) {
-                    $payload = json_decode($body['body'], true, 512, JSON_THROW_ON_ERROR);
-                } elseif (isset($body['value'])) {
-                    $payload = json_decode($body['value'], true, 512, JSON_THROW_ON_ERROR);
-                } else {
-                    $payload = $body;
-                }
-            } else {
-                $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            }
+            $payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             
             Log::info('Received Kafka message', [
                 'topic' => $message->getProperty('topic'),
