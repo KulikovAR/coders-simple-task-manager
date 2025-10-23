@@ -1,5 +1,5 @@
 [Unit]
-Description=Laravel Queue Worker
+Description=Laravel Queue Worker and Kafka Consumer
 After=network.target
 
 [Service]
@@ -7,16 +7,16 @@ Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/dev.379tm.ru
-ExecStart=/usr/bin/php artisan queue:work --queue=seo-recognition,wordstat-recognition,default --tries=3 --timeout=300 --sleep=3 --max-jobs=1000 --max-time=3600
+ExecStart=/bin/bash -c 'php artisan queue:work --queue=seo-recognition,wordstat-recognition,default --tries=3 --timeout=300 --sleep=3 --max-jobs=1000 --max-time=3600 & php artisan kafka:tracking-consumer & wait'
 Restart=always
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=laravel-queue-worker
+SyslogIdentifier=laravel-services
 
 # Ограничения ресурсов
-MemoryLimit=512M
-CPUQuota=50%
+MemoryLimit=1G
+CPUQuota=75%
 
 [Install]
 WantedBy=multi-user.target
