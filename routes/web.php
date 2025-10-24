@@ -209,5 +209,12 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
+// Admin routes
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.index');
+    Route::get('/jobs', [App\Http\Controllers\Admin\AdminController::class, 'jobs'])->name('admin.jobs.index');
+    Route::get('/jobs/{id}', [App\Http\Controllers\Admin\AdminController::class, 'job'])->name('admin.jobs.show');
+});
+
 
 require __DIR__.'/auth.php';
