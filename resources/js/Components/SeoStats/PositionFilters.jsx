@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { Download, FileText } from 'lucide-react';
 
-export default function PositionFilters({ 
-    filters = {}, 
+export default function PositionFilters({
+    filters = {},
     projectId,
     project = {}
 }) {
     // Определяем значение по умолчанию для поисковика
     const defaultSource = filters.source || project.search_engines?.[0] || '';
-    
+
     const [localFilters, setLocalFilters] = useState({
         source: defaultSource,
         date_from: filters.date_from || '',
@@ -39,7 +39,7 @@ export default function PositionFilters({
 
     const applyFilters = () => {
         const queryParams = new URLSearchParams();
-        
+
         Object.entries(localFilters).forEach(([key, value]) => {
             if (value !== '' && value !== false && value !== null) {
                 queryParams.append(key, value);
@@ -58,7 +58,7 @@ export default function PositionFilters({
             date_from: '',
             date_to: '',
         });
-        
+
         router.visit(route('seo-stats.reports', projectId), {
             preserveState: true,
             preserveScroll: true,
@@ -71,7 +71,7 @@ export default function PositionFilters({
         try {
             // Получаем CSRF токен
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
+
             const response = await fetch(route('reports.export'), {
                 method: 'POST',
                 headers: {
@@ -92,7 +92,7 @@ export default function PositionFilters({
             }
 
             const data = await response.json();
-            
+
             // Сохраняем ссылку в состоянии
             setReportLinks(prev => ({
                 ...prev,
@@ -106,60 +106,6 @@ export default function PositionFilters({
 
     return (
         <>
-            {/* Блок экспорта отчетов */}
-            <div className="card mb-6">
-                <div className="card-header">
-                    <div>
-                        <h3 className="card-title mb-1">Экспорт отчетов</h3>
-                        <p className="card-subtitle">Создайте отчеты в различных форматах</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => handleExport('excel')}
-                                className="btn btn-success text-white"
-                                title="Экспорт в Excel"
-                            >
-                                <Download className="w-4 h-4 mr-2" />
-                                Excel
-                            </button>
-                            {reportLinks.excel && (
-                                <a
-                                    href={reportLinks.excel}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-sm btn-success text-white"
-                                >
-                                    <Download className="w-3 h-3 mr-1" />
-                                    Скачать
-                                </a>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => handleExport('html')}
-                                className="btn btn-info text-white"
-                                title="Экспорт в HTML"
-                            >
-                                <FileText className="w-4 h-4 mr-2" />
-                                HTML
-                            </button>
-                            {reportLinks.html && (
-                                <a
-                                    href={reportLinks.html}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-sm btn-info text-white"
-                                >
-                                    <FileText className="w-3 h-3 mr-1" />
-                                    Открыть
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Блок фильтров */}
             <div className="card mb-6">
                 <div className="card-header">
@@ -193,8 +139,8 @@ export default function PositionFilters({
                     >
                         {project.search_engines?.map(searchEngine => (
                             <option key={searchEngine} value={searchEngine}>
-                                {searchEngine === 'google' ? 'Google' : 
-                                 searchEngine === 'yandex' ? 'Яндекс' : 
+                                {searchEngine === 'google' ? 'Google' :
+                                 searchEngine === 'yandex' ? 'Яндекс' :
                                  searchEngine}
                             </option>
                         ))}

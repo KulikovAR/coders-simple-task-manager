@@ -181,6 +181,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/export', [App\Http\Controllers\ReportController::class, 'export'])
         ->middleware('ajax')
         ->name('reports.export');
+    Route::get('/reports/{report}/status', [App\Http\Controllers\ReportController::class, 'status'])->name('reports.status');
     Route::get('/reports/{report}/download', [App\Http\Controllers\ReportController::class, 'download'])->name('reports.download');
     Route::get('/reports/{report}/show', [App\Http\Controllers\ReportController::class, 'show'])->name('reports.show');
 });

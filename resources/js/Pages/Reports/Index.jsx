@@ -1,55 +1,57 @@
-import React, { useState } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, router } from '@inertiajs/react';
 import SeoLayout from '@/Layouts/SeoLayout';
+import axios from 'axios';
 
-export default function ReportsIndex({ reports, filters, sites }) {
-    const [showExportModal, setShowExportModal] = useState(false);
-    const [selectedSite, setSelectedSite] = useState(null);
+export default function ReportsIndex({ reports, filters, sites, auth }) {
+    const [processingReports, setProcessingReports] = useState(new Set());
 
-    const { data: exportData, setData: setExportData, post: postExport, processing: exportProcessing, errors: exportErrors } = useForm({
-        site_id: '',
-        type: 'html',
-        filters: {
-            date_from: '',
-            date_to: '',
-            source: ''
-        }
-    });
+    useEffect(() => {
+        const interval = setInterval(() => {
+            processingReports.forEach(reportId => {
+                checkReportStatus(reportId);
+            });
+        }, 3000);
 
-    const handleExport = (site) => {
-        setSelectedSite(site);
-        setExportData({
-            site_id: site.id,
-            type: 'html',
-            filters: {
-                date_from: '',
-                date_to: '',
-                source: ''
-            }
-        });
-        setShowExportModal(true);
-    };
+        return () => clearInterval(interval);
+    }, [processingReports]);
 
-    const handleSubmitExport = () => {
-        postExport(route('reports.export'), {
-            onSuccess: (response) => {
-                setShowExportModal(false);
-                // Обновляем страницу для показа нового отчета
+    const checkReportStatus = async (reportId) => {
+        try {
+            const response = await axios.get(route('reports.status', reportId));
+            const { status } = response.data;
+
+            if (status === 'completed' || status === 'failed') {
+                setProcessingReports(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(reportId);
+                    return newSet;
+                });
                 router.reload();
             }
-        });
+        } catch (error) {
+            console.error('Error checking report status:', error);
+        }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status, reportId) => {
+        const isProcessing = processingReports.has(reportId);
+        const actualStatus = isProcessing ? 'processing' : status;
+
         const statusConfig = {
             completed: { color: 'bg-green-100 text-green-800', text: 'Завершен' },
             processing: { color: 'bg-yellow-100 text-yellow-800', text: 'Обработка' },
             failed: { color: 'bg-red-100 text-red-800', text: 'Ошибка' }
         };
 
-        const config = statusConfig[status] || statusConfig.failed;
+        const config = statusConfig[actualStatus] || statusConfig.failed;
         return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color} flex justify-center items-center gap-1`}>
+                {actualStatus === 'processing' && (
+                    <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                )}
                 {config.text}
             </span>
         );
@@ -57,21 +59,18 @@ export default function ReportsIndex({ reports, filters, sites }) {
 
     const getTypeIcon = (type) => {
         return type === 'excel' ? (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
         ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
         );
     };
 
     return (
-      <h1>В разработке ;)</h1>
-    );
-    var a = (
-        <SeoLayout>
+        <SeoLayout user={auth.user}>
             <Head title="Отчеты" />
             <div className="min-h-screen bg-primary-bg p-6">
                 <div className="max-w-7xl mx-auto">
@@ -123,16 +122,6 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                 <h3 className="text-lg font-semibold text-text-primary">
                                     Все отчеты ({reports?.data?.length || 0})
                                 </h3>
-
-                                <button
-                                    onClick={() => setShowExportModal(true)}
-                                    className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors text-sm font-medium flex items-center gap-2"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Создать отчет
-                                </button>
                             </div>
                         </div>
 
@@ -144,13 +133,7 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                     </svg>
                                 </div>
                                 <h3 className="text-lg font-medium text-text-primary mb-2">Нет отчетов</h3>
-                                <p className="text-text-muted mb-4">Создайте первый отчет для просмотра статистики</p>
-                                <button
-                                    onClick={() => setShowExportModal(true)}
-                                    className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors"
-                                >
-                                    Создать отчет
-                                </button>
+                                <p className="text-text-muted mb-4">Отчеты создаются на страницах проектов</p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
@@ -158,7 +141,6 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                     <thead className="bg-secondary-bg">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-sm font-medium text-text-primary">Название</th>
-                                            <th className="px-6 py-3 text-left text-sm font-medium text-text-primary">Проект</th>
                                             <th className="px-6 py-3 text-center text-sm font-medium text-text-primary">Тип</th>
                                             <th className="px-6 py-3 text-center text-sm font-medium text-text-primary">Статус</th>
                                             <th className="px-6 py-3 text-left text-sm font-medium text-text-primary">Создан</th>
@@ -173,11 +155,6 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                                         {report.name}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-text-primary text-sm">
-                                                        {report.site?.name || 'Неизвестный проект'}
-                                                    </div>
-                                                </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-center gap-2">
                                                         {getTypeIcon(report.type)}
@@ -187,7 +164,7 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    {getStatusBadge(report.status)}
+                                                    {getStatusBadge(report.status, report.id)}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="text-text-muted text-sm">
@@ -228,8 +205,11 @@ export default function ReportsIndex({ reports, filters, sites }) {
                                                                 Ошибка
                                                             </span>
                                                         )}
-                                                        {report.status === 'processing' && (
-                                                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+                                                        {(report.status === 'processing' || processingReports.has(report.id)) && (
+                                                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium flex items-center gap-1">
+                                                                <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                                </svg>
                                                                 Обработка...
                                                             </span>
                                                         )}
@@ -271,98 +251,6 @@ export default function ReportsIndex({ reports, filters, sites }) {
                 </div>
             </div>
 
-            {/* Модальное окно создания отчета */}
-            {showExportModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-card-bg rounded-xl p-6 w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-text-primary">Создать отчет</h3>
-                            <button
-                                onClick={() => setShowExportModal(false)}
-                                className="text-text-muted hover:text-text-primary transition-colors"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Проект
-                                </label>
-                                <select
-                                    value={exportData.site_id}
-                                    onChange={(e) => setExportData('site_id', e.target.value)}
-                                    className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
-                                >
-                                    <option value="">Выберите проект</option>
-                                    {sites?.map((site) => (
-                                        <option key={site.id} value={site.id}>
-                                            {site.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {exportErrors.site_id && (
-                                    <p className="text-red-500 text-sm mt-1">{exportErrors.site_id}</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Тип отчета
-                                </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <label className="flex items-center p-3 border border-border-color rounded-lg cursor-pointer hover:bg-secondary-bg transition-colors">
-                                        <input
-                                            type="radio"
-                                            value="html"
-                                            checked={exportData.type === 'html'}
-                                            onChange={(e) => setExportData('type', e.target.value)}
-                                            className="mr-2"
-                                        />
-                                        <div>
-                                            <div className="font-medium text-text-primary">HTML</div>
-                                            <div className="text-sm text-text-muted">Веб-страница</div>
-                                        </div>
-                                    </label>
-                                    <label className="flex items-center p-3 border border-border-color rounded-lg cursor-pointer hover:bg-secondary-bg transition-colors">
-                                        <input
-                                            type="radio"
-                                            value="excel"
-                                            checked={exportData.type === 'excel'}
-                                            onChange={(e) => setExportData('type', e.target.value)}
-                                            className="mr-2"
-                                        />
-                                        <div>
-                                            <div className="font-medium text-text-primary">Excel</div>
-                                            <div className="text-sm text-text-muted">Таблица</div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-4">
-                                <button
-                                    onClick={() => setShowExportModal(false)}
-                                    className="flex-1 px-4 py-2 bg-secondary-bg text-text-primary rounded-lg hover:bg-border-color transition-colors"
-                                >
-                                    Отмена
-                                </button>
-                                <button
-                                    onClick={handleSubmitExport}
-                                    disabled={!exportData.site_id || exportProcessing}
-                                    className="flex-1 px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {exportProcessing ? 'Создание...' : 'Создать'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </SeoLayout>
     );
 }
-

@@ -7,6 +7,8 @@ use App\Models\SeoSite;
 use App\Services\Seo\Services\ReportsService;
 use App\Services\Seo\Services\SeoHtmlReportService;
 use App\Services\Seo\Services\ExcelReportService;
+use App\Jobs\ProcessHtmlReportJob;
+use App\Jobs\ProcessExcelReportJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -65,53 +67,54 @@ class ReportController extends Controller
         $filters = $request->filters ?? [];
 
         try {
-            $reportData = $this->reportsService->getReportsData($siteId, $filters);
-
-            if (!$reportData) {
-                return response()->json(['error' => 'No access to site'], 403);
-            }
-
-            $report = Report::create([
-                'user_id' => Auth::id(),
-                'site_id' => $siteId,
-                'name' => $this->generateReportName($reportData['project']['name'], $filters),
-                'type' => $type,
-                'filters' => $filters,
-                'status' => 'processing'
-            ]);
-
             if ($type === 'excel') {
-                $filePath = $this->excelReportService->exportToExcel($reportData, $report->id);
-                $fullPath = storage_path('app/' . $filePath);
+                $reportData = $this->reportsService->getReportsData($siteId, $filters);
 
-                if (!file_exists($fullPath)) {
-                    throw new \Exception("Excel file was not created");
+                if (!$reportData) {
+                    return response()->json(['error' => 'No access to site'], 403);
                 }
 
-                $fileSize = filesize($fullPath);
-                if ($fileSize === 0) {
-                    throw new \Exception("Excel file is empty");
-                }
-
-                $report->update([
-                    'file_path' => $filePath,
-                    'status' => 'completed'
+                $report = Report::create([
+                    'user_id' => Auth::id(),
+                    'site_id' => $siteId,
+                    'name' => $this->generateReportName($reportData['project']['name'], $filters),
+                    'type' => $type,
+                    'filters' => $filters,
+                    'status' => 'processing'
                 ]);
 
-                $downloadUrl = route('reports.download', $report->id);
-                return response()->json(['url' => $downloadUrl])
-                    ->header('Content-Type', 'application/json');
+                ProcessExcelReportJob::dispatch($report);
+
+                return response()->json([
+                    'report_id' => $report->id,
+                    'status' => 'processing',
+                    'message' => 'Отчет формируется в фоновом режиме'
+                ], 200, [], JSON_UNESCAPED_UNICODE);
             }
 
             if ($type === 'html') {
-                $publicUrl = $this->htmlReportService->exportToHtml($reportData, $report->id);
-                $report->update([
-                    'public_url' => $publicUrl,
-                    'status' => 'completed'
+                $reportData = $this->reportsService->getReportsData($siteId, $filters);
+
+                if (!$reportData) {
+                    return response()->json(['error' => 'No access to site'], 403);
+                }
+
+                $report = Report::create([
+                    'user_id' => Auth::id(),
+                    'site_id' => $siteId,
+                    'name' => $this->generateReportName($reportData['project']['name'], $filters),
+                    'type' => $type,
+                    'filters' => $filters,
+                    'status' => 'processing'
                 ]);
 
-                return response()->json(['url' => $publicUrl])
-                    ->header('Content-Type', 'application/json');
+                ProcessHtmlReportJob::dispatch($report);
+
+                return response()->json([
+                    'report_id' => $report->id,
+                    'status' => 'processing',
+                    'message' => 'Отчет формируется в фоновом режиме'
+                ], 200, [], JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
             Log::error("Error creating report export: " . $e->getMessage(), [
@@ -127,6 +130,21 @@ class ReportController extends Controller
 
             return response()->json(['error' => 'Failed to create report'], 500);
         }
+    }
+
+    public function status(Report $report)
+    {
+        if ($report->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'id' => $report->id,
+            'status' => $report->status,
+            'public_url' => $report->public_url,
+            'error_message' => $report->error_message,
+            'completed_at' => $report->completed_at
+        ]);
     }
 
     public function download(Report $report)

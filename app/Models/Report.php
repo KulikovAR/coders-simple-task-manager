@@ -19,6 +19,8 @@ class Report extends Model
         'file_path',
         'public_url',
         'status',
+        'error_message',
+        'completed_at',
         'created_at',
         'updated_at'
     ];
@@ -26,7 +28,8 @@ class Report extends Model
     protected $casts = [
         'filters' => 'array',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'completed_at' => 'datetime'
     ];
 
     public function user(): BelongsTo
