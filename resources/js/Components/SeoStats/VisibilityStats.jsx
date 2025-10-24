@@ -1,83 +1,41 @@
 import { useMemo, useState, useEffect } from 'react';
 
-export default function VisibilityStats({ positions = [], filters = {} }) {
+export default function VisibilityStats({ positions = [], filters = {}, statistics = {} }) {
     const [animatedStats, setAnimatedStats] = useState({ average: 0, median: 0, total: 0, visible: 0, notFound: 0 });
     const [isAnimating, setIsAnimating] = useState(false);
 
     const stats = useMemo(() => {
-        // Фильтруем позиции по примененным фильтрам
-        let filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
-        
-        // Фильтруем по поисковику, если указан
-        if (filters.source) {
-            filteredPositions = filteredPositions.filter(pos => pos.source === filters.source);
-        }
-        
-        // Фильтруем по датам, если указаны
-        if (filters.date_from) {
-            filteredPositions = filteredPositions.filter(pos => {
-                const posDate = new Date(pos.date);
-                const fromDate = new Date(filters.date_from);
-                return posDate >= fromDate;
-            });
-        }
-        
-        if (filters.date_to) {
-            filteredPositions = filteredPositions.filter(pos => {
-                const posDate = new Date(pos.date);
-                const toDate = new Date(filters.date_to);
-                return posDate <= toDate;
-            });
-        }
+        if (statistics.visibility_stats?.avg_position && statistics.visibility_stats?.median_position) {
+            console.log('Visibility statistics from microservice:', statistics);
 
-        const validPositions = filteredPositions.map(pos => pos.rank);
-
-        if (validPositions.length === 0) {
             return {
-                average: 0,
-                median: 0,
-                total: 0,
-                visible: 0
+                average: Math.round(statistics.visibility_stats.avg_position * 10) / 10,
+                median: Math.round(statistics.visibility_stats.median_position * 10) / 10,
+                total: statistics.total_positions || 0,
+                visible: statistics.visible || 0,
+                notFound: statistics.not_visible || 0
             };
         }
 
-        // Сортируем для расчета медианы
-        const sortedPositions = [...validPositions].sort((a, b) => a - b);
-        
-        // Средняя позиция
-        const average = validPositions.reduce((sum, pos) => sum + pos, 0) / validPositions.length;
-        
-        // Медианная позиция
-        const median = sortedPositions.length % 2 === 0
-            ? (sortedPositions[sortedPositions.length / 2 - 1] + sortedPositions[sortedPositions.length / 2]) / 2
-            : sortedPositions[Math.floor(sortedPositions.length / 2)];
-
-        // Количество видимых позиций (в топ-100, исключаем позицию 0)
-        const visible = validPositions.filter(pos => pos > 0 && pos <= 100).length;
-        
-        // Количество не найденных позиций (позиция 0)
-        const notFound = validPositions.filter(pos => pos === 0).length;
-
         return {
-            average: Math.round(average * 10) / 10,
-            median: Math.round(median * 10) / 10,
-            total: validPositions.length,
-            visible,
-            notFound
+            average: 0,
+            median: 0,
+            total: 0,
+            visible: 0,
+            notFound: 0,
         };
-    }, [positions, filters]);
+    }, [statistics, positions, filters]);
 
-    // Анимация чисел
     useEffect(() => {
         setIsAnimating(true);
-        const duration = 1000; // 1 секунда
-        const steps = 60; // 60 FPS
+        const duration = 1000;
+        const steps = 60;
         const stepDuration = duration / steps;
-        
+
         const animateValue = (start, end, callback) => {
             let current = start;
             const increment = (end - start) / steps;
-            
+
             const timer = setInterval(() => {
                 current += increment;
                 if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
@@ -102,6 +60,12 @@ export default function VisibilityStats({ positions = [], filters = {} }) {
         setTimeout(() => {
             animateValue(0, stats.total, (value) => {
                 setAnimatedStats(prev => ({ ...prev, total: value }));
+            });
+        }, 400);
+
+        setTimeout(() => {
+            animateValue(0, stats.visible, (value) => {
+                setAnimatedStats(prev => ({ ...prev, visible: value }));
             });
         }, 400);
 

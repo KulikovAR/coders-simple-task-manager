@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import SeoLayout from '@/Layouts/SeoLayout';
 import PositionFilters from '@/Components/SeoStats/PositionFilters';
@@ -14,18 +13,18 @@ export default function SeoReports({
     project, 
     keywords = [], 
     positions = [], 
+    statistics = {},
     filters = {},
     filterOptions = {},
+    pagination = {},
     activeTask = null
 }) {
-    const [dateRange, setDateRange] = useState('7');
     const { recognitionStatus } = useSeoRecognition(project.id);
 
     const handleRefreshData = () => {
         router.reload({ only: ['positions'] });
     };
 
-    // Проверяем, что project существует
     if (!project) {
         return (
             <SeoLayout user={auth.user}>
@@ -57,19 +56,28 @@ export default function SeoReports({
     const getUniqueDates = () => {
         const uniqueDates = new Set();
         
-        positions.forEach(pos => {
-            if (pos.date) {
-                const dateOnly = pos.date.split('T')[0];
-                uniqueDates.add(dateOnly);
-            }
-        });
+        if (Array.isArray(positions)) {
+            positions.forEach(pos => {
+                if (pos.date) {
+                    const dateOnly = pos.date.split('T')[0];
+                    uniqueDates.add(dateOnly);
+                }
+            });
+        }
         
-        return Array.from(uniqueDates)
-            .sort()
-            .slice(-parseInt(dateRange));
+        const sortedDates = Array.from(uniqueDates).sort();
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (sortedDates.includes(today)) {
+            return [today, ...sortedDates.filter(date => date !== today)];
+        }
+        
+        return sortedDates;
     };
 
     const getPositionForKeyword = (keywordId, date) => {
+        if (!Array.isArray(positions)) return '-';
+        
         const position = positions.find(pos => {
             const posDateOnly = pos.date ? pos.date.split('T')[0] : '';
             return pos.keyword_id === keywordId && posDateOnly === date;
@@ -135,6 +143,15 @@ export default function SeoReports({
                                         {keywords.length} ключевых слов
                                     </div>
                                     
+                                    {statistics.total_positions && (
+                                        <div className="flex items-center gap-1">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                            {statistics.total_positions.toLocaleString('ru-RU')} позиций
+                                        </div>
+                                    )}
+                                    
                                     {project.search_engines && project.search_engines.length > 0 && (
                                         <div className="flex items-center gap-1">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,16 +174,6 @@ export default function SeoReports({
                             </div>
                             
                             <div className="flex items-center gap-4">
-                                <select
-                                    value={dateRange}
-                                    onChange={(e) => setDateRange(e.target.value)}
-                                    className="px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
-                                >
-                                    <option value="7">7 дней</option>
-                                    <option value="30">30 дней</option>
-                                    <option value="90">90 дней</option>
-                                </select>
-                                
                                 <TrackPositionsButton siteId={project.id} initialData={activeTask} />
                                 {project.wordstat_enabled && (
                                     <TrackWordstatButton siteId={project.id} initialData={activeTask} />
@@ -187,6 +194,7 @@ export default function SeoReports({
                     <StatsSection 
                         keywords={keywords}
                         positions={positions}
+                        statistics={statistics}
                         filters={filters}
                     />
 
@@ -194,7 +202,9 @@ export default function SeoReports({
                     <PositionsTable
                         keywords={keywords}
                         positions={positions}
-                        dateRange={dateRange}
+                        siteId={project.id}
+                        filters={filters}
+                        pagination={pagination}
                     />
                 </div>
             </div>

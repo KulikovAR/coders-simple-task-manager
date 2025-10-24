@@ -34,32 +34,85 @@ class ReportsService
         }
 
         if (empty($filters['date_from'])) {
-            $filters['date_from'] = now()->subMonth()->format('Y-m-d');
+            $filters['date_from'] = now()->subDays(30)->format('Y-m-d');
         }
         if (empty($filters['date_to'])) {
-            unset($filters['date_to']);
+            $filters['date_to'] = now()->addDay()->format('Y-m-d');
         }
 
-        $keywords = $this->microserviceClient->getKeywords($siteId);
         $positionFilters = PositionFiltersDTO::fromRequest(['site_id' => $siteId, ...$filters]);
-        $positions = $this->microserviceClient->getPositionHistoryWithFilters($positionFilters->toQueryParams());
 
-        $wordstatPositions = [];
+        $statistics = $this->microserviceClient->getPositionStatistics($positionFilters->toQueryParams());
+
+        $combinedFilters = $positionFilters->toQueryParams();
+        
         if ($site->wordstatEnabled) {
-            $wordstatFilters = PositionFiltersDTO::fromRequest([...$filters, 'site_id' => $siteId, 'source' => 'wordstat']);
-            $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFilters($wordstatFilters->toQueryParams());
-
-            if (empty($wordstatPositions)) {
-                $wordstatPositions = $this->microserviceClient->getPositionHistoryWithFiltersAndLast($wordstatFilters->toQueryParams(), true);
+            $combinedFilters['wordstat'] = true;
+        }
+        
+        $combinedResponse = $this->microserviceClient->getCombinedPositions($combinedFilters, 1, 10);
+        $combinedData = $combinedResponse['data'] ?? [];
+        
+        $keywords = [];
+        $positions = [];
+        
+        foreach ($combinedData as $item) {
+            $keywords[] = [
+                'id' => $item['keyword_id'],
+                'value' => $item['keyword'],
+                'site_id' => $item['site_id']
+            ];
+            
+            if (!empty($item['positions']) && is_array($item['positions'])) {
+                foreach ($item['positions'] as $position) {
+                    $positions[] = [
+                        'id' => $item['id'],
+                        'keyword_id' => $item['keyword_id'],
+                        'keyword' => $item['keyword'],
+                        'date' => $position['date'] ?? $item['date'],
+                        'source' => $position['source'],
+                        'rank' => $position['rank'],
+                        'position' => $position['rank'],
+                        'url' => $position['url'] ?? null,
+                        'title' => $position['title'] ?? null,
+                        'device' => $position['device'] ?? null,
+                        'country' => $position['country'] ?? null,
+                        'lang' => $position['lang'] ?? null,
+                        'os' => $position['os'] ?? null,
+                        'ads' => $position['ads'] ?? false,
+                        'pages' => $position['pages'] ?? null
+                    ];
+                }
+            }
+            
+            if (!empty($item['wordstat']) && $item['wordstat'] !== null) {
+                $positions[] = [
+                    'id' => $item['id'],
+                    'keyword_id' => $item['keyword_id'],
+                    'keyword' => $item['keyword'],
+                    'date' => $item['date'],
+                    'source' => 'wordstat',
+                    'rank' => $item['wordstat']['rank'],
+                    'position' => $item['wordstat']['rank'],
+                    'url' => $item['wordstat']['url'] ?? null,
+                    'title' => $item['wordstat']['title'] ?? null,
+                    'device' => $item['wordstat']['device'] ?? null,
+                    'country' => $item['wordstat']['country'] ?? null,
+                    'lang' => $item['wordstat']['lang'] ?? null,
+                    'os' => $item['wordstat']['os'] ?? null,
+                    'ads' => $item['wordstat']['ads'] ?? false,
+                    'pages' => $item['wordstat']['pages'] ?? null
+                ];
             }
         }
-
-        $mergedPositions = $this->mergePositionsWithWordstat($positions, $wordstatPositions);
 
         return [
             'project' => $site->toArray(),
             'keywords' => $keywords,
-            'positions' => $mergedPositions,
+            'positions' => $positions,
+            'statistics' => $statistics,
+            'pagination' => $combinedResponse['pagination'] ?? [],
+            'meta' => $combinedResponse['meta'] ?? [],
             'filters' => [
                 'source' => $positionFilters->source,
                 'date_from' => $positionFilters->dateFrom,

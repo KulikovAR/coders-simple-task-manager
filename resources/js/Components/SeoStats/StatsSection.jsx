@@ -3,18 +3,45 @@ import PieChart from './PieChart';
 import VisibilityStats from './VisibilityStats';
 import PositionDistribution from './PositionDistribution';
 
-export default function StatsSection({ keywords = [], positions = [], filters = {} }) {
-    // Подготавливаем данные для круговой диаграммы
+export default function StatsSection({ keywords = [], positions = [], statistics = {}, filters = {} }) {
     const pieChartData = useMemo(() => {
-        // Фильтруем позиции по примененным фильтрам
-        let filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
+        if (statistics.position_distribution) {
+            console.log('Statistics from microservice:', statistics);
+            console.log('Position distribution:', statistics.position_distribution);
+            
+            return [
+                {
+                    label: 'Не найдено',
+                    value: statistics.position_distribution.not_found || 0,
+                    color: '#6B7280'
+                },
+                {
+                    label: 'Топ-3 позиции',
+                    value: statistics.position_distribution.top_3 || 0,
+                    color: '#10B981'
+                },
+                {
+                    label: 'Позиции 4-10',
+                    value: (statistics.position_distribution.top_10 || 0) - (statistics.position_distribution.top_3 || 0),
+                    color: '#F59E0B'
+                },
+                {
+                    label: 'Позиции 11+',
+                    value: (statistics.position_distribution.top_20 || 0) - (statistics.position_distribution.top_10 || 0),
+                    color: '#EF4444'
+                }
+            ];
+        }
+
+        let filteredPositions = [];
+        if (Array.isArray(positions)) {
+            filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
+        }
         
-        // Фильтруем по поисковику, если указан
         if (filters.source) {
             filteredPositions = filteredPositions.filter(pos => pos.source === filters.source);
         }
         
-        // Фильтруем по датам, если указаны
         if (filters.date_from) {
             filteredPositions = filteredPositions.filter(pos => {
                 const posDate = new Date(pos.date);
@@ -60,10 +87,9 @@ export default function StatsSection({ keywords = [], positions = [], filters = 
                 color: '#EF4444'
             }
         ];
-    }, [positions, filters]);
+    }, [statistics, positions, filters]);
 
-    // Если нет данных, показываем пустое состояние
-    if (keywords.length === 0 || positions.length === 0) {
+    if (keywords.length === 0 || ((!Array.isArray(positions) || positions.length === 0) && !statistics.total_positions && !statistics.keywords_count)) {
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
                 <div className="text-text-muted mb-4">
@@ -99,10 +125,10 @@ export default function StatsSection({ keywords = [], positions = [], filters = 
                 </div>
 
                 {/* Статистика видимости */}
-                <VisibilityStats positions={positions} filters={filters} />
+                <VisibilityStats positions={positions} filters={filters} statistics={statistics} />
 
                 {/* Распределение позиций */}
-                <PositionDistribution positions={positions} filters={filters} />
+                <PositionDistribution positions={positions} filters={filters} statistics={statistics} />
             </div>
         </div>
     );

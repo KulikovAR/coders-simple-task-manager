@@ -1,29 +1,68 @@
 import { useMemo, useState, useEffect } from 'react';
 
-export default function PositionDistribution({ positions = [], filters = {} }) {
+export default function PositionDistribution({ positions = [], filters = {}, statistics = {} }) {
     const [animatedDistribution, setAnimatedDistribution] = useState([]);
     const [isAnimating, setIsAnimating] = useState(false);
 
     const distribution = useMemo(() => {
         const ranges = [
-            { label: 'Не найдено', min: 0, max: 0, color: '#6B7280' }, // серый для позиции 0
-            { label: '1-3', min: 1, max: 3, color: '#10B981' }, // зеленый
-            { label: '4-10', min: 4, max: 10, color: '#F59E0B' }, // желтый
-            { label: '11-30', min: 11, max: 30, color: '#EF4444' }, // красный
-            { label: '31-50', min: 31, max: 50, color: '#8B5CF6' }, // фиолетовый
-            { label: '51-100', min: 51, max: 100, color: '#6B7280' }, // серый
-            { label: '100+', min: 101, max: Infinity, color: '#374151' } // темно-серый
+            { label: 'Не найдено', min: 0, max: 0, color: '#6B7280' },
+            { label: '1-3', min: 1, max: 3, color: '#10B981' },
+            { label: '4-10', min: 4, max: 10, color: '#F59E0B' },
+            { label: '11-30', min: 11, max: 30, color: '#EF4444' },
+            { label: '31-50', min: 31, max: 50, color: '#8B5CF6' },
+            { label: '51-100', min: 51, max: 100, color: '#6B7280' },
+            { label: '100+', min: 101, max: Infinity, color: '#374151' }
         ];
 
-        // Фильтруем позиции по примененным фильтрам
+        if (statistics.position_ranges) {
+            console.log('Position distribution from microservice:', statistics);
+            
+            const total = statistics.total_positions || 0;
+            
+            return ranges.map(range => {
+                let count = 0;
+                
+                switch (range.label) {
+                    case 'Не найдено':
+                        count = statistics.position_distribution?.not_found || 0;
+                        break;
+                    case '1-3':
+                        count = statistics.position_ranges['1_3'] || 0;
+                        break;
+                    case '4-10':
+                        count = statistics.position_ranges['4_10'] || 0;
+                        break;
+                    case '11-30':
+                        count = statistics.position_ranges['11_30'] || 0;
+                        break;
+                    case '31-50':
+                        count = statistics.position_ranges['31_50'] || 0;
+                        break;
+                    case '51-100':
+                        count = statistics.position_ranges['51_100'] || 0;
+                        break;
+                    case '100+':
+                        count = statistics.position_ranges['100_plus'] || 0;
+                        break;
+                }
+                
+                const percentage = total > 0 ? (count / total) * 100 : 0;
+                
+                return {
+                    ...range,
+                    count,
+                    percentage: Math.round(percentage * 10) / 10
+                };
+            });
+        }
+
         let filteredPositions = positions.filter(pos => pos && pos.rank !== null && pos.rank !== undefined);
         
-        // Фильтруем по поисковику, если указан
         if (filters.source) {
             filteredPositions = filteredPositions.filter(pos => pos.source === filters.source);
         }
         
-        // Фильтруем по датам, если указаны
         if (filters.date_from) {
             filteredPositions = filteredPositions.filter(pos => {
                 const posDate = new Date(pos.date);
@@ -64,12 +103,11 @@ export default function PositionDistribution({ positions = [], filters = {} }) {
                 percentage: Math.round(percentage * 10) / 10
             };
         });
-    }, [positions, filters]);
+    }, [statistics, positions, filters]);
 
-    // Анимация прогресс-баров
     useEffect(() => {
         setIsAnimating(true);
-        const duration = 1200; // 1.2 секунды
+        const duration = 1200;
         const steps = 60;
         const stepDuration = duration / steps;
         

@@ -119,11 +119,16 @@ class MicroserviceClient
         }
     }
 
-    public function getPositionHistoryWithFilters(array $filters): array
+    public function getPositionHistoryWithFilters(array $filters, int $page = 1, int $perPage = 100): array
     {
         try {
+            $queryParams = array_merge($filters, [
+                'page' => $page,
+                'per_page' => $perPage
+            ]);
+
             $response = $this->client->get($this->baseUrl . '/api/positions/history', [
-                'query' => $filters,
+                'query' => $queryParams,
             ]);
             $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
             return is_array($data) ? $data : [];
@@ -132,10 +137,13 @@ class MicroserviceClient
         }
     }
 
-    public function getPositionHistoryWithFiltersAndLast(array $filters, bool $last = false): array
+    public function getPositionHistoryWithFiltersAndLast(array $filters, bool $last = false, int $page = 1, int $perPage = 100): array
     {
         try {
-            $queryParams = $filters;
+            $queryParams = array_merge($filters, [
+                'page' => $page,
+                'per_page' => $perPage
+            ]);
             if ($last) {
                 $queryParams['last'] = 'true';
             }
@@ -178,11 +186,11 @@ class MicroserviceClient
             $response = $this->client->post($this->baseUrl . '/api/positions/track-google', [
                 'json' => $trackData,
             ]);
-            
+
             if ($response->getStatusCode() === 200) {
                 return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
             }
-            
+
             return null;
         } catch (GuzzleException $e) {
             Log::error('Failed to track Google positions', [
@@ -199,11 +207,11 @@ class MicroserviceClient
             $response = $this->client->post($this->baseUrl . '/api/positions/track-yandex', [
                 'json' => $trackData,
             ]);
-            
+
             if ($response->getStatusCode() === 200) {
                 return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
             }
-            
+
             return null;
         } catch (GuzzleException $e) {
             Log::error('Failed to track Yandex positions', [
@@ -220,11 +228,11 @@ class MicroserviceClient
             $response = $this->client->post($this->baseUrl . '/api/positions/track-wordstat', [
                 'json' => $trackData,
             ]);
-            
+
             if ($response->getStatusCode() === 200) {
                 return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
             }
-            
+
             return null;
         } catch (GuzzleException $e) {
             Log::error('Failed to track Wordstat positions', [
@@ -232,6 +240,40 @@ class MicroserviceClient
                 'trackData' => $trackData
             ]);
             return null;
+        }
+    }
+
+    public function getPositionStatistics(array $filters): array
+    {
+
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/positions/statistics', [
+                'json' => $filters,
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            return is_array($data) ? $data : [];
+        } catch (GuzzleException $e) {
+            Log::error('Failed to get position statistics: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getCombinedPositions(array $filters, int $page = 1, int $perPage = 50): array
+    {
+        try {
+            $queryParams = [...$filters, 'page' => $page, 'per_page' => $perPage];
+
+            $response = $this->client->get($this->baseUrl . '/api/positions/combined', [
+                'query' => $queryParams,
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+            return is_array($data) ? $data : [];
+        } catch (GuzzleException $e) {
+            Log::error('Failed to get combined positions: ' . $e->getMessage());
+            return [];
         }
     }
 

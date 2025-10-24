@@ -46,6 +46,7 @@ class PositionFiltersDTO
             'ads' => $this->ads,
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
+            'limit' => 500,
         ], fn($value) => $value !== null);
     }
 

@@ -26,47 +26,38 @@ Route::get('/', function () {
     ]);
 });
 
-// Страница с информацией об ИИ-ассистенте
 Route::get('/ai-features', function () {
     return Inertia::render('AiAgent/Features');
 })->name('ai-features');
 
-// Страница FAQ
 Route::get('/faq', function () {
     return Inertia::render('Faq');
 })->name('faq');
 
-// API документация (заглушка для футера)
 Route::get('/api-docs', function () {
     return Inertia::render('ApiDocs');
 })->name('api-docs');
 
-    // Демо-страница RichTextEditor
     Route::get('/demo/rich-editor', function () {
         return Inertia::render('Demo/RichEditorDemo');
     })->name('demo.rich-editor');
 
-    // Демо-страница ИИ RichTextEditor
     Route::get('/demo/ai-rich-editor', function () {
         return Inertia::render('Demo/AiRichEditorDemo');
     })->name('demo.ai-rich-editor');
 
-    // Демо-страница загрузки файлов
     Route::get('/demo/file-upload', function () {
         return Inertia::render('Demo/FileUploadDemo');
     })->name('demo.file-upload');
 
-    // Тестовая страница FileExtension
     Route::get('/demo/file-extension-test', function () {
         return Inertia::render('Demo/FileExtensionTest');
     })->name('demo.file-extension-test');
 
-    // Тестовая страница загрузки файлов
     Route::get('/demo/file-upload-test', function () {
         return Inertia::render('Demo/FileUploadTest');
     })->name('demo.file-upload-test');
 
-    // Загрузка файлов для RichTextEditor
     Route::middleware('auth')->group(function () {
         Route::post('/file-upload', [App\Http\Controllers\FileUploadController::class, 'store'])->name('file-upload.store');
         Route::get('/file-upload/{attachment}/download', [App\Http\Controllers\FileUploadController::class, 'download'])->name('file-upload.download');
@@ -84,7 +75,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Уведомления
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
@@ -92,7 +82,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/read', [NotificationController::class, 'destroyRead'])->name('notifications.destroy-read');
 
-    // Проекты
     Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/create', [App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
@@ -106,14 +95,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'addMember'])->name('projects.members.add');
     Route::delete('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'removeMember'])->name('projects.members.remove');
 
-    // Гантт диаграммы
     Route::get('/projects/{project}/gantt', [GanttController::class, 'show'])->name('projects.gantt');
     Route::put('/tasks/{task}/gantt', [GanttController::class, 'updateTask'])->name('tasks.gantt.update');
     Route::post('/gantt/dependencies', [GanttController::class, 'createDependency'])->name('gantt.dependencies.create');
     Route::delete('/gantt/dependencies/{dependency}', [GanttController::class, 'deleteDependency'])->name('gantt.dependencies.delete');
     Route::post('/projects/{project}/gantt/calculate-dates', [GanttController::class, 'calculateDates'])->name('projects.gantt.calculate-dates');
 
-    // Спринты
     Route::get('/projects/{project}/sprints', [App\Http\Controllers\SprintController::class, 'index'])->name('sprints.index');
     Route::get('/projects/{project}/sprints/create', [App\Http\Controllers\SprintController::class, 'create'])->name('sprints.create');
     Route::post('/projects/{project}/sprints', [App\Http\Controllers\SprintController::class, 'store'])->name('sprints.store');
@@ -122,7 +109,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'update'])->name('sprints.update');
     Route::delete('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'destroy'])->name('sprints.destroy');
 
-    // Статусы задач
     Route::get('/projects/{project}/statuses', [TaskStatusController::class, 'projectIndex'])->name('projects.statuses');
     Route::put('/projects/{project}/statuses', [TaskStatusController::class, 'updateProject'])->name('projects.statuses.update');
     Route::get('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'sprintIndex'])->name('sprints.statuses');
@@ -132,10 +118,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('projects.statuses.api');
     Route::get('/projects/{project}/sprints/{sprint}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('sprints.statuses.api');
 
-    // Новый универсальный роут для получения контекстных статусов
     Route::get('/projects/{project}/contextual-statuses', [TaskStatusController::class, 'getContextualStatuses'])->name('projects.contextual-statuses');
 
-    // Задачи
     Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/create', [App\Http\Controllers\TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tasks', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
@@ -148,17 +132,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/sprints-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectSprints'])->name('tasks.project.sprints');
     Route::get('/projects/{project}/statuses-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectStatuses'])->name('tasks.project.statuses');
 
-    // Задачи по коду
     Route::get('/tasks/code/{code}', [App\Http\Controllers\TaskController::class, 'showByCode'])->name('tasks.show.by-code');
 
-    // Комментарии к задачам
     Route::get('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'index'])->name('tasks.comments.index');
     Route::post('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'store'])->name('tasks.comments.store');
     Route::get('/comments/{comment}/edit', [App\Http\Controllers\TaskCommentController::class, 'edit'])->name('comments.edit');
     Route::put('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'destroy'])->name('comments.destroy');
 
-    // Чек-листы задач
     Route::get('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'index'])->name('tasks.checklists.index');
     Route::post('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'store'])->name('tasks.checklists.store');
     Route::put('/tasks/{task}/checklists/reorder', [App\Http\Controllers\TaskChecklistController::class, 'reorder'])->name('tasks.checklists.reorder');
@@ -166,13 +147,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tasks/{task}/checklists/{checklist}', [App\Http\Controllers\TaskChecklistController::class, 'destroy'])->name('tasks.checklists.destroy');
     Route::put('/tasks/{task}/checklists/{checklist}/toggle', [App\Http\Controllers\TaskChecklistController::class, 'toggleStatus'])->name('tasks.checklists.toggle');
 
-    // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
 
-    // Оптимизация текста с помощью ИИ
     Route::post('/ai-text-optimize', [AiTextOptimizationController::class, 'optimizeText'])->name('ai-text-optimize');
 
-    // Webhook'и
     Route::get('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'index'])->name('webhooks.index');
     Route::post('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'store'])->name('webhooks.store');
     Route::put('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'update'])->name('webhooks.update');
@@ -180,10 +158,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/webhooks/{webhook}/test', [App\Http\Controllers\WebhookController::class, 'test'])->name('webhooks.test');
     Route::post('/projects/{project}/webhooks/{webhook}/toggle', [App\Http\Controllers\WebhookController::class, 'toggle'])->name('webhooks.toggle');
 
-    // SEO Статистика
     Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'dashboard'])->name('seo-stats.dashboard');
     Route::get('/seo-stats/projects', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
     Route::get('/seo-stats/{site}/reports', [App\Http\Controllers\SeoStatsController::class, 'reports'])->name('seo-stats.reports');
+    Route::get('/seo-stats/{site}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPositions'])->name('seo-stats.positions');
     Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
     Route::put('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'updateSite'])->name('seo-stats.update-site');
     Route::get('/seo-stats/sites/{site}/data', [App\Http\Controllers\SeoStatsController::class, 'getProjectData'])->name('seo-stats.project-data');
@@ -196,11 +174,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
 
-    // XML API настройки пользователя
     Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
     Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');
 
-    // Отчеты
     Route::get('/reports-history', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/export', [App\Http\Controllers\ReportController::class, 'export'])
         ->middleware('ajax')
@@ -209,14 +185,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}/show', [App\Http\Controllers\ReportController::class, 'show'])->name('reports.show');
 });
 
-// ИИ-агент API (без CSRF)
 Route::middleware(['auth', 'ai.agent'])->group(function () {
     Route::post('/ai-agent/process', [App\Http\Controllers\AiAgentController::class, 'processRequest'])
         ->name('ai-agent.process');
     Route::get('/ai-agent/commands', [App\Http\Controllers\AiAgentController::class, 'getCommands'])
         ->name('ai-agent.commands');
 
-    // История диалогов ИИ-агента
     Route::get('/ai-agent/conversations', [App\Http\Controllers\AiAgentController::class, 'getConversations'])
         ->name('ai-agent.conversations');
     Route::get('/ai-agent/conversations/{conversationId}/messages', [App\Http\Controllers\AiAgentController::class, 'getConversationMessages'])
@@ -229,12 +203,10 @@ Route::middleware(['auth', 'ai.agent'])->group(function () {
         ->name('ai-agent.stats');
 });
 
-// --- Оплата подписки ---
 Route::middleware(['auth'])->group(function () {
     Route::post('/payment/start', [\App\Http\Controllers\PaymentController::class, 'start'])->name('payment.start');
 });
 Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
-// Telegram webhook перенесён в routes/api.php
 
 require __DIR__.'/auth.php';

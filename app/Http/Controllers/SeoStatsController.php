@@ -30,7 +30,6 @@ class SeoStatsController extends Controller
     {
         $data = $this->siteUserService->getUserSites();
 
-        // Добавляем информацию об активных задачах для каждого сайта
         $data['activeTasks'] = [];
         foreach ($data['sites'] as $site) {
             $activeTask = $this->recognitionTaskService->getActiveTaskForSite($site['id']);
@@ -125,7 +124,6 @@ class SeoStatsController extends Controller
             abort(403);
         }
 
-        // Добавляем информацию об активной задаче для текущего сайта
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
         if ($activeTask) {
             $data['activeTask'] = [
@@ -141,6 +139,100 @@ class SeoStatsController extends Controller
         }
 
         return Inertia::render('SeoStats/Reports', $data);
+    }
+
+    public function getPositions(int $siteId)
+    {
+        $filters = [
+            'source' => request('source'),
+            'date_from' => request('date_from'),
+            'date_to' => request('date_to'),
+            'page' => request('page', 1),
+            'per_page' => request('per_page', 10),
+        ];
+
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $positionFilters = PositionFiltersDTO::fromRequest(['site_id' => $siteId, ...$filters]);
+        
+        $combinedFilters = $positionFilters->toQueryParams();
+        
+        $site = $this->siteUserService->getSite($siteId);
+        if ($site && $site->wordstatEnabled) {
+            $combinedFilters['wordstat'] = true;
+        }
+        
+        $combinedResponse = $this->microserviceClient->getCombinedPositions(
+            $combinedFilters, 
+            $filters['page'], 
+            $filters['per_page']
+        );
+
+        $combinedData = $combinedResponse['data'] ?? [];
+        $keywords = [];
+        $positions = [];
+        
+        foreach ($combinedData as $item) {
+            $keywords[] = [
+                'id' => $item['keyword_id'],
+                'value' => $item['keyword'],
+                'site_id' => $item['site_id']
+            ];
+            
+            if (!empty($item['positions']) && is_array($item['positions'])) {
+                foreach ($item['positions'] as $position) {
+                    $positions[] = [
+                        'id' => $item['id'],
+                        'keyword_id' => $item['keyword_id'],
+                        'keyword' => $item['keyword'],
+                        'date' => $position['date'] ?? $item['date'],
+                        'source' => $position['source'],
+                        'rank' => $position['rank'],
+                        'position' => $position['rank'],
+                        'url' => $position['url'] ?? null,
+                        'title' => $position['title'] ?? null,
+                        'device' => $position['device'] ?? null,
+                        'country' => $position['country'] ?? null,
+                        'lang' => $position['lang'] ?? null,
+                        'os' => $position['os'] ?? null,
+                        'ads' => $position['ads'] ?? false,
+                        'pages' => $position['pages'] ?? null
+                    ];
+                }
+            }
+            
+            if (!empty($item['wordstat']) && $item['wordstat'] !== null) {
+                $positions[] = [
+                    'id' => $item['id'],
+                    'keyword_id' => $item['keyword_id'],
+                    'keyword' => $item['keyword'],
+                    'date' => $item['date'],
+                    'source' => 'wordstat',
+                    'rank' => $item['wordstat']['rank'],
+                    'position' => $item['wordstat']['rank'],
+                    'url' => $item['wordstat']['url'] ?? null,
+                    'title' => $item['wordstat']['title'] ?? null,
+                    'device' => $item['wordstat']['device'] ?? null,
+                    'country' => $item['wordstat']['country'] ?? null,
+                    'lang' => $item['wordstat']['lang'] ?? null,
+                    'os' => $item['wordstat']['os'] ?? null,
+                    'ads' => $item['wordstat']['ads'] ?? false,
+                    'pages' => $item['wordstat']['pages'] ?? null
+                ];
+            }
+        }
+
+        return response()->json([
+            'keywords' => $keywords,
+            'positions' => $positions,
+            'pagination' => $combinedResponse['pagination'] ?? [],
+            'meta' => $combinedResponse['meta'] ?? [],
+            'has_more' => $combinedResponse['pagination']['has_more'] ?? false,
+            'page' => $filters['page'],
+            'per_page' => $filters['per_page']
+        ]);
     }
 
     public function trackPositions(int $siteId)
@@ -223,7 +315,7 @@ class SeoStatsController extends Controller
         }
 
         $activeTask = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
-        
+
         if ($activeTask) {
             return response()->json([
                 'success' => true,
@@ -234,7 +326,7 @@ class SeoStatsController extends Controller
 
         try {
             $task = $this->wordstatRecognitionTaskService->createTask($siteId);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Парсинг Wordstat запущен',
@@ -252,7 +344,7 @@ class SeoStatsController extends Controller
         }
 
         $task = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
-        
+
         if (!$task) {
             return response()->json(['status' => 'none']);
         }
@@ -272,7 +364,7 @@ class SeoStatsController extends Controller
     public function getWordstatTaskStatus(int $taskId)
     {
         $task = $this->wordstatRecognitionTaskService->getTaskStatus($taskId);
-        
+
         if (!$task) {
             return response()->json(['error' => 'Задача не найдена'], 404);
         }
