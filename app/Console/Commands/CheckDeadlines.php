@@ -37,10 +37,8 @@ class CheckDeadlines extends Command
         $this->info('Проверка дедлайнов задач...');
 
         $now = Carbon::now();
-        $approachingDeadline = $now->copy()->addDays(1); // Завтра
-        $overdueDeadline = $now->copy()->subDay(); // Вчера
+        $approachingDeadline = $now->copy()->addDay();
 
-        // Задачи с приближающимся дедлайном (завтра)
         $approachingTasks = Task::where('deadline', '<=', $approachingDeadline)
             ->where('deadline', '>', $now)
             ->whereNotNull('assignee_id')
@@ -57,7 +55,6 @@ class CheckDeadlines extends Command
             $this->line("Уведомление отправлено для задачи: {$task->title}");
         }
 
-        // Просроченные задачи
         $overdueTasks = Task::where('deadline', '<', $now)
             ->whereNotNull('assignee_id')
             ->whereHas('status', function ($query) {

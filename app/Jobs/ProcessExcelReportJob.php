@@ -38,20 +38,20 @@ class ProcessExcelReportJob implements ShouldQueue
     {
         try {
             Auth::loginUsingId($this->report->user_id);
-            
+
             Log::info("Processing Excel report", [
                 'report_id' => $this->report->id,
                 'site_id' => $this->report->site_id,
                 'user_id' => $this->report->user_id
             ]);
-            
+
             $site = $siteUserService->getSite($this->report->site_id);
             if (!$site) {
                 throw new \Exception("Site not found or no access");
             }
 
             $filters = $this->report->filters ?? [];
-            
+
             if (empty($filters['date_from'])) {
                 $filters['date_from'] = now()->subDays(30)->format('Y-m-d');
             }
@@ -63,7 +63,7 @@ class ProcessExcelReportJob implements ShouldQueue
             $statistics = $microserviceClient->getPositionStatistics($positionFilters->toQueryParams());
 
             $combinedFilters = $positionFilters->toQueryParams();
-            
+
             if ($site->wordstatEnabled) {
                 $combinedFilters['wordstat'] = true;
             }
@@ -76,7 +76,7 @@ class ProcessExcelReportJob implements ShouldQueue
             do {
                 $response = $microserviceClient->getCombinedPositions($combinedFilters, $page, $perPage);
                 $data = $response['data'] ?? [];
-                
+
                 if (empty($data)) {
                     break;
                 }
@@ -87,7 +87,7 @@ class ProcessExcelReportJob implements ShouldQueue
                         'value' => $item['keyword'],
                         'site_id' => $item['site_id']
                     ];
-                    
+
                     if (!empty($item['positions']) && is_array($item['positions'])) {
                         foreach ($item['positions'] as $position) {
                             $allPositions[] = [
@@ -109,7 +109,7 @@ class ProcessExcelReportJob implements ShouldQueue
                             ];
                         }
                     }
-                    
+
                     if (!empty($item['wordstat']) && $item['wordstat'] !== null) {
                         $allPositions[] = [
                             'id' => $item['id'],
@@ -132,14 +132,14 @@ class ProcessExcelReportJob implements ShouldQueue
                 }
 
                 $page++;
-                
+
                 $pagination = $response['pagination'] ?? [];
                 if (isset($pagination['current_page']) && isset($pagination['last_page'])) {
                     if ($pagination['current_page'] >= $pagination['last_page']) {
                         break;
                     }
                 }
-                
+
             } while (!empty($data));
 
             $reportData = [
@@ -165,7 +165,7 @@ class ProcessExcelReportJob implements ShouldQueue
             if ($fileSize === 0) {
                 throw new \Exception("Excel file is empty");
             }
-            
+
             $this->report->update([
                 'file_path' => $filePath,
                 'status' => 'completed',

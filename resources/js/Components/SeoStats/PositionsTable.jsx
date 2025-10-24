@@ -8,7 +8,7 @@ export default function PositionsTable({
     filters = {},
     pagination = {}
 }) {
-    const [sortConfig, setSortConfig] = useState({ key: 'keyword', direction: 'asc' });
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
     const [searchTerm, setSearchTerm] = useState('');
     const [allKeywords, setAllKeywords] = useState(keywords);
     const [allPositions, setAllPositions] = useState(positions);
@@ -103,16 +103,19 @@ export default function PositionsTable({
             keyword.value.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        filtered.sort((a, b) => {
-            const aValue = a.value.toLowerCase();
-            const bValue = b.value.toLowerCase();
-            
-            if (sortConfig.direction === 'asc') {
-                return aValue.localeCompare(bValue);
-            } else {
-                return bValue.localeCompare(aValue);
-            }
-        });
+        // Применяем сортировку только если пользователь выбрал колонку для сортировки
+        if (sortConfig.key) {
+            filtered.sort((a, b) => {
+                const aValue = a.value.toLowerCase();
+                const bValue = b.value.toLowerCase();
+                
+                if (sortConfig.direction === 'asc') {
+                    return aValue.localeCompare(bValue);
+                } else {
+                    return bValue.localeCompare(aValue);
+                }
+            });
+        }
 
         return filtered;
     }, [allKeywords, searchTerm, sortConfig]);
@@ -225,7 +228,7 @@ export default function PositionsTable({
                                     Ключевое слово
                                     <svg className={`w-4 h-4 transition-transform ${
                                         sortConfig.key === 'keyword' && sortConfig.direction === 'desc' ? 'rotate-180' : ''
-                                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    } ${sortConfig.key === 'keyword' ? 'text-accent-blue' : 'text-text-muted'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                                     </svg>
                                 </button>
