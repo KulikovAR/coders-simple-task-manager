@@ -98,7 +98,7 @@ export default function RecognitionConfirmationModal({
                     <div className="text-center py-8">
                         {(error.includes('настройки') || error.includes('API')) && (
                             <div className="border border-accent-red/20 rounded-lg p-4 mb-4">
-                                <div className="flex items-center gap-2  mb-2">
+                                <div className="flex justify-center items-center gap-2  mb-2">
                                     <span className="font-medium">Требуется настройка API</span>
                                 </div>
                                 <p className="text-sm text-text-muted">
