@@ -79,7 +79,7 @@ class RecognitionCostCalculator
 
     private function calculateEngineCost(int $keywordsCount, int $pagesPerKeyword, float $pricePer1000): float
     {
-        $totalRequests = $keywordsCount * $pagesPerKeyword * 10;
+        $totalRequests = $keywordsCount * $pagesPerKeyword;
         $costPerRequest = $pricePer1000 / 1000;
 
         return $totalRequests * $costPerRequest;
