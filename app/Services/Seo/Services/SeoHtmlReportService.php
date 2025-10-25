@@ -20,8 +20,8 @@ class SeoHtmlReportService
         // Подготавливаем данные для таблицы (строки = ключевые слова, столбцы = даты)
         $tableData = $this->prepareTableData($positions);
         
-        // Подготавливаем данные для статистики (только позиции, без Wordstat)
-        $stats = $this->prepareStatsData($positions, $filters);
+        // Получаем статистику через микросервис для гарантии консистентности данных
+        $stats = $this->microserviceClient->getPositionStatistics($filters);
         
         $html = '<!DOCTYPE html>
 <html lang="ru">
@@ -295,27 +295,27 @@ class SeoHtmlReportService
             </div>
             <div class="meta-item">
                 <div class="meta-label">Ключевых слов</div>
-                <div class="meta-value">' . count($tableData['keywords']) . '</div>
+                <div class="meta-value">' . ($stats['keywords_count'] ?? count($tableData['keywords'])) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Топ-3 позиции</div>
-                <div class="meta-value">' . $stats['top3'] . '</div>
+                <div class="meta-value">' . ($stats['position_distribution']['top_3'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Позиции 4-10</div>
-                <div class="meta-value">' . $stats['top10'] . '</div>
+                <div class="meta-value">' . ($stats['position_distribution']['top_10'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
-                <div class="meta-label">Позиции 11+</div>
-                <div class="meta-value">' . $stats['low'] . '</div>
+                <div class="meta-label">Позиции 11-20</div>
+                <div class="meta-value">' . ($stats['position_distribution']['top_20'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Не найдено</div>
-                <div class="meta-value">' . $stats['notFound'] . '</div>
+                <div class="meta-value">' . ($stats['position_distribution']['not_found'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
-                <div class="meta-label">Нет данных</div>
-                <div class="meta-value">' . $stats['noData'] . '</div>
+                <div class="meta-label">Видимость</div>
+                <div class="meta-value">' . ($stats['visible'] ?? 0) . '</div>
             </div>
         </div>
         
@@ -403,10 +403,15 @@ class SeoHtmlReportService
         new Chart(ctx1, {
             type: "doughnut",
             data: {
-                labels: ["Топ-3", "4-10", "11+", "Не найдено", "Нет данных"],
+                labels: ["Топ-3", "4-10", "11-20", "Не найдено"],
                 datasets: [{
-                    data: [statsData.top3, statsData.top10, statsData.low, statsData.notFound, statsData.noData],
-                    backgroundColor: ["#2d5a2d", "#8b5a00", "#8b0000", "#666666", "#999999"],
+                    data: [
+                        statsData.position_distribution?.top_3 || 0,
+                        statsData.position_distribution?.top_10 || 0,
+                        statsData.position_distribution?.top_20 || 0,
+                        statsData.position_distribution?.not_found || 0
+                    ],
+                    backgroundColor: ["#2d5a2d", "#8b5a00", "#8b0000", "#666666"],
                     borderWidth: 0,
                     cutout: "60%"
                 }]
@@ -439,12 +444,12 @@ class SeoHtmlReportService
         tableData.keywords.forEach(keywordData => {
             Object.keys(keywordData.positions).forEach(date => {
                 if (!dateGroups[date]) {
-                    dateGroups[date] = { top3: 0, top10: 0, low: 0, notFound: 0, noData: 0 };
+                    dateGroups[date] = { top3: 0, top10: 0, top20: 0, notFound: 0 };
                 }
                 const rank = keywordData.positions[date];
                 if (rank === null) {
-                    // Дефис - отсутствие данных
-                    dateGroups[date].noData++;
+                    // Дефис - отсутствие данных, не учитываем в графике
+                    return;
                 } else if (rank === 0) {
                     // Сайт не найден в поисковых системах
                     dateGroups[date].notFound++;
@@ -452,9 +457,10 @@ class SeoHtmlReportService
                     dateGroups[date].top3++;
                 } else if (rank <= 10) {
                     dateGroups[date].top10++;
-                } else {
-                    dateGroups[date].low++;
+                } else if (rank <= 20) {
+                    dateGroups[date].top20++;
                 }
+                // Позиции выше 20 не отображаем в графике для упрощения
             });
         });
         
@@ -486,8 +492,8 @@ class SeoHtmlReportService
                         pointHoverRadius: 6
                     },
                     {
-                        label: "11+",
-                        data: sortedDates.map(date => dateGroups[date].low),
+                        label: "11-20",
+                        data: sortedDates.map(date => dateGroups[date].top20),
                         borderColor: "#8b0000",
                         backgroundColor: "rgba(139, 0, 0, 0.1)",
                         tension: 0.1,
@@ -500,16 +506,6 @@ class SeoHtmlReportService
                         data: sortedDates.map(date => dateGroups[date].notFound),
                         borderColor: "#666666",
                         backgroundColor: "rgba(102, 102, 102, 0.1)",
-                        tension: 0.1,
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: "Нет данных",
-                        data: sortedDates.map(date => dateGroups[date].noData),
-                        borderColor: "#999999",
-                        backgroundColor: "rgba(153, 153, 153, 0.1)",
                         tension: 0.1,
                         borderWidth: 2,
                         pointRadius: 4,
@@ -646,47 +642,6 @@ class SeoHtmlReportService
         ];
     }
 
-    private function prepareStatsData(array $positions, array $filters): array
-    {
-        $top3 = 0;
-        $top10 = 0;
-        $low = 0;
-        $notFound = 0; // rank = 0 (сайт не найден)
-        $noData = 0;   // rank = null (дефис, отсутствие данных)
-
-        foreach ($positions as $position) {
-            $source = $this->extractSource($position);
-            
-            // Исключаем Wordstat из статистики позиций
-            if ($source === 'Wordstat') {
-                continue;
-            }
-            
-            $rank = $this->extractPosition($position);
-            
-            if ($rank === null) {
-                // Дефис - отсутствие данных
-                $noData++;
-            } elseif ($rank === 0) {
-                // Сайт не найден в поисковых системах
-                $notFound++;
-            } elseif ($rank <= 3) {
-                $top3++;
-            } elseif ($rank <= 10) {
-                $top10++;
-            } else {
-                $low++;
-            }
-        }
-
-        return [
-            'top3' => $top3,
-            'top10' => $top10,
-            'low' => $low,
-            'notFound' => $notFound,
-            'noData' => $noData,
-        ];
-    }
 
     private function getPositionClass($position): string
     {

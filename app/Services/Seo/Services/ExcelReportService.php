@@ -10,6 +10,12 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
 use Illuminate\Support\Facades\Log;
 
 class ExcelReportService
@@ -86,23 +92,25 @@ class ExcelReportService
             
             $sheet->getStyle('A2:A4')->getFont()->setSize(12);
             
-            // Статистика
-            $stats = $this->prepareStatsData($reportData['positions']);
+            // Статистика из микросервиса
+            $stats = $this->microserviceClient->getPositionStatistics($reportData['filters']);
             $sheet->setCellValue('A6', 'Статистика:');
-            $sheet->setCellValue('A7', 'Топ-3 позиции: ' . $stats['top3']);
-            $sheet->setCellValue('A8', 'Позиции 4-10: ' . $stats['top10']);
-            $sheet->setCellValue('A9', 'Позиции 11+: ' . $stats['low']);
-            $sheet->setCellValue('A10', 'Не найдено: ' . $stats['none']);
+            $sheet->setCellValue('A7', 'Ключевых слов: ' . ($stats['keywords_count'] ?? 0));
+            $sheet->setCellValue('A8', 'Топ-3 позиции: ' . ($stats['position_distribution']['top_3'] ?? 0));
+            $sheet->setCellValue('A9', 'Позиции 4-10: ' . ($stats['position_distribution']['top_10'] ?? 0));
+            $sheet->setCellValue('A10', 'Позиции 11-20: ' . ($stats['position_distribution']['top_20'] ?? 0));
+            $sheet->setCellValue('A11', 'Не найдено: ' . ($stats['position_distribution']['not_found'] ?? 0));
+            $sheet->setCellValue('A12', 'Видимость: ' . ($stats['visible'] ?? 0));
             
             $sheet->getStyle('A6')->getFont()->setBold(true);
-            $sheet->getStyle('A7:A10')->getFont()->setSize(11);
+            $sheet->getStyle('A7:A12')->getFont()->setSize(11);
             
             // Заголовки таблицы
-            $sheet->setCellValue('A12', 'Ключевое слово');
-            $sheet->setCellValue('B12', 'Позиция');
-            $sheet->setCellValue('C12', 'Дата');
-            $sheet->setCellValue('D12', 'Источник');
-            $sheet->setCellValue('E12', 'Категория');
+            $sheet->setCellValue('A14', 'Ключевое слово');
+            $sheet->setCellValue('B14', 'Позиция');
+            $sheet->setCellValue('C14', 'Дата');
+            $sheet->setCellValue('D14', 'Источник');
+            $sheet->setCellValue('E14', 'Категория');
             
             $headerStyle = [
                 'font' => [
@@ -126,7 +134,7 @@ class ExcelReportService
                 ]
             ];
             
-            $sheet->getStyle('A12:E12')->applyFromArray($headerStyle);
+            $sheet->getStyle('A14:E14')->applyFromArray($headerStyle);
             
             // Автоподбор ширины колонок
             $sheet->getColumnDimension('A')->setWidth(30);
@@ -147,10 +155,10 @@ class ExcelReportService
             $positions = $reportData['positions'] ?? [];
             
             if (empty($positions)) {
-                $sheet->setCellValue("A13", 'Нет данных для отображения');
-                $sheet->mergeCells("A13:E13");
-                $sheet->getStyle("A13")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A13")->getFont()->setItalic(true);
+                $sheet->setCellValue("A15", 'Нет данных для отображения');
+                $sheet->mergeCells("A15:E15");
+                $sheet->getStyle("A15")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("A15")->getFont()->setItalic(true);
                 return;
             }
             
@@ -161,7 +169,7 @@ class ExcelReportService
             $this->updateExcelHeaders($sheet, $tableData['dates']);
             
             // Заполняем данные
-            $row = 13;
+            $row = 15;
             foreach ($tableData['keywords'] as $keywordData) {
                 $col = 'A';
                 
@@ -196,7 +204,7 @@ class ExcelReportService
             $lastCol = $this->getColumnLetter(count($tableData['dates']) + 2); // +2 для keyword и wordstat
             $lastRow = $row - 1;
             
-            if ($lastRow >= 13) {
+            if ($lastRow >= 15) {
                 $dataStyle = [
                     'borders' => [
                         'allBorders' => [
@@ -210,7 +218,7 @@ class ExcelReportService
                     ]
                 ];
                 
-                $sheet->getStyle("A13:{$lastCol}{$lastRow}")->applyFromArray($dataStyle);
+                $sheet->getStyle("A15:{$lastCol}{$lastRow}")->applyFromArray($dataStyle);
             }
             
         } catch (\Exception $e) {
@@ -225,35 +233,74 @@ class ExcelReportService
         $tableData = $this->prepareTableData($reportData['positions']);
         $keywordCount = count($tableData['keywords']);
         
-        // Рассчитываем позицию для статистики: начало данных (13) + количество ключевых слов + отступ
-        $chartRow = 13 + $keywordCount + 3;
+        // Рассчитываем позицию для статистики: начало данных (15) + количество ключевых слов + отступ
+        $chartRow = 15 + $keywordCount + 3;
         
-        $sheet->setCellValue("A{$chartRow}", 'Статистика по категориям позиций');
+        // Получаем статистику из микросервиса
+        $stats = $this->microserviceClient->getPositionStatistics($reportData['filters']);
+        
+        // Заголовок для диаграммы распределения позиций
+        $sheet->setCellValue("A{$chartRow}", 'Распределение позиций');
         $sheet->getStyle("A{$chartRow}")->getFont()->setBold(true)->setSize(14);
         
-        // Добавляем данные для диаграммы
-        $stats = $this->prepareStatsData($reportData['positions']);
         $chartRow += 2;
         
+        // Данные для диаграммы распределения позиций
         $sheet->setCellValue("A{$chartRow}", 'Категория');
         $sheet->setCellValue("B{$chartRow}", 'Количество');
         $sheet->getStyle("A{$chartRow}:B{$chartRow}")->getFont()->setBold(true);
         
         $chartRow++;
         $sheet->setCellValue("A{$chartRow}", 'Топ-3');
-        $sheet->setCellValue("B{$chartRow}", $stats['top3']);
+        $sheet->setCellValue("B{$chartRow}", $stats['position_distribution']['top_3'] ?? 0);
         
         $chartRow++;
         $sheet->setCellValue("A{$chartRow}", '4-10');
-        $sheet->setCellValue("B{$chartRow}", $stats['top10']);
+        $sheet->setCellValue("B{$chartRow}", $stats['position_distribution']['top_10'] ?? 0);
         
         $chartRow++;
-        $sheet->setCellValue("A{$chartRow}", '11+');
-        $sheet->setCellValue("B{$chartRow}", $stats['low']);
+        $sheet->setCellValue("A{$chartRow}", '11-20');
+        $sheet->setCellValue("B{$chartRow}", $stats['position_distribution']['top_20'] ?? 0);
         
         $chartRow++;
         $sheet->setCellValue("A{$chartRow}", 'Не найдено');
-        $sheet->setCellValue("B{$chartRow}", $stats['none']);
+        $sheet->setCellValue("B{$chartRow}", $stats['position_distribution']['not_found'] ?? 0);
+        
+        // Создаем диаграмму распределения позиций
+        $this->createPositionDistributionChart($sheet, $chartRow - 4, $chartRow - 1);
+        
+        // Добавляем статистику видимости
+        $chartRow += 3;
+        $sheet->setCellValue("A{$chartRow}", 'Статистика видимости');
+        $sheet->getStyle("A{$chartRow}")->getFont()->setBold(true)->setSize(14);
+        
+        $chartRow += 2;
+        $sheet->setCellValue("A{$chartRow}", 'Показатель');
+        $sheet->setCellValue("B{$chartRow}", 'Значение');
+        $sheet->getStyle("A{$chartRow}:B{$chartRow}")->getFont()->setBold(true);
+        
+        $chartRow++;
+        $sheet->setCellValue("A{$chartRow}", 'Видимость');
+        $sheet->setCellValue("B{$chartRow}", $stats['visible'] ?? 0);
+        
+        $chartRow++;
+        $sheet->setCellValue("A{$chartRow}", 'Не видимо');
+        $sheet->setCellValue("B{$chartRow}", $stats['not_visible'] ?? 0);
+        
+        $chartRow++;
+        $sheet->setCellValue("A{$chartRow}", 'Средняя позиция');
+        $sheet->setCellValue("B{$chartRow}", $stats['visibility_stats']['avg_position'] ?? 0);
+        
+        $chartRow++;
+        $sheet->setCellValue("A{$chartRow}", 'Лучшая позиция');
+        $sheet->setCellValue("B{$chartRow}", $stats['visibility_stats']['best_position'] ?? 0);
+        
+        $chartRow++;
+        $sheet->setCellValue("A{$chartRow}", 'Худшая позиция');
+        $sheet->setCellValue("B{$chartRow}", $stats['visibility_stats']['worst_position'] ?? 0);
+        
+        // Создаем диаграмму видимости
+        $this->createVisibilityChart($sheet, $chartRow - 5, $chartRow - 1);
     }
 
     private function prepareTableData(array $positions): array
@@ -303,16 +350,16 @@ class ExcelReportService
         $col = 'A';
         
         // Ключевое слово
-        $sheet->setCellValue("{$col}12", 'Ключевое слово');
+        $sheet->setCellValue("{$col}14", 'Ключевое слово');
         $col++;
         
         // Частота Wordstat
-        $sheet->setCellValue("{$col}12", 'Частота (Wordstat)');
+        $sheet->setCellValue("{$col}14", 'Частота (Wordstat)');
         $col++;
         
         // Даты
         foreach ($dates as $date) {
-            $sheet->setCellValue("{$col}12", $date);
+            $sheet->setCellValue("{$col}14", $date);
             $col++;
         }
         
@@ -340,7 +387,7 @@ class ExcelReportService
             ]
         ];
         
-        $sheet->getStyle("A12:{$lastCol}12")->applyFromArray($headerStyle);
+        $sheet->getStyle("A14:{$lastCol}14")->applyFromArray($headerStyle);
     }
 
     private function getColumnLetter(int $columnNumber): string
@@ -354,41 +401,6 @@ class ExcelReportService
         return $letter;
     }
 
-    private function prepareStatsData(array $positions): array
-    {
-        $top3 = 0;
-        $top10 = 0;
-        $low = 0;
-        $none = 0;
-
-        foreach ($positions as $position) {
-            $source = $this->extractSource($position);
-            
-            // Исключаем Wordstat из статистики позиций
-            if ($source === 'Wordstat') {
-                continue;
-            }
-            
-            $rank = $this->extractPosition($position);
-            
-            if ($rank === null || $rank === '' || $rank === 0) {
-                $none++;
-            } elseif ($rank <= 3) {
-                $top3++;
-            } elseif ($rank <= 10) {
-                $top10++;
-            } else {
-                $low++;
-            }
-        }
-
-        return [
-            'top3' => $top3,
-            'top10' => $top10,
-            'low' => $low,
-            'none' => $none,
-        ];
-    }
 
     private function getPositionCategory($position): string
     {
@@ -476,5 +488,101 @@ class ExcelReportService
             'wordstat' => 'Wordstat',
             default => $source
         };
+    }
+
+    private function createPositionDistributionChart($sheet, int $startRow, int $endRow): void
+    {
+        try {
+            // Создаем круговую диаграмму распределения позиций
+            $dataSeriesLabels = [
+                new DataSeriesValues('String', 'Worksheet!$A$' . ($startRow + 1) . ':$A$' . ($endRow + 1), null, 4),
+            ];
+            
+            $xAxisTickValues = [
+                new DataSeriesValues('String', 'Worksheet!$A$' . ($startRow + 1) . ':$A$' . ($endRow + 1), null, 4),
+            ];
+            
+            $dataSeriesValues = [
+                new DataSeriesValues('Number', 'Worksheet!$B$' . ($startRow + 1) . ':$B$' . ($endRow + 1), null, 4),
+            ];
+            
+            $series = new DataSeries(
+                DataSeries::TYPE_PIECHART,
+                null,
+                range(0, count($dataSeriesValues) - 1),
+                $dataSeriesLabels,
+                $xAxisTickValues,
+                $dataSeriesValues
+            );
+            
+            $plotArea = new PlotArea(null, [$series]);
+            $legend = new Legend();
+            $chart = new Chart(
+                'Распределение позиций',
+                new Title('Распределение позиций'),
+                $legend,
+                $plotArea,
+                true,
+                0,
+                null,
+                null
+            );
+            
+            // Размещаем диаграмму справа от данных
+            $chart->setTopLeftPosition('D' . ($startRow + 1));
+            $chart->setBottomRightPosition('K' . ($startRow + 15));
+            
+            $sheet->addChart($chart);
+        } catch (\Exception $e) {
+            Log::error("Error creating position distribution chart: " . $e->getMessage());
+        }
+    }
+
+    private function createVisibilityChart($sheet, int $startRow, int $endRow): void
+    {
+        try {
+            // Создаем столбчатую диаграмму видимости
+            $dataSeriesLabels = [
+                new DataSeriesValues('String', 'Worksheet!$A$' . ($startRow + 1) . ':$A$' . ($endRow + 1), null, 5),
+            ];
+            
+            $xAxisTickValues = [
+                new DataSeriesValues('String', 'Worksheet!$A$' . ($startRow + 1) . ':$A$' . ($endRow + 1), null, 5),
+            ];
+            
+            $dataSeriesValues = [
+                new DataSeriesValues('Number', 'Worksheet!$B$' . ($startRow + 1) . ':$B$' . ($endRow + 1), null, 5),
+            ];
+            
+            $series = new DataSeries(
+                DataSeries::TYPE_BARCHART,
+                DataSeries::GROUPING_STANDARD,
+                range(0, count($dataSeriesValues) - 1),
+                $dataSeriesLabels,
+                $xAxisTickValues,
+                $dataSeriesValues
+            );
+            
+            $plotArea = new PlotArea(null, [$series]);
+            $legend = new Legend();
+            $chart = new Chart(
+                'Статистика видимости',
+                new Title('Статистика видимости'),
+                $legend,
+                $plotArea,
+                true,
+                0,
+                null,
+                null
+            );
+            
+            // Размещаем диаграмму справа от данных
+            $chart->setTopLeftPosition('D' . ($startRow + 1));
+            $chart->setBottomRightPosition('K' . ($startRow + 10));
+            
+            $sheet->addChart($chart);
+        } catch (\Exception $e) {
+            Log::error("Error creating visibility chart: " . $e->getMessage());
+        }
     }
 }
