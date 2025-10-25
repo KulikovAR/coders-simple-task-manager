@@ -24,7 +24,12 @@ export default function RecognitionConfirmationModal({
             const response = await axios.get(endpoint);
             
             if (response.data.success) {
-                setCostData(response.data.cost_calculation);
+                const costCalculation = response.data.cost_calculation;
+                if (costCalculation.success) {
+                    setCostData(costCalculation);
+                } else {
+                    setError(costCalculation.error || 'Ошибка расчета стоимости');
+                }
             } else {
                 const errorMessage = response.data.error || 'Неизвестная ошибка';
                 setError(errorMessage);
