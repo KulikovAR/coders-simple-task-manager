@@ -36,10 +36,6 @@ class SiteUserService
         if (!empty($siteData)) {
             $dto = UpdateSiteDTO::fromRequest($siteData);
             $this->siteService->updateSite($site->id, $dto);
-            
-            if ($dto->wordstatEnabled) {
-                $this->wordstatRecognitionTaskService->createTask($site->id);
-            }
         }
 
         return $site;
@@ -79,14 +75,7 @@ class SiteUserService
             return false;
         }
 
-        $site = $this->siteService->getSite($siteId);
-        $wasWordstatEnabled = $site?->wordstatEnabled ?? false;
-        
         $success = $this->siteService->updateSite($siteId, $dto);
-        
-        if ($success && $dto->wordstatEnabled && !$wasWordstatEnabled) {
-            $this->wordstatRecognitionTaskService->createTask($siteId);
-        }
 
         return $success;
     }
