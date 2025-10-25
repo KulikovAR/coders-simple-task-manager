@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function RecognitionConfirmationModal({ 
@@ -49,12 +49,6 @@ export default function RecognitionConfirmationModal({
         }
     };
 
-    const handleOpen = () => {
-        if (isOpen && !costData && !loading) {
-            fetchCost();
-        }
-    };
-
     const handleConfirm = () => {
         onConfirm();
         onClose();
@@ -66,6 +60,13 @@ export default function RecognitionConfirmationModal({
             maximumFractionDigits: 2
         }).format(cost);
     };
+
+    // Загружаем данные при открытии модального окна
+    useEffect(() => {
+        if (isOpen && !costData && !loading && !error) {
+            fetchCost();
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -85,8 +86,6 @@ export default function RecognitionConfirmationModal({
                         </svg>
                     </button>
                 </div>
-
-                {handleOpen()}
 
                 {loading && (
                     <div className="flex items-center justify-center py-8">
