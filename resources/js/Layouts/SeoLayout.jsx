@@ -10,6 +10,7 @@ import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
 import Waves from '@/Components/Waves';
 import YandexMetrika from '@/Components/YandexMetrika';
 import ServiceSwitcher from '@/Components/ServiceSwitcher';
+import ApiBalanceDisplay from '@/Components/ApiBalanceDisplay';
 
 export default function SeoLayout({ user, header, children, flash }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -99,6 +100,7 @@ export default function SeoLayout({ user, header, children, flash }) {
                             </div>
                         </div>
                         <div className="hidden sm:flex sm:items-center sm:ml-6 dropdown-glitch">
+                            <ApiBalanceDisplay lazyLoad={true} />
                             <div className="ml-3 relative flex items-center gap-3">
                                 {/* Theme Switcher */}
                                 <button
@@ -194,7 +196,7 @@ export default function SeoLayout({ user, header, children, flash }) {
                             </div>
                         </div>
                         <div className="-mr-2 flex items-center gap-2 sm:hidden">
-                            {/* Notification Bell для мобильного - рядом с бургером */}
+                            <ApiBalanceDisplay lazyLoad={true} />
                             <MobileNotificationBell />
 
                             <button

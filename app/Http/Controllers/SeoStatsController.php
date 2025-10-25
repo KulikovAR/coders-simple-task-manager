@@ -10,6 +10,9 @@ use App\Services\Seo\Services\PositionTrackingService;
 use App\Services\Seo\Services\MicroserviceClient;
 use App\Services\Seo\Services\RecognitionTaskService;
 use App\Services\Seo\Services\WordstatRecognitionTaskService;
+use App\Services\Seo\Services\ApiBalanceManager;
+use App\Services\Seo\Services\RecognitionCostCalculator;
+use App\Services\Seo\Services\WordstatCostCalculator;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +26,10 @@ class SeoStatsController extends Controller
         private PositionTrackingService $positionTrackingService,
         private MicroserviceClient $microserviceClient,
         private RecognitionTaskService $recognitionTaskService,
-        private WordstatRecognitionTaskService $wordstatRecognitionTaskService
+        private WordstatRecognitionTaskService $wordstatRecognitionTaskService,
+        private ApiBalanceManager $apiBalanceManager,
+        private RecognitionCostCalculator $costCalculator,
+        private WordstatCostCalculator $wordstatCostCalculator
     ) {}
 
     public function index()
@@ -252,15 +258,98 @@ class SeoStatsController extends Controller
         }
 
         try {
-            $task = $this->recognitionTaskService->createTask($siteId);
+            $keywords = $this->microserviceClient->getKeywords($siteId);
+            $keywordsCount = count($keywords);
+            
+            if ($keywordsCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Нет ключевых слов для отслеживания'
+                ]);
+            }
+
+            $site = $this->siteUserService->getSite($siteId);
+            if (!$site) {
+                return response()->json(['error' => 'Сайт не найден'], 404);
+            }
+
+            $searchEngines = $site->searchEngines ?? ['google'];
+            $pagesPerKeyword = 10;
+
+            $validation = $this->costCalculator->validateRecognitionRequest(
+                $keywordsCount,
+                $pagesPerKeyword,
+                $searchEngines
+            );
+
+            if (!$validation['valid']) {
+                return response()->json([
+                    'success' => false,
+                    'error' => implode(', ', $validation['errors']),
+                    'cost_calculation' => $validation['cost_calculation'] ?? null
+                ]);
+            }
+
+            $task = $this->recognitionTaskService->createTask($siteId, $searchEngines);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Отслеживание запущено',
-                'task_id' => $task->id
+                'task_id' => $task->id,
+                'cost_calculation' => $validation['cost_calculation']
             ]);
         } catch (\Exception $e) {
+            Log::error('Track positions error', [
+                'site_id' => $siteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['error' => 'Ошибка запуска отслеживания'], 500);
+        }
+    }
+
+    public function getRecognitionCost(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        try {
+            $keywords = $this->microserviceClient->getKeywords($siteId);
+            $keywordsCount = count($keywords);
+            
+            if ($keywordsCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Нет ключевых слов для отслеживания'
+                ]);
+            }
+
+            $site = $this->siteUserService->getSite($siteId);
+            if (!$site) {
+                return response()->json(['error' => 'Сайт не найден'], 404);
+            }
+
+            $searchEngines = $site->searchEngines ?? ['google'];
+            $pagesPerKeyword = 10;
+
+            $costCalculation = $this->costCalculator->calculateRecognitionCost(
+                $keywordsCount,
+                $pagesPerKeyword,
+                $searchEngines
+            );
+
+            return response()->json([
+                'success' => true,
+                'cost_calculation' => $costCalculation
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get recognition cost error', [
+                'site_id' => $siteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Ошибка расчета стоимости'], 500);
         }
     }
 
@@ -325,15 +414,90 @@ class SeoStatsController extends Controller
         }
 
         try {
+            $keywords = $this->microserviceClient->getKeywords($siteId);
+            $keywordsCount = count($keywords);
+            
+            if ($keywordsCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Нет ключевых слов для парсинга Wordstat'
+                ]);
+            }
+
+            $site = $this->siteUserService->getSite($siteId);
+            if (!$site || !$site->wordstatEnabled) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Wordstat не включен для данного сайта'
+                ]);
+            }
+
+            $validation = $this->wordstatCostCalculator->validateWordstatRequest($keywordsCount);
+
+            if (!$validation['valid']) {
+                return response()->json([
+                    'success' => false,
+                    'error' => implode(', ', $validation['errors']),
+                    'cost_calculation' => $validation['cost_calculation'] ?? null
+                ]);
+            }
+
             $task = $this->wordstatRecognitionTaskService->createTask($siteId);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Парсинг Wordstat запущен',
-                'task_id' => $task->id
+                'task_id' => $task->id,
+                'cost_calculation' => $validation['cost_calculation']
             ]);
         } catch (\Exception $e) {
+            Log::error('Track wordstat positions error', [
+                'site_id' => $siteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['error' => 'Ошибка запуска парсинга Wordstat'], 500);
+        }
+    }
+
+    public function getWordstatCost(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        try {
+            $keywords = $this->microserviceClient->getKeywords($siteId);
+            $keywordsCount = count($keywords);
+            
+            if ($keywordsCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Нет ключевых слов для парсинга Wordstat'
+                ]);
+            }
+
+            $site = $this->siteUserService->getSite($siteId);
+            if (!$site || !$site->wordstatEnabled) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Wordstat не включен для данного сайта'
+                ]);
+            }
+
+            $costCalculation = $this->wordstatCostCalculator->calculateWordstatCost($keywordsCount);
+
+            return response()->json([
+                'success' => true,
+                'cost_calculation' => $costCalculation
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get wordstat cost error', [
+                'site_id' => $siteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Ошибка расчета стоимости Wordstat'], 500);
         }
     }
 

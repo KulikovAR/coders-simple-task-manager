@@ -54,7 +54,7 @@ export default function XmlRiverLogo(props) {
                 </svg>
             </div>
 
-            {/* XML River Logo */}
+            {/* XML Stock Logo */}
             <div className="flex items-center gap-2">
                 <img
                     src="/images/xml-stock-logo.png"

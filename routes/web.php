@@ -13,6 +13,7 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskStatusController;
+use App\Http\Controllers\ApiBalanceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -168,11 +169,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/seo-stats/keywords', [App\Http\Controllers\SeoStatsController::class, 'storeKeyword'])->name('seo-stats.store-keyword');
     Route::delete('/seo-stats/keywords/{keyword}', [App\Http\Controllers\SeoStatsController::class, 'destroyKeyword'])->name('seo-stats.destroy-keyword');
     Route::post('/seo-stats/{site}/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
+    Route::get('/seo-stats/{site}/recognition-cost', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionCost'])->name('seo-stats.recognition-cost');
     Route::post('/seo-stats/{site}/track-wordstat', [App\Http\Controllers\SeoStatsController::class, 'trackWordstatPositions'])->name('seo-stats.track-wordstat');
+    Route::get('/seo-stats/{site}/wordstat-cost', [App\Http\Controllers\SeoStatsController::class, 'getWordstatCost'])->name('seo-stats.wordstat-cost');
     Route::get('/seo-stats/{site}/wordstat-recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatRecognitionStatus'])->name('seo-stats.wordstat-recognition-status');
     Route::get('/seo-stats/wordstat-tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatTaskStatus'])->name('seo-stats.wordstat-task-status');
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
+    
+    // API роуты для баланса
+    Route::get('/api-balance', [ApiBalanceController::class, 'index'])->name('api-balance');
 
     Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
     Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');

@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { useWordstatRecognition } from '@/hooks/useWordstatRecognition';
+import RecognitionConfirmationModal from './RecognitionConfirmationModal';
 
 export default function TrackWordstatButton({ siteId, size = 'default', initialData = null }) {
     const { wordstatStatus, startWordstatRecognition } = useWordstatRecognition(siteId, initialData);
     const [isStarting, setIsStarting] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const handleStartWordstatRecognition = async () => {
         setIsStarting(true);
         try {
             const result = await startWordstatRecognition();
             if (!result.success) {
-                alert(result.message);
+                alert(result.message || result.error || 'Ошибка запуска парсинга Wordstat');
             }
+        } catch (error) {
+            alert('Ошибка запуска парсинга Wordstat');
         } finally {
             setIsStarting(false);
         }
@@ -47,7 +51,7 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
     if (wordstatStatus.status === 'failed') {
         return (
             <button
-                onClick={handleStartWordstatRecognition}
+                onClick={() => setShowModal(true)}
                 className={`${getButtonClasses()} bg-red-500 text-white hover:bg-red-600`}
                 title="Повторить парсинг Wordstat"
             >
@@ -60,15 +64,25 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
     }
 
     return (
-        <button
-            onClick={handleStartWordstatRecognition}
-            className={`${getButtonClasses()} bg-blue-500 text-white hover:bg-blue-600`}
-            title="Запустить парсинг Wordstat"
-        >
-            <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Wordstat
-        </button>
+        <>
+            <button
+                onClick={() => setShowModal(true)}
+                className={`${getButtonClasses()} bg-blue-500 text-white hover:bg-blue-600`}
+                title="Запустить парсинг Wordstat"
+            >
+                <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Wordstat
+            </button>
+
+            <RecognitionConfirmationModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onConfirm={handleStartWordstatRecognition}
+                siteId={siteId}
+                type="wordstat"
+            />
+        </>
     );
 }

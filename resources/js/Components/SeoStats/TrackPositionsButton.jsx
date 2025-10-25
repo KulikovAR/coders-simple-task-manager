@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
+import RecognitionConfirmationModal from './RecognitionConfirmationModal';
 
 export default function TrackPositionsButton({ siteId, size = 'default', initialData = null }) {
     const { recognitionStatus, startRecognition } = useSeoRecognition(siteId, initialData);
     const [isStarting, setIsStarting] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const handleStartRecognition = async () => {
         setIsStarting(true);
         try {
             const result = await startRecognition();
             if (!result.success) {
-                alert(result.message);
+                alert(result.message || result.error || 'Ошибка запуска распознавания');
             }
+        } catch (error) {
+            alert('Ошибка запуска распознавания');
         } finally {
             setIsStarting(false);
         }
@@ -47,7 +51,7 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
     if (recognitionStatus.status === 'failed') {
         return (
             <button
-                onClick={handleStartRecognition}
+                onClick={() => setShowModal(true)}
                 className={`${getButtonClasses()} bg-red-500 text-white hover:bg-red-600`}
                 title="Повторить снятие позиций"
             >
@@ -60,14 +64,25 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
     }
 
     return (
-        <button
-            onClick={handleStartRecognition}
-            className={`${getButtonClasses()} bg-accent-green text-white hover:bg-accent-green/90`}
-            title="Снять позиции"
-        >
-            <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-        </button>
+        <>
+            <button
+                onClick={() => setShowModal(true)}
+                className={`${getButtonClasses()} bg-accent-green text-white hover:bg-accent-green/90`}
+                title="Снять позиции"
+            >
+                <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Снять позиции
+            </button>
+
+            <RecognitionConfirmationModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onConfirm={handleStartRecognition}
+                siteId={siteId}
+                type="recognition"
+            />
+        </>
     );
 }

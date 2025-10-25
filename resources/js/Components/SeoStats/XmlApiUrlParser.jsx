@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function XmlApiUrlParser({ 
-    value, 
-    onChange, 
+export default function XmlApiUrlParser({
+    value,
+    onChange,
     placeholder = "Введите URL API...",
     className = "",
     allowedDomains = [],
@@ -21,7 +21,7 @@ export default function XmlApiUrlParser({
         if (apiType === 'google') {
             return ['https://xmlstock.com'];
         } else if (apiType === 'wordstat') {
-            return ['http://xmlriver.com'];
+            return ['https://xmlriver.com'];
         }
         return allowedDomains;
     };
@@ -30,7 +30,7 @@ export default function XmlApiUrlParser({
     const validateDomain = (baseUrl) => {
         const allowedDomains = getAllowedDomains();
         const isValid = allowedDomains.some(domain => baseUrl.startsWith(domain));
-        
+
         if (!isValid && baseUrl) {
             const domainNames = allowedDomains.map(d => d.replace(/^https?:\/\//, '')).join(' или ');
             return `Домен должен быть: ${domainNames}`;
@@ -52,27 +52,27 @@ export default function XmlApiUrlParser({
 
     const parseUrl = (urlString) => {
         const newErrors = {};
-        
+
         try {
             const url = new URL(urlString);
             const params = new URLSearchParams(url.search);
-            
+
             const userId = params.get('user') || '';
             const apiKey = params.get('key') || '';
             const baseUrl = `${url.protocol}//${url.host}`;
-            
+
             // Валидация домена
             const domainError = validateDomain(baseUrl);
             if (domainError) {
                 newErrors.baseUrl = domainError;
             }
-            
+
             const parsed = {
                 baseUrl,
                 userId,
                 apiKey
             };
-            
+
             setParsedData(parsed);
             setErrors(newErrors);
             onChange(parsed, newErrors);
@@ -101,7 +101,7 @@ export default function XmlApiUrlParser({
     const handleFieldChange = (field, value) => {
         const newData = { ...parsedData, [field]: value };
         const newErrors = { ...errors };
-        
+
         // Валидация домена при изменении baseUrl
         if (field === 'baseUrl') {
             const domainError = validateDomain(value);
@@ -111,7 +111,7 @@ export default function XmlApiUrlParser({
                 delete newErrors.baseUrl;
             }
         }
-        
+
         setParsedData(newData);
         setErrors(newErrors);
         onChange(newData, newErrors);
@@ -136,7 +136,7 @@ export default function XmlApiUrlParser({
                     <p className="mt-1 text-sm text-accent-red">{errors.url}</p>
                 )}
             </div>
-            
+
             <div className="grid grid-cols-3 gap-3">
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
@@ -155,7 +155,7 @@ export default function XmlApiUrlParser({
                         <p className="mt-1 text-sm text-accent-red">{errors.baseUrl}</p>
                     )}
                 </div>
-                
+
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
                         User ID
@@ -168,7 +168,7 @@ export default function XmlApiUrlParser({
                         className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
                     />
                 </div>
-                
+
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
                         API Key
