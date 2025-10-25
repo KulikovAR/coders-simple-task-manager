@@ -231,9 +231,15 @@ class SeoHtmlReportService
             color: #8b0000; 
         }
         
-        .position-none { 
+        .position-not-found { 
             background: #f0f0f0; 
             color: #666666; 
+        }
+        
+        .position-no-data { 
+            background: #f8f9fa; 
+            color: #999999; 
+            font-style: italic;
         }
         
         .footer {
@@ -303,6 +309,14 @@ class SeoHtmlReportService
                 <div class="meta-label">Позиции 11+</div>
                 <div class="meta-value">' . $stats['low'] . '</div>
             </div>
+            <div class="meta-item">
+                <div class="meta-label">Не найдено</div>
+                <div class="meta-value">' . $stats['notFound'] . '</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Нет данных</div>
+                <div class="meta-value">' . $stats['noData'] . '</div>
+            </div>
         </div>
         
         <div class="stats-section">
@@ -355,7 +369,15 @@ class SeoHtmlReportService
             foreach ($tableData['dates'] as $date) {
                 $position = $keywordData['positions'][$date] ?? null;
                 $positionClass = $this->getPositionClass($position);
-                $positionText = $position === null ? '—' : $position;
+                
+                // Определяем текст для отображения
+                if ($position === null) {
+                    $positionText = '—'; // Дефис - отсутствие данных
+                } elseif ($position === 0) {
+                    $positionText = '0'; // Сайт не найден
+                } else {
+                    $positionText = $position; // Реальная позиция
+                }
                 
                 $html .= '<td class="date-cell"><span class="position-cell ' . $positionClass . '">' . htmlspecialchars($positionText) . '</span></td>';
             }
@@ -381,10 +403,10 @@ class SeoHtmlReportService
         new Chart(ctx1, {
             type: "doughnut",
             data: {
-                labels: ["Топ-3", "4-10", "11+", "Не найдено"],
+                labels: ["Топ-3", "4-10", "11+", "Не найдено", "Нет данных"],
                 datasets: [{
-                    data: [statsData.top3, statsData.top10, statsData.low, statsData.none],
-                    backgroundColor: ["#2d5a2d", "#8b5a00", "#8b0000", "#666666"],
+                    data: [statsData.top3, statsData.top10, statsData.low, statsData.notFound, statsData.noData],
+                    backgroundColor: ["#2d5a2d", "#8b5a00", "#8b0000", "#666666", "#999999"],
                     borderWidth: 0,
                     cutout: "60%"
                 }]
@@ -417,13 +439,22 @@ class SeoHtmlReportService
         tableData.keywords.forEach(keywordData => {
             Object.keys(keywordData.positions).forEach(date => {
                 if (!dateGroups[date]) {
-                    dateGroups[date] = { top3: 0, top10: 0, low: 0, none: 0 };
+                    dateGroups[date] = { top3: 0, top10: 0, low: 0, notFound: 0, noData: 0 };
                 }
                 const rank = keywordData.positions[date];
-                if (rank === null || rank === 0) dateGroups[date].none++;
-                else if (rank <= 3) dateGroups[date].top3++;
-                else if (rank <= 10) dateGroups[date].top10++;
-                else dateGroups[date].low++;
+                if (rank === null) {
+                    // Дефис - отсутствие данных
+                    dateGroups[date].noData++;
+                } else if (rank === 0) {
+                    // Сайт не найден в поисковых системах
+                    dateGroups[date].notFound++;
+                } else if (rank <= 3) {
+                    dateGroups[date].top3++;
+                } else if (rank <= 10) {
+                    dateGroups[date].top10++;
+                } else {
+                    dateGroups[date].low++;
+                }
             });
         });
         
@@ -459,6 +490,26 @@ class SeoHtmlReportService
                         data: sortedDates.map(date => dateGroups[date].low),
                         borderColor: "#8b0000",
                         backgroundColor: "rgba(139, 0, 0, 0.1)",
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: "Не найдено",
+                        data: sortedDates.map(date => dateGroups[date].notFound),
+                        borderColor: "#666666",
+                        backgroundColor: "rgba(102, 102, 102, 0.1)",
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: "Нет данных",
+                        data: sortedDates.map(date => dateGroups[date].noData),
+                        borderColor: "#999999",
+                        backgroundColor: "rgba(153, 153, 153, 0.1)",
                         tension: 0.1,
                         borderWidth: 2,
                         pointRadius: 4,
@@ -600,7 +651,8 @@ class SeoHtmlReportService
         $top3 = 0;
         $top10 = 0;
         $low = 0;
-        $none = 0;
+        $notFound = 0; // rank = 0 (сайт не найден)
+        $noData = 0;   // rank = null (дефис, отсутствие данных)
 
         foreach ($positions as $position) {
             $source = $this->extractSource($position);
@@ -612,8 +664,12 @@ class SeoHtmlReportService
             
             $rank = $this->extractPosition($position);
             
-            if ($rank === null || $rank === '' || $rank === 0) {
-                $none++;
+            if ($rank === null) {
+                // Дефис - отсутствие данных
+                $noData++;
+            } elseif ($rank === 0) {
+                // Сайт не найден в поисковых системах
+                $notFound++;
             } elseif ($rank <= 3) {
                 $top3++;
             } elseif ($rank <= 10) {
@@ -627,14 +683,17 @@ class SeoHtmlReportService
             'top3' => $top3,
             'top10' => $top10,
             'low' => $low,
-            'none' => $none,
+            'notFound' => $notFound,
+            'noData' => $noData,
         ];
     }
 
     private function getPositionClass($position): string
     {
-        if ($position === null || $position === '' || $position === 0) {
-            return 'position-none';
+        if ($position === null) {
+            return 'position-no-data';
+        } elseif ($position === 0) {
+            return 'position-not-found';
         } elseif ($position <= 3) {
             return 'position-top3';
         } elseif ($position <= 10) {
