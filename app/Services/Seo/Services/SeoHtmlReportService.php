@@ -160,9 +160,15 @@ class SeoHtmlReportService
             color: #37352f;
         }
         
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+        
         table { 
             width: 100%; 
             border-collapse: collapse;
+            min-width: 600px;
         }
         
         th, td { 
@@ -334,6 +340,7 @@ class SeoHtmlReportService
                 <div class="table-title">Детальная статистика</div>
             </div>
             
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -377,6 +384,7 @@ class SeoHtmlReportService
         
         $html .= '</tbody>
         </table>
+        </div>
         
         <div class="footer">
             <p>Отчет сгенерирован ' . now()->format('d.m.Y в H:i') . '</p>
