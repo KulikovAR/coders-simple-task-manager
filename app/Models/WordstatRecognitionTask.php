@@ -15,6 +15,7 @@ class WordstatRecognitionTask extends Model
         'status',
         'total_keywords',
         'processed_keywords',
+        'progress_percent',
         'error_message',
         'external_task_id',
         'started_at',
@@ -33,6 +34,10 @@ class WordstatRecognitionTask extends Model
 
     public function getProgressPercentageAttribute(): int
     {
+        if (isset($this->progress_percent) && $this->progress_percent > 0) {
+            return $this->progress_percent;
+        }
+        
         if ($this->total_keywords === 0) {
             return 0;
         }

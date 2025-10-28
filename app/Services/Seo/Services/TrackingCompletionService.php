@@ -57,16 +57,19 @@ class TrackingCompletionService
 
     private function updateSeoTask(SeoRecognitionTask $task, string $status, array $message): void
     {
-        $updateData = [
-            'completed_at' => now(),
-        ];
+        $updateData = [];
 
         if ($status === 'completed') {
             $updateData['status'] = 'completed';
             $updateData['processed_keywords'] = $task->total_keywords;
+            $updateData['progress_percent'] = 100;
+            $updateData['completed_at'] = now();
         } elseif ($status === 'failed') {
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
+            $updateData['completed_at'] = now();
+        } elseif (isset($message['percent'])) {
+            $updateData['progress_percent'] = $message['percent'];
         } else {
             Log::info('Received unknown status for SEO task', [
                 'task_id' => $task->id,
@@ -88,16 +91,19 @@ class TrackingCompletionService
 
     private function updateWordstatTask(WordstatRecognitionTask $task, string $status, array $message): void
     {
-        $updateData = [
-            'completed_at' => now(),
-        ];
+        $updateData = [];
 
         if ($status === 'completed') {
             $updateData['status'] = 'completed';
             $updateData['processed_keywords'] = $task->total_keywords;
+            $updateData['progress_percent'] = 100;
+            $updateData['completed_at'] = now();
         } elseif ($status === 'failed') {
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
+            $updateData['completed_at'] = now();
+        } elseif (isset($message['percent'])) {
+            $updateData['progress_percent'] = $message['percent'];
         } else {
             Log::info('Received unknown status for Wordstat task', [
                 'task_id' => $task->id,
