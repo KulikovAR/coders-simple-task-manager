@@ -281,10 +281,20 @@ export default function SeoReports({
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-4">
-                                <TrackPositionsButton siteId={project.id} initialData={activeTask} />
-                                {project.wordstat_enabled && (
-                                    <TrackWordstatButton siteId={project.id} initialData={activeTask} />
+                            <div className="flex flex-col gap-3 items-end">
+                                <div className="flex items-center gap-4">
+                                    <TrackPositionsButton siteId={project.id} initialData={activeTask} />
+                                    {project.wordstat_enabled && (
+                                        <TrackWordstatButton siteId={project.id} initialData={activeTask} />
+                                    )}
+                                </div>
+                                {project.last_position_update && (
+                                    <div className="text-xs text-text-muted flex items-center gap-1">
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Последнее обновление: {new Date(project.last_position_update).toLocaleString('ru-RU')}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -304,6 +314,7 @@ export default function SeoReports({
                         positions={positions}
                         statistics={statistics}
                         filters={filters}
+                        projectId={project.id}
                     />
 
                     {/* Таблица позиций */}

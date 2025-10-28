@@ -3,7 +3,7 @@ import PieChart from './PieChart';
 import VisibilityStats from './VisibilityStats';
 import PositionDistribution from './PositionDistribution';
 
-export default function StatsSection({ keywords = [], positions = [], statistics = {}, filters = {} }) {
+export default function StatsSection({ keywords = [], positions = [], statistics = {}, filters = {}, projectId }) {
     const pieChartData = useMemo(() => {
         if (statistics.position_distribution) {
             console.log('Statistics from microservice:', statistics);
@@ -128,7 +128,7 @@ export default function StatsSection({ keywords = [], positions = [], statistics
                 <VisibilityStats positions={positions} filters={filters} statistics={statistics} />
 
                 {/* Распределение позиций */}
-                <PositionDistribution positions={positions} filters={filters} statistics={statistics} />
+                <PositionDistribution positions={positions} filters={filters} statistics={statistics} projectId={projectId} />
             </div>
         </div>
     );

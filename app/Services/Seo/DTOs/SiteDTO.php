@@ -18,6 +18,7 @@ class SiteDTO
         public readonly ?int $wordstatRegion = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null,
+        public readonly ?string $lastPositionUpdate = null,
         public readonly ?int $keywordsCount = null
     ) {}
 
@@ -27,7 +28,8 @@ class SiteDTO
             id: $data['id'],
             domain: $data['domain'],
             name: '',
-            keywordsCount: $data['keywords_count'] ?? null
+            keywordsCount: $data['keywords_count'] ?? null,
+            lastPositionUpdate: $data['last_position_update'] ?? null
         );
     }
 
@@ -66,6 +68,7 @@ class SiteDTO
             'wordstat_region' => $this->wordstatRegion,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
+            'last_position_update' => $this->lastPositionUpdate,
             'keywords_count' => $this->keywordsCount,
         ];
     }
@@ -86,6 +89,7 @@ class SiteDTO
             wordstatRegion: $other->wordstatRegion !== null ? $other->wordstatRegion : $this->wordstatRegion,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt,
+            lastPositionUpdate: $other->lastPositionUpdate ?: $this->lastPositionUpdate,
             keywordsCount: $other->keywordsCount !== null ? $other->keywordsCount : $this->keywordsCount
         );
     }

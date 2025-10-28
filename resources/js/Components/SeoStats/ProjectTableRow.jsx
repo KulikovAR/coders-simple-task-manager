@@ -7,7 +7,9 @@ export default function ProjectTableRow({
     isEditingProject = false,
     activeTask = null
 }) {
-    const lastUpdate = project.updated_at ? new Date(project.updated_at).toLocaleDateString('ru-RU') : '-';
+    const lastUpdate = project.last_position_update 
+        ? new Date(project.last_position_update).toLocaleString('ru-RU') 
+        : '-';
 
     return (
         <tr className="hover:bg-secondary-bg/50 transition-colors duration-150 border-b border-border-color">

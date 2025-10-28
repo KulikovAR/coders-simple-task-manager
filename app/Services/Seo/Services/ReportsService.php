@@ -117,6 +117,8 @@ class ReportsService
                 'source' => $positionFilters->source,
                 'date_from' => $positionFilters->dateFrom,
                 'date_to' => $positionFilters->dateTo,
+                'rank_from' => $positionFilters->rankFrom,
+                'rank_to' => $positionFilters->rankTo,
             ],
         ];
     }

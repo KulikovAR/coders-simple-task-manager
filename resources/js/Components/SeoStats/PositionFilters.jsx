@@ -14,6 +14,8 @@ export default function PositionFilters({
         source: defaultSource,
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
+        rank_from: filters.rank_from || '',
+        rank_to: filters.rank_to || '',
     });
 
     const [reportLinks, setReportLinks] = useState({
@@ -27,8 +29,10 @@ export default function PositionFilters({
             source: filters.source || project.search_engines?.[0] || '',
             date_from: filters.date_from || '',
             date_to: filters.date_to || '',
+            rank_from: filters.rank_from || '',
+            rank_to: filters.rank_to || '',
         });
-    }, [filters.source, filters.date_from, filters.date_to, project.search_engines]);
+    }, [filters.source, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines]);
 
     const handleFilterChange = (key, value) => {
         setLocalFilters(prev => ({
@@ -57,6 +61,8 @@ export default function PositionFilters({
             source: project.search_engines?.[0] || '',
             date_from: '',
             date_to: '',
+            rank_from: '',
+            rank_to: '',
         });
 
         router.visit(route('seo-stats.reports', projectId), {
@@ -65,7 +71,28 @@ export default function PositionFilters({
         });
     };
 
-    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '';
+    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '';
+
+    const getRankRangeLabel = () => {
+        if (localFilters.rank_from === '' || localFilters.rank_to === '') return null;
+        
+        const from = parseInt(localFilters.rank_from);
+        const to = parseInt(localFilters.rank_to);
+        
+        if (from === 0 && to === 0) return 'Не найдено';
+        if (from === 1 && to === 3) return '1-3';
+        if (from === 4 && to === 10) return '4-10';
+        if (from === 11 && to === 30) return '11-30';
+        if (from === 31 && to === 50) return '31-50';
+        if (from === 51 && to === 100) return '51-100';
+        if (from === 101 && to === 999) return '100+';
+        
+        return `${from}-${to}`;
+    };
+
+    const hasDateFilters = localFilters.date_from !== '' || localFilters.date_to !== '';
+    const hasRankFilter = localFilters.rank_from !== '' || localFilters.rank_to !== '';
+    const rankLabel = getRankRangeLabel();
 
     const handleExport = async (type) => {
         try {
@@ -175,12 +202,35 @@ export default function PositionFilters({
             </div>
 
             {hasActiveFilters && (
-                <div className="mt-4 p-3 bg-accent-blue/10 border border-accent-blue/20 rounded-lg">
-                    <div className="flex items-center gap-2 text-sm text-accent-blue">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="mt-4 p-4 bg-accent-blue/10 border border-accent-blue/20 rounded-lg">
+                    <div className="flex items-start gap-2 text-sm text-accent-blue mb-2">
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                         </svg>
-                        Активные фильтры применены. Нажмите "Применить" для обновления данных.
+                        <span className="font-medium">Активные фильтры:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 ml-6">
+                        {rankLabel && (
+                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Диапазон: {rankLabel}
+                            </span>
+                        )}
+                        {hasDateFilters && (
+                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {localFilters.date_from && localFilters.date_to 
+                                    ? `Даты: ${localFilters.date_from} - ${localFilters.date_to}`
+                                    : localFilters.date_from 
+                                        ? `С: ${localFilters.date_from}`
+                                        : `До: ${localFilters.date_to}`
+                                }
+                            </span>
+                        )}
                     </div>
                 </div>
             )}

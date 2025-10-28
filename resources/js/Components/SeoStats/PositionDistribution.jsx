@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
 
-export default function PositionDistribution({ positions = [], filters = {}, statistics = {} }) {
+export default function PositionDistribution({ positions = [], filters = {}, statistics = {}, projectId }) {
     const [animatedDistribution, setAnimatedDistribution] = useState([]);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -139,6 +140,52 @@ export default function PositionDistribution({ positions = [], filters = {}, sta
         return value === 0 ? '0' : value.toString();
     };
 
+    const isRangeActive = (min, max) => {
+        if (filters.rank_from !== undefined && filters.rank_to !== undefined) {
+            const from = parseInt(filters.rank_from);
+            const at = parseInt(filters.rank_to);
+            
+            if (max === Infinity) {
+                return from === min && at === 999;
+            }
+            
+            return from === min && at === max;
+        }
+        return false;
+    };
+
+    const handleRangeClick = (min, max) => {
+        const currentFilters = { ...filters };
+        
+        if (isRangeActive(min, max)) {
+            delete currentFilters.rank_from;
+            delete currentFilters.rank_to;
+        } else {
+            if (min === 0 && max === 0) {
+                currentFilters.rank_from = 0;
+                currentFilters.rank_to = 0;
+            } else if (max === Infinity) {
+                currentFilters.rank_from = min;
+                currentFilters.rank_to = 999;
+            } else {
+                currentFilters.rank_from = min;
+                currentFilters.rank_to = max;
+            }
+        }
+
+        const queryParams = new URLSearchParams();
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (value !== '' && value !== false && value !== null && value !== undefined) {
+                queryParams.append(key, value);
+            }
+        });
+
+        router.visit(route('seo-stats.reports', projectId) + '?' + queryParams.toString(), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <div className="bg-card-bg border border-border-color rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -154,8 +201,16 @@ export default function PositionDistribution({ positions = [], filters = {}, sta
             </div>
 
             <div className="space-y-3">
-                {(animatedDistribution.length > 0 ? animatedDistribution : distribution).map((range, index) => (
-                    <div key={index} className="flex items-center gap-3">
+                {(animatedDistribution.length > 0 ? animatedDistribution : distribution).map((range, index) => {
+                    const isActive = isRangeActive(range.min, range.max);
+                    return (
+                    <div 
+                        key={index} 
+                        className={`flex items-center gap-3 cursor-pointer p-3 rounded-lg transition-all duration-200 ${
+                            isActive ? 'bg-accent-blue/10 border-2 border-accent-blue/30' : 'hover:bg-secondary-bg/50'
+                        }`}
+                        onClick={() => handleRangeClick(range.min, range.max)}
+                    >
                         {/* Цветовой индикатор */}
                         <div 
                             className="w-4 h-4 rounded-full flex-shrink-0" 
@@ -192,7 +247,8 @@ export default function PositionDistribution({ positions = [], filters = {}, sta
                             </div>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Общая статистика */}
