@@ -29,12 +29,6 @@ class ProcessSeoRecognitionJob implements ShouldQueue
     public function handle(SeoRecognitionService $seoRecognitionService): void
     {
         $seoRecognitionService->processRecognitionTask($this->task);
-
-        if(env('APP_ENV') !== 'production') {
-            $this->task->update([
-                'status' => 'done',
-            ]);
-        }
     }
 
     public function failed(\Throwable $exception): void

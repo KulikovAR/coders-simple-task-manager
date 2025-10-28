@@ -29,12 +29,6 @@ class ProcessWordstatRecognitionJob implements ShouldQueue
     public function handle(WordstatRecognitionService $wordstatRecognitionService): void
     {
         $wordstatRecognitionService->processWordstatTask($this->task);
-
-        if(env('APP_ENV') !== 'production') {
-            $this->task->update([
-                'status' => 'done',
-            ]);
-        }
     }
 
     public function failed(\Throwable $exception): void
