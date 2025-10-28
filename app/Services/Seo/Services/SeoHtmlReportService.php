@@ -2,26 +2,16 @@
 
 namespace App\Services\Seo\Services;
 
-use Illuminate\Support\Facades\Log;
-
 class SeoHtmlReportService
 {
-    public function __construct(
-        private SiteUserService $siteUserService,
-        private MicroserviceClient $microserviceClient
-    ) {}
-
     public function generateHtmlReport(array $reportData, int $reportId): string
     {
         $project = $reportData['project'];
         $positions = $reportData['positions'];
         $filters = $reportData['filters'];
+        $stats = $reportData['statistics'];
         
-        // Подготавливаем данные для таблицы (строки = ключевые слова, столбцы = даты)
         $tableData = $this->prepareTableData($positions);
-        
-        // Получаем статистику через микросервис для гарантии консистентности данных
-        $stats = $this->microserviceClient->getPositionStatistics($filters);
         
         $html = '<!DOCTYPE html>
 <html lang="ru">
