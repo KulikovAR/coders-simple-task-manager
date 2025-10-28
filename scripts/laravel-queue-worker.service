@@ -7,7 +7,7 @@ Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/dev.379tm.ru
-ExecStart=/bin/bash -c 'php artisan queue:work --queue=seo-recognition,wordstat-recognition,default --tries=3 --timeout=300 --sleep=3 --max-jobs=1000 --max-time=3600 & php artisan kafka:tracking-consumer & wait'
+ExecStart=/bin/bash -c 'php artisan queue:work --queue=seo-recognition,wordstat-recognition,default --tries=3 --timeout=300 --sleep=3 --max-jobs=1000 --max-time=3600'
 Restart=always
 RestartSec=5
 StandardOutput=journal
