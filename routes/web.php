@@ -27,6 +27,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/main', function () {
+    return Inertia::render('Main');
+})->name('main');
+
 Route::get('/ai-features', function () {
     return Inertia::render('AiAgent/Features');
 })->name('ai-features');
