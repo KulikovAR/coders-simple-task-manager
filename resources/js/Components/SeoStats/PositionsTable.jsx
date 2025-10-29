@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { router } from '@inertiajs/react';
 
 export default function PositionsTable({ 
     keywords = [], 
@@ -163,6 +164,41 @@ export default function PositionsTable({
         setSearchTerm(e.target.value);
     };
 
+    const getDateSortState = (date) => {
+        if (filters.date_sort === date) {
+            return filters.sort_type || 'asc';
+        }
+        return null;
+    };
+
+    const handleDateClick = (date) => {
+        const currentSort = getDateSortState(date);
+        const newFilters = { ...filters };
+
+        if (!currentSort) {
+            newFilters.date_sort = date;
+            newFilters.sort_type = 'asc';
+        } else if (currentSort === 'asc') {
+            newFilters.date_sort = date;
+            newFilters.sort_type = 'desc';
+        } else {
+            delete newFilters.date_sort;
+            delete newFilters.sort_type;
+        }
+
+        const queryParams = new URLSearchParams();
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value !== '' && value !== false && value !== null && value !== undefined) {
+                queryParams.append(key, value);
+            }
+        });
+
+        router.visit(route('seo-stats.reports', siteId) + '?' + queryParams.toString(), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     if (allKeywords.length === 0) {
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-12 text-center">
@@ -243,15 +279,41 @@ export default function PositionsTable({
                             {uniqueDates.map((date, index) => {
                                 const today = new Date().toISOString().split('T')[0];
                                 const isToday = date === today;
+                                const sortState = getDateSortState(date);
+                                const isSorted = sortState !== null;
                                 
                                 return (
-                                    <th key={`${date}-${index}`} className={`px-3 py-3 text-center text-sm font-medium min-w-[100px] ${
-                                        isToday ? 'bg-accent-blue/20 border-2 border-accent-blue text-accent-blue' : 'text-text-primary'
-                                    }`}>
-                                        <div className="flex flex-col">
-                                            <span className={`font-medium ${isToday ? 'font-bold text-lg' : ''}`}>
-                                                {new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
-                                            </span>
+                                    <th 
+                                        key={`${date}-${index}`} 
+                                        className={`px-3 py-3 text-center text-sm font-medium min-w-[100px] cursor-pointer transition-all ${
+                                            isToday ? 'bg-accent-blue/20 border-2 border-accent-blue text-accent-blue' : 'text-text-primary hover:bg-secondary-bg/50'
+                                        } ${isSorted ? (sortState === 'asc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : ''}`}
+                                        onClick={() => handleDateClick(date)}
+                                    >
+                                        <div className="flex flex-col items-center">
+                                            <div className="flex items-center gap-1">
+                                                <span className={`font-medium ${isToday ? 'font-bold text-lg' : ''}`}>
+                                                    {new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
+                                                </span>
+                                                {isSorted && (
+                                                    <svg 
+                                                        className="w-4 h-4 text-text-primary" 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path 
+                                                            strokeLinecap="round" 
+                                                            strokeLinejoin="round" 
+                                                            strokeWidth="2" 
+                                                            d={sortState === 'asc' 
+                                                                ? "M5 15l7-7 7 7" 
+                                                                : "M19 9l-7 7-7-7"
+                                                            } 
+                                                        />
+                                                    </svg>
+                                                )}
+                                            </div>
                                             <span className={`text-xs font-normal ${isToday ? 'font-bold text-accent-blue' : 'text-text-muted'}`}>
                                                 {new Date(date).toLocaleDateString('ru-RU', { weekday: 'short' })}
                                             </span>

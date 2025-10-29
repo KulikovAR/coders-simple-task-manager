@@ -124,6 +124,8 @@ class SeoStatsController extends Controller
             'date_to' => request('date_to'),
             'rank_from' => request('rank_from'),
             'rank_to' => request('rank_to'),
+            'date_sort' => request('date_sort'),
+            'sort_type' => request('sort_type'),
         ];
 
         $data = $this->reportsService->getReportsData($siteId, $filters);

@@ -16,7 +16,9 @@ class PositionFiltersDTO
         public readonly ?string $dateFrom = null,
         public readonly ?string $dateTo = null,
         public readonly ?int $rankFrom = null,
-        public readonly ?int $rankTo = null
+        public readonly ?int $rankTo = null,
+        public readonly ?string $dateSort = null,
+        public readonly ?string $sortType = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -33,7 +35,9 @@ class PositionFiltersDTO
             dateFrom: $data['date_from'] ?? null,
             dateTo: $data['date_to'] ?? null,
             rankFrom: isset($data['rank_from']) ? (int)$data['rank_from'] : null,
-            rankTo: isset($data['rank_to']) ? (int)$data['rank_to'] : null
+            rankTo: isset($data['rank_to']) ? (int)$data['rank_to'] : null,
+            dateSort: $data['date_sort'] ?? null,
+            sortType: $data['sort_type'] ?? null
         );
     }
 
@@ -52,6 +56,8 @@ class PositionFiltersDTO
             'date_to' => $this->dateTo,
             'rank_from' => $this->rankFrom,
             'rank_to' => $this->rankTo,
+            'date_sort' => $this->dateSort,
+            'sort_type' => $this->sortType,
             'limit' => 500,
         ], fn($value) => $value !== null);
     }
