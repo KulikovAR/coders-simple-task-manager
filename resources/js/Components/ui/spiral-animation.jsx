@@ -34,7 +34,7 @@ class AnimationController {
         this.size = size
         this.time = 0
         this.stars = []
-        this.timeline = gsap.timeline({ repeat: -1 })
+        this.timeline = gsap.timeline()
         
         // 常量
         this.changeEventTime = 0.32
@@ -81,7 +81,6 @@ class AnimationController {
             .to(this, {
                 time: 1,
                 duration: 15,
-                repeat: -1,
                 ease: "none",
                 onUpdate: () => this.render()
             })

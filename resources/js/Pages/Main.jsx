@@ -1,24 +1,21 @@
-import { Head } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { useState, useEffect } from 'react'
 import { SpiralAnimation } from '@/Components/ui/spiral-animation'
 import ApplicationLogo from '@/Components/ApplicationLogo'
 import ApplicationLogoSeo from '@/Components/ApplicationLogoSeo'
 
 export default function Main({ auth }) {
-  const [startVisible, setStartVisible] = useState(false)
+  const [logosVisible, setLogosVisible] = useState(false)
   
-  // Handle navigation to personal site
-  const navigateToPersonalSite = () => {
-    window.location.href = "https://xubh.top/"
-  }
-  
-  // Fade in the start button after animation loads
+  // Показываем логотипы через секунду
   useEffect(() => {
     const timer = setTimeout(() => {
-      setStartVisible(true)
-    }, 2000)
+      setLogosVisible(true)
+    }, 1000)
     
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+    }
   }, [])
   
   return (
@@ -31,50 +28,58 @@ export default function Main({ auth }) {
         </div>
         
         {/* Main Content */}
-        <div 
-          className={`
-            absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10
-            flex flex-col items-center gap-8
-            transition-all duration-1500 ease-out
-            ${startVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-          `}
-        >
-          {/* Button 379 */}
-          <button 
-            onClick={navigateToPersonalSite}
-            className="
-              text-white text-2xl tracking-[0.2em] uppercase font-extralight
-              transition-all duration-700
-              hover:tracking-[0.3em] animate-pulse
-            "
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center">
+          {/* Service Cards */}
+          <div
+            className={`
+              grid grid-cols-1 sm:grid-cols-2 gap-8
+              transition-all duration-1000 ease-out
+              ${logosVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+            `}
           >
-            379
-          </button>
-          
-          {/* Service Links */}
-          <div className="flex items-center gap-6">
-            <a
-              href="#"
-              className="
-                transition-all duration-300
-                opacity-70 hover:opacity-100
-                hover:scale-110
-                cursor-pointer
-              "
-            >
-              <ApplicationLogo className="text-white" />
-            </a>
-            <a
-              href="#"
-              className="
-                transition-all duration-300
-                opacity-70 hover:opacity-100
-                hover:scale-110
-                cursor-pointer
-              "
-            >
-              <ApplicationLogoSeo className="text-white" />
-            </a>
+            {/* 379TM Card */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="scale-125 md:scale-150">
+                <ApplicationLogo className="text-white" />
+              </div>
+              <div className="text-white/80 text-sm">таск-менеджер</div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/tm"
+                  className="px-4 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
+                >
+                  подробнее
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 rounded-md bg-white/90 text-black hover:bg-white transition-colors whitespace-nowrap"
+                >
+                  в систему
+                </Link>
+              </div>
+            </div>
+
+            {/* 379SEO Card */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="scale-125 md:scale-150">
+                <ApplicationLogoSeo className="text-white" />
+              </div>
+              <div className="text-white/80 text-sm">сео аналитика</div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/seo"
+                  className="px-4 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
+                >
+                  подробнее
+                </Link>
+                <Link
+                  href="/seo-stats"
+                  className="px-4 py-2 rounded-md bg-white/90 text-black hover:bg-white transition-colors whitespace-nowrap"
+                >
+                  в систему
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
