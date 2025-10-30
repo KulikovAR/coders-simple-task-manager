@@ -46,7 +46,7 @@ export default function Main({ auth }) {
               <div className="flex items-center gap-3">
                 <Link
                   href="/tm"
-                  className="px-4 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
+                  className="px-4 py-2 rounded-md border-2 border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
                 >
                   подробнее
                 </Link>
@@ -64,11 +64,11 @@ export default function Main({ auth }) {
               <div className="scale-125 md:scale-150">
                 <ApplicationLogoSeo className="text-white" />
               </div>
-              <div className="text-white/80 text-sm">сео аналитика</div>
+              <div className="text-white/80 text-sm">seo аналитика</div>
               <div className="flex items-center gap-3">
                 <Link
                   href="/seo"
-                  className="px-4 py-2 rounded-md border border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
+                  className="px-4 py-2 rounded-md border-2 border-white/30 text-white/90 hover:text-white hover:border-white/60 transition-colors"
                 >
                   подробнее
                 </Link>
