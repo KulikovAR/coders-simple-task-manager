@@ -187,7 +187,7 @@ class AnimationController {
         const ctx = this.ctx
         if (!ctx) return
         
-        ctx.fillStyle = 'black'
+        ctx.fillStyle = 'white'
         ctx.fillRect(0, 0, this.size, this.size)
         
         ctx.save()
@@ -204,7 +204,7 @@ class AnimationController {
         this.drawTrail(t1)
         
         // 绘制星星
-        ctx.fillStyle = 'white'
+        ctx.fillStyle = 'black'
         for (const star of this.stars) {
             star.render(t1, this)
         }
@@ -221,7 +221,7 @@ class AnimationController {
             const f = this.map(i, 0, this.trailLength, 1.1, 0.1)
             const sw = (1.3 * (1 - t1) + 3.0 * Math.sin(Math.PI * t1)) * f
             
-            this.ctx.fillStyle = 'white'
+            this.ctx.fillStyle = 'black'
             this.ctx.lineWidth = sw
             
             const pathTime = t1 - 0.00015 * i

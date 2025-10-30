@@ -21,11 +21,15 @@ use Inertia\Inertia;
 use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
+    return Inertia::render('Main');
+});
+
+Route::get('/tm', function () {
     return Inertia::render('Landing', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
     ]);
-});
+})->name('tm');
 
 Route::get('/main', function () {
     return Inertia::render('Main');
