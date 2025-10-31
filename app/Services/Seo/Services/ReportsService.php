@@ -121,6 +121,7 @@ class ReportsService
                 'rank_to' => $positionFilters->rankTo,
                 'date_sort' => $positionFilters->dateSort,
                 'sort_type' => $positionFilters->sortType,
+                'wordstat_sort' => $positionFilters->wordstatSort,
             ],
         ];
     }

@@ -175,6 +175,8 @@ export default function PositionsTable({
         const currentSort = getDateSortState(date);
         const newFilters = { ...filters };
 
+        delete newFilters.wordstat_sort;
+
         if (!currentSort) {
             newFilters.date_sort = date;
             newFilters.sort_type = 'asc';
@@ -184,6 +186,38 @@ export default function PositionsTable({
         } else {
             delete newFilters.date_sort;
             delete newFilters.sort_type;
+        }
+
+        const queryParams = new URLSearchParams();
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value !== '' && value !== false && value !== null && value !== undefined) {
+                queryParams.append(key, value);
+            }
+        });
+
+        router.visit(route('seo-stats.reports', siteId) + '?' + queryParams.toString(), {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const getWordstatSortState = () => {
+        return filters.wordstat_sort || null;
+    };
+
+    const handleWordstatClick = () => {
+        const currentSort = getWordstatSortState();
+        const newFilters = { ...filters };
+
+        delete newFilters.date_sort;
+        delete newFilters.sort_type;
+
+        if (!currentSort) {
+            newFilters.wordstat_sort = 'desc';
+        } else if (currentSort === 'desc') {
+            newFilters.wordstat_sort = 'asc';
+        } else {
+            delete newFilters.wordstat_sort;
         }
 
         const queryParams = new URLSearchParams();
@@ -271,8 +305,33 @@ export default function PositionsTable({
                             </th>
 
                             {/* Частота */}
-                            <th className="px-6 py-3 text-center text-sm font-medium text-text-primary min-w-[120px]">
-                                Частота
+                            <th 
+                                className={`px-6 py-3 text-center text-sm font-medium text-text-primary min-w-[120px] cursor-pointer transition-all ${
+                                    filters.wordstat_sort ? (filters.wordstat_sort === 'desc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : 'hover:bg-secondary-bg/50'
+                                }`}
+                                onClick={handleWordstatClick}
+                            >
+                                <div className="flex items-center justify-center gap-1">
+                                    <span>Частота</span>
+                                    {filters.wordstat_sort && (
+                                        <svg 
+                                            className="w-4 h-4 text-text-primary" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth="2" 
+                                                d={filters.wordstat_sort === 'desc' 
+                                                    ? "M5 15l7-7 7 7" 
+                                                    : "M19 9l-7 7-7-7"
+                                                } 
+                                            />
+                                        </svg>
+                                    )}
+                                </div>
                             </th>
 
                             {/* Даты */}

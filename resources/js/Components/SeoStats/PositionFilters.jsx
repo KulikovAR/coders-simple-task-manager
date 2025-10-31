@@ -71,7 +71,7 @@ export default function PositionFilters({
         });
     };
 
-    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type;
+    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type || filters.wordstat_sort;
 
     const getRankRangeLabel = () => {
         if (localFilters.rank_from === '' || localFilters.rank_to === '') return null;
@@ -249,6 +249,26 @@ export default function PositionFilters({
                                     />
                                 </svg>
                                 Сортировка: {new Date(filters.date_sort).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })} ({filters.sort_type === 'asc' ? '↑' : '↓'})
+                            </span>
+                        )}
+                        {filters.wordstat_sort && (
+                            <span className={`px-3 py-1 border rounded-full text-xs font-medium flex items-center gap-1 ${
+                                filters.wordstat_sort === 'desc' 
+                                    ? 'bg-green-100 border-green-500 text-green-700' 
+                                    : 'bg-red-100 border-red-500 text-red-700'
+                            }`}>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth="2" 
+                                        d={filters.wordstat_sort === 'desc' 
+                                            ? "M5 15l7-7 7 7" 
+                                            : "M19 9l-7 7-7-7"
+                                        } 
+                                    />
+                                </svg>
+                                Сортировка по частоте: ({filters.wordstat_sort === 'desc' ? '↑' : '↓'})
                             </span>
                         )}
                     </div>
