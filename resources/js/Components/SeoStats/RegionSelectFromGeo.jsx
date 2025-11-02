@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 export default function RegionSelectFromGeo({ 
-    domain,
     value, 
     onChange, 
     placeholder = "Выберите регион...", 
@@ -17,16 +16,14 @@ export default function RegionSelectFromGeo({
     const inputRef = useRef(null);
 
     useEffect(() => {
-        if (domain && domain.criteria_id) {
-            loadRegions(domain.criteria_id);
-        } else {
-            setOptions([]);
+        if (isOpen && options.length === 0) {
+            loadRegions();
         }
-    }, [domain]);
+    }, [isOpen]);
 
     useEffect(() => {
-        if (value && options.length === 0 && typeof value === 'object' && domain) {
-            loadRegions(domain.criteria_id);
+        if (value && options.length === 0) {
+            loadRegions();
         }
     }, [value]);
 
@@ -44,11 +41,11 @@ export default function RegionSelectFromGeo({
         };
     }, []);
 
-    const loadRegions = async (domainId) => {
+    const loadRegions = async (query = '') => {
         try {
             setLoading(true);
             const response = await axios.get('/geo/regions', {
-                params: { domain_id: domainId }
+                params: { query }
             });
             if (response.data.success) {
                 setOptions(response.data.data);
@@ -76,8 +73,18 @@ export default function RegionSelectFromGeo({
         setSearchTerm('');
     };
 
+    useEffect(() => {
+        if (searchTerm.length > 0) {
+            const timeoutId = setTimeout(() => {
+                loadRegions(searchTerm);
+            }, 300);
+            return () => clearTimeout(timeoutId);
+        } else if (isOpen) {
+            loadRegions();
+        }
+    }, [searchTerm, isOpen]);
+
     const handleToggle = () => {
-        if (!domain || !domain.criteria_id) return;
         setIsOpen(!isOpen);
         if (!isOpen) {
             setTimeout(() => {
@@ -88,17 +95,15 @@ export default function RegionSelectFromGeo({
 
     const selectedRegion = typeof value === 'object' && value !== null ? value : null;
     const displayText = selectedRegion ? selectedRegion.name : placeholder;
-    const isDisabled = !domain || !domain.criteria_id;
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
             <button
                 type="button"
                 onClick={handleToggle}
-                disabled={isDisabled}
                 className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 text-left flex items-center justify-between ${
                     required && !value ? 'border-accent-red' : ''
-                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                }`}
             >
                 <span className={value ? 'text-text-primary' : 'text-text-muted'}>
                     {displayText}
@@ -113,7 +118,7 @@ export default function RegionSelectFromGeo({
                 </svg>
             </button>
 
-            {isOpen && !isDisabled && (
+            {isOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-card-bg border border-border-color rounded-lg shadow-lg max-h-60 overflow-hidden">
                     <div className="p-2 border-b border-border-color">
                         <div className="relative">
@@ -155,7 +160,7 @@ export default function RegionSelectFromGeo({
                             ))
                         ) : (
                             <div className="px-3 py-2 text-sm text-text-muted text-center">
-                                {domain ? 'Регионы не найдены' : 'Сначала выберите домен'}
+                                Регионы не найдены
                             </div>
                         )}
                     </div>

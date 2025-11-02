@@ -11,9 +11,17 @@ export default function YandexTargetCard({
     const handleChange = (field, value) => {
         onChange({
             ...target,
-            device: 'mobile',
             [field]: value
         });
+    };
+
+    const handleDeviceChange = (device) => {
+        const updated = {
+            ...target,
+            device,
+            os: device === 'mobile' ? target.os || null : null
+        };
+        onChange(updated);
     };
 
     return (
@@ -48,24 +56,45 @@ export default function YandexTargetCard({
 
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
-                        ОС <span className="text-accent-red">*</span>
+                        Устройство <span className="text-accent-red">*</span>
                     </label>
                     <select
-                        value={target.os || ''}
-                        onChange={(e) => handleChange('os', e.target.value || null)}
+                        value={target.device || ''}
+                        onChange={(e) => handleDeviceChange(e.target.value)}
                         className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
-                            errors?.os ? 'border-accent-red' : ''
+                            errors?.device ? 'border-accent-red' : ''
                         }`}
                         required
                     >
-                        <option value="">Выберите ОС</option>
-                        <option value="ios">iOS</option>
-                        <option value="android">Android</option>
+                        <option value="">Выберите устройство</option>
+                        <option value="desktop">Компьютер</option>
+                        <option value="tablet">Планшет</option>
+                        <option value="mobile">Мобильный</option>
                     </select>
-                    <ValidationError message={errors?.os} />
+                    <ValidationError message={errors?.device} />
                 </div>
+
+                {target.device === 'mobile' && (
+                    <div>
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                            ОС <span className="text-accent-red">*</span>
+                        </label>
+                        <select
+                            value={target.os || ''}
+                            onChange={(e) => handleChange('os', e.target.value || null)}
+                            className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
+                                errors?.os ? 'border-accent-red' : ''
+                            }`}
+                            required
+                        >
+                            <option value="">Выберите ОС</option>
+                            <option value="ios">iOS</option>
+                            <option value="android">Android</option>
+                        </select>
+                        <ValidationError message={errors?.os} />
+                    </div>
+                )}
             </div>
-            <input type="hidden" name={`targets[${index}].device`} value="mobile" />
         </div>
     );
 }

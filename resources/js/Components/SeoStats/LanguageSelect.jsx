@@ -16,6 +16,12 @@ export default function LanguageSelect({
     const inputRef = useRef(null);
 
     useEffect(() => {
+        if (value && options.length === 0) {
+            loadLanguages();
+        }
+    }, [value]);
+
+    useEffect(() => {
         if (isOpen && options.length === 0) {
             loadLanguages();
         }
@@ -83,7 +89,18 @@ export default function LanguageSelect({
     };
 
     const selectedLanguage = options.find(opt => opt.code === value);
-    const displayText = selectedLanguage ? selectedLanguage.name : placeholder;
+    const getDisplayText = () => {
+        if (!value) return placeholder;
+        if (selectedLanguage) {
+            return selectedLanguage.name;
+        }
+        if (options.length > 0) {
+            return value;
+        }
+        return placeholder;
+    };
+
+    const displayText = getDisplayText();
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>

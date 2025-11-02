@@ -26,7 +26,11 @@ class UpdateSiteDTO
                 $domain = null;
                 if (isset($target['domain'])) {
                     if (is_array($target['domain']) && !empty($target['domain'])) {
-                        $domain = $target['domain']['name'] ?? $target['domain']['canonical_name'] ?? null;
+                        if ($target['search_engine'] === 'google') {
+                            $domain = $target['domain']['value'] ?? $target['domain']['canonical_name'] ?? $target['domain']['name'] ?? null;
+                        } else {
+                            $domain = $target['domain']['name'] ?? $target['domain']['canonical_name'] ?? null;
+                        }
                     } elseif (is_string($target['domain']) && !empty($target['domain'])) {
                         $domain = $target['domain'];
                     }
@@ -50,9 +54,6 @@ class UpdateSiteDTO
                 $os = !empty($os) ? $os : null;
                 
                 $device = $target['device'] ?? 'desktop';
-                if ($target['search_engine'] === 'yandex') {
-                    $device = 'mobile';
-                }
                 
                 return [
                     'search_engine' => $target['search_engine'],

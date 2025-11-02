@@ -22,8 +22,11 @@ export default function DomainSelect({
     }, [isOpen]);
 
     useEffect(() => {
-        if (value && options.length === 0 && typeof value === 'object') {
-            loadDomainById(value.criteria_id);
+        if (value && options.length === 0) {
+            const domainValue = typeof value === 'string' ? value : value?.value || value?.canonical_name;
+            if (domainValue) {
+                loadGoogleDomainByValue(domainValue);
+            }
         }
     }, [value]);
 
@@ -44,7 +47,7 @@ export default function DomainSelect({
     const loadDomains = async (query = '') => {
         try {
             setLoading(true);
-            const response = await axios.get('/geo/domains/search', {
+            const response = await axios.get('/geo/google-domains/search', {
                 params: { query }
             });
             if (response.data.success) {
@@ -57,15 +60,15 @@ export default function DomainSelect({
         }
     };
 
-    const loadDomainById = async (id) => {
+    const loadGoogleDomainByValue = async (value) => {
         try {
             setLoading(true);
-            const response = await axios.get(`/geo/domains/${id}`);
+            const response = await axios.get(`/geo/google-domains/${value}`);
             if (response.data.success) {
                 setOptions([response.data.data]);
             }
         } catch (error) {
-            console.error('Error loading domain:', error);
+            console.error('Error loading Google domain:', error);
         } finally {
             setLoading(false);
         }
@@ -84,15 +87,15 @@ export default function DomainSelect({
 
     const filteredOptions = options.filter(option =>
         option.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        option.canonical_name.toLowerCase().includes(searchTerm.toLowerCase())
+        option.canonical_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        option.value.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleSelect = (option) => {
         onChange({
-            criteria_id: option.criteria_id,
+            value: option.value,
             name: option.name,
-            canonical_name: option.canonical_name,
-            country_code: option.country_code
+            canonical_name: option.canonical_name
         });
         setIsOpen(false);
         setSearchTerm('');
@@ -107,8 +110,19 @@ export default function DomainSelect({
         }
     };
 
-    const selectedDomain = typeof value === 'object' && value !== null ? value : null;
-    const displayText = selectedDomain ? selectedDomain.name : placeholder;
+    const getDisplayText = () => {
+        if (!value) return placeholder;
+        if (typeof value === 'string') {
+            const option = options.find(opt => opt.value === value || opt.canonical_name === value);
+            return option ? option.name : value;
+        }
+        if (typeof value === 'object') {
+            return value.name || value.canonical_name || placeholder;
+        }
+        return placeholder;
+    };
+
+    const displayText = getDisplayText();
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
@@ -157,21 +171,26 @@ export default function DomainSelect({
                                 Загрузка...
                             </div>
                         ) : filteredOptions.length > 0 ? (
-                            filteredOptions.map((option) => (
-                                <button
-                                    key={option.criteria_id}
-                                    type="button"
-                                    onClick={() => handleSelect(option)}
-                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-secondary-bg transition-colors ${
-                                        selectedDomain?.criteria_id === option.criteria_id
-                                            ? 'bg-accent-blue/10 text-accent-blue' 
-                                            : 'text-text-primary'
-                                    }`}
-                                >
-                                    <div className="font-medium">{option.name}</div>
-                                    <div className="text-xs text-text-muted">{option.canonical_name}</div>
-                                </button>
-                            ))
+                            filteredOptions.map((option) => {
+                                const isSelected = value === option.value || 
+                                    (typeof value === 'object' && value?.value === option.value) || 
+                                    (typeof value === 'object' && value?.canonical_name === option.value);
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => handleSelect(option)}
+                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-secondary-bg transition-colors ${
+                                            isSelected
+                                                ? 'bg-accent-blue/10 text-accent-blue' 
+                                                : 'text-text-primary'
+                                        }`}
+                                    >
+                                        <div className="font-medium">{option.name}</div>
+                                        <div className="text-xs text-text-muted">{option.canonical_name || option.value}</div>
+                                    </button>
+                                );
+                            })
                         ) : (
                             <div className="px-3 py-2 text-sm text-text-muted text-center">
                                 Ничего не найдено

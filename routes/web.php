@@ -185,9 +185,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
     
-    Route::get('/geo/domains/search', [App\Http\Controllers\GeoController::class, 'searchDomains'])->name('geo.domains.search');
-    Route::get('/geo/domains/{id}', [App\Http\Controllers\GeoController::class, 'getDomainById'])->name('geo.domains.show');
-    Route::get('/geo/regions', [App\Http\Controllers\GeoController::class, 'getRegionsByDomain'])->name('geo.regions');
+    Route::get('/geo/google-domains/search', [App\Http\Controllers\GeoController::class, 'getGoogleDomains'])->name('geo.google-domains.search');
+    Route::get('/geo/google-domains/{value}', [App\Http\Controllers\GeoController::class, 'getGoogleDomainByValue'])->name('geo.google-domains.show');
+    Route::get('/geo/regions', [App\Http\Controllers\GeoController::class, 'getAllRegions'])->name('geo.regions');
     Route::get('/languages/search', [App\Http\Controllers\LanguageController::class, 'search'])->name('languages.search');
     
     // API роуты для баланса

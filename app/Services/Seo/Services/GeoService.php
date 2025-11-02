@@ -97,4 +97,19 @@ class GeoService
             })
             ->first();
     }
+
+    public function getAllRegions(?string $query = null): Collection
+    {
+        $queryBuilder = Geo::where('target_type', 'Region')
+            ->where('status', 'Active');
+
+        if ($query) {
+            $queryBuilder->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('canonical_name', 'like', "%{$query}%");
+            });
+        }
+
+        return $queryBuilder->orderBy('name')->limit(100)->get();
+    }
 }

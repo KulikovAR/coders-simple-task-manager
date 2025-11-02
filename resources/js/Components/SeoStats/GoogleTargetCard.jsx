@@ -61,7 +61,6 @@ export default function GoogleTargetCard({
                         Регион <span className="text-accent-red">*</span>
                     </label>
                     <RegionSelectFromGeo
-                        domain={target.domain || null}
                         value={target.region || null}
                         onChange={(value) => handleChange('region', value)}
                         placeholder="Выберите регион"

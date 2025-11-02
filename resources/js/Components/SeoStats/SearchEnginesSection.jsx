@@ -83,7 +83,7 @@ export default function SearchEnginesSection({
         const newTarget = {
             search_engine: 'yandex',
             lr: null,
-            device: 'mobile',
+            device: '',
             os: null
         };
         const allTargets = [...targets || [], newTarget];

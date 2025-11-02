@@ -73,7 +73,11 @@ export function useFormValidation() {
                                 targetErrors[`${engine}_${index}_os`] = 'Выберите операционную систему';
                             }
                         } else if (engine === 'yandex') {
-                            if (!target.os) {
+                            if (!target.device) {
+                                targetErrors[`${engine}_${index}_device`] = 'Выберите устройство';
+                            }
+                            
+                            if (target.device === 'mobile' && !target.os) {
                                 targetErrors[`${engine}_${index}_os`] = 'Выберите операционную систему';
                             }
                         }
@@ -195,7 +199,11 @@ export function useFormValidation() {
                                         searchEngineErrors.push(`target_${engine}_${index}_os`);
                                     }
                                 } else if (engine === 'yandex') {
-                                    if (!target.os) {
+                                    if (!target.device) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_device`);
+                                    }
+                                    
+                                    if (target.device === 'mobile' && !target.os) {
                                         searchEngineErrors.push(`target_${engine}_${index}_os`);
                                     }
                                 }

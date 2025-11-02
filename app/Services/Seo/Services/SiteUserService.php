@@ -2,6 +2,7 @@
 
 namespace App\Services\Seo\Services;
 
+use App\Enums\GoogleDomainType;
 use App\Models\SeoSite;
 use App\Services\Seo\DTOs\SiteDTO;
 use App\Services\Seo\DTOs\UpdateSiteDTO;
@@ -77,29 +78,35 @@ class SiteUserService
         $siteData['targets'] = $targets->map(function($target) {
             $targetData = [
                 'search_engine' => $target->search_engine,
-                'device' => $target->device ?? ($target->search_engine === 'yandex' ? 'mobile' : 'desktop'),
+                'device' => $target->device ?? 'desktop',
                 'os' => $target->os,
             ];
             
             if ($target->search_engine === 'google') {
                 $domainObj = null;
                 if ($target->domain) {
-                    $domain = $this->geoService->findDomainByName($target->domain);
-                    if ($domain) {
+                    $googleDomain = GoogleDomainType::tryFrom($target->domain);
+                    if ($googleDomain) {
                         $domainObj = [
-                            'criteria_id' => $domain->criteria_id,
-                            'name' => $domain->name,
-                            'canonical_name' => $domain->canonical_name,
-                            'country_code' => $domain->country_code,
+                            'value' => $googleDomain->value,
+                            'name' => $googleDomain->label(),
+                            'canonical_name' => $googleDomain->value,
                         ];
                     } else {
-                        $domainObj = ['name' => $target->domain];
+                        $domainObj = [
+                            'value' => $target->domain,
+                            'name' => $target->domain,
+                            'canonical_name' => $target->domain,
+                        ];
                     }
                 }
                 
                 $regionObj = null;
-                if ($target->region && $domainObj && isset($domainObj['criteria_id'])) {
-                    $region = $this->geoService->findRegionByNameAndDomain($target->region, $domainObj['criteria_id']);
+                if ($target->region) {
+                    $regions = $this->geoService->getAllRegions($target->region);
+                    $region = $regions->firstWhere('name', $target->region) 
+                        ?? $regions->firstWhere('canonical_name', $target->region);
+                    
                     if ($region) {
                         $regionObj = [
                             'criteria_id' => $region->criteria_id,
@@ -109,8 +116,6 @@ class SiteUserService
                     } else {
                         $regionObj = ['name' => $target->region];
                     }
-                } elseif ($target->region) {
-                    $regionObj = ['name' => $target->region];
                 }
                 
                 $targetData['domain'] = $domainObj;
