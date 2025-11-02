@@ -72,7 +72,7 @@ class SeoRecognitionService
 
             foreach ($searchEngines as $searchEngine) {
                 $engineTargets = $targetsByEngine->get($searchEngine, collect());
-                
+
                 if ($engineTargets->isEmpty()) {
                     Log::warning("No targets found for search engine", [
                         'search_engine' => $searchEngine,
@@ -93,7 +93,7 @@ class SeoRecognitionService
                     if ($result && isset($result['task_id'])) {
                         $successfulEngines++;
                         $externalTaskIds[] = $result['task_id'];
-                        
+
                         Log::info("Tracking started successfully", [
                             'search_engine' => $searchEngine,
                             'target_id' => $target->id,
@@ -160,26 +160,35 @@ class SeoRecognitionService
         } elseif ($target->search_engine === 'yandex') {
             return $this->buildYandexTrackData($site, $target, $userId);
         }
-        
+
         return $this->buildDefaultTrackData($site, $target);
+    }
+
+    private function calculatePagesForPositionLimit(?int $positionLimit): int
+    {
+        if ($positionLimit === null || $positionLimit <= 0) {
+            return 1;
+        }
+
+        return (int)ceil($positionLimit / 10);
     }
 
     private function buildGoogleTrackData($site, $target, int $userId): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
-        
+
         $country = null;
         if ($target->region) {
             $region = $this->geoService->getAllRegions($target->region)
-                ->firstWhere('name', $target->region) 
+                ->firstWhere('name', $target->region)
                 ?? $this->geoService->getAllRegions($target->region)
                     ->firstWhere('canonical_name', $target->region);
-            
+
             if ($region) {
                 $country = (string)$region->criteria_id;
             }
         }
-        
+
         $lang = null;
         if ($target->language) {
             $language = LanguageType::tryFrom($target->language);
@@ -187,7 +196,7 @@ class SeoRecognitionService
                 $lang = $language->getId();
             }
         }
-        
+
         $domain = null;
         if ($target->domain) {
             $googleDomain = GoogleDomainType::tryFrom($target->domain);
@@ -195,7 +204,7 @@ class SeoRecognitionService
                 $domain = $googleDomain->getId();
             }
         }
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: $target->device,
@@ -204,7 +213,7 @@ class SeoRecognitionService
             lang: $lang,
             os: $target->os,
             ads: $site->getAds(),
-            pages: 1,
+            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
             subdomains: $site->getSubdomains(),
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
@@ -216,7 +225,7 @@ class SeoRecognitionService
     private function buildYandexTrackData($site, $target, int $userId): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: $target->device,
@@ -225,7 +234,7 @@ class SeoRecognitionService
             lang: null,
             os: $target->os,
             ads: $site->getAds(),
-            pages: 1,
+            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
             subdomains: $site->getSubdomains(),
             lr: $target->lr,
             xmlApiKey: $googleApiData['apiKey'] ?: null,
@@ -243,7 +252,7 @@ class SeoRecognitionService
             country: null,
             os: $target->os,
             ads: $site->getAds(),
-            pages: 1,
+            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
             subdomains: $site->getSubdomains()
         );
     }
@@ -251,7 +260,7 @@ class SeoRecognitionService
     private function buildWordstatTrackData($site, int $userId): TrackPositionsDTO
     {
         $wordstatApiData = $this->xmlApiSettingsService->getWordstatApiDataForUser($userId);
-        
+
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: null,
@@ -260,7 +269,7 @@ class SeoRecognitionService
             lang: null,
             os: null,
             ads: false,
-            pages: 1,
+            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
             subdomains: null,
             regions: $site->getWordstatRegion(),
             xmlApiKey: $wordstatApiData['apiKey'] ?: null,
