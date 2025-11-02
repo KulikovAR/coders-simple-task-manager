@@ -1,9 +1,21 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import PieChart from './PieChart';
 import VisibilityStats from './VisibilityStats';
 import PositionDistribution from './PositionDistribution';
 
 export default function StatsSection({ keywords = [], positions = [], statistics = {}, filters = {}, projectId }) {
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        const saved = localStorage.getItem('seoStatsSectionCollapsed');
+        return saved === 'true';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('seoStatsSectionCollapsed', isCollapsed.toString());
+    }, [isCollapsed]);
+
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+    };
     const pieChartData = useMemo(() => {
         if (statistics.position_distribution) {
             console.log('Statistics from microservice:', statistics);
@@ -104,32 +116,64 @@ export default function StatsSection({ keywords = [], positions = [], statistics
     }
 
     return (
-        <div className="mb-6">
-            {/* Сетка с компонентами статистики */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Круговая диаграмма */}
-                <div className="bg-card-bg border border-border-color rounded-xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-accent-green/10 rounded-lg">
-                            <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-text-primary">Категории позиций</h3>
-                            <p className="text-text-muted text-sm">Распределение по диапазонам</p>
-                        </div>
+        <div className="mb-6 bg-card-bg border border-border-color rounded-xl overflow-hidden relative">
+            {/* Кнопка сворачивания в правом верхнем углу */}
+            <button
+                onClick={toggleCollapse}
+                className="absolute top-3 right-3 z-10 p-1.5 bg-secondary-bg hover:bg-accent-blue/10 border border-border-color rounded-md text-text-muted hover:text-accent-blue transition-all duration-200 shadow-sm hover:shadow-md"
+                title={isCollapsed ? 'Развернуть статистику' : 'Свернуть статистику'}
+            >
+                {isCollapsed ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                    </svg>
+                )}
+            </button>
+
+            {isCollapsed ? (
+                // Свернутое состояние - маленькая полоска
+                <div className="h-12 flex items-center px-4">
+                    <div className="flex items-center gap-2 text-text-primary">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span className="text-sm font-medium">Статистика позиций</span>
                     </div>
-                    <PieChart data={pieChartData} />
                 </div>
+            ) : (
+                // Развернутое состояние - полная статистика
+                <div className="p-6">
+                    {/* Сетка с компонентами статистики */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Круговая диаграмма */}
+                        <div className="bg-secondary-bg border border-border-color rounded-xl p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-accent-green/10 rounded-lg">
+                                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-text-primary">Категории позиций</h3>
+                                    <p className="text-text-muted text-sm">Распределение по диапазонам</p>
+                                </div>
+                            </div>
+                            <PieChart data={pieChartData} />
+                        </div>
 
-                {/* Статистика видимости */}
-                <VisibilityStats positions={positions} filters={filters} statistics={statistics} />
+                        {/* Статистика видимости */}
+                        <VisibilityStats positions={positions} filters={filters} statistics={statistics} />
 
-                {/* Распределение позиций */}
-                <PositionDistribution positions={positions} filters={filters} statistics={statistics} projectId={projectId} />
-            </div>
+                        {/* Распределение позиций */}
+                        <PositionDistribution positions={positions} filters={filters} statistics={statistics} projectId={projectId} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

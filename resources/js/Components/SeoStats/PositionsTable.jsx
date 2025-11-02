@@ -137,7 +137,7 @@ export default function PositionsTable({
             const posDateOnly = pos.date ? pos.date.split('T')[0] : '';
             return pos.keyword_id === keywordId && posDateOnly === date && pos.source !== 'wordstat';
         });
-        return position ? position.rank : null;
+        return position || null;
     };
 
     const getPositionChange = (keywordId, date) => {
@@ -145,12 +145,12 @@ export default function PositionsTable({
         const currentIndex = dates.indexOf(date);
         if (currentIndex <= 0) return null;
         
-        const currentPosition = getPositionForKeyword(keywordId, date);
-        const previousPosition = getPositionForKeyword(keywordId, dates[currentIndex - 1]);
+        const currentPositionObj = getPositionForKeyword(keywordId, date);
+        const previousPositionObj = getPositionForKeyword(keywordId, dates[currentIndex - 1]);
         
-        if (currentPosition === null || previousPosition === null) return null;
+        if (!currentPositionObj || !previousPositionObj || !currentPositionObj.rank || !previousPositionObj.rank) return null;
         
-        return previousPosition - currentPosition;
+        return previousPositionObj.rank - currentPositionObj.rank;
     };
 
     const handleSort = (key) => {
@@ -414,22 +414,38 @@ export default function PositionsTable({
 
                                     {/* Позиции по датам */}
                                     {uniqueDates.map((date, index) => {
-                                        const position = getPositionForKeyword(keyword.id, date);
+                                        const positionObj = getPositionForKeyword(keyword.id, date);
+                                        const position = positionObj ? positionObj.rank : null;
+                                        const positionUrl = positionObj ? positionObj.url : null;
                                         const change = getPositionChange(keyword.id, date);
                                         const today = new Date().toISOString().split('T')[0];
                                         const isToday = date === today;
+                                        const isClickable = positionUrl !== null && positionUrl !== undefined;
+                                        
+                                        const handlePositionClick = (e) => {
+                                            if (isClickable && positionUrl) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                window.open(positionUrl, '_blank', 'noopener,noreferrer');
+                                            }
+                                        };
                                         
                                         return (
-                                            <td key={`${date}-${keyword.id}-${index}`} className={`w-12 h-12 px-1 py-1 text-center min-w-[100px] ${
+                                            <td key={`${date}-${keyword.id}-${index}`} className={`w-12 h-12 px-1 py-1 text-center min-w-[100px] relative ${
                                                 isToday ? 'border-2 border-accent-blue' : ''
                                             }`}>
-                                                <div className={`w-full h-full flex flex-col items-center justify-center ${
-                                                    position === null ? 'bg-gray-200' : 
-                                                    position === 0 ? 'bg-gray-400' :
-                                                    position <= 3 ? 'bg-green-500' :
-                                                    position <= 10 ? 'bg-yellow-500' :
-                                                    'bg-red-500'
-                                                } ${isToday ? 'ring-2 ring-accent-blue ring-offset-1' : ''}`}>
+                                                <div 
+                                                    onClick={handlePositionClick}
+                                                    className={`w-full h-full flex flex-col items-center justify-center group ${
+                                                        position === null ? 'bg-gray-200' : 
+                                                        position === 0 ? 'bg-gray-400' :
+                                                        position <= 3 ? 'bg-green-500' :
+                                                        position <= 10 ? 'bg-yellow-500' :
+                                                        'bg-red-500'
+                                                    } ${isToday ? 'ring-2 ring-accent-blue ring-offset-1' : ''} ${
+                                                        isClickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+                                                    }`}
+                                                >
                                                     <span className={`text-sm font-bold ${
                                                         position === null ? 'text-gray-600' : 
                                                         'text-white'
@@ -444,6 +460,17 @@ export default function PositionsTable({
                                                         }`}>
                                                             {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
                                                         </span>
+                                                    )}
+                                                    
+                                                    {/* Tooltip с URL */}
+                                                    {isClickable && positionUrl && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-80 max-w-[90vw]">
+                                                            <div className="text-gray-200 break-words whitespace-normal">
+                                                                {positionUrl}
+                                                            </div>
+                                                            {/* Стрелка тултипа */}
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
