@@ -3,8 +3,13 @@
 namespace App\Services\Seo\Services;
 
 use App\Models\SeoRecognitionTask;
+use App\Models\SeoSite;
+use App\Enums\GoogleDomainType;
+use App\Enums\LanguageType;
 use App\Services\Seo\DTOs\TrackPositionsDTO;
 use App\Services\Seo\Services\UserXmlApiSettingsService;
+use App\Services\Seo\Services\SeoSiteTargetService;
+use App\Services\Seo\Services\GeoService;
 use Illuminate\Support\Facades\Log;
 
 class SeoRecognitionService
@@ -12,7 +17,9 @@ class SeoRecognitionService
     public function __construct(
         private MicroserviceClient $microserviceClient,
         private SiteService $siteService,
-        private UserXmlApiSettingsService $xmlApiSettingsService
+        private UserXmlApiSettingsService $xmlApiSettingsService,
+        private SeoSiteTargetService $targetService,
+        private GeoService $geoService
     ) {}
 
     public function processRecognitionTask(SeoRecognitionTask $task): void
@@ -55,22 +62,50 @@ class SeoRecognitionService
 
             Log::info("SearchEngines", compact('searchEngines'));
 
-            foreach ($searchEngines as $searchEngine) {
-                $trackData = $this->buildTrackDataForEngine($site, $searchEngine, $task->user_id);
-                Log::info("Track Data", compact('searchEngine', 'trackData'));
-                $result = $this->callMicroserviceMethod($searchEngine, $trackData->toArray());
+            $localSite = SeoSite::where('go_seo_site_id', $site->id)->first();
+            if (!$localSite) {
+                throw new \Exception("Local site not found: {$site->id}");
+            }
 
-                if ($result && isset($result['task_id'])) {
-                    $successfulEngines++;
-                    $externalTaskIds[] = $result['task_id'];
-                    
-                    Log::info("Tracking started successfully", [
+            $targets = $this->targetService->listForSite($localSite->id);
+            $targetsByEngine = $targets->groupBy('search_engine');
+
+            foreach ($searchEngines as $searchEngine) {
+                $engineTargets = $targetsByEngine->get($searchEngine, collect());
+                
+                if ($engineTargets->isEmpty()) {
+                    Log::warning("No targets found for search engine", [
                         'search_engine' => $searchEngine,
-                        'external_task_id' => $result['task_id'],
-                        'task_id' => $task->id
+                        'site_id' => $site->id
                     ]);
-                } else {
-                    throw new \Exception("Failed to track positions for search engine: {$searchEngine}");
+                    continue;
+                }
+
+                foreach ($engineTargets as $target) {
+                    $trackData = $this->buildTrackDataForTarget($site, $target, $task->user_id);
+                    Log::info("Track Data", [
+                        'search_engine' => $searchEngine,
+                        'target_id' => $target->id,
+                        'trackData' => $trackData
+                    ]);
+                    $result = $this->callMicroserviceMethod($searchEngine, $trackData->toArray());
+
+                    if ($result && isset($result['task_id'])) {
+                        $successfulEngines++;
+                        $externalTaskIds[] = $result['task_id'];
+                        
+                        Log::info("Tracking started successfully", [
+                            'search_engine' => $searchEngine,
+                            'target_id' => $target->id,
+                            'external_task_id' => $result['task_id'],
+                            'task_id' => $task->id
+                        ]);
+                    } else {
+                        Log::error("Failed to track positions", [
+                            'search_engine' => $searchEngine,
+                            'target_id' => $target->id
+                        ]);
+                    }
                 }
             }
 
@@ -118,62 +153,95 @@ class SeoRecognitionService
         return $searchEngines;
     }
 
-    private function buildTrackDataForEngine($site, string $searchEngine, int $userId): TrackPositionsDTO
+    private function buildTrackDataForTarget($site, $target, int $userId): TrackPositionsDTO
     {
-        return match ($searchEngine) {
-            'google' => $this->buildGoogleTrackData($site, $userId),
-            'yandex' => $this->buildYandexTrackData($site, $userId),
-            default => $this->buildDefaultTrackData($site, $searchEngine)
-        };
+        if ($target->search_engine === 'google') {
+            return $this->buildGoogleTrackData($site, $target, $userId);
+        } elseif ($target->search_engine === 'yandex') {
+            return $this->buildYandexTrackData($site, $target, $userId);
+        }
+        
+        return $this->buildDefaultTrackData($site, $target);
     }
 
-    private function buildGoogleTrackData($site, int $userId): TrackPositionsDTO
+    private function buildGoogleTrackData($site, $target, int $userId): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
         
+        $country = null;
+        if ($target->region) {
+            $region = $this->geoService->getAllRegions($target->region)
+                ->firstWhere('name', $target->region) 
+                ?? $this->geoService->getAllRegions($target->region)
+                    ->firstWhere('canonical_name', $target->region);
+            
+            if ($region) {
+                $country = (string)$region->criteria_id;
+            }
+        }
+        
+        $lang = null;
+        if ($target->language) {
+            $language = LanguageType::tryFrom($target->language);
+            if ($language) {
+                $lang = $language->getId();
+            }
+        }
+        
+        $domain = null;
+        if ($target->domain) {
+            $googleDomain = GoogleDomainType::tryFrom($target->domain);
+            if ($googleDomain) {
+                $domain = $googleDomain->getId();
+            }
+        }
+        
         return new TrackPositionsDTO(
             siteId: $site->id,
-            device: $site->getDevice('google'),
+            device: $target->device,
             source: 'google',
-            country: $site->getCountry('google'),
-            os: $site->getOs('google'),
+            country: $country,
+            lang: $lang,
+            os: $target->os,
             ads: $site->getAds(),
             pages: 1,
             subdomains: $site->getSubdomains(),
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
-            xmlUserId: $googleApiData['userId'] ?: null
+            xmlUserId: $googleApiData['userId'] ?: null,
+            domain: $domain
         );
     }
 
-    private function buildYandexTrackData($site, int $userId): TrackPositionsDTO
+    private function buildYandexTrackData($site, $target, int $userId): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
         
         return new TrackPositionsDTO(
             siteId: $site->id,
-            device: $site->getDevice('yandex'),
+            device: $target->device,
             source: 'yandex',
-            country: $site->getCountry('yandex'),
-            os: $site->getOs('yandex'),
+            country: null,
+            lang: null,
+            os: $target->os,
             ads: $site->getAds(),
             pages: 1,
             subdomains: $site->getSubdomains(),
-            lr: $site->getYandexRegion(),
+            lr: $target->lr,
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
             xmlUserId: $googleApiData['userId'] ?: null
         );
     }
 
-    private function buildDefaultTrackData($site, string $searchEngine): TrackPositionsDTO
+    private function buildDefaultTrackData($site, $target): TrackPositionsDTO
     {
         return new TrackPositionsDTO(
             siteId: $site->id,
-            device: $site->getDevice($searchEngine),
-            source: $searchEngine,
-            country: $site->getCountry($searchEngine),
-            os: $site->getOs($searchEngine),
+            device: $target->device,
+            source: $target->search_engine,
+            country: null,
+            os: $target->os,
             ads: $site->getAds(),
             pages: 1,
             subdomains: $site->getSubdomains()

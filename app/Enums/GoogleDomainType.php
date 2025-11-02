@@ -217,5 +217,29 @@ enum GoogleDomainType: string
         }
         return $result;
     }
+
+    public function getId(): ?int
+    {
+        static $domainIds = null;
+        
+        if ($domainIds === null) {
+            $domainIds = [];
+            $csvPath = base_path('domains.csv');
+            if (file_exists($csvPath)) {
+                $handle = fopen($csvPath, 'r');
+                if ($handle) {
+                    fgetcsv($handle);
+                    while (($row = fgetcsv($handle)) !== false) {
+                        if (count($row) >= 2) {
+                            $domainIds[$row[0]] = (int)$row[1];
+                        }
+                    }
+                    fclose($handle);
+                }
+            }
+        }
+        
+        return $domainIds[$this->value] ?? null;
+    }
 }
 

@@ -193,4 +193,41 @@ enum LanguageType: string
         }
         return $result;
     }
+
+    public function getId(): ?int
+    {
+        static $langIds = null;
+        
+        if ($langIds === null) {
+            $langIds = [];
+            $csvPath = base_path('langs.csv');
+            if (file_exists($csvPath)) {
+                $handle = fopen($csvPath, 'r');
+                if ($handle) {
+                    $header = fgetcsv($handle);
+                    $idIndex = array_search('id', $header);
+                    $langIndex = array_search('lang', $header);
+                    
+                    if ($idIndex !== false && $langIndex !== false) {
+                        while (($row = fgetcsv($handle)) !== false) {
+                            if (count($row) > max($idIndex, $langIndex)) {
+                                $langIds[$row[$langIndex]] = (int)$row[$idIndex];
+                            }
+                        }
+                    } else {
+                        $line = 2;
+                        while (($row = fgetcsv($handle)) !== false) {
+                            if (count($row) >= 1) {
+                                $langIds[$row[0]] = $line - 1;
+                            }
+                            $line++;
+                        }
+                    }
+                    fclose($handle);
+                }
+            }
+        }
+        
+        return $langIds[$this->value] ?? null;
+    }
 }

@@ -18,7 +18,8 @@ class TrackPositionsDTO
         public readonly ?string $xmlBaseUrl = null,
         public readonly ?string $xmlUserId = null,
         public readonly ?int $lr = null,
-        public readonly ?int $regions = null
+        public readonly ?int $regions = null,
+        public readonly ?int $domain = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -37,7 +38,8 @@ class TrackPositionsDTO
             xmlBaseUrl: $data['xml_base_url'] ?? null,
             xmlUserId: $data['xml_user_id'] ?? null,
             lr: $data['lr'] ?? null,
-            regions: $data['regions'] ?? null
+            regions: $data['regions'] ?? null,
+            domain: $data['domain'] ?? null
         );
     }
 
@@ -58,6 +60,7 @@ class TrackPositionsDTO
             'xml_user_id' => $this->xmlUserId,
             'lr' => $this->lr,
             'regions' => $this->regions,
+            'domain' => $this->domain,
         ], fn($value) => $value !== null);
     }
 
