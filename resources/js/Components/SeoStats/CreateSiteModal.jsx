@@ -32,36 +32,14 @@ export default function CreateSiteModal({
 
         setSiteData('search_engines', newEngines);
 
-        // Если убираем поисковик, убираем и его регион
         if (!newEngines.includes(engine)) {
-            const newRegions = { ...siteData.regions };
-            delete newRegions[engine];
-            setSiteData('regions', newRegions);
+            const newTargets = (siteData.targets || []).filter(t => t.search_engine !== engine);
+            setSiteData('targets', newTargets);
         }
     };
 
-    const handleRegionChange = (engine, region) => {
-        if (engine === 'yandex') {
-            setSiteData('regions', {
-                ...siteData.regions,
-                [engine]: region
-            });
-        } else {
-            setSiteData('regions', {
-                ...siteData.regions,
-                [engine]: region
-            });
-        }
-    };
-
-    const handleDeviceSettingsChange = (engine, setting, value) => {
-        setSiteData('device_settings', {
-            ...siteData.device_settings,
-            [engine]: {
-                ...siteData.device_settings?.[engine],
-                [setting]: value
-            }
-        });
+    const handleTargetsChange = (targets) => {
+        setSiteData('targets', targets);
     };
 
     const handleWordstatToggle = (enabled) => {
@@ -171,11 +149,9 @@ export default function CreateSiteModal({
                     >
                         <SearchEnginesSection
                             searchEngines={siteData.search_engines}
-                            regions={siteData.regions}
+                            targets={siteData.targets}
                             onEngineToggle={handleSearchEngineToggle}
-                            onRegionChange={handleRegionChange}
-                            deviceSettings={siteData.device_settings}
-                            onDeviceSettingsChange={handleDeviceSettingsChange}
+                            onTargetsChange={handleTargetsChange}
                             wordstatEnabled={siteData.wordstat_enabled}
                             onWordstatToggle={handleWordstatToggle}
                             wordstatRegion={siteData.wordstat_region}

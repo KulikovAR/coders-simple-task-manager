@@ -17,8 +17,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         name: '',
         keywords: '',
         search_engines: [],
-        regions: {},
-        device_settings: {},
+        targets: [],
         position_limit: 10,
         subdomains: false,
         schedule: null,
@@ -31,8 +30,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         name: '',
         keywords: '',
         search_engines: [],
-        regions: {},
-        device_settings: {},
+        targets: [],
         position_limit: 10,
         subdomains: false,
         schedule: null,
@@ -48,6 +46,19 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         setEditingProject(project);
         setIsLoadingProjectData(true);
         
+        setEditData({ 
+            domain: '', 
+            name: '', 
+            keywords: '', 
+            search_engines: [], 
+            targets: [], 
+            position_limit: 10, 
+            subdomains: false, 
+            schedule: null, 
+            wordstat_enabled: false, 
+            wordstat_region: null 
+        });
+        
         try {
             const url = route('seo-stats.project-data', project.id);
             
@@ -60,8 +71,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     name: data.site.name || '',
                     keywords: data.keywords || '',
                     search_engines: data.site.search_engines || [],
-                    regions: data.site.regions || {},
-                    device_settings: data.site.device_settings || {},
+                    targets: data.site.targets || [],
                     position_limit: data.site.position_limit || 10,
                     subdomains: data.site.subdomains || false,
                     schedule: data.site.schedule || null,
@@ -77,29 +87,28 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     name: project.name || '',
                     keywords: '',
                     search_engines: project.search_engines || [],
-                    regions: project.regions || {},
-                    device_settings: project.device_settings || {},
+                    targets: [],
                     position_limit: project.position_limit || 10,
                     subdomains: project.subdomains || false,
                     schedule: project.schedule || null,
                     wordstat_enabled: project.wordstat_enabled || false,
+                    wordstat_region: project.wordstat_region || null,
                 };
                 setEditData(fallbackData);
             }
         } catch (error) {
             console.error('Ошибка при загрузке данных проекта:', error);
-            // Устанавливаем базовые данные из проекта
             const fallbackData = {
                 domain: project.domain || '',
                 name: project.name || '',
                 keywords: '',
                 search_engines: project.search_engines || [],
-                regions: project.regions || {},
-                device_settings: project.device_settings || {},
+                targets: [],
                 position_limit: project.position_limit || 10,
                 subdomains: project.subdomains || false,
                 schedule: project.schedule || null,
                 wordstat_enabled: project.wordstat_enabled || false,
+                wordstat_region: project.wordstat_region || null,
             };
             setEditData(fallbackData);
         } finally {
@@ -113,7 +122,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false });
+                setSiteData({ domain: '', name: '', keywords: '', search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null });
             },
         });
     };
@@ -128,7 +137,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keywords: '', search_engines: [], regions: {}, device_settings: {}, position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false });
+                setEditData({ domain: '', name: '', keywords: '', search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);

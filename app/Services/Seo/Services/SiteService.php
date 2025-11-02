@@ -9,7 +9,8 @@ use App\Models\SeoSite;
 class SiteService
 {
     public function __construct(
-        private MicroserviceClient $microserviceClient
+        private MicroserviceClient $microserviceClient,
+        private SeoSiteTargetService $targetService
     ) {}
 
     public function findByMicroserviceId(int $microserviceId): ?SiteDTO
@@ -71,7 +72,13 @@ class SiteService
             $updateData['wordstat_region'] = $dto->wordstatRegion;
         }
 
-        return $site->update($updateData);
+        $updated = $site->update($updateData);
+
+        if ($dto->targets !== null) {
+            $this->targetService->upsertTargets($site->id, $dto->targets);
+        }
+
+        return $updated;
     }
 
     public function getSite(int $siteId): ?SiteDTO

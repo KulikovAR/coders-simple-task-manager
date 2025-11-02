@@ -75,5 +75,26 @@ class GeoService
             ->orderBy('name')
             ->get();
     }
+    
+    public function findDomainByName(string $name): ?Geo
+    {
+        return Geo::where('target_type', 'Country')
+            ->where('status', 'Active')
+            ->where(function ($q) use ($name) {
+                $q->where('name', $name)
+                  ->orWhere('canonical_name', $name);
+            })
+            ->first();
+    }
+    
+    public function findRegionByNameAndDomain(string $regionName, int $domainCriteriaId): ?Geo
+    {
+        return Geo::where('parent_id', $domainCriteriaId)
+            ->where('status', 'Active')
+            ->where(function ($q) use ($regionName) {
+                $q->where('name', $regionName)
+                  ->orWhere('canonical_name', $regionName);
+            })
+            ->first();
+    }
 }
-

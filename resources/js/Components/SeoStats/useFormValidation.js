@@ -38,52 +38,55 @@ export function useFormValidation() {
         if (!formData.search_engines || formData.search_engines.length === 0) {
             newErrors.search_engines = 'Выберите хотя бы одну поисковую систему';
         } else {
-            // Валидация регионов для выбранных поисковиков
-            const regionErrors = {};
-            let hasRegionErrors = false;
-
+            const targets = formData.targets || [];
+            const targetErrors = {};
+            
             formData.search_engines.forEach(engine => {
-                if (!formData.regions || !formData.regions[engine]) {
-                    regionErrors[engine] = `Выберите регион для ${engine === 'google' ? 'Google' : 'Yandex'}`;
-                    hasRegionErrors = true;
-                } else if (engine === 'yandex') {
-                    if (typeof formData.regions[engine] !== 'number') {
-                        regionErrors[engine] = `Выберите корректный регион для Yandex`;
-                        hasRegionErrors = true;
-                    }
-                } else if (!formData.regions[engine].code || !formData.regions[engine].name) {
-                    regionErrors[engine] = `Выберите корректный регион для Google`;
-                    hasRegionErrors = true;
+                const engineTargets = targets.filter(t => t.search_engine === engine);
+                
+                if (engineTargets.length === 0) {
+                    targetErrors[engine] = `Добавьте хотя бы одну комбинацию для ${engine === 'google' ? 'Google' : 'Yandex'}`;
+                } else {
+                    engineTargets.forEach((target, index) => {
+                        if (engine === 'google') {
+                            if (!target.domain || (typeof target.domain === 'object' && !target.domain.name)) {
+                                targetErrors[`${engine}_${index}_domain`] = 'Выберите домен';
+                            }
+                            if (!target.region || (typeof target.region === 'object' && !target.region.name)) {
+                                targetErrors[`${engine}_${index}_region`] = 'Выберите регион';
+                            }
+                            if (!target.language) {
+                                targetErrors[`${engine}_${index}_language`] = 'Выберите язык';
+                            }
+                        } else if (engine === 'yandex') {
+                            if (!target.lr) {
+                                targetErrors[`${engine}_${index}_lr`] = 'Выберите LR';
+                            }
+                        }
+                        
+                        if (engine === 'google') {
+                            if (!target.device) {
+                                targetErrors[`${engine}_${index}_device`] = 'Выберите устройство';
+                            }
+                            
+                            if (target.device === 'mobile' && !target.os) {
+                                targetErrors[`${engine}_${index}_os`] = 'Выберите операционную систему';
+                            }
+                        } else if (engine === 'yandex') {
+                            if (!target.os) {
+                                targetErrors[`${engine}_${index}_os`] = 'Выберите операционную систему';
+                            }
+                        }
+                    });
                 }
             });
+
+            if (Object.keys(targetErrors).length > 0) {
+                newErrors.targets = targetErrors;
+            }
 
             if (formData.wordstat_enabled && (!formData.wordstat_region || typeof formData.wordstat_region !== 'number')) {
                 newErrors.wordstat_region = 'Выберите регион для Яндекс.Вордстат';
-            }
-
-            if (hasRegionErrors) {
-                newErrors.regions = regionErrors;
-            }
-
-            // Валидация настроек устройств для выбранных поисковиков
-            const deviceErrors = {};
-            let hasDeviceErrors = false;
-
-            formData.search_engines.forEach(engine => {
-                if (!formData.device_settings || !formData.device_settings[engine]) {
-                    deviceErrors[engine] = `Выберите устройство для ${engine === 'google' ? 'Google' : 'Yandex'}`;
-                    hasDeviceErrors = true;
-                } else if (!formData.device_settings[engine].device) {
-                    deviceErrors[engine] = `Выберите устройство для ${engine === 'google' ? 'Google' : 'Yandex'}`;
-                    hasDeviceErrors = true;
-                } else if (formData.device_settings[engine].device === 'mobile' && !formData.device_settings[engine].os) {
-                    deviceErrors[engine] = `Выберите операционную систему для мобильного устройства в ${engine === 'google' ? 'Google' : 'Yandex'}`;
-                    hasDeviceErrors = true;
-                }
-            });
-
-            if (hasDeviceErrors) {
-                newErrors.device_settings = deviceErrors;
             }
         }
 
@@ -158,30 +161,51 @@ export function useFormValidation() {
                 if (!formData.search_engines || formData.search_engines.length === 0) {
                     searchEngineErrors.push('search_engines');
                 } else {
-                    // Проверяем регионы
+                    const targets = formData.targets || [];
+                    
                     formData.search_engines.forEach(engine => {
-                        if (!formData.regions || !formData.regions[engine]) {
-                            searchEngineErrors.push(`region_${engine}`);
-                        } else if (engine === 'yandex' && typeof formData.regions[engine] !== 'number') {
-                            searchEngineErrors.push(`region_${engine}`);
-                        } else if (engine === 'google' && !formData.regions[engine].code) {
-                            searchEngineErrors.push(`region_${engine}`);
+                        const engineTargets = targets.filter(t => t.search_engine === engine);
+                        
+                        if (engineTargets.length === 0) {
+                            searchEngineErrors.push(`targets_${engine}`);
+                        } else {
+                            engineTargets.forEach((target, index) => {
+                                if (engine === 'google') {
+                                    if (!target.domain || (typeof target.domain === 'object' && !target.domain.name)) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_domain`);
+                                    }
+                                    if (!target.region || (typeof target.region === 'object' && !target.region.name)) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_region`);
+                                    }
+                                    if (!target.language) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_language`);
+                                    }
+                                } else if (engine === 'yandex') {
+                                    if (!target.lr) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_lr`);
+                                    }
+                                }
+                                
+                                if (engine === 'google') {
+                                    if (!target.device) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_device`);
+                                    }
+                                    
+                                    if (target.device === 'mobile' && !target.os) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_os`);
+                                    }
+                                } else if (engine === 'yandex') {
+                                    if (!target.os) {
+                                        searchEngineErrors.push(`target_${engine}_${index}_os`);
+                                    }
+                                }
+                            });
                         }
                     });
                     
-                    // Проверяем регион для Вордстат
                     if (formData.wordstat_enabled && (!formData.wordstat_region || typeof formData.wordstat_region !== 'number')) {
                         searchEngineErrors.push('wordstat_region');
                     }
-                    
-                    // Проверяем настройки устройств
-                    formData.search_engines.forEach(engine => {
-                        if (!formData.device_settings || !formData.device_settings[engine] || !formData.device_settings[engine].device) {
-                            searchEngineErrors.push(`device_${engine}`);
-                        } else if (formData.device_settings[engine].device === 'mobile' && !formData.device_settings[engine].os) {
-                            searchEngineErrors.push(`os_${engine}`);
-                        }
-                    });
                 }
                 return {
                     hasErrors: searchEngineErrors.length > 0,
