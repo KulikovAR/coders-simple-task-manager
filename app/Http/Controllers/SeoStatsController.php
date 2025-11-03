@@ -127,12 +127,21 @@ class SeoStatsController extends Controller
             'date_sort' => request('date_sort'),
             'sort_type' => request('sort_type'),
             'wordstat_sort' => request('wordstat_sort'),
+            'group_id' => request('group_id'),
         ];
 
         $data = $this->reportsService->getReportsData($siteId, $filters);
 
         if (!$data) {
             abort(403);
+        }
+
+        // Получаем список групп для селекта
+        try {
+            $groups = $this->microserviceClient->getGroups($siteId);
+            $data['groups'] = $groups ?? [];
+        } catch (\Exception $e) {
+            $data['groups'] = [];
         }
 
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
@@ -163,6 +172,7 @@ class SeoStatsController extends Controller
             'date_sort' => request('date_sort'),
             'sort_type' => request('sort_type'),
             'wordstat_sort' => request('wordstat_sort'),
+            'group_id' => request('group_id'),
             'page' => request('page', 1),
             'per_page' => request('per_page', 10),
         ];

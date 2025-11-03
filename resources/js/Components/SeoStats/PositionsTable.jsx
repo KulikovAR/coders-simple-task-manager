@@ -2,9 +2,9 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { router } from '@inertiajs/react';
 
-export default function PositionsTable({ 
-    keywords = [], 
-    positions = [], 
+export default function PositionsTable({
+    keywords = [],
+    positions = [],
     siteId,
     filters = {},
     pagination = {}
@@ -29,14 +29,14 @@ export default function PositionsTable({
                 }
             });
         }
-        
+
         const sortedDates = Array.from(dates).sort();
         const today = new Date().toISOString().split('T')[0];
-        
+
         if (sortedDates.includes(today)) {
             return [today, ...sortedDates.filter(date => date !== today)];
         }
-        
+
         return sortedDates;
     }, [allPositions]);
 
@@ -54,13 +54,13 @@ export default function PositionsTable({
             });
 
             const { keywords: newKeywords, positions: newPositions, has_more, pagination } = response.data;
-            
+
             setAllKeywords(prev => {
                 const existingIds = new Set(prev.map(k => k.id));
                 const uniqueNewKeywords = newKeywords.filter(k => !existingIds.has(k.id));
                 return [...prev, ...uniqueNewKeywords];
             });
-            
+
             setAllPositions(prev => [...prev, ...(newPositions || [])]);
             setCurrentPage(prev => prev + 1);
             setHasMore(has_more || false);
@@ -100,7 +100,7 @@ export default function PositionsTable({
     }, [keywords, positions, filters]);
 
     const filteredAndSortedKeywords = useMemo(() => {
-        let filtered = allKeywords.filter(keyword => 
+        let filtered = allKeywords.filter(keyword =>
             keyword.value.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
@@ -109,7 +109,7 @@ export default function PositionsTable({
             filtered.sort((a, b) => {
                 const aValue = a.value.toLowerCase();
                 const bValue = b.value.toLowerCase();
-                
+
                 if (sortConfig.direction === 'asc') {
                     return aValue.localeCompare(bValue);
                 } else {
@@ -123,8 +123,8 @@ export default function PositionsTable({
 
     const getFrequencyForKeyword = (keywordId) => {
         if (!Array.isArray(allPositions)) return null;
-        
-        const wordstatPosition = allPositions.find(pos => 
+
+        const wordstatPosition = allPositions.find(pos =>
             pos.keyword_id === keywordId && pos.source === 'wordstat'
         );
         return wordstatPosition ? wordstatPosition.rank : null;
@@ -132,7 +132,7 @@ export default function PositionsTable({
 
     const getPositionForKeyword = (keywordId, date) => {
         if (!Array.isArray(allPositions)) return null;
-        
+
         const position = allPositions.find(pos => {
             const posDateOnly = pos.date ? pos.date.split('T')[0] : '';
             return pos.keyword_id === keywordId && posDateOnly === date && pos.source !== 'wordstat';
@@ -144,12 +144,12 @@ export default function PositionsTable({
         const dates = uniqueDates;
         const currentIndex = dates.indexOf(date);
         if (currentIndex <= 0) return null;
-        
+
         const currentPositionObj = getPositionForKeyword(keywordId, date);
         const previousPositionObj = getPositionForKeyword(keywordId, dates[currentIndex - 1]);
-        
+
         if (!currentPositionObj || !previousPositionObj || !currentPositionObj.rank || !previousPositionObj.rank) return null;
-        
+
         return previousPositionObj.rank - currentPositionObj.rank;
     };
 
@@ -235,14 +235,14 @@ export default function PositionsTable({
 
     if (allKeywords.length === 0) {
         return (
-            <div className="bg-card-bg border border-border-color rounded-xl p-12 text-center">
+            <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
                 <div className="text-text-muted mb-4">
                     <svg className="mx-auto h-16 w-16 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
-                <h3 className="text-lg font-medium text-text-primary mb-2">Нет ключевых слов</h3>
-                <p className="text-text-muted mb-4">Добавьте ключевые слова для отслеживания позиций</p>
+                <h3 className="text-lg font-medium text-text-primary mb-2">Нет данных для сводной таблицы</h3>
+                <p className="text-text-muted">Добавьте ключевые слова и запустите отслеживание позиций</p>
             </div>
         );
     }
@@ -305,7 +305,7 @@ export default function PositionsTable({
                             </th>
 
                             {/* Частота */}
-                            <th 
+                            <th
                                 className={`px-6 py-3 text-center text-sm font-medium text-text-primary min-w-[120px] cursor-pointer transition-all ${
                                     filters.wordstat_sort ? (filters.wordstat_sort === 'desc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : 'hover:bg-secondary-bg/50'
                                 }`}
@@ -314,20 +314,20 @@ export default function PositionsTable({
                                 <div className="flex items-center justify-center gap-1">
                                     <span>Частота</span>
                                     {filters.wordstat_sort && (
-                                        <svg 
-                                            className="w-4 h-4 text-text-primary" 
-                                            fill="none" 
-                                            stroke="currentColor" 
+                                        <svg
+                                            className="w-4 h-4 text-text-primary"
+                                            fill="none"
+                                            stroke="currentColor"
                                             viewBox="0 0 24 24"
                                         >
-                                            <path 
-                                                strokeLinecap="round" 
-                                                strokeLinejoin="round" 
-                                                strokeWidth="2" 
-                                                d={filters.wordstat_sort === 'desc' 
-                                                    ? "M5 15l7-7 7 7" 
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d={filters.wordstat_sort === 'desc'
+                                                    ? "M5 15l7-7 7 7"
                                                     : "M19 9l-7 7-7-7"
-                                                } 
+                                                }
                                             />
                                         </svg>
                                     )}
@@ -340,10 +340,10 @@ export default function PositionsTable({
                                 const isToday = date === today;
                                 const sortState = getDateSortState(date);
                                 const isSorted = sortState !== null;
-                                
+
                                 return (
-                                    <th 
-                                        key={`${date}-${index}`} 
+                                    <th
+                                        key={`${date}-${index}`}
                                         className={`px-3 py-3 text-center text-sm font-medium min-w-[100px] cursor-pointer transition-all ${
                                             isToday ? 'bg-accent-blue/20 border-2 border-accent-blue text-accent-blue' : 'text-text-primary hover:bg-secondary-bg/50'
                                         } ${isSorted ? (sortState === 'asc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : ''}`}
@@ -355,20 +355,20 @@ export default function PositionsTable({
                                                     {new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
                                                 </span>
                                                 {isSorted && (
-                                                    <svg 
-                                                        className="w-4 h-4 text-text-primary" 
-                                                        fill="none" 
-                                                        stroke="currentColor" 
+                                                    <svg
+                                                        className="w-4 h-4 text-text-primary"
+                                                        fill="none"
+                                                        stroke="currentColor"
                                                         viewBox="0 0 24 24"
                                                     >
-                                                        <path 
-                                                            strokeLinecap="round" 
-                                                            strokeLinejoin="round" 
-                                                            strokeWidth="2" 
-                                                            d={sortState === 'asc' 
-                                                                ? "M5 15l7-7 7 7" 
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d={sortState === 'asc'
+                                                                ? "M5 15l7-7 7 7"
                                                                 : "M19 9l-7 7-7-7"
-                                                            } 
+                                                            }
                                                         />
                                                     </svg>
                                                 )}
@@ -421,7 +421,7 @@ export default function PositionsTable({
                                         const today = new Date().toISOString().split('T')[0];
                                         const isToday = date === today;
                                         const isClickable = positionUrl !== null && positionUrl !== undefined;
-                                        
+
                                         const handlePositionClick = (e) => {
                                             if (isClickable && positionUrl) {
                                                 e.preventDefault();
@@ -429,15 +429,15 @@ export default function PositionsTable({
                                                 window.open(positionUrl, '_blank', 'noopener,noreferrer');
                                             }
                                         };
-                                        
+
                                         return (
                                             <td key={`${date}-${keyword.id}-${index}`} className={`w-12 h-12 px-1 py-1 text-center min-w-[100px] relative ${
                                                 isToday ? 'border-2 border-accent-blue' : ''
                                             }`}>
-                                                <div 
+                                                <div
                                                     onClick={handlePositionClick}
                                                     className={`w-full h-full flex flex-col items-center justify-center group ${
-                                                        position === null ? 'bg-gray-200' : 
+                                                        position === null ? 'bg-gray-200' :
                                                         position === 0 ? 'bg-gray-400' :
                                                         position <= 3 ? 'bg-green-500' :
                                                         position <= 10 ? 'bg-yellow-500' :
@@ -447,21 +447,21 @@ export default function PositionsTable({
                                                     }`}
                                                 >
                                                     <span className={`text-sm font-bold ${
-                                                        position === null ? 'text-gray-600' : 
+                                                        position === null ? 'text-gray-600' :
                                                         'text-white'
                                                     } ${isToday ? 'text-lg' : ''}`}>
                                                         {position !== null ? position : '-'}
                                                     </span>
                                                     {change !== null && (
                                                         <span className={`text-xs font-medium ${
-                                                            change > 0 ? 'text-green-200' : 
-                                                            change < 0 ? 'text-red-200' : 
+                                                            change > 0 ? 'text-green-200' :
+                                                            change < 0 ? 'text-red-200' :
                                                             'text-gray-200'
                                                         }`}>
                                                             {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
                                                         </span>
                                                     )}
-                                                    
+
                                                     {/* Tooltip с URL */}
                                                     {isClickable && positionUrl && (
                                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-80 max-w-[90vw]">
@@ -482,7 +482,7 @@ export default function PositionsTable({
                         })}
                     </tbody>
                 </table>
-                
+
                 {/* Индикатор загрузки для бесконечной прокрутки */}
                 {hasMore && (
                     <div ref={loadingRef} className="px-6 py-4 text-center">
@@ -498,7 +498,7 @@ export default function PositionsTable({
                         )}
                     </div>
                 )}
-                
+
                 {!hasMore && allPositions.length > 0 && (
                     <div className="px-6 py-4 text-center text-text-muted text-sm">
                         Все позиции загружены

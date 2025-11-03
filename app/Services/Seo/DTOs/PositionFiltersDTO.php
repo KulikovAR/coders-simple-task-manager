@@ -7,6 +7,7 @@ class PositionFiltersDTO
     public function __construct(
         public readonly int $siteId,
         public readonly ?int $keywordId = null,
+        public readonly ?int $groupId = null,
         public readonly ?string $device = null,
         public readonly ?string $source = null,
         public readonly ?string $country = null,
@@ -27,6 +28,7 @@ class PositionFiltersDTO
         return new self(
             siteId: $data['site_id'],
             keywordId: $data['keyword_id'] ?? null,
+            groupId: isset($data['group_id']) ? (int)$data['group_id'] : null,
             device: $data['device'] ?? null,
             source: $data['source'] ?? null,
             country: $data['country'] ?? null,
@@ -48,6 +50,7 @@ class PositionFiltersDTO
         return array_filter([
             'site_id' => $this->siteId,
             'keyword_id' => $this->keywordId,
+            'group_id' => $this->groupId,
             'device' => $this->device,
             'source' => $this->source,
             'country' => $this->country,

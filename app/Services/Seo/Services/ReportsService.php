@@ -122,6 +122,7 @@ class ReportsService
                 'date_sort' => $positionFilters->dateSort,
                 'sort_type' => $positionFilters->sortType,
                 'wordstat_sort' => $positionFilters->wordstatSort,
+                'group_id' => $positionFilters->groupId,
             ],
         ];
     }

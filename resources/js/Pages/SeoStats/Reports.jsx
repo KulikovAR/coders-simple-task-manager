@@ -19,7 +19,8 @@ export default function SeoReports({
     filters = {},
     filterOptions = {},
     pagination = {},
-    activeTask = null
+    activeTask = null,
+    groups = []
 }) {
     const { recognitionStatus } = useSeoRecognition(project.id);
     const [exportProcessing, setExportProcessing] = useState({ html: false, excel: false });
@@ -158,6 +159,7 @@ export default function SeoReports({
                         filters={filters}
                         projectId={project.id}
                         project={project}
+                        groups={groups || []}
                     />
 
                     {/* Экспорт отчетов */}

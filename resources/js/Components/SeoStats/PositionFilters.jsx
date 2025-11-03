@@ -5,13 +5,15 @@ import { Download, FileText } from 'lucide-react';
 export default function PositionFilters({
     filters = {},
     projectId,
-    project = {}
+    project = {},
+    groups = []
 }) {
     // Определяем значение по умолчанию для поисковика
     const defaultSource = filters.source || project.search_engines?.[0] || '';
 
     const [localFilters, setLocalFilters] = useState({
         source: defaultSource,
+        group_id: filters.group_id || '',
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
         rank_from: filters.rank_from || '',
@@ -27,12 +29,13 @@ export default function PositionFilters({
     React.useEffect(() => {
         setLocalFilters({
             source: filters.source || project.search_engines?.[0] || '',
+            group_id: filters.group_id || '',
             date_from: filters.date_from || '',
             date_to: filters.date_to || '',
             rank_from: filters.rank_from || '',
             rank_to: filters.rank_to || '',
         });
-    }, [filters.source, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines]);
+    }, [filters.source, filters.group_id, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines]);
 
     const handleFilterChange = (key, value) => {
         setLocalFilters(prev => ({
@@ -59,6 +62,7 @@ export default function PositionFilters({
     const clearFilters = () => {
         setLocalFilters({
             source: project.search_engines?.[0] || '',
+            group_id: '',
             date_from: '',
             date_to: '',
             rank_from: '',
@@ -71,7 +75,7 @@ export default function PositionFilters({
         });
     };
 
-    const hasActiveFilters = localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type || filters.wordstat_sort;
+    const hasActiveFilters = localFilters.group_id !== '' || localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type || filters.wordstat_sort;
 
     const getRankRangeLabel = () => {
         if (localFilters.rank_from === '' || localFilters.rank_to === '') return null;
@@ -153,7 +157,7 @@ export default function PositionFilters({
                     </div>
                 </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Поисковая система */}
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
@@ -169,6 +173,25 @@ export default function PositionFilters({
                                 {searchEngine === 'google' ? 'Google' :
                                  searchEngine === 'yandex' ? 'Яндекс' :
                                  searchEngine}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Группа ключевых слов */}
+                <div>
+                    <label className="block text-sm font-medium text-text-primary mb-2">
+                        Группа ключевых слов
+                    </label>
+                    <select
+                        value={localFilters.group_id}
+                        onChange={(e) => handleFilterChange('group_id', e.target.value)}
+                        className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                    >
+                        <option value="">Все группы</option>
+                        {groups.map(group => (
+                            <option key={group.id} value={group.id}>
+                                {group.name || `Группа #${group.id}`}
                             </option>
                         ))}
                     </select>
@@ -210,6 +233,14 @@ export default function PositionFilters({
                         <span className="font-medium">Активные фильтры:</span>
                     </div>
                     <div className="flex flex-wrap gap-2 ml-6">
+                        {localFilters.group_id && (
+                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                Группа: {groups.find(g => g.id == localFilters.group_id)?.name || `#${localFilters.group_id}`}
+                            </span>
+                        )}
                         {rankLabel && (
                             <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
