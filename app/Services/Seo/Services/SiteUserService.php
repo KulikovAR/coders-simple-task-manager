@@ -66,7 +66,35 @@ class SiteUserService
         }
 
         $keywords = $this->microserviceClient->getKeywords($siteId);
-        $keywordsText = implode("\n", array_column($keywords, 'value'));
+        $groups = $this->microserviceClient->getGroups($siteId);
+        $groupIdToName = [];
+        foreach (($groups ?? []) as $g) {
+            if (isset($g['id'])) {
+                $groupIdToName[$g['id']] = $g['name'] ?? '';
+            }
+        }
+
+        $keywordGroupsMap = [];
+        foreach (($keywords ?? []) as $kw) {
+            $gid = $kw['group_id'] ?? null;
+            $key = $gid !== null ? (string)$gid : 'default';
+            if (!isset($keywordGroupsMap[$key])) {
+                $keywordGroupsMap[$key] = [
+                    'name' => $gid !== null ? ($groupIdToName[$gid] ?? '') : '',
+                    'keywords' => [],
+                ];
+            }
+            if (!empty($kw['value'])) {
+                $keywordGroupsMap[$key]['keywords'][] = $kw['value'];
+            }
+        }
+
+        $keywordGroups = array_map(function ($item) {
+            return [
+                'name' => $item['name'],
+                'keywords' => implode("\n", $item['keywords']),
+            ];
+        }, array_values($keywordGroupsMap));
 
         $localSite = SeoSite::where('go_seo_site_id', $siteId)->first();
         if (!$localSite) {
@@ -130,7 +158,7 @@ class SiteUserService
 
         return [
             'site' => $siteData,
-            'keywords' => $keywordsText,
+            'keyword_groups' => $keywordGroups,
         ];
     }
 

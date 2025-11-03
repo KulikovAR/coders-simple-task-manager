@@ -115,29 +115,51 @@ class SiteService
     {
         $success = $this->update($siteId, $dto);
 
-        if (!empty($dto->keywords)) {
-            $this->updateSiteKeywords($siteId, $dto->keywords);
+        if (!empty($dto->keywordGroups)) {
+            $this->updateSiteKeywords($siteId, $dto->keywordGroups);
         }
 
         return $success;
     }
 
-    public function updateSiteKeywords(int $siteId, string $keywords): void
+    public function updateSiteKeywords(int $siteId, array $keywordGroups = []): void
     {
-        $existingKeywords = $this->microserviceClient->getKeywords($siteId);
-        $existingValues = array_column($existingKeywords, 'value');
-
-        $newKeywords = array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
-
-        foreach ($existingKeywords as $keyword) {
-            if (!in_array($keyword['value'], $newKeywords, true)) {
-                $this->microserviceClient->deleteKeyword($keyword['id']);
+        $allNewKeywords = [];
+        
+        foreach ($keywordGroups as $group) {
+            $groupId = null;
+            $groupName = $group['name'] ?? null;
+            $keywords = $group['keywords'] ?? '';
+            
+            if ($groupName) {
+                $groups = $this->microserviceClient->getGroups($siteId);
+                $existingGroup = collect($groups)->firstWhere('name', $groupName);
+                
+                if ($existingGroup) {
+                    $groupId = $existingGroup['id'];
+                } else {
+                    $newGroup = $this->microserviceClient->createGroup($siteId, $groupName);
+                    if ($newGroup && isset($newGroup['id'])) {
+                        $groupId = $newGroup['id'];
+                    }
+                }
+            }
+            
+            $keywordsList = array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
+            
+            foreach ($keywordsList as $keywordValue) {
+                if (!empty($keywordValue)) {
+                    $allNewKeywords[] = $keywordValue;
+                    $this->microserviceClient->createKeyword($siteId, $keywordValue, $groupId);
+                }
             }
         }
-
-        foreach ($newKeywords as $keywordValue) {
-            if (!empty($keywordValue) && !in_array($keywordValue, $existingValues)) {
-                $this->microserviceClient->createKeyword($siteId, $keywordValue);
+        
+        $existingKeywords = $this->microserviceClient->getKeywords($siteId);
+        
+        foreach ($existingKeywords as $keyword) {
+            if (!in_array($keyword['value'], $allNewKeywords, true)) {
+                $this->microserviceClient->deleteKeyword($keyword['id']);
             }
         }
     }

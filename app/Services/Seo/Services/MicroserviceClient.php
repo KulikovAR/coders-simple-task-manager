@@ -78,14 +78,20 @@ class MicroserviceClient
         }
     }
 
-    public function createKeyword(int $siteId, string $value): ?array
+    public function createKeyword(int $siteId, string $value, ?int $groupId = null): ?array
     {
         try {
+            $data = [
+                'site_id' => $siteId,
+                'value' => $value,
+            ];
+            
+            if ($groupId !== null) {
+                $data['group_id'] = $groupId;
+            }
+            
             $response = $this->client->post($this->baseUrl . '/api/keywords', [
-                'json' => [
-                    'site_id' => $siteId,
-                    'value' => $value,
-                ],
+                'json' => $data,
             ]);
             return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         } catch (GuzzleException $e) {
@@ -274,6 +280,56 @@ class MicroserviceClient
         } catch (GuzzleException $e) {
             Log::error('Failed to get combined positions: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    public function getGroups(int $siteId): array
+    {
+        try {
+            $response = $this->client->get($this->baseUrl . '/api/groups', [
+                'query' => ['site_id' => $siteId],
+            ]);
+            $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            return is_array($data) ? $data : [];
+        } catch (GuzzleException $e) {
+            return [];
+        }
+    }
+
+    public function createGroup(int $siteId, string $name): ?array
+    {
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/groups', [
+                'json' => [
+                    'site_id' => $siteId,
+                    'name' => $name,
+                ],
+            ]);
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (GuzzleException $e) {
+            return null;
+        }
+    }
+
+    public function updateGroup(int $groupId, string $name): bool
+    {
+        try {
+            $response = $this->client->put($this->baseUrl . '/api/groups/' . $groupId, [
+                'json' => ['name' => $name],
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
+    public function deleteGroup(int $groupId): bool
+    {
+        try {
+            $response = $this->client->delete($this->baseUrl . '/api/groups/' . $groupId);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
         }
     }
 

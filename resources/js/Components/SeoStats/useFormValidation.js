@@ -24,13 +24,23 @@ export function useFormValidation() {
             }
         }
 
-        if (!formData.keywords || formData.keywords.trim() === '') {
-            newErrors.keywords = 'Ключевые слова обязательны для заполнения';
+        const keywordGroups = formData.keyword_groups || [];
+        if (keywordGroups.length === 0) {
+            newErrors.keywords = 'Добавьте хотя бы одну группу ключевых слов';
         } else {
-            // Проверяем, что есть хотя бы одно ключевое слово
-            const keywordsList = formData.keywords.split('\n').filter(kw => kw.trim() !== '');
-            if (keywordsList.length === 0) {
-                newErrors.keywords = 'Введите хотя бы одно ключевое слово';
+            let hasValidKeywords = false;
+            for (const group of keywordGroups) {
+                const keywords = (group.keywords || '').trim();
+                if (keywords) {
+                    const keywordsList = keywords.split('\n').filter(kw => kw.trim() !== '');
+                    if (keywordsList.length > 0) {
+                        hasValidKeywords = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasValidKeywords) {
+                newErrors.keywords = 'Введите хотя бы одно ключевое слово в одной из групп';
             }
         }
 
@@ -146,17 +156,28 @@ export function useFormValidation() {
 
             case 'keywords':
                 const keywordErrors = [];
-                if (!formData.keywords || formData.keywords.trim() === '') {
+                const keywordGroups = formData.keyword_groups || [];
+                if (keywordGroups.length === 0) {
                     keywordErrors.push('keywords');
                 } else {
-                    const keywordsList = formData.keywords.split('\n').filter(kw => kw.trim() !== '');
-                    if (keywordsList.length === 0) {
+                    let hasValidKeywords = false;
+                    for (const group of keywordGroups) {
+                        const keywords = (group.keywords || '').trim();
+                        if (keywords) {
+                            const keywordsList = keywords.split('\n').filter(kw => kw.trim() !== '');
+                            if (keywordsList.length > 0) {
+                                hasValidKeywords = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasValidKeywords) {
                         keywordErrors.push('keywords');
                     }
                 }
                 return {
                     hasErrors: keywordErrors.length > 0,
-                    isValid: keywordErrors.length === 0 && formData.keywords,
+                    isValid: keywordErrors.length === 0 && keywordGroups.length > 0,
                     errors: keywordErrors
                 };
 

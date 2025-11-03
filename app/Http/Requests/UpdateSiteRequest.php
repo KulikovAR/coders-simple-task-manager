@@ -15,7 +15,9 @@ class UpdateSiteRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string|max:255',
-            'keywords' => 'nullable|string',
+            'keyword_groups' => 'nullable|array',
+            'keyword_groups.*.name' => 'nullable|string|max:255',
+            'keyword_groups.*.keywords' => 'nullable|string',
             'search_engines' => 'nullable|array',
             'targets' => 'nullable|array',
             'targets.*.search_engine' => 'required|string|in:google,yandex',

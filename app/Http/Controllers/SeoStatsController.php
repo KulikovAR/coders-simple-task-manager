@@ -583,4 +583,75 @@ class SeoStatsController extends Controller
             return response()->json(['error' => 'Ошибка удаления'], 500);
         }
     }
+
+    public function getGroups(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        try {
+            $groups = $this->microserviceClient->getGroups($siteId);
+            return response()->json($groups);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка получения групп'], 500);
+        }
+    }
+
+    public function storeGroup(int $siteId, \Illuminate\Http\Request $request)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        try {
+            $group = $this->microserviceClient->createGroup($siteId, $request->input('name'));
+
+            if ($group) {
+                return response()->json(['success' => true, 'group' => $group]);
+            } else {
+                return response()->json(['error' => 'Ошибка создания группы'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка создания группы'], 500);
+        }
+    }
+
+    public function updateGroup(int $groupId, \Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        try {
+            $success = $this->microserviceClient->updateGroup($groupId, $request->input('name'));
+
+            if ($success) {
+                return response()->json(['success' => true, 'message' => 'Группа обновлена']);
+            } else {
+                return response()->json(['error' => 'Ошибка обновления группы'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка обновления группы'], 500);
+        }
+    }
+
+    public function destroyGroup(int $groupId)
+    {
+        try {
+            $success = $this->microserviceClient->deleteGroup($groupId);
+
+            if ($success) {
+                return response()->json(['success' => true, 'message' => 'Группа удалена']);
+            } else {
+                return response()->json(['error' => 'Ошибка удаления группы'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ошибка удаления группы'], 500);
+        }
+    }
 }

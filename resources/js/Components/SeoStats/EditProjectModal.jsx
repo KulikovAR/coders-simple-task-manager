@@ -51,8 +51,8 @@ export default function EditProjectModal({
         setSiteData('wordstat_region', region);
     };
 
-    const handleKeywordsChange = (keywords) => {
-        setSiteData('keywords', keywords);
+    const handleKeywordGroupsChange = (groups) => {
+        setSiteData('keyword_groups', groups);
     };
 
     const handleFormSubmit = (e) => {
@@ -131,8 +131,8 @@ export default function EditProjectModal({
                             isValid={keywordsStatus.isValid}
                         >
                             <KeywordsSection 
-                                keywords={siteData.keywords}
-                                onKeywordsChange={handleKeywordsChange}
+                                keywordGroups={siteData.keyword_groups || []}
+                                onKeywordGroupsChange={handleKeywordGroupsChange}
                                 errors={allErrors}
                             />
                         </CollapsibleSection>
