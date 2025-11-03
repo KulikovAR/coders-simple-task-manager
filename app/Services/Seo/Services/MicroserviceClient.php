@@ -99,6 +99,23 @@ class MicroserviceClient
         }
     }
 
+    public function updateKeyword(int $keywordId, ?int $groupId = null): bool
+    {
+        try {
+            $data = [];
+            if ($groupId !== null) {
+                $data['group_id'] = $groupId;
+            }
+            
+            $response = $this->client->put($this->baseUrl . '/api/keywords/' . $keywordId, [
+                'json' => $data,
+            ]);
+            return $response->getStatusCode() === 200;
+        } catch (GuzzleException $e) {
+            return false;
+        }
+    }
+
     public function deleteKeyword(int $keywordId): bool
     {
         try {

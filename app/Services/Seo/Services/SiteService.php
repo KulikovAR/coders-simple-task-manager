@@ -124,43 +124,111 @@ class SiteService
 
     public function updateSiteKeywords(int $siteId, array $keywordGroups = []): void
     {
-        $allNewKeywords = [];
+        $existingKeywords = $this->microserviceClient->getKeywords($siteId);
+        $existingGroups = $this->microserviceClient->getGroups($siteId);
         
-        foreach ($keywordGroups as $group) {
-            $groupId = null;
-            $groupName = $group['name'] ?? null;
-            $keywords = $group['keywords'] ?? '';
-            
-            if ($groupName) {
-                $groups = $this->microserviceClient->getGroups($siteId);
-                $existingGroup = collect($groups)->firstWhere('name', $groupName);
-                
-                if ($existingGroup) {
-                    $groupId = $existingGroup['id'];
-                } else {
-                    $newGroup = $this->microserviceClient->createGroup($siteId, $groupName);
-                    if ($newGroup && isset($newGroup['id'])) {
-                        $groupId = $newGroup['id'];
-                    }
-                }
-            }
-            
-            $keywordsList = array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
-            
-            foreach ($keywordsList as $keywordValue) {
-                if (!empty($keywordValue)) {
-                    $allNewKeywords[] = $keywordValue;
-                    $this->microserviceClient->createKeyword($siteId, $keywordValue, $groupId);
-                }
+        $existingKeywordsMap = $this->buildExistingKeywordsMap($existingKeywords);
+        $newKeywordsMap = $this->buildNewKeywordsMap($siteId, $keywordGroups, $existingGroups);
+        
+        $this->syncKeywords($siteId, $existingKeywordsMap, $newKeywordsMap, $existingKeywords);
+    }
+
+    private function buildExistingKeywordsMap(array $keywords): array
+    {
+        $map = [];
+        
+        foreach ($keywords as $keyword) {
+            $value = trim($keyword['value'] ?? '');
+            if (!empty($value)) {
+                $map[$value] = $keyword;
             }
         }
         
-        $existingKeywords = $this->microserviceClient->getKeywords($siteId);
+        return $map;
+    }
+
+    private function buildNewKeywordsMap(int $siteId, array $keywordGroups, array &$existingGroups): array
+    {
+        $map = [];
+        $processed = [];
+        
+        foreach ($keywordGroups as $group) {
+            $groupId = $this->resolveGroupId($siteId, $group['name'] ?? null, $existingGroups);
+            $keywordsList = $this->parseKeywords($group['keywords'] ?? '');
+            
+            foreach ($keywordsList as $keywordValue) {
+                if (isset($processed[$keywordValue])) {
+                    continue;
+                }
+                
+                $processed[$keywordValue] = true;
+                $map[$keywordValue] = [
+                    'group_id' => $groupId,
+                    'value' => $keywordValue,
+                ];
+            }
+        }
+        
+        return $map;
+    }
+
+    private function resolveGroupId(int $siteId, ?string $groupName, array &$existingGroups): ?int
+    {
+        if (!$groupName) {
+            return null;
+        }
+        
+        $existingGroup = collect($existingGroups)->firstWhere('name', $groupName);
+        
+        if ($existingGroup) {
+            return $existingGroup['id'];
+        }
+        
+        $newGroup = $this->microserviceClient->createGroup($siteId, $groupName);
+        
+        if ($newGroup && isset($newGroup['id'])) {
+            $existingGroups[] = $newGroup;
+            return $newGroup['id'];
+        }
+        
+        return null;
+    }
+
+    private function parseKeywords(string $keywords): array
+    {
+        return array_unique(array_filter(array_map('trim', explode("\n", $keywords))));
+    }
+
+    private function syncKeywords(
+        int $siteId,
+        array $existingKeywordsMap,
+        array $newKeywordsMap,
+        array $existingKeywords
+    ): void {
+        foreach ($newKeywordsMap as $keywordValue => $keywordData) {
+            $targetGroupId = $keywordData['group_id'];
+            
+            if (isset($existingKeywordsMap[$keywordValue])) {
+                $this->updateKeywordIfNeeded($existingKeywordsMap[$keywordValue], $targetGroupId);
+            } else {
+                $this->microserviceClient->createKeyword($siteId, $keywordValue, $targetGroupId);
+            }
+        }
         
         foreach ($existingKeywords as $keyword) {
-            if (!in_array($keyword['value'], $allNewKeywords, true)) {
+            $value = trim($keyword['value'] ?? '');
+            if (!empty($value) && !isset($newKeywordsMap[$value])) {
                 $this->microserviceClient->deleteKeyword($keyword['id']);
             }
+        }
+    }
+
+    private function updateKeywordIfNeeded(array $existingKeyword, ?int $targetGroupId): void
+    {
+        $currentGroupId = $existingKeyword['group_id'] ?? null;
+        
+        if ($currentGroupId != $targetGroupId) {
+            $this->microserviceClient->updateKeyword($existingKeyword['id'], $targetGroupId);
         }
     }
 
