@@ -144,48 +144,28 @@ export default function SeoDashboard({ auth }) {
                     </div>
 
                     {/* Информация об интеграции с XML River */}
-                    <div className="mt-12 text-center">
-                        <div className="bg-gradient-to-r from-accent-blue/10 to-accent-blue/5 border border-accent-blue/20 rounded-xl p-8">
-                            <h3 className="text-xl font-bold text-text-primary mb-4">
-                                Интеграция с XML River API
-                            </h3>
-                            <p className="text-text-muted max-w-2xl mx-auto mb-6">
-                                Мы используем мощное API <span className="text-accent-blue font-semibold">XML River</span> для сбора данных
-                                из поисковых систем. Укажите свои ключи доступа в настройках проекта и получите доступ к
-                                профессиональному мониторингу позиций с нашей удобной визуализацией и аналитикой.
-                            </p>
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="text-text-primary">Надежный сбор данных</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                    <span className="text-text-primary">Удобная визуализация</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                    <span className="text-text-primary">Детальная аналитика</span>
-                                </div>
-                            </div>
-                            <div className="mt-6">
-                                <a
-                                    href="https://xmlriver.com"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-accent-blue hover:text-accent-blue/80 font-medium"
-                                >
-                                    Получить ключи API XML River →
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    {/*<div className="mt-12 text-center">*/}
+                    {/*    <div className="bg-gradient-to-r from-accent-blue/10 to-accent-blue/5 border border-accent-blue/20 rounded-xl p-8">*/}
+                    {/*        <h3 className="text-xl font-bold text-text-primary mb-4">*/}
+                    {/*            Интеграция с XML River API*/}
+                    {/*        </h3>*/}
+                    {/*        <p className="text-text-muted max-w-2xl mx-auto mb-6">*/}
+                    {/*            Мы используем мощное API <span className="text-accent-blue font-semibold">XML River</span> для сбора данных*/}
+                    {/*            из поисковых систем. Укажите свои ключи доступа в настройках проекта и получите доступ к*/}
+                    {/*            профессиональному мониторингу позиций с нашей удобной визуализацией и аналитикой.*/}
+                    {/*        </p>*/}
+                    {/*        <div className="mt-6">*/}
+                    {/*            <a*/}
+                    {/*                href="https://xmlriver.com"*/}
+                    {/*                target="_blank"*/}
+                    {/*                rel="noopener noreferrer"*/}
+                    {/*                className="text-accent-blue hover:text-accent-blue/80 font-medium"*/}
+                    {/*            >*/}
+                    {/*                Получить ключи API XML River →*/}
+                    {/*            </a>*/}
+                    {/*        </div>*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
                 </div>
             </div>
         </SeoLayout>
