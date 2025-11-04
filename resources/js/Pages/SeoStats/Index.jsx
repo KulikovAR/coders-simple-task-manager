@@ -11,6 +11,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [isLoadingProjectData, setIsLoadingProjectData] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { data: siteData, setData: setSiteData, post: postSite, processing: siteProcessing, errors: siteErrors } = useForm({
         domain: '',
@@ -150,6 +151,15 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         });
     };
 
+    const filteredSites = sites.filter(site => {
+        if (!searchTerm) return true;
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            site.name?.toLowerCase().includes(searchLower) ||
+            site.domain?.toLowerCase().includes(searchLower)
+        );
+    });
+
 
     return (
         <SeoLayout user={auth.user}>
@@ -175,6 +185,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                             <button
                                 onClick={() => router.visit(route('reports.index'))}
                                 className="bg-secondary-bg text-text-primary px-4 py-2 rounded-lg hover:bg-border-color transition-colors flex items-center gap-2 text-sm font-medium border border-border-color"
+                                title="Перейти к отчетам"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -185,6 +196,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                             <button
                                 onClick={() => setShowAddSiteModal(true)}
                                 className="bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-accent-blue/90 transition-colors flex items-center gap-2 text-sm font-medium"
+                                title="Создать новый SEO проект"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -194,8 +206,60 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                         </div>
                     </div>
 
+                    {/* Поиск по проектам */}
+                    {sites.length > 0 && (
+                        <div className="mb-6">
+                            <div className="relative max-w-md">
+                                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    placeholder="Поиск по названию или домену..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-colors"
+                                />
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                                        title="Очистить поиск"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                            {searchTerm && (
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Найдено проектов: {filteredSites.length} из {sites.length}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Таблица проектов */}
-                    {sites.length === 0 ? (
+                    {filteredSites.length === 0 && sites.length > 0 ? (
+                        <div className="text-center py-16">
+                            <div className="text-text-muted mb-4">
+                                <svg className="mx-auto h-16 w-16 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-semibold text-text-primary mb-2">Ничего не найдено</h3>
+                            <p className="text-text-muted mb-4">
+                                По запросу "{searchTerm}" проектов не найдено
+                            </p>
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="text-accent-blue hover:text-accent-blue/80 transition-colors text-sm font-medium"
+                            >
+                                Очистить поиск
+                            </button>
+                        </div>
+                    ) : sites.length === 0 ? (
                         <div className="text-center py-16">
                             <div className="text-text-muted mb-6">
                                 <svg className="mx-auto h-20 w-20 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +304,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-card-bg divide-y divide-border-color">
-                                        {sites.map((site) => (
+                                        {filteredSites.map((site) => (
                                             <ProjectTableRow
                                                 key={site.id}
                                                 project={site}

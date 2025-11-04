@@ -77,7 +77,7 @@ export default function SeoDashboard({ auth }) {
                             SEO Аналитика
                         </h1>
                         <p className="text-xl text-text-muted max-w-3xl mx-auto">
-                            Современная платформа для отслеживания позиций в поисковых системах.
+                            Платформа для отслеживания позиций в поисковых системах.
                         </p>
                     </div>
 

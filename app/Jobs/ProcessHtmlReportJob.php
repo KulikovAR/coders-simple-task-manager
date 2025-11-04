@@ -97,7 +97,15 @@ class ProcessHtmlReportJob implements ShouldQueue
             $filters['date_to'] = now()->addDay()->format('Y-m-d');
         }
 
-        return $filters;
+        return array_filter($filters, function($value, $key) {
+            if ($value === null || $value === '') {
+                return false;
+            }
+            if (in_array($key, ['rank_from', 'rank_to']) && $value === 0) {
+                return true;
+            }
+            return true;
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     private function collectAllPositions(

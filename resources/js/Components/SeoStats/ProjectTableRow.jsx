@@ -7,9 +7,30 @@ export default function ProjectTableRow({
     isEditingProject = false,
     activeTask = null
 }) {
-    const lastUpdate = project.last_position_update 
-        ? new Date(project.last_position_update).toLocaleString('ru-RU') 
-        : '-';
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            if (diffHours === 0) {
+                const diffMinutes = Math.floor(diffTime / (1000 * 60));
+                return diffMinutes <= 1 ? 'только что' : `${diffMinutes} мин. назад`;
+            }
+            return `${diffHours} ч. назад`;
+        } else if (diffDays === 1) {
+            return 'вчера';
+        } else if (diffDays < 7) {
+            return `${diffDays} дн. назад`;
+        } else {
+            return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+    };
+
+    const lastUpdate = formatDate(project.last_position_update);
 
     return (
         <tr className="hover:bg-secondary-bg/50 transition-colors duration-150 border-b border-border-color">

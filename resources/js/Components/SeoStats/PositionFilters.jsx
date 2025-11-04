@@ -73,6 +73,20 @@ export default function PositionFilters({
         router.visit(route('seo-stats.reports', projectId) + '?' + queryParams.toString(), {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => {
+                const applyButton = document.querySelector('[data-filter-apply]');
+                if (applyButton) {
+                    applyButton.disabled = true;
+                    applyButton.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            },
+            onFinish: () => {
+                const applyButton = document.querySelector('[data-filter-apply]');
+                if (applyButton) {
+                    applyButton.disabled = false;
+                    applyButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
         });
     };
 
@@ -174,6 +188,7 @@ export default function PositionFilters({
                         </button>
                         <button
                             onClick={applyFilters}
+                            data-filter-apply
                             className="btn btn-primary"
                         >
                             Применить

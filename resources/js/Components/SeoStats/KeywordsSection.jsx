@@ -155,12 +155,19 @@ export default function KeywordsSection({ keywordGroups = [], onKeywordGroupsCha
                 </button>
             </div>
 
-            {keywordGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="border border-border-color rounded-lg p-4 space-y-4 bg-secondary-bg/30">
-                    <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-medium text-text-primary">
-                            Группа {groupIndex + 1}
-                        </h4>
+                    {keywordGroups.map((group, groupIndex) => {
+                        const keywordsCount = (group.keywords || '').split('\n').filter(k => k.trim()).length;
+                        return (
+                        <div key={groupIndex} className="border border-border-color rounded-lg p-4 space-y-4 bg-secondary-bg/30">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-sm font-medium text-text-primary">
+                                    Группа {groupIndex + 1}
+                                    {keywordsCount > 0 && (
+                                        <span className="ml-2 text-xs text-text-muted font-normal">
+                                            ({keywordsCount} {keywordsCount === 1 ? 'ключевое слово' : keywordsCount < 5 ? 'ключевых слова' : 'ключевых слов'})
+                                        </span>
+                                    )}
+                                </h4>
                         {keywordGroups.length > 1 && (
                             <button
                                 type="button"
@@ -247,9 +254,10 @@ export default function KeywordsSection({ keywordGroups = [], onKeywordGroupsCha
                         <p className="text-xs text-text-muted mt-2">
                             Каждое ключевое слово или фразу вводите с новой строки. Поддерживаются файлы CSV и TXT
                         </p>
-                    </div>
-                </div>
-            ))}
+                            </div>
+                        </div>
+                        );
+                    })}
 
             <ValidationError message={errors?.keywords} />
         </div>

@@ -34,10 +34,23 @@ export default function SeoReports({
         setExportProcessing(prev => ({ ...prev, [type]: true }));
         
         try {
+            const exportFilters = {
+                ...(filters.source && { source: filters.source }),
+                ...(filters.group_id && { group_id: filters.group_id }),
+                ...(filters.wordstat_query_type && { wordstat_query_type: filters.wordstat_query_type }),
+                ...(filters.date_from && { date_from: filters.date_from }),
+                ...(filters.date_to && { date_to: filters.date_to }),
+                ...(filters.rank_from !== undefined && filters.rank_from !== null && filters.rank_from !== '' && { rank_from: filters.rank_from }),
+                ...(filters.rank_to !== undefined && filters.rank_to !== null && filters.rank_to !== '' && { rank_to: filters.rank_to }),
+                ...(filters.date_sort && { date_sort: filters.date_sort }),
+                ...(filters.sort_type && { sort_type: filters.sort_type }),
+                ...(filters.wordstat_sort && { wordstat_sort: filters.wordstat_sort }),
+            };
+            
             const response = await axios.post(route('reports.export'), {
                 site_id: project.id,
                 type: type,
-                filters: filters
+                filters: exportFilters
             });
             
             setShowExportMessage({
