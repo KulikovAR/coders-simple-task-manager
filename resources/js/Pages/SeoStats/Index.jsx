@@ -23,6 +23,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         schedule: null,
         wordstat_enabled: false,
         wordstat_region: null,
+        wordstat_options: { default: true },
     });
 
     const { data: editData, setData: setEditData, put: putSite, processing: editProcessing, errors: editErrors } = useForm({
@@ -36,6 +37,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         schedule: null,
         wordstat_enabled: false,
         wordstat_region: null,
+        wordstat_options: { default: true },
     });
 
     const handleViewReports = (project) => {
@@ -56,7 +58,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
             subdomains: false, 
             schedule: null, 
             wordstat_enabled: false, 
-            wordstat_region: null 
+            wordstat_region: null,
+            wordstat_options: { default: true }
         });
         
         try {
@@ -77,6 +80,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     schedule: data.site.schedule || null,
                     wordstat_enabled: data.site.wordstat_enabled || false,
                     wordstat_region: data.site.wordstat_region || null,
+                    wordstat_options: data.site.wordstat_options || { default: true },
                 };
                 
                 setEditData(editFormData);
@@ -93,6 +97,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     schedule: project.schedule || null,
                     wordstat_enabled: project.wordstat_enabled || false,
                     wordstat_region: project.wordstat_region || null,
+                    wordstat_options: project.wordstat_options || { default: true },
                 };
                 setEditData(fallbackData);
             }
@@ -122,7 +127,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null });
+                setSiteData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
             },
         });
     };
@@ -137,7 +142,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null });
+                setEditData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);

@@ -13,6 +13,8 @@ export default function SearchEnginesSection({
     onWordstatToggle,
     wordstatRegion,
     onWordstatRegionChange,
+    wordstatOptions = {},
+    onWordstatOptionsChange,
     errors = {}
 }) {
     const engineConfig = {
@@ -246,18 +248,140 @@ export default function SearchEnginesSection({
                 />
 
                 {wordstatEnabled && (
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                            Регион для Вордстат <span className="text-accent-red">*</span>
-                        </label>
-                        <RegionSelect
-                            value={wordstatRegion}
-                            onChange={onWordstatRegionChange}
-                            placeholder="Выберите регион"
-                            required={wordstatEnabled}
-                            className={errors?.wordstat_region ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
-                        />
-                        <ValidationError message={errors?.wordstat_region} />
+                    <div className="mt-4 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-2">
+                                Регион для Вордстат <span className="text-accent-red">*</span>
+                            </label>
+                            <RegionSelect
+                                value={wordstatRegion}
+                                onChange={onWordstatRegionChange}
+                                placeholder="Выберите регион"
+                                required={wordstatEnabled}
+                                className={errors?.wordstat_region ? 'border-accent-red focus:border-accent-red focus:ring-accent-red/20' : ''}
+                            />
+                            <ValidationError message={errors?.wordstat_region} />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-3">
+                                Типы запросов
+                            </label>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            id="wordstat-default"
+                                            checked={wordstatOptions.default !== false}
+                                            onChange={(e) => onWordstatOptionsChange({ ...wordstatOptions, default: e.target.checked })}
+                                            className="sr-only"
+                                        />
+                                        <label 
+                                            htmlFor="wordstat-default"
+                                            className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                                                wordstatOptions.default !== false
+                                                    ? 'bg-accent-blue border-accent-blue' 
+                                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                                            }`}
+                                        >
+                                            {wordstatOptions.default !== false && (
+                                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <label htmlFor="wordstat-default" className="text-sm text-text-primary cursor-pointer">
+                                        Ключевая фраза
+                                    </label>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            id="wordstat-quotes"
+                                            checked={wordstatOptions.quotes || false}
+                                            onChange={(e) => onWordstatOptionsChange({ ...wordstatOptions, quotes: e.target.checked })}
+                                            className="sr-only"
+                                        />
+                                        <label 
+                                            htmlFor="wordstat-quotes"
+                                            className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                                                wordstatOptions.quotes
+                                                    ? 'bg-accent-blue border-accent-blue' 
+                                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                                            }`}
+                                        >
+                                            {wordstatOptions.quotes && (
+                                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <label htmlFor="wordstat-quotes" className="text-sm text-text-primary cursor-pointer">
+                                        "ключевая фраза"
+                                    </label>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            id="wordstat-quotes-exclamation"
+                                            checked={wordstatOptions.quotes_exclamation_marks || false}
+                                            onChange={(e) => onWordstatOptionsChange({ ...wordstatOptions, quotes_exclamation_marks: e.target.checked })}
+                                            className="sr-only"
+                                        />
+                                        <label 
+                                            htmlFor="wordstat-quotes-exclamation"
+                                            className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                                                wordstatOptions.quotes_exclamation_marks
+                                                    ? 'bg-accent-blue border-accent-blue' 
+                                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                                            }`}
+                                        >
+                                            {wordstatOptions.quotes_exclamation_marks && (
+                                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <label htmlFor="wordstat-quotes-exclamation" className="text-sm text-text-primary cursor-pointer">
+                                        "!ключевая !фраза"
+                                    </label>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            id="wordstat-exclamation"
+                                            checked={wordstatOptions.exclamation_marks || false}
+                                            onChange={(e) => onWordstatOptionsChange({ ...wordstatOptions, exclamation_marks: e.target.checked })}
+                                            className="sr-only"
+                                        />
+                                        <label 
+                                            htmlFor="wordstat-exclamation"
+                                            className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                                                wordstatOptions.exclamation_marks
+                                                    ? 'bg-accent-blue border-accent-blue' 
+                                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                                            }`}
+                                        >
+                                            {wordstatOptions.exclamation_marks && (
+                                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </label>
+                                    </div>
+                                    <label htmlFor="wordstat-exclamation" className="text-sm text-text-primary cursor-pointer">
+                                        !ключевая фраза
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

@@ -260,6 +260,7 @@ class SeoRecognitionService
     private function buildWordstatTrackData($site, int $userId): TrackPositionsDTO
     {
         $wordstatApiData = $this->xmlApiSettingsService->getWordstatApiDataForUser($userId);
+        $wordstatOptions = $site->getWordstatOptions();
 
         return new TrackPositionsDTO(
             siteId: $site->id,
@@ -274,7 +275,11 @@ class SeoRecognitionService
             regions: $site->getWordstatRegion(),
             xmlApiKey: $wordstatApiData['apiKey'] ?: null,
             xmlBaseUrl: $wordstatApiData['baseUrl'] ?: null,
-            xmlUserId: $wordstatApiData['userId'] ?: null
+            xmlUserId: $wordstatApiData['userId'] ?: null,
+            default: $wordstatOptions['default'] ?? true,
+            quotes: $wordstatOptions['quotes'] ?? false,
+            quotesExclamationMarks: $wordstatOptions['quotes_exclamation_marks'] ?? false,
+            exclamationMarks: $wordstatOptions['exclamation_marks'] ?? false
         );
     }
 

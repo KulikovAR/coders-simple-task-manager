@@ -21,6 +21,7 @@ class SeoSite extends Model
         'schedule',
         'wordstat_enabled',
         'wordstat_region',
+        'wordstat_options',
     ];
 
     protected $casts = [
@@ -28,6 +29,7 @@ class SeoSite extends Model
         'regions' => 'array',
         'device_settings' => 'array',
         'schedule' => 'array',
+        'wordstat_options' => 'array',
     ];
 
     public function user()

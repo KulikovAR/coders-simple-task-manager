@@ -123,6 +123,7 @@ class ReportsService
                 'sort_type' => $positionFilters->sortType,
                 'wordstat_sort' => $positionFilters->wordstatSort,
                 'group_id' => $positionFilters->groupId,
+                'wordstat_query_type' => $positionFilters->wordstatQueryType,
             ],
         ];
     }

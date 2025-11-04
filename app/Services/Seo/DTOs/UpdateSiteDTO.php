@@ -16,6 +16,7 @@ class UpdateSiteDTO
         public readonly ?array $schedule = null,
         public readonly ?bool $wordstatEnabled = null,
         public readonly ?int $wordstatRegion = null,
+        public readonly ?array $wordstatOptions = null,
     ) {}
 
     public static function fromRequest(array $data): self
@@ -79,6 +80,7 @@ class UpdateSiteDTO
             schedule: $data['schedule'] ?? null,
             wordstatEnabled: $data['wordstat_enabled'] ?? null,
             wordstatRegion: $data['wordstat_region'] ?? null,
+            wordstatOptions: $data['wordstat_options'] ?? null,
         );
     }
 
@@ -95,6 +97,7 @@ class UpdateSiteDTO
             'schedule' => $this->schedule,
             'wordstat_enabled' => $this->wordstatEnabled,
             'wordstat_region' => $this->wordstatRegion,
+            'wordstat_options' => $this->wordstatOptions,
         ], fn($value) => $value !== null);
     }
 }

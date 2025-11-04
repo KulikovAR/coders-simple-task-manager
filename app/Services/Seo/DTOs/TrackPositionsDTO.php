@@ -19,7 +19,11 @@ class TrackPositionsDTO
         public readonly ?string $xmlUserId = null,
         public readonly ?int $lr = null,
         public readonly ?int $regions = null,
-        public readonly ?int $domain = null
+        public readonly ?int $domain = null,
+        public readonly ?bool $default = null,
+        public readonly ?bool $quotes = null,
+        public readonly ?bool $quotesExclamationMarks = null,
+        public readonly ?bool $exclamationMarks = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -39,7 +43,11 @@ class TrackPositionsDTO
             xmlUserId: $data['xml_user_id'] ?? null,
             lr: $data['lr'] ?? null,
             regions: $data['regions'] ?? null,
-            domain: $data['domain'] ?? null
+            domain: $data['domain'] ?? null,
+            default: $data['default'] ?? null,
+            quotes: $data['quotes'] ?? null,
+            quotesExclamationMarks: $data['quotes_exclamation_marks'] ?? null,
+            exclamationMarks: $data['exclamation_marks'] ?? null
         );
     }
 
@@ -61,6 +69,10 @@ class TrackPositionsDTO
             'lr' => $this->lr,
             'regions' => $this->regions,
             'domain' => $this->domain,
+            'default' => $this->default,
+            'quotes' => $this->quotes,
+            'quotes_exclamation_marks' => $this->quotesExclamationMarks,
+            'exclamation_marks' => $this->exclamationMarks,
         ], fn($value) => $value !== null);
     }
 

@@ -129,7 +129,8 @@ class PositionTrackingService
     private function buildWordstatTrackData(SiteDTO $site): TrackPositionsDTO
     {
         $wordstatApiData = $this->xmlApiSettingsService->getWordstatApiData();
-
+        $wordstatOptions = $site->getWordstatOptions();
+        
         return new TrackPositionsDTO(
             siteId: $site->id,
             device: null,
@@ -143,7 +144,11 @@ class PositionTrackingService
             xmlApiKey: $wordstatApiData['apiKey'] ?: null,
             xmlBaseUrl: $wordstatApiData['baseUrl'] ?: null,
             xmlUserId: $wordstatApiData['userId'] ?: null,
-            regions: $site->getWordstatRegion()
+            regions: $site->getWordstatRegion(),
+            default: $wordstatOptions['default'] ?? true,
+            quotes: $wordstatOptions['quotes'] ?? false,
+            quotesExclamationMarks: $wordstatOptions['quotes_exclamation_marks'] ?? false,
+            exclamationMarks: $wordstatOptions['exclamation_marks'] ?? false
         );
     }
 

@@ -128,6 +128,7 @@ class SeoStatsController extends Controller
             'sort_type' => request('sort_type'),
             'wordstat_sort' => request('wordstat_sort'),
             'group_id' => request('group_id'),
+            'wordstat_query_type' => request('wordstat_query_type'),
         ];
 
         $data = $this->reportsService->getReportsData($siteId, $filters);
@@ -173,6 +174,7 @@ class SeoStatsController extends Controller
             'sort_type' => request('sort_type'),
             'wordstat_sort' => request('wordstat_sort'),
             'group_id' => request('group_id'),
+            'wordstat_query_type' => request('wordstat_query_type'),
             'page' => request('page', 1),
             'per_page' => request('per_page', 10),
         ];

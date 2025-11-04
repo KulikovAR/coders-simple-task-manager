@@ -16,6 +16,7 @@ class SiteDTO
         public readonly ?array $schedule = null,
         public readonly ?bool $wordstatEnabled = null,
         public readonly ?int $wordstatRegion = null,
+        public readonly ?array $wordstatOptions = null,
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null,
         public readonly ?string $lastPositionUpdate = null,
@@ -47,6 +48,7 @@ class SiteDTO
             schedule: $data['schedule'] ?? null,
             wordstatEnabled: $data['wordstat_enabled'] ?? null,
             wordstatRegion: $data['wordstat_region'] ?? null,
+            wordstatOptions: $data['wordstat_options'] ?? null,
             updatedAt: $data['updated_at'] ?? null,
             lastTrackedAt: $data['updated_at'] ?? null
         );
@@ -66,6 +68,7 @@ class SiteDTO
             'schedule' => $this->schedule,
             'wordstat_enabled' => $this->wordstatEnabled,
             'wordstat_region' => $this->wordstatRegion,
+            'wordstat_options' => $this->wordstatOptions,
             'updated_at' => $this->updatedAt,
             'last_tracked_at' => $this->lastTrackedAt,
             'last_position_update' => $this->lastPositionUpdate,
@@ -87,6 +90,7 @@ class SiteDTO
             schedule: $other->schedule ?: $this->schedule,
             wordstatEnabled: $other->wordstatEnabled !== null ? $other->wordstatEnabled : $this->wordstatEnabled,
             wordstatRegion: $other->wordstatRegion !== null ? $other->wordstatRegion : $this->wordstatRegion,
+            wordstatOptions: $other->wordstatOptions !== null ? $other->wordstatOptions : $this->wordstatOptions,
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt,
             lastPositionUpdate: $other->lastPositionUpdate ?: $this->lastPositionUpdate,
@@ -141,6 +145,15 @@ class SiteDTO
     public function getWordstatRegion(): ?int
     {
         return $this->wordstatRegion;
+    }
+
+    public function getWordstatOptions(): array
+    {
+        $defaultOptions = ['default' => true];
+        if (!$this->wordstatOptions) {
+            return $defaultOptions;
+        }
+        return array_merge($defaultOptions, $this->wordstatOptions);
     }
 
     public function getSubdomains(): ?bool

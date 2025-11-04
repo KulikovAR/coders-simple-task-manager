@@ -51,6 +51,10 @@ export default function EditProjectModal({
         setSiteData('wordstat_region', region);
     };
 
+    const handleWordstatOptionsChange = (options) => {
+        setSiteData('wordstat_options', options);
+    };
+
     const handleKeywordGroupsChange = (groups) => {
         setSiteData('keyword_groups', groups);
     };
@@ -158,6 +162,8 @@ export default function EditProjectModal({
                                 onWordstatToggle={handleWordstatToggle}
                                 wordstatRegion={siteData.wordstat_region}
                                 onWordstatRegionChange={handleWordstatRegionChange}
+                                wordstatOptions={siteData.wordstat_options || { default: true }}
+                                onWordstatOptionsChange={handleWordstatOptionsChange}
                                 errors={allErrors}
                             />
                             

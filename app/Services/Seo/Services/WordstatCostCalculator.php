@@ -13,7 +13,7 @@ class WordstatCostCalculator
         $this->tariffService = $tariffService;
     }
 
-    public function calculateWordstatCost(int $keywordsCount): array
+    public function calculateWordstatCost(int $keywordsCount, array $wordstatOptions = null): array
     {
         if (!$this->tariffService->isConfigured()) {
             return [
@@ -33,7 +33,8 @@ class WordstatCostCalculator
             ];
         }
 
-        $totalCost = $this->calculateCost($keywordsCount, $pricePer1000);
+        $multiplier = $this->calculateMultiplier($wordstatOptions);
+        $totalCost = $this->calculateCost($keywordsCount, $pricePer1000, $multiplier);
         $balance = $this->tariffService->getBalance();
         $hasEnoughBalance = $balance !== null && $balance >= $totalCost;
 
@@ -42,22 +43,46 @@ class WordstatCostCalculator
             'total_cost' => $totalCost,
             'price_per_1000' => $pricePer1000,
             'keywords_count' => $keywordsCount,
-            'total_requests' => $keywordsCount,
+            'multiplier' => $multiplier,
+            'total_requests' => $keywordsCount * $multiplier,
             'balance' => $balance,
             'has_enough_balance' => $hasEnoughBalance,
             'provider' => 'xmlriver'
         ];
     }
 
-    private function calculateCost(int $keywordsCount, float $pricePer1000): float
+    private function calculateMultiplier(?array $wordstatOptions): int
     {
-        $costPerRequest = $pricePer1000 / 1000;
-        return $keywordsCount * $costPerRequest;
+        if (!$wordstatOptions) {
+            return 1;
+        }
+
+        $multiplier = 0;
+        if ($wordstatOptions['default'] ?? true) {
+            $multiplier++;
+        }
+        if ($wordstatOptions['quotes'] ?? false) {
+            $multiplier++;
+        }
+        if ($wordstatOptions['quotes_exclamation_marks'] ?? false) {
+            $multiplier++;
+        }
+        if ($wordstatOptions['exclamation_marks'] ?? false) {
+            $multiplier++;
+        }
+
+        return $multiplier > 0 ? $multiplier : 1;
     }
 
-    public function validateWordstatRequest(int $keywordsCount): array
+    private function calculateCost(int $keywordsCount, float $pricePer1000, int $multiplier): float
     {
-        $costCalculation = $this->calculateWordstatCost($keywordsCount);
+        $costPerRequest = $pricePer1000 / 1000;
+        return $keywordsCount * $multiplier * $costPerRequest;
+    }
+
+    public function validateWordstatRequest(int $keywordsCount, array $wordstatOptions = null): array
+    {
+        $costCalculation = $this->calculateWordstatCost($keywordsCount, $wordstatOptions);
         
         if (!$costCalculation['success']) {
             return [

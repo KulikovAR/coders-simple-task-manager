@@ -33,6 +33,11 @@ class CreateSiteRequest extends FormRequest
             'schedule' => 'nullable|array',
             'wordstat_enabled' => 'nullable|boolean',
             'wordstat_region' => 'nullable|integer',
+            'wordstat_options' => 'nullable|array',
+            'wordstat_options.default' => 'nullable|boolean',
+            'wordstat_options.quotes' => 'nullable|boolean',
+            'wordstat_options.quotes_exclamation_marks' => 'nullable|boolean',
+            'wordstat_options.exclamation_marks' => 'nullable|boolean',
         ];
     }
 }

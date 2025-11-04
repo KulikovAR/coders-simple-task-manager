@@ -20,7 +20,8 @@ class PositionFiltersDTO
         public readonly ?int $rankTo = null,
         public readonly ?string $dateSort = null,
         public readonly ?string $sortType = null,
-        public readonly ?string $wordstatSort = null
+        public readonly ?string $wordstatSort = null,
+        public readonly ?string $wordstatQueryType = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -41,7 +42,8 @@ class PositionFiltersDTO
             rankTo: isset($data['rank_to']) ? (int)$data['rank_to'] : null,
             dateSort: $data['date_sort'] ?? null,
             sortType: $data['sort_type'] ?? null,
-            wordstatSort: $data['wordstat_sort'] ?? null
+            wordstatSort: $data['wordstat_sort'] ?? null,
+            wordstatQueryType: $data['wordstat_query_type'] ?? null
         );
     }
 
@@ -64,6 +66,7 @@ class PositionFiltersDTO
             'date_sort' => $this->dateSort,
             'sort_type' => $this->sortType,
             'wordstat_sort' => $this->wordstatSort,
+            'wordstat_query_type' => $this->wordstatQueryType,
             'limit' => 500,
         ], fn($value) => $value !== null);
     }
