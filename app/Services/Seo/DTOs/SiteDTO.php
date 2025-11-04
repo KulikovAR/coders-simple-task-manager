@@ -20,7 +20,9 @@ class SiteDTO
         public readonly ?string $updatedAt = null,
         public readonly ?string $lastTrackedAt = null,
         public readonly ?string $lastPositionUpdate = null,
-        public readonly ?int $keywordsCount = null
+        public readonly ?int $keywordsCount = null,
+        public readonly ?bool $yandexDynamic = null,
+        public readonly ?bool $googleDynamic = null
     ) {}
 
     public static function fromMicroservice(array $data): self
@@ -30,7 +32,9 @@ class SiteDTO
             domain: $data['domain'],
             name: '',
             keywordsCount: $data['keywords_count'] ?? null,
-            lastPositionUpdate: $data['last_position_update'] ?? null
+            lastPositionUpdate: $data['last_position_update'] ?? null,
+            yandexDynamic: isset($data['yandex_dynamic']) ? (bool)$data['yandex_dynamic'] : null,
+            googleDynamic: isset($data['google_dynamic']) ? (bool)$data['google_dynamic'] : null
         );
     }
 
@@ -73,6 +77,8 @@ class SiteDTO
             'last_tracked_at' => $this->lastTrackedAt,
             'last_position_update' => $this->lastPositionUpdate,
             'keywords_count' => $this->keywordsCount,
+            'yandex_dynamic' => $this->yandexDynamic,
+            'google_dynamic' => $this->googleDynamic,
         ];
     }
 
@@ -94,7 +100,9 @@ class SiteDTO
             updatedAt: $other->updatedAt ?: $this->updatedAt,
             lastTrackedAt: $other->lastTrackedAt ?: $this->lastTrackedAt,
             lastPositionUpdate: $other->lastPositionUpdate ?: $this->lastPositionUpdate,
-            keywordsCount: $other->keywordsCount !== null ? $other->keywordsCount : $this->keywordsCount
+            keywordsCount: $other->keywordsCount !== null ? $other->keywordsCount : $this->keywordsCount,
+            yandexDynamic: $other->yandexDynamic !== null ? $other->yandexDynamic : $this->yandexDynamic,
+            googleDynamic: $other->googleDynamic !== null ? $other->googleDynamic : $this->googleDynamic
         );
     }
 

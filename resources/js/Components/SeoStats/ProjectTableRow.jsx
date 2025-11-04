@@ -71,6 +71,47 @@ export default function ProjectTableRow({
                 </div>
             </td>
 
+            {/* Динамика */}
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-4">
+                    {project.search_engines?.includes('yandex') && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-text-muted font-medium">Я:</span>
+                            {project.yandex_dynamic === true ? (
+                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                                </svg>
+                            ) : project.yandex_dynamic === false ? (
+                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            ) : (
+                                <span className="text-xs text-text-muted">-</span>
+                            )}
+                        </div>
+                    )}
+                    {project.search_engines?.includes('google') && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-text-muted font-medium">G:</span>
+                            {project.google_dynamic === true ? (
+                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                                </svg>
+                            ) : project.google_dynamic === false ? (
+                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            ) : (
+                                <span className="text-xs text-text-muted">-</span>
+                            )}
+                        </div>
+                    )}
+                    {(!project.search_engines || project.search_engines.length === 0) && (
+                        <span className="text-xs text-text-muted">-</span>
+                    )}
+                </div>
+            </td>
+
             {/* Последнее обновление */}
             <td className="px-6 py-4">
                 <div className="text-sm text-text-primary">{lastUpdate}</div>

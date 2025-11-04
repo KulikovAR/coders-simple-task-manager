@@ -22,7 +22,7 @@ export default function ProjectCard({ project, keywords, onViewReports, onAddKey
                         {project.domain}
                     </a>
                     
-                    <div className="flex items-center gap-4 text-sm text-text-muted">
+                    <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
                         <div className="flex items-center gap-1">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -39,6 +39,45 @@ export default function ProjectCard({ project, keywords, onViewReports, onAddKey
                             </div>
                         )}
                     </div>
+
+                    {/* Динамика */}
+                    {(project.search_engines?.includes('yandex') || project.search_engines?.includes('google')) && (
+                        <div className="flex items-center gap-3 mb-3">
+                            <span className="text-xs text-text-muted">Динамика:</span>
+                            {project.search_engines?.includes('yandex') && (
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xs text-text-muted font-medium">Яндекс:</span>
+                                    {project.yandex_dynamic === true ? (
+                                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    ) : project.yandex_dynamic === false ? (
+                                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    ) : (
+                                        <span className="text-xs text-text-muted">-</span>
+                                    )}
+                                </div>
+                            )}
+                            {project.search_engines?.includes('google') && (
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xs text-text-muted font-medium">Google:</span>
+                                    {project.google_dynamic === true ? (
+                                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    ) : project.google_dynamic === false ? (
+                                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    ) : (
+                                        <span className="text-xs text-text-muted">-</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
                 
                 <div className="flex items-center gap-2">

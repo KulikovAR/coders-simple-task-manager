@@ -229,6 +229,9 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                                                 Ключевые слова
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                                Динамика
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
                                                 Последнее обновление
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
