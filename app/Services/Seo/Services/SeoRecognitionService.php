@@ -225,6 +225,9 @@ class SeoRecognitionService
     private function buildYandexTrackData($site, $target, int $userId): TrackPositionsDTO
     {
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
+        
+        $organic = $target->organic ?? true;
+        $pages = $organic ? $this->calculatePagesForPositionLimit($site->positionLimit) : 1;
 
         return new TrackPositionsDTO(
             siteId: $site->id,
@@ -234,12 +237,13 @@ class SeoRecognitionService
             lang: null,
             os: $target->os,
             ads: $site->getAds(),
-            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
+            pages: $pages,
             subdomains: $site->getSubdomains(),
             lr: $target->lr,
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
-            xmlUserId: $googleApiData['userId'] ?: null
+            xmlUserId: $googleApiData['userId'] ?: null,
+            organic: $organic
         );
     }
 

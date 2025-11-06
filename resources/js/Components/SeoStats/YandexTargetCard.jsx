@@ -94,6 +94,34 @@ export default function YandexTargetCard({
                         <ValidationError message={errors?.os} />
                     </div>
                 )}
+
+                <div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <div className="relative">
+                            <input
+                                type="checkbox"
+                                checked={target.organic !== false}
+                                onChange={(e) => handleChange('organic', e.target.checked)}
+                                className="sr-only"
+                            />
+                            <div className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors ${
+                                target.organic !== false
+                                    ? 'bg-accent-blue border-accent-blue' 
+                                    : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
+                            }`}>
+                                {target.organic !== false && (
+                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </div>
+                        </div>
+                        <span className="text-sm font-medium text-text-primary">Органическая выдача</span>
+                    </label>
+                    <p className="text-xs text-text-muted mt-1 ml-7">
+                        Если выключено, стоимость рассчитывается как для 1 страницы независимо от лимита позиций
+                    </p>
+                </div>
             </div>
         </div>
     );

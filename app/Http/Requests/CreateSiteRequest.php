@@ -28,6 +28,7 @@ class CreateSiteRequest extends FormRequest
             'targets.*.lr' => 'nullable|integer',
             'targets.*.device' => 'required|string|in:desktop,tablet,mobile',
             'targets.*.os' => 'nullable|string|in:ios,android',
+            'targets.*.organic' => 'nullable|boolean',
             'position_limit' => 'nullable|integer|min:1|max:100',
             'subdomains' => 'nullable|boolean',
             'schedule' => 'nullable|array',

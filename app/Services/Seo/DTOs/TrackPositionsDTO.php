@@ -23,7 +23,8 @@ class TrackPositionsDTO
         public readonly ?bool $default = null,
         public readonly ?bool $quotes = null,
         public readonly ?bool $quotesExclamationMarks = null,
-        public readonly ?bool $exclamationMarks = null
+        public readonly ?bool $exclamationMarks = null,
+        public readonly ?bool $organic = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -47,7 +48,8 @@ class TrackPositionsDTO
             default: $data['default'] ?? null,
             quotes: $data['quotes'] ?? null,
             quotesExclamationMarks: $data['quotes_exclamation_marks'] ?? null,
-            exclamationMarks: $data['exclamation_marks'] ?? null
+            exclamationMarks: $data['exclamation_marks'] ?? null,
+            organic: $data['organic'] ?? null
         );
     }
 
@@ -73,6 +75,7 @@ class TrackPositionsDTO
             'quotes' => $this->quotes,
             'quotes_exclamation_marks' => $this->quotesExclamationMarks,
             'exclamation_marks' => $this->exclamationMarks,
+            'organic' => $this->organic,
         ], fn($value) => $value !== null);
     }
 

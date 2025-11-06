@@ -56,6 +56,8 @@ class UpdateSiteDTO
                 
                 $device = $target['device'] ?? 'desktop';
                 
+                $organic = isset($target['organic']) ? (bool)$target['organic'] : true;
+                
                 return [
                     'search_engine' => $target['search_engine'],
                     'domain' => $domain,
@@ -64,6 +66,7 @@ class UpdateSiteDTO
                     'lr' => $lr,
                     'device' => $device,
                     'os' => $os,
+                    'organic' => $organic,
                 ];
             }, $data['targets']);
         }

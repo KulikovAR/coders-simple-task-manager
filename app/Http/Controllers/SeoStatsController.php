@@ -299,16 +299,18 @@ class SeoStatsController extends Controller
             $pagesPerKeyword = 10;
 
             $siteData = $this->siteUserService->getSiteData($siteId);
+            $targets = $siteData['site']['targets'] ?? [];
             $targetsCount = [];
             foreach ($searchEngines as $engine) {
-                $targetsCount[$engine] = count(array_filter($siteData['site']['targets'] ?? [], fn($t) => $t['search_engine'] === $engine)) ?: 1;
+                $targetsCount[$engine] = count(array_filter($targets, fn($t) => $t['search_engine'] === $engine)) ?: 1;
             }
 
             $validation = $this->costCalculator->validateRecognitionRequest(
                 $keywordsCount,
                 $pagesPerKeyword,
                 $searchEngines,
-                $targetsCount
+                $targetsCount,
+                $targets
             );
 
             if (!$validation['valid']) {
@@ -363,16 +365,18 @@ class SeoStatsController extends Controller
             $pagesPerKeyword = 10;
 
             $siteData = $this->siteUserService->getSiteData($siteId);
+            $targets = $siteData['site']['targets'] ?? [];
             $targetsCount = [];
             foreach ($searchEngines as $engine) {
-                $targetsCount[$engine] = count(array_filter($siteData['site']['targets'] ?? [], fn($t) => $t['search_engine'] === $engine)) ?: 1;
+                $targetsCount[$engine] = count(array_filter($targets, fn($t) => $t['search_engine'] === $engine)) ?: 1;
             }
 
             $costCalculation = $this->costCalculator->calculateRecognitionCost(
                 $keywordsCount,
                 $pagesPerKeyword,
                 $searchEngines,
-                $targetsCount
+                $targetsCount,
+                $targets
             );
 
             return response()->json([

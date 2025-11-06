@@ -86,7 +86,8 @@ export default function SearchEnginesSection({
             search_engine: 'yandex',
             lr: null,
             device: '',
-            os: null
+            os: null,
+            organic: true
         };
         const allTargets = [...targets || [], newTarget];
         onTargetsChange(allTargets);

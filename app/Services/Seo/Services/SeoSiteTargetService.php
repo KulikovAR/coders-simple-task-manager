@@ -27,6 +27,7 @@ class SeoSiteTargetService
                 'lr' => $t['lr'] ?? null,
                 'device' => $t['device'],
                 'os' => $t['os'] ?? null,
+                'organic' => $t['organic'] ?? true,
             ]);
             $idsToKeep[] = $target->id;
         }
