@@ -37,6 +37,13 @@ export default function PositionFilters({
         html: null
     });
 
+    // Получаем первую доступную комбинацию для текущего поисковика
+    const getDefaultTargetId = (source) => {
+        if (!targets || targets.length === 0) return '';
+        const filteredTargets = targets.filter(target => !source || target.search_engine === source);
+        return filteredTargets.length > 0 ? filteredTargets[0].id : '';
+    };
+
     // Обновляем локальные фильтры при изменении пропсов
     React.useEffect(() => {
         const wordstatOptions = project.wordstat_options || { default: true };
@@ -45,23 +52,57 @@ export default function PositionFilters({
                                    wordstatOptions.quotes_exclamation_marks ? 'quotes_exclamation_marks' :
                                    wordstatOptions.exclamation_marks ? 'exclamation_marks' : '';
         
+        const currentSource = filters.source || project.search_engines?.[0] || '';
+        const defaultTargetId = getDefaultTargetId(currentSource);
+        
         setLocalFilters({
-            source: filters.source || project.search_engines?.[0] || '',
+            source: currentSource,
             group_id: filters.group_id || '',
-            filter_group_id: filters.filter_group_id || '',
+            filter_group_id: filters.filter_group_id || defaultTargetId,
             wordstat_query_type: filters.wordstat_query_type || (project.wordstat_enabled ? defaultWordstatType : ''),
             date_from: filters.date_from || '',
             date_to: filters.date_to || '',
             rank_from: filters.rank_from || '',
             rank_to: filters.rank_to || '',
         });
-    }, [filters.source, filters.group_id, filters.filter_group_id, filters.wordstat_query_type, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines, project.wordstat_enabled, project.wordstat_options]);
+    }, [filters.source, filters.group_id, filters.filter_group_id, filters.wordstat_query_type, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines, project.wordstat_enabled, project.wordstat_options, targets]);
+
+    // Автоматически выбираем первую доступную комбинацию, если текущая не выбрана или не соответствует фильтру
+    React.useEffect(() => {
+        if (targets.length === 0) return;
+        
+        const filteredTargets = targets.filter(target => !localFilters.source || target.search_engine === localFilters.source);
+        
+        if (filteredTargets.length === 0) return;
+        
+        const currentTargetId = localFilters.filter_group_id;
+        const isCurrentTargetValid = currentTargetId && filteredTargets.find(t => t.id == currentTargetId);
+        
+        if (!isCurrentTargetValid) {
+            setLocalFilters(prev => ({
+                ...prev,
+                filter_group_id: filteredTargets[0].id
+            }));
+        }
+    }, [localFilters.source, targets, localFilters.filter_group_id]);
 
     const handleFilterChange = (key, value) => {
-        setLocalFilters(prev => ({
-            ...prev,
-            [key]: value
-        }));
+        setLocalFilters(prev => {
+            const newFilters = {
+                ...prev,
+                [key]: value
+            };
+            
+            // При изменении поисковика автоматически выбираем первую доступную комбинацию
+            if (key === 'source') {
+                const defaultTargetId = getDefaultTargetId(value);
+                if (defaultTargetId) {
+                    newFilters.filter_group_id = defaultTargetId;
+                }
+            }
+            
+            return newFilters;
+        });
     };
 
     const applyFilters = () => {
@@ -100,10 +141,13 @@ export default function PositionFilters({
                                    wordstatOptions.quotes_exclamation_marks ? 'quotes_exclamation_marks' :
                                    wordstatOptions.exclamation_marks ? 'exclamation_marks' : '';
         
+        const defaultSource = project.search_engines?.[0] || '';
+        const defaultTargetId = getDefaultTargetId(defaultSource);
+        
         setLocalFilters({
-            source: project.search_engines?.[0] || '',
+            source: defaultSource,
             group_id: '',
-            filter_group_id: '',
+            filter_group_id: defaultTargetId,
             wordstat_query_type: project.wordstat_enabled ? defaultWordstatType : '',
             date_from: '',
             date_to: '',
@@ -241,20 +285,21 @@ export default function PositionFilters({
                 </div>
 
                 {/* Target (комбинация) */}
-                {targets.length > 0 && (
-                    <div>
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                            Комбинация
-                        </label>
-                        <select
-                            value={localFilters.filter_group_id}
-                            onChange={(e) => handleFilterChange('filter_group_id', e.target.value)}
-                            className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
-                        >
-                            <option value="">Все комбинации</option>
-                            {targets
-                                .filter(target => !localFilters.source || target.search_engine === localFilters.source)
-                                .map(target => {
+                {targets.length > 0 && (() => {
+                    const filteredTargets = targets.filter(target => !localFilters.source || target.search_engine === localFilters.source);
+                    const currentTargetId = localFilters.filter_group_id || (filteredTargets.length > 0 ? filteredTargets[0].id : '');
+                    
+                    return (
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-2">
+                                Комбинация
+                            </label>
+                            <select
+                                value={currentTargetId}
+                                onChange={(e) => handleFilterChange('filter_group_id', e.target.value)}
+                                className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                            >
+                                {filteredTargets.map(target => {
                                     const parts = [];
                                     if (target.search_engine === 'google') {
                                         if (target.domain?.name) parts.push(target.domain.name);
@@ -281,9 +326,10 @@ export default function PositionFilters({
                                         </option>
                                     );
                                 })}
-                        </select>
-                    </div>
-                )}
+                            </select>
+                        </div>
+                    );
+                })()}
 
                 {/* Тип запроса Wordstat */}
                 {project.wordstat_enabled && (() => {
