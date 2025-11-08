@@ -16,6 +16,7 @@ class SeoSiteTarget extends Model
         'device',
         'os',
         'organic',
+        'enabled',
     ];
 
     public function site()

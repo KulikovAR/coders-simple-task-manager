@@ -105,10 +105,12 @@ class SiteUserService
         $targets = $this->targetService->listForSite($localSite->id);
         $siteData['targets'] = $targets->map(function($target) {
             $targetData = [
+                'id' => $target->id,
                 'search_engine' => $target->search_engine,
                 'device' => $target->device ?? 'desktop',
                 'os' => $target->os,
                 'organic' => $target->organic ?? true,
+                'enabled' => $target->enabled ?? true,
             ];
             
             if ($target->search_engine === 'google') {

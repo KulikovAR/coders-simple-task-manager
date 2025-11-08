@@ -129,6 +129,7 @@ class SeoStatsController extends Controller
             'wordstat_sort' => request('wordstat_sort'),
             'group_id' => request('group_id'),
             'wordstat_query_type' => request('wordstat_query_type'),
+            'filter_group_id' => request('filter_group_id'),
         ];
 
         $data = $this->reportsService->getReportsData($siteId, $filters);
@@ -137,13 +138,15 @@ class SeoStatsController extends Controller
             abort(403);
         }
 
-        // Получаем список групп для селекта
         try {
             $groups = $this->microserviceClient->getGroups($siteId);
             $data['groups'] = $groups ?? [];
         } catch (\Exception $e) {
             $data['groups'] = [];
         }
+
+        $siteData = $this->siteUserService->getSiteData($siteId);
+        $data['targets'] = $siteData['site']['targets'] ?? [];
 
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
         if ($activeTask) {
@@ -175,6 +178,7 @@ class SeoStatsController extends Controller
             'wordstat_sort' => request('wordstat_sort'),
             'group_id' => request('group_id'),
             'wordstat_query_type' => request('wordstat_query_type'),
+            'filter_group_id' => request('filter_group_id'),
             'page' => request('page', 1),
             'per_page' => request('per_page', 10),
         ];

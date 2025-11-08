@@ -6,7 +6,8 @@ export default function PositionFilters({
     filters = {},
     projectId,
     project = {},
-    groups = []
+    groups = [],
+    targets = []
 }) {
     // Определяем значение по умолчанию для поисковика
     const defaultSource = filters.source || project.search_engines?.[0] || '';
@@ -23,6 +24,7 @@ export default function PositionFilters({
     const [localFilters, setLocalFilters] = useState({
         source: defaultSource,
         group_id: filters.group_id || '',
+        filter_group_id: filters.filter_group_id || '',
         wordstat_query_type: filters.wordstat_query_type || getDefaultWordstatType(),
         date_from: filters.date_from || '',
         date_to: filters.date_to || '',
@@ -46,13 +48,14 @@ export default function PositionFilters({
         setLocalFilters({
             source: filters.source || project.search_engines?.[0] || '',
             group_id: filters.group_id || '',
+            filter_group_id: filters.filter_group_id || '',
             wordstat_query_type: filters.wordstat_query_type || (project.wordstat_enabled ? defaultWordstatType : ''),
             date_from: filters.date_from || '',
             date_to: filters.date_to || '',
             rank_from: filters.rank_from || '',
             rank_to: filters.rank_to || '',
         });
-    }, [filters.source, filters.group_id, filters.wordstat_query_type, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines, project.wordstat_enabled, project.wordstat_options]);
+    }, [filters.source, filters.group_id, filters.filter_group_id, filters.wordstat_query_type, filters.date_from, filters.date_to, filters.rank_from, filters.rank_to, project.search_engines, project.wordstat_enabled, project.wordstat_options]);
 
     const handleFilterChange = (key, value) => {
         setLocalFilters(prev => ({
@@ -100,6 +103,7 @@ export default function PositionFilters({
         setLocalFilters({
             source: project.search_engines?.[0] || '',
             group_id: '',
+            filter_group_id: '',
             wordstat_query_type: project.wordstat_enabled ? defaultWordstatType : '',
             date_from: '',
             date_to: '',
@@ -113,7 +117,7 @@ export default function PositionFilters({
         });
     };
 
-    const hasActiveFilters = localFilters.group_id !== '' || localFilters.wordstat_query_type !== '' || localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type || filters.wordstat_sort;
+    const hasActiveFilters = localFilters.group_id !== '' || localFilters.filter_group_id !== '' || localFilters.wordstat_query_type !== '' || localFilters.date_from !== '' || localFilters.date_to !== '' || localFilters.rank_from !== '' || localFilters.rank_to !== '' || filters.date_sort || filters.sort_type || filters.wordstat_sort;
 
     const getRankRangeLabel = () => {
         if (localFilters.rank_from === '' || localFilters.rank_to === '') return null;
@@ -196,7 +200,7 @@ export default function PositionFilters({
                     </div>
                 </div>
 
-            <div className={`grid grid-cols-1 gap-4 ${project.wordstat_enabled ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+            <div className={`grid grid-cols-1 gap-4 ${project.wordstat_enabled ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
                 {/* Поисковая система */}
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
@@ -235,6 +239,51 @@ export default function PositionFilters({
                         ))}
                     </select>
                 </div>
+
+                {/* Target (комбинация) */}
+                {targets.length > 0 && (
+                    <div>
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                            Комбинация
+                        </label>
+                        <select
+                            value={localFilters.filter_group_id}
+                            onChange={(e) => handleFilterChange('filter_group_id', e.target.value)}
+                            className="w-full px-3 py-2 bg-secondary-bg border border-border-color rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                        >
+                            <option value="">Все комбинации</option>
+                            {targets
+                                .filter(target => !localFilters.source || target.search_engine === localFilters.source)
+                                .map(target => {
+                                    const parts = [];
+                                    if (target.search_engine === 'google') {
+                                        if (target.domain?.name) parts.push(target.domain.name);
+                                        if (target.region?.name) parts.push(target.region.name);
+                                        if (target.language) parts.push(target.language);
+                                    } else if (target.search_engine === 'yandex') {
+                                        if (target.lr) parts.push(`LR: ${target.lr}`);
+                                    }
+                                    if (target.device) {
+                                        const deviceNames = { desktop: 'Компьютер', tablet: 'Планшет', mobile: 'Мобильный' };
+                                        parts.push(deviceNames[target.device] || target.device);
+                                    }
+                                    if (target.os) {
+                                        const osNames = { ios: 'iOS', android: 'Android' };
+                                        parts.push(osNames[target.os] || target.os);
+                                    }
+                                    if (target.search_engine === 'yandex' && target.organic === false) {
+                                        parts.push('Неорганическая');
+                                    }
+                                    const label = parts.length > 0 ? parts.join(', ') : `Комбинация #${target.id}`;
+                                    return (
+                                        <option key={target.id} value={target.id}>
+                                            {label}
+                                        </option>
+                                    );
+                                })}
+                        </select>
+                    </div>
+                )}
 
                 {/* Тип запроса Wordstat */}
                 {project.wordstat_enabled && (() => {
@@ -318,6 +367,38 @@ export default function PositionFilters({
                                 Группа: {groups.find(g => g.id == localFilters.group_id)?.name || `#${localFilters.group_id}`}
                             </span>
                         )}
+                        {localFilters.filter_group_id && (() => {
+                            const target = targets.find(t => t.id == localFilters.filter_group_id);
+                            if (!target) return null;
+                            const parts = [];
+                            if (target.search_engine === 'google') {
+                                if (target.domain?.name) parts.push(target.domain.name);
+                                if (target.region?.name) parts.push(target.region.name);
+                                if (target.language) parts.push(target.language);
+                            } else if (target.search_engine === 'yandex') {
+                                if (target.lr) parts.push(`LR: ${target.lr}`);
+                            }
+                            if (target.device) {
+                                const deviceNames = { desktop: 'Компьютер', tablet: 'Планшет', mobile: 'Мобильный' };
+                                parts.push(deviceNames[target.device] || target.device);
+                            }
+                            if (target.os) {
+                                const osNames = { ios: 'iOS', android: 'Android' };
+                                parts.push(osNames[target.os] || target.os);
+                            }
+                            if (target.search_engine === 'yandex' && target.organic === false) {
+                                parts.push('Неорганическая');
+                            }
+                            const label = parts.length > 0 ? parts.join(', ') : `Комбинация #${target.id}`;
+                            return (
+                                <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    Комбинация: {label}
+                                </span>
+                            );
+                        })()}
                         {localFilters.wordstat_query_type && (
                             <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -62,7 +62,8 @@ export default function SearchEnginesSection({
             region: null,
             language: '',
             device: '',
-            os: null
+            os: null,
+            enabled: true
         };
         const allTargets = [...targets || [], newTarget];
         onTargetsChange(allTargets);
@@ -87,7 +88,8 @@ export default function SearchEnginesSection({
             lr: null,
             device: '',
             os: null,
-            organic: true
+            organic: true,
+            enabled: true
         };
         const allTargets = [...targets || [], newTarget];
         onTargetsChange(allTargets);

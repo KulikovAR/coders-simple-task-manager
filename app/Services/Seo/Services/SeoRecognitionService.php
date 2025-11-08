@@ -82,6 +82,14 @@ class SeoRecognitionService
                 }
 
                 foreach ($engineTargets as $target) {
+                    if (!$target->enabled) {
+                        Log::info("Target is disabled, skipping", [
+                            'search_engine' => $searchEngine,
+                            'target_id' => $target->id
+                        ]);
+                        continue;
+                    }
+
                     $trackData = $this->buildTrackDataForTarget($site, $target, $task->user_id);
                     Log::info("Track Data", [
                         'search_engine' => $searchEngine,
@@ -218,7 +226,8 @@ class SeoRecognitionService
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
             xmlUserId: $googleApiData['userId'] ?: null,
-            domain: $domain
+            domain: $domain,
+            filterGroupId: $target->id
         );
     }
 
@@ -243,7 +252,8 @@ class SeoRecognitionService
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
             xmlUserId: $googleApiData['userId'] ?: null,
-            organic: $organic
+            organic: $organic,
+            filterGroupId: $target->id
         );
     }
 
@@ -257,7 +267,8 @@ class SeoRecognitionService
             os: $target->os,
             ads: $site->getAds(),
             pages: $this->calculatePagesForPositionLimit($site->getPositionLimit('yandex')),
-            subdomains: $site->getSubdomains()
+            subdomains: $site->getSubdomains(),
+            filterGroupId: $target->id
         );
     }
 

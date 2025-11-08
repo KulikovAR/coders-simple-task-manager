@@ -24,7 +24,8 @@ class TrackPositionsDTO
         public readonly ?bool $quotes = null,
         public readonly ?bool $quotesExclamationMarks = null,
         public readonly ?bool $exclamationMarks = null,
-        public readonly ?bool $organic = null
+        public readonly ?bool $organic = null,
+        public readonly ?int $filterGroupId = null
     ) {}
 
     public static function fromRequest(array $data): self
@@ -49,7 +50,8 @@ class TrackPositionsDTO
             quotes: $data['quotes'] ?? null,
             quotesExclamationMarks: $data['quotes_exclamation_marks'] ?? null,
             exclamationMarks: $data['exclamation_marks'] ?? null,
-            organic: $data['organic'] ?? null
+            organic: $data['organic'] ?? null,
+            filterGroupId: $data['filter_group_id'] ?? null
         );
     }
 
@@ -76,6 +78,7 @@ class TrackPositionsDTO
             'quotes_exclamation_marks' => $this->quotesExclamationMarks,
             'exclamation_marks' => $this->exclamationMarks,
             'organic' => $this->organic,
+            'filter_group_id' => $this->filterGroupId,
         ], fn($value) => $value !== null);
     }
 

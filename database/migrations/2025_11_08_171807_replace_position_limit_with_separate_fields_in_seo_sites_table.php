@@ -34,7 +34,7 @@ return new class extends Migration
             'position_limit' => DB::raw('position_limit_yandex'),
         ]);
 
-     
+
         Schema::table('seo_sites', function (Blueprint $table) {
             $table->dropColumn(['position_limit_yandex', 'position_limit_google']);
         });

@@ -6,7 +6,8 @@ export default function LanguageSelect({
     onChange, 
     placeholder = "Выберите язык...", 
     required = false,
-    className = ""
+    className = "",
+    disabled = false
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -80,6 +81,7 @@ export default function LanguageSelect({
     };
 
     const handleToggle = () => {
+        if (disabled) return;
         setIsOpen(!isOpen);
         if (!isOpen) {
             setTimeout(() => {
@@ -107,7 +109,8 @@ export default function LanguageSelect({
             <button
                 type="button"
                 onClick={handleToggle}
-                className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 text-left flex items-center justify-between ${
+                disabled={disabled}
+                className={`w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 text-left flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed ${
                     required && !value ? 'border-accent-red' : ''
                 }`}
             >

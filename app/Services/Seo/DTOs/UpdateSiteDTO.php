@@ -58,8 +58,10 @@ class UpdateSiteDTO
                 $device = $target['device'] ?? 'desktop';
                 
                 $organic = isset($target['organic']) ? (bool)$target['organic'] : true;
+                $enabled = isset($target['enabled']) ? (bool)$target['enabled'] : true;
                 
                 return [
+                    'id' => $target['id'] ?? null,
                     'search_engine' => $target['search_engine'],
                     'domain' => $domain,
                     'region' => $region,
@@ -68,6 +70,7 @@ class UpdateSiteDTO
                     'device' => $device,
                     'os' => $os,
                     'organic' => $organic,
+                    'enabled' => $enabled,
                 ];
             }, $data['targets']);
         }

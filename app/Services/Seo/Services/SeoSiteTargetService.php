@@ -18,18 +18,30 @@ class SeoSiteTargetService
     {
         $idsToKeep = [];
         foreach ($targets as $t) {
-            $target = SeoSiteTarget::create([
-                'seo_site_id' => $seoSiteId,
-                'search_engine' => $t['search_engine'],
-                'domain' => $t['domain'] ?? null,
-                'region' => $t['region'] ?? null,
-                'language' => $t['language'] ?? null,
-                'lr' => $t['lr'] ?? null,
-                'device' => $t['device'],
-                'os' => $t['os'] ?? null,
-                'organic' => $t['organic'] ?? true,
-            ]);
-            $idsToKeep[] = $target->id;
+            if (isset($t['id'])) {
+                $target = SeoSiteTarget::find($t['id']);
+                if ($target && $target->seo_site_id === $seoSiteId) {
+                    $target->update([
+                        'enabled' => $t['enabled'] ?? true,
+                        'organic' => $t['organic'] ?? true,
+                    ]);
+                    $idsToKeep[] = $target->id;
+                }
+            } else {
+                $target = SeoSiteTarget::create([
+                    'seo_site_id' => $seoSiteId,
+                    'search_engine' => $t['search_engine'],
+                    'domain' => $t['domain'] ?? null,
+                    'region' => $t['region'] ?? null,
+                    'language' => $t['language'] ?? null,
+                    'lr' => $t['lr'] ?? null,
+                    'device' => $t['device'],
+                    'os' => $t['os'] ?? null,
+                    'organic' => $t['organic'] ?? true,
+                    'enabled' => $t['enabled'] ?? true,
+                ]);
+                $idsToKeep[] = $target->id;
+            }
         }
 
         SeoSiteTarget::where('seo_site_id', $seoSiteId)
