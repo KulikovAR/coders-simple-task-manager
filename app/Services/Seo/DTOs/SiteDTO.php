@@ -11,7 +11,8 @@ class SiteDTO
         public readonly array $searchEngines = [],
         public readonly array $regions = [],
         public readonly array $deviceSettings = [],
-        public readonly ?int $positionLimit = null,
+        public readonly ?int $positionLimitYandex = null,
+        public readonly ?int $positionLimitGoogle = null,
         public readonly ?bool $subdomains = null,
         public readonly ?array $schedule = null,
         public readonly ?bool $wordstatEnabled = null,
@@ -47,7 +48,8 @@ class SiteDTO
             searchEngines: $data['search_engines'] ?? [],
             regions: $data['regions'] ?? [],
             deviceSettings: $data['device_settings'] ?? [],
-            positionLimit: $data['position_limit'] ?? null,
+            positionLimitYandex: $data['position_limit_yandex'] ?? null,
+            positionLimitGoogle: $data['position_limit_google'] ?? null,
             subdomains: $data['subdomains'] ?? null,
             schedule: $data['schedule'] ?? null,
             wordstatEnabled: $data['wordstat_enabled'] ?? null,
@@ -67,7 +69,8 @@ class SiteDTO
             'search_engines' => $this->searchEngines,
             'regions' => $this->regions,
             'device_settings' => $this->deviceSettings,
-            'position_limit' => $this->positionLimit,
+            'position_limit_yandex' => $this->positionLimitYandex,
+            'position_limit_google' => $this->positionLimitGoogle,
             'subdomains' => $this->subdomains,
             'schedule' => $this->schedule,
             'wordstat_enabled' => $this->wordstatEnabled,
@@ -91,7 +94,8 @@ class SiteDTO
             searchEngines: $other->searchEngines ?: $this->searchEngines,
             regions: $other->regions ?: $this->regions,
             deviceSettings: $other->deviceSettings ?: $this->deviceSettings,
-            positionLimit: $other->positionLimit ?: $this->positionLimit,
+            positionLimitYandex: $other->positionLimitYandex !== null ? $other->positionLimitYandex : $this->positionLimitYandex,
+            positionLimitGoogle: $other->positionLimitGoogle !== null ? $other->positionLimitGoogle : $this->positionLimitGoogle,
             subdomains: $other->subdomains !== null ? $other->subdomains : $this->subdomains,
             schedule: $other->schedule ?: $this->schedule,
             wordstatEnabled: $other->wordstatEnabled !== null ? $other->wordstatEnabled : $this->wordstatEnabled,
@@ -167,5 +171,14 @@ class SiteDTO
     public function getSubdomains(): ?bool
     {
         return $this->subdomains;
+    }
+
+    public function getPositionLimit(string $searchEngine): ?int
+    {
+        return match($searchEngine) {
+            'yandex' => $this->positionLimitYandex,
+            'google' => $this->positionLimitGoogle,
+            default => $this->positionLimitYandex ?? $this->positionLimitGoogle,
+        };
     }
 }

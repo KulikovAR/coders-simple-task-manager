@@ -56,8 +56,11 @@ class SiteService
         if ($dto->deviceSettings !== null) {
             $updateData['device_settings'] = $dto->deviceSettings;
         }
-        if ($dto->positionLimit !== null) {
-            $updateData['position_limit'] = $dto->positionLimit;
+        if ($dto->positionLimitYandex !== null) {
+            $updateData['position_limit_yandex'] = $dto->positionLimitYandex;
+        }
+        if ($dto->positionLimitGoogle !== null) {
+            $updateData['position_limit_google'] = $dto->positionLimitGoogle;
         }
         if ($dto->subdomains !== null) {
             $updateData['subdomains'] = $dto->subdomains;

@@ -18,7 +18,8 @@ class RecognitionCostCalculator
         int $pagesPerKeyword = 10,
         array $searchEngines = ['yandex', 'google'],
         array $targetsCount = [],
-        array $targets = []
+        array $targets = [],
+        array $pagesPerKeywordByEngine = []
     ): array {
         if (!$this->tariffService->isConfigured()) {
             return [
@@ -40,6 +41,8 @@ class RecognitionCostCalculator
                 continue;
             }
 
+            $enginePagesPerKeyword = $pagesPerKeywordByEngine[$engine] ?? $pagesPerKeyword;
+
             if (!empty($targets)) {
                 $engineTargets = array_filter($targets, fn($t) => ($t['search_engine'] ?? null) === $engine);
                 $engineCost = 0;
@@ -48,9 +51,9 @@ class RecognitionCostCalculator
                 foreach ($engineTargets as $target) {
                     if ($engine === 'yandex') {
                         $organic = $target['organic'] ?? true;
-                        $targetPagesPerKeyword = $organic ? $pagesPerKeyword : 1;
+                        $targetPagesPerKeyword = $organic ? $enginePagesPerKeyword : 1;
                     } else {
-                        $targetPagesPerKeyword = $pagesPerKeyword;
+                        $targetPagesPerKeyword = $enginePagesPerKeyword;
                     }
                     $targetCost = $this->calculateEngineCost($keywordsCount, $targetPagesPerKeyword, $price);
                     $engineCost += $targetCost;
@@ -60,9 +63,9 @@ class RecognitionCostCalculator
                 $combinationsCount = count($engineTargets) ?: 1;
             } else {
                 $combinationsCount = $targetsCount[$engine] ?? 1;
-                $engineCost = $this->calculateEngineCost($keywordsCount, $pagesPerKeyword, $price);
+                $engineCost = $this->calculateEngineCost($keywordsCount, $enginePagesPerKeyword, $price);
                 $engineCost *= $combinationsCount;
-                $totalRequests = $keywordsCount * $pagesPerKeyword * 10 * $combinationsCount;
+                $totalRequests = $keywordsCount * $enginePagesPerKeyword * 10 * $combinationsCount;
             }
 
             $totalCost += $engineCost;
@@ -70,7 +73,7 @@ class RecognitionCostCalculator
             $costBreakdown[$engine] = [
                 'price_per_1000' => $price,
                 'keywords' => $keywordsCount,
-                'pages_per_keyword' => $pagesPerKeyword,
+                'pages_per_keyword' => $enginePagesPerKeyword,
                 'positions_per_page' => 10,
                 'combinations_count' => $combinationsCount,
                 'total_requests' => $totalRequests,
@@ -117,9 +120,10 @@ class RecognitionCostCalculator
         int $pagesPerKeyword = 10,
         array $searchEngines = ['yandex', 'google'],
         array $targetsCount = [],
-        array $targets = []
+        array $targets = [],
+        array $pagesPerKeywordByEngine = []
     ): array {
-        $costCalculation = $this->calculateRecognitionCost($keywordsCount, $pagesPerKeyword, $searchEngines, $targetsCount, $targets);
+        $costCalculation = $this->calculateRecognitionCost($keywordsCount, $pagesPerKeyword, $searchEngines, $targetsCount, $targets, $pagesPerKeywordByEngine);
 
         if (!$costCalculation['success']) {
             return [

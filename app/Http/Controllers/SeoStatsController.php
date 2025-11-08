@@ -296,21 +296,24 @@ class SeoStatsController extends Controller
             }
 
             $searchEngines = $site->searchEngines ?? ['google'];
-            $pagesPerKeyword = 10;
 
             $siteData = $this->siteUserService->getSiteData($siteId);
             $targets = $siteData['site']['targets'] ?? [];
             $targetsCount = [];
+            $pagesPerKeywordByEngine = [];
             foreach ($searchEngines as $engine) {
                 $targetsCount[$engine] = count(array_filter($targets, fn($t) => $t['search_engine'] === $engine)) ?: 1;
+                $positionLimit = $site->getPositionLimit($engine);
+                $pagesPerKeywordByEngine[$engine] = $positionLimit ? (int)ceil($positionLimit / 10) : 1;
             }
 
             $validation = $this->costCalculator->validateRecognitionRequest(
                 $keywordsCount,
-                $pagesPerKeyword,
+                10,
                 $searchEngines,
                 $targetsCount,
-                $targets
+                $targets,
+                $pagesPerKeywordByEngine
             );
 
             if (!$validation['valid']) {
@@ -362,21 +365,24 @@ class SeoStatsController extends Controller
             }
 
             $searchEngines = $site->searchEngines ?? ['google'];
-            $pagesPerKeyword = 10;
 
             $siteData = $this->siteUserService->getSiteData($siteId);
             $targets = $siteData['site']['targets'] ?? [];
             $targetsCount = [];
+            $pagesPerKeywordByEngine = [];
             foreach ($searchEngines as $engine) {
                 $targetsCount[$engine] = count(array_filter($targets, fn($t) => $t['search_engine'] === $engine)) ?: 1;
+                $positionLimit = $site->getPositionLimit($engine);
+                $pagesPerKeywordByEngine[$engine] = $positionLimit ? (int)ceil($positionLimit / 10) : 1;
             }
 
             $costCalculation = $this->costCalculator->calculateRecognitionCost(
                 $keywordsCount,
-                $pagesPerKeyword,
+                10,
                 $searchEngines,
                 $targetsCount,
-                $targets
+                $targets,
+                $pagesPerKeywordByEngine
             );
 
             return response()->json([

@@ -213,7 +213,7 @@ class SeoRecognitionService
             lang: $lang,
             os: $target->os,
             ads: $site->getAds(),
-            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
+            pages: $this->calculatePagesForPositionLimit($site->getPositionLimit('google')),
             subdomains: $site->getSubdomains(),
             xmlApiKey: $googleApiData['apiKey'] ?: null,
             xmlBaseUrl: $googleApiData['baseUrl'] ?: null,
@@ -227,7 +227,7 @@ class SeoRecognitionService
         $googleApiData = $this->xmlApiSettingsService->getGoogleApiDataForUser($userId);
         
         $organic = $target->organic ?? true;
-        $pages = $organic ? $this->calculatePagesForPositionLimit($site->positionLimit) : 1;
+        $pages = $organic ? $this->calculatePagesForPositionLimit($site->getPositionLimit('yandex')) : 1;
 
         return new TrackPositionsDTO(
             siteId: $site->id,
@@ -256,7 +256,7 @@ class SeoRecognitionService
             country: null,
             os: $target->os,
             ads: $site->getAds(),
-            pages: $this->calculatePagesForPositionLimit($site->positionLimit),
+            pages: $this->calculatePagesForPositionLimit($site->getPositionLimit('yandex')),
             subdomains: $site->getSubdomains()
         );
     }

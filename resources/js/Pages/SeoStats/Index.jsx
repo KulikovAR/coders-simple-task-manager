@@ -19,7 +19,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         keyword_groups: [],
         search_engines: [],
         targets: [],
-        position_limit: 10,
+        position_limit_yandex: 10,
+        position_limit_google: 10,
         subdomains: false,
         schedule: null,
         wordstat_enabled: false,
@@ -33,7 +34,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         keyword_groups: [],
         search_engines: [],
         targets: [],
-        position_limit: 10,
+        position_limit_yandex: 10,
+        position_limit_google: 10,
         subdomains: false,
         schedule: null,
         wordstat_enabled: false,
@@ -55,7 +57,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
             keyword_groups: [], 
             search_engines: [], 
             targets: [], 
-            position_limit: 10, 
+            position_limit_yandex: 10,
+            position_limit_google: 10,
             subdomains: false, 
             schedule: null, 
             wordstat_enabled: false, 
@@ -76,7 +79,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     keyword_groups: data.keyword_groups || [],
                     search_engines: data.site.search_engines || [],
                     targets: data.site.targets || [],
-                    position_limit: data.site.position_limit || 10,
+                    position_limit_yandex: data.site.position_limit_yandex || 10,
+                    position_limit_google: data.site.position_limit_google || 10,
                     subdomains: data.site.subdomains || false,
                     schedule: data.site.schedule || null,
                     wordstat_enabled: data.site.wordstat_enabled || false,
@@ -93,7 +97,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                     keyword_groups: [],
                     search_engines: project.search_engines || [],
                     targets: [],
-                    position_limit: project.position_limit || 10,
+                    position_limit_yandex: project.position_limit_yandex || 10,
+                    position_limit_google: project.position_limit_google || 10,
                     subdomains: project.subdomains || false,
                     schedule: project.schedule || null,
                     wordstat_enabled: project.wordstat_enabled || false,
@@ -110,7 +115,8 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                 keyword_groups: [],
                 search_engines: project.search_engines || [],
                 targets: [],
-                position_limit: project.position_limit || 10,
+                position_limit_yandex: project.position_limit_yandex || 10,
+                position_limit_google: project.position_limit_google || 10,
                 subdomains: project.subdomains || false,
                 schedule: project.schedule || null,
                 wordstat_enabled: project.wordstat_enabled || false,
@@ -128,7 +134,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         postSite(route('seo-stats.store-site'), {
             onSuccess: () => {
                 setShowAddSiteModal(false);
-                setSiteData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
+                setSiteData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit_yandex: 10, position_limit_google: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
             },
         });
     };
@@ -143,7 +149,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                 console.log('Site updated successfully');
                 setShowEditModal(false);
                 setEditingProject(null);
-                setEditData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
+                setEditData({ domain: '', name: '', keyword_groups: [], search_engines: [], targets: [], position_limit_yandex: 10, position_limit_google: 10, subdomains: false, schedule: null, wordstat_enabled: false, wordstat_region: null, wordstat_options: { default: true } });
             },
             onError: (errors) => {
                 console.error('Error updating site:', errors);
