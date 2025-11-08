@@ -31,6 +31,13 @@ Route::get('/tm', function () {
     ]);
 })->name('tm');
 
+Route::get('/seo', function () {
+    return Inertia::render('SeoLanding', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('seo');
+
 Route::get('/main', function () {
     return Inertia::render('Main');
 })->name('main');

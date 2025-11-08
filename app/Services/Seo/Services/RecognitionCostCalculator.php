@@ -49,6 +49,10 @@ class RecognitionCostCalculator
                 $totalRequests = 0;
 
                 foreach ($engineTargets as $target) {
+                    if(!$target['enabled']) {
+                        continue;
+                    }
+
                     if ($engine === 'yandex') {
                         $organic = $target['organic'] ?? true;
                         $targetPagesPerKeyword = $organic ? $enginePagesPerKeyword : 1;
@@ -87,7 +91,7 @@ class RecognitionCostCalculator
         return [
             'success' => empty($errors),
             'errors' => $errors,
-            'total_cost' => $totalCost,
+            'total_cost' => round($totalCost, 2),
             'cost_breakdown' => $costBreakdown,
             'balance' => $balance,
             'has_enough_balance' => $hasEnoughBalance,
