@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 export default function RecognitionConfirmationModal({
@@ -12,7 +12,7 @@ export default function RecognitionConfirmationModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchCost = async () => {
+    const fetchCost = useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -47,7 +47,7 @@ export default function RecognitionConfirmationModal({
         } finally {
             setLoading(false);
         }
-    };
+    }, [siteId, type]);
 
     const handleConfirm = () => {
         onConfirm();
@@ -61,12 +61,18 @@ export default function RecognitionConfirmationModal({
         }).format(cost);
     };
 
-    // Загружаем данные при открытии модального окна
+    // Сбрасываем данные при закрытии и загружаем при открытии модального окна
     useEffect(() => {
-        if (isOpen && !costData && !loading && !error) {
+        if (!isOpen) {
+            // Сбрасываем данные при закрытии
+            setCostData(null);
+            setError(null);
+            setLoading(false);
+        } else {
+            // Загружаем актуальные данные при каждом открытии
             fetchCost();
         }
-    }, [isOpen]);
+    }, [isOpen, fetchCost]);
 
     if (!isOpen) return null;
 
