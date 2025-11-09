@@ -13,6 +13,7 @@ use App\Services\Seo\Services\WordstatRecognitionTaskService;
 use App\Services\Seo\Services\ApiBalanceManager;
 use App\Services\Seo\Services\RecognitionCostCalculator;
 use App\Services\Seo\Services\WordstatCostCalculator;
+use App\Services\Seo\Services\ReportsFiltersService;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,7 @@ class SeoStatsController extends Controller
         private RecognitionTaskService $recognitionTaskService,
         private WordstatRecognitionTaskService $wordstatRecognitionTaskService,
         private ApiBalanceManager $apiBalanceManager,
+        private ReportsFiltersService $filtersService,
         private RecognitionCostCalculator $costCalculator,
         private WordstatCostCalculator $wordstatCostCalculator
     ) {}
@@ -118,20 +120,29 @@ class SeoStatsController extends Controller
 
     public function reports(int $siteId)
     {
-        $filters = [
-            'source' => request('source'),
-            'date_from' => request('date_from'),
-            'date_to' => request('date_to'),
-            'rank_from' => request('rank_from'),
-            'rank_to' => request('rank_to'),
-            'date_sort' => request('date_sort'),
-            'sort_type' => request('sort_type'),
-            'wordstat_sort' => request('wordstat_sort'),
-            'group_id' => request('group_id'),
-            'wordstat_query_type' => request('wordstat_query_type'),
-            'filter_group_id' => request('filter_group_id'),
-        ];
+        // Получаем данные сайта для определения дефолтных фильтров
+        $siteData = $this->siteUserService->getSiteData($siteId);
+        if (!$siteData) {
+            abort(403);
+        }
 
+        $site = $siteData['site'];
+        $targets = $siteData['site']['targets'] ?? [];
+
+        // Применяем дефолтные фильтры
+        $filtersResult = $this->filtersService->applyDefaultFilters(
+            $site,
+            $targets,
+            'seo-stats.reports',
+            $siteId
+        );
+
+        // Если нужен редирект - делаем его
+        if ($filtersResult['redirect_url']) {
+            return redirect($filtersResult['redirect_url']);
+        }
+
+        $filters = $filtersResult['filters'];
         $data = $this->reportsService->getReportsData($siteId, $filters);
 
         if (!$data) {
@@ -145,9 +156,9 @@ class SeoStatsController extends Controller
             $data['groups'] = [];
         }
 
-        $siteData = $this->siteUserService->getSiteData($siteId);
-        $data['targets'] = $siteData['site']['targets'] ?? [];
-        $data['public_token'] = $siteData['site']['public_token'] ?? null;
+        // Данные сайта уже получены выше
+        $data['targets'] = $targets;
+        $data['public_token'] = $site['public_token'] ?? null;
 
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
         if ($activeTask) {
@@ -174,20 +185,29 @@ class SeoStatsController extends Controller
             abort(404, 'Страница не найдена');
         }
 
-        $filters = [
-            'source' => request('source'),
-            'date_from' => request('date_from'),
-            'date_to' => request('date_to'),
-            'rank_from' => request('rank_from'),
-            'rank_to' => request('rank_to'),
-            'date_sort' => request('date_sort'),
-            'sort_type' => request('sort_type'),
-            'wordstat_sort' => request('wordstat_sort'),
-            'group_id' => request('group_id'),
-            'wordstat_query_type' => request('wordstat_query_type'),
-            'filter_group_id' => request('filter_group_id'),
-        ];
+        // Получаем данные сайта для определения дефолтных фильтров
+        $siteData = $this->siteUserService->getSiteDataWithoutAuth($site->go_seo_site_id);
+        if (!$siteData) {
+            abort(404, 'Данные не найдены');
+        }
 
+        $siteInfo = $siteData['site'];
+        $targets = $siteData['site']['targets'] ?? [];
+
+        // Применяем дефолтные фильтры
+        $filtersResult = $this->filtersService->applyDefaultFilters(
+            $siteInfo,
+            $targets,
+            'seo-stats.public-reports',
+            $token
+        );
+
+        // Если нужен редирект - делаем его
+        if ($filtersResult['redirect_url']) {
+            return redirect($filtersResult['redirect_url']);
+        }
+
+        $filters = $filtersResult['filters'];
         $data = $this->reportsService->getReportsData($site->go_seo_site_id, $filters, true);
 
         if (!$data) {
@@ -201,8 +221,8 @@ class SeoStatsController extends Controller
             $data['groups'] = [];
         }
 
-        $siteData = $this->siteUserService->getSiteDataWithoutAuth($site->go_seo_site_id);
-        $data['targets'] = $siteData['site']['targets'] ?? [];
+        // Данные сайта уже получены выше
+        $data['targets'] = $targets;
         $data['isPublic'] = true;
         $data['publicToken'] = $token;
 
