@@ -147,6 +147,7 @@ class SeoStatsController extends Controller
 
         $siteData = $this->siteUserService->getSiteData($siteId);
         $data['targets'] = $siteData['site']['targets'] ?? [];
+        $data['public_token'] = $siteData['site']['public_token'] ?? null;
 
         $activeTask = $this->recognitionTaskService->getActiveTaskForSite($siteId);
         if ($activeTask) {
@@ -163,6 +164,49 @@ class SeoStatsController extends Controller
         }
 
         return Inertia::render('SeoStats/Reports', $data);
+    }
+
+    public function publicReports(string $token)
+    {
+        $site = \App\Models\SeoSite::where('public_token', $token)->first();
+
+        if (!$site) {
+            abort(404, 'Страница не найдена');
+        }
+
+        $filters = [
+            'source' => request('source'),
+            'date_from' => request('date_from'),
+            'date_to' => request('date_to'),
+            'rank_from' => request('rank_from'),
+            'rank_to' => request('rank_to'),
+            'date_sort' => request('date_sort'),
+            'sort_type' => request('sort_type'),
+            'wordstat_sort' => request('wordstat_sort'),
+            'group_id' => request('group_id'),
+            'wordstat_query_type' => request('wordstat_query_type'),
+            'filter_group_id' => request('filter_group_id'),
+        ];
+
+        $data = $this->reportsService->getReportsData($site->go_seo_site_id, $filters, true);
+
+        if (!$data) {
+            abort(404, 'Данные не найдены');
+        }
+
+        try {
+            $groups = $this->microserviceClient->getGroups($site->go_seo_site_id);
+            $data['groups'] = $groups ?? [];
+        } catch (\Exception $e) {
+            $data['groups'] = [];
+        }
+
+        $siteData = $this->siteUserService->getSiteDataWithoutAuth($site->go_seo_site_id);
+        $data['targets'] = $siteData['site']['targets'] ?? [];
+        $data['isPublic'] = true;
+        $data['publicToken'] = $token;
+
+        return Inertia::render('SeoStats/PublicReports', $data);
     }
 
     public function getPositions(int $siteId)
@@ -664,6 +708,31 @@ class SeoStatsController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Ошибка обновления группы'], 500);
         }
+    }
+
+    public function generatePublicToken(int $siteId)
+    {
+        $site = \App\Models\SeoSite::where('go_seo_site_id', $siteId)
+            ->where('user_id', \Illuminate\Support\Facades\Auth::id())
+            ->first();
+
+        if (!$site) {
+            return response()->json(['error' => 'Сайт не найден'], 404);
+        }
+
+        // Генерируем токен, если его еще нет
+        if (!$site->public_token) {
+            $site->public_token = \Illuminate\Support\Str::random(64);
+            $site->save();
+        }
+
+        $publicUrl = route('seo-stats.public-reports', $site->public_token);
+
+        return response()->json([
+            'success' => true,
+            'token' => $site->public_token,
+            'url' => $publicUrl
+        ]);
     }
 
     public function destroyGroup(int $groupId)

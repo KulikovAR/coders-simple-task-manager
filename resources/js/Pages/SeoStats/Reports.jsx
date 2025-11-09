@@ -21,14 +21,47 @@ export default function SeoReports({
     pagination = {},
     activeTask = null,
     groups = [],
-    targets = []
+    targets = [],
+    public_token = null
 }) {
     const { recognitionStatus } = useSeoRecognition(project.id);
     const [exportProcessing, setExportProcessing] = useState({ html: false, excel: false });
     const [showExportMessage, setShowExportMessage] = useState(null);
+    const [publicUrl, setPublicUrl] = useState(public_token ? route('seo-stats.public-reports', public_token) : null);
+    const [copySuccess, setCopySuccess] = useState(false);
 
     const handleRefreshData = () => {
         router.reload({ only: ['positions'] });
+    };
+
+    const handleGeneratePublicLink = async () => {
+        try {
+            const response = await axios.post(route('seo-stats.generate-public-token', project.id));
+            
+            if (response.data.success) {
+                setPublicUrl(response.data.url);
+                // Копируем в буфер обмена
+                await navigator.clipboard.writeText(response.data.url);
+                setCopySuccess(true);
+                setTimeout(() => setCopySuccess(false), 3000);
+            }
+        } catch (error) {
+            alert('Ошибка при создании публичной ссылки');
+        }
+    };
+
+    const handleCopyPublicLink = async () => {
+        const url = public_token 
+            ? route('seo-stats.public-reports', public_token)
+            : publicUrl;
+        
+        if (url) {
+            await navigator.clipboard.writeText(url);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 3000);
+        } else {
+            await handleGeneratePublicLink();
+        }
     };
 
     const handleExport = async (type) => {
@@ -186,6 +219,28 @@ export default function SeoReports({
                             </div>
                             
                             <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handleCopyPublicLink}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2"
+                                    title={copySuccess ? 'Скопировано!' : 'Скопировать публичную ссылку'}
+                                >
+                                    {copySuccess ? (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Скопировано!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                            Публичная ссылка
+                                        </>
+                                    )}
+                                </button>
+                                
                                 <button
                                     onClick={() => handleExport('html')}
                                     disabled={exportProcessing.html}

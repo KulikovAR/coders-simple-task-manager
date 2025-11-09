@@ -17,13 +17,15 @@ class ReportsService
         private MicroserviceClient $microserviceClient
     ) {}
 
-    public function getReportsData(int $siteId, array $filters = []): ?array
+    public function getReportsData(int $siteId, array $filters = [], bool $skipAuthCheck = false): ?array
     {
-        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+        if (!$skipAuthCheck && !$this->siteUserService->hasAccessToSite($siteId)) {
             return null;
         }
 
-        $site = $this->siteUserService->getSite($siteId);
+        $site = $skipAuthCheck 
+            ? $this->siteUserService->getSiteWithoutAuth($siteId)
+            : $this->siteUserService->getSite($siteId);
 
         if (!$site) {
             return null;

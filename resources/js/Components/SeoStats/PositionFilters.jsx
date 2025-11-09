@@ -7,7 +7,9 @@ export default function PositionFilters({
     projectId,
     project = {},
     groups = [],
-    targets = []
+    targets = [],
+    isPublic = false,
+    publicToken = null
 }) {
     // Определяем значение по умолчанию для поисковика
     const defaultSource = filters.source || project.search_engines?.[0] || '';
@@ -114,7 +116,11 @@ export default function PositionFilters({
             }
         });
 
-        router.visit(route('seo-stats.reports', projectId) + '?' + queryParams.toString(), {
+        const routeName = isPublic && publicToken 
+            ? route('seo-stats.public-reports', publicToken)
+            : route('seo-stats.reports', projectId);
+        
+        router.visit(routeName + '?' + queryParams.toString(), {
             preserveState: true,
             preserveScroll: true,
             onStart: () => {
@@ -155,7 +161,11 @@ export default function PositionFilters({
             rank_to: '',
         });
 
-        router.visit(route('seo-stats.reports', projectId), {
+        const routeName = isPublic && publicToken 
+            ? route('seo-stats.public-reports', publicToken)
+            : route('seo-stats.reports', projectId);
+        
+        router.visit(routeName, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -185,6 +195,11 @@ export default function PositionFilters({
     const rankLabel = getRankRangeLabel();
 
     const handleExport = async (type) => {
+        // Экспорт недоступен в публичном режиме
+        if (isPublic) {
+            return;
+        }
+        
         try {
             // Получаем CSRF токен
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

@@ -13,6 +13,7 @@ class SeoSite extends Model
         'go_seo_site_id',
         'user_id',
         'name',
+        'public_token',
         'search_engines',
         'regions',
         'device_settings',

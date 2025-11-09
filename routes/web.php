@@ -38,6 +38,9 @@ Route::get('/seo', function () {
     ]);
 })->name('seo');
 
+// Публичный доступ к отчетам SEO
+Route::get('/public/seo-stats/{token}/reports', [App\Http\Controllers\SeoStatsController::class, 'publicReports'])->name('seo-stats.public-reports');
+
 Route::get('/main', function () {
     return Inertia::render('Main');
 })->name('main');
@@ -187,6 +190,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/seo-stats/{site}/groups', [App\Http\Controllers\SeoStatsController::class, 'storeGroup'])->name('seo-stats.store-group');
     Route::put('/seo-stats/groups/{group}', [App\Http\Controllers\SeoStatsController::class, 'updateGroup'])->name('seo-stats.update-group');
     Route::delete('/seo-stats/groups/{group}', [App\Http\Controllers\SeoStatsController::class, 'destroyGroup'])->name('seo-stats.destroy-group');
+    Route::post('/seo-stats/{site}/generate-public-token', [App\Http\Controllers\SeoStatsController::class, 'generatePublicToken'])->name('seo-stats.generate-public-token');
     Route::post('/seo-stats/{site}/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
     Route::get('/seo-stats/{site}/recognition-cost', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionCost'])->name('seo-stats.recognition-cost');
     Route::post('/seo-stats/{site}/track-wordstat', [App\Http\Controllers\SeoStatsController::class, 'trackWordstatPositions'])->name('seo-stats.track-wordstat');
