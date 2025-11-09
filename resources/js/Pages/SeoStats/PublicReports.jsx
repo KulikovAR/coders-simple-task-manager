@@ -44,12 +44,8 @@ export default function SeoPublicReports({
             });
         }
         
-        const sortedDates = Array.from(uniqueDates).sort();
-        const today = new Date().toISOString().split('T')[0];
-        
-        if (sortedDates.includes(today)) {
-            return [today, ...sortedDates.filter(date => date !== today)];
-        }
+        // Сортируем от новой к старой (обратный порядок)
+        const sortedDates = Array.from(uniqueDates).sort().reverse();
         
         return sortedDates;
     };
@@ -67,10 +63,11 @@ export default function SeoPublicReports({
     const getPositionChange = (keywordId, date) => {
         const dates = getUniqueDates();
         const currentIndex = dates.indexOf(date);
-        if (currentIndex <= 0) return null;
+        // Теперь предыдущая дата справа (индекс +1), так как даты идут от новой к старой
+        if (currentIndex < 0 || currentIndex >= dates.length - 1) return null;
         
         const currentPosition = getPositionForKeyword(keywordId, date);
-        const previousPosition = getPositionForKeyword(keywordId, dates[currentIndex - 1]);
+        const previousPosition = getPositionForKeyword(keywordId, dates[currentIndex + 1]);
         
         if (currentPosition === '-' || previousPosition === '-') return null;
         

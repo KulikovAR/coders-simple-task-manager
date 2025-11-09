@@ -30,12 +30,8 @@ export default function PositionsTable({
             });
         }
 
-        const sortedDates = Array.from(dates).sort();
-        const today = new Date().toISOString().split('T')[0];
-
-        if (sortedDates.includes(today)) {
-            return [today, ...sortedDates.filter(date => date !== today)];
-        }
+        // Сортируем от новой к старой (обратный порядок)
+        const sortedDates = Array.from(dates).sort().reverse();
 
         return sortedDates;
     }, [allPositions]);
@@ -143,13 +139,15 @@ export default function PositionsTable({
     const getPositionChange = (keywordId, date) => {
         const dates = uniqueDates;
         const currentIndex = dates.indexOf(date);
-        if (currentIndex <= 0) return null;
+        // Теперь предыдущая дата справа (индекс +1), так как даты идут от новой к старой
+        if (currentIndex < 0 || currentIndex >= dates.length - 1) return null;
 
         const currentPositionObj = getPositionForKeyword(keywordId, date);
-        const previousPositionObj = getPositionForKeyword(keywordId, dates[currentIndex - 1]);
+        const previousPositionObj = getPositionForKeyword(keywordId, dates[currentIndex + 1]);
 
         if (!currentPositionObj || !previousPositionObj || !currentPositionObj.rank || !previousPositionObj.rank) return null;
 
+        // Положительное значение = улучшение (позиция стала выше), отрицательное = ухудшение
         return previousPositionObj.rank - currentPositionObj.rank;
     };
 
@@ -336,22 +334,20 @@ export default function PositionsTable({
 
                             {/* Даты */}
                             {uniqueDates.map((date, index) => {
-                                const today = new Date().toISOString().split('T')[0];
-                                const isToday = date === today;
                                 const sortState = getDateSortState(date);
                                 const isSorted = sortState !== null;
 
                                 return (
                                     <th
                                         key={`${date}-${index}`}
-                                        className={`px-3 py-3 text-center text-sm font-medium min-w-[100px] cursor-pointer transition-all ${
-                                            isToday ? 'bg-accent-blue/20 border-2 border-accent-blue text-accent-blue' : 'text-text-primary hover:bg-secondary-bg/50'
-                                        } ${isSorted ? (sortState === 'asc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : ''}`}
+                                        className={`px-3 py-3 text-center text-sm font-medium min-w-[100px] cursor-pointer transition-all text-text-primary hover:bg-secondary-bg/50 ${
+                                            isSorted ? (sortState === 'asc' ? 'border-2 border-green-500' : 'border-2 border-red-500') : ''
+                                        }`}
                                         onClick={() => handleDateClick(date)}
                                     >
                                         <div className="flex flex-col items-center">
                                             <div className="flex items-center gap-1">
-                                                <span className={`font-medium ${isToday ? 'font-bold text-lg' : ''}`}>
+                                                <span className="font-medium">
                                                     {new Date(date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
                                                 </span>
                                                 {isSorted && (
@@ -373,7 +369,7 @@ export default function PositionsTable({
                                                     </svg>
                                                 )}
                                             </div>
-                                            <span className={`text-xs font-normal ${isToday ? 'font-bold text-accent-blue' : 'text-text-muted'}`}>
+                                            <span className="text-xs font-normal text-text-muted">
                                                 {new Date(date).toLocaleDateString('ru-RU', { weekday: 'short' })}
                                             </span>
                                         </div>
