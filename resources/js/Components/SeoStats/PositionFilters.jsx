@@ -306,7 +306,11 @@ export default function PositionFilters({
                                         if (target.region?.name) parts.push(target.region.name);
                                         if (target.language) parts.push(target.language);
                                     } else if (target.search_engine === 'yandex') {
-                                        if (target.lr) parts.push(`LR: ${target.lr}`);
+                                        if (target.lr_name) {
+                                            parts.push(target.lr_name);
+                                        } else if (target.lr) {
+                                            parts.push(`LR: ${target.lr}`);
+                                        }
                                     }
                                     if (target.device) {
                                         const deviceNames = { desktop: 'Компьютер', tablet: 'Планшет', mobile: 'Мобильный' };
@@ -422,7 +426,11 @@ export default function PositionFilters({
                                 if (target.region?.name) parts.push(target.region.name);
                                 if (target.language) parts.push(target.language);
                             } else if (target.search_engine === 'yandex') {
-                                if (target.lr) parts.push(`LR: ${target.lr}`);
+                                if (target.lr_name) {
+                                    parts.push(target.lr_name);
+                                } else if (target.lr) {
+                                    parts.push(`LR: ${target.lr}`);
+                                }
                             }
                             if (target.device) {
                                 const deviceNames = { desktop: 'Компьютер', tablet: 'Планшет', mobile: 'Мобильный' };

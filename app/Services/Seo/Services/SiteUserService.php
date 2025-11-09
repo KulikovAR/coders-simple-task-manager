@@ -3,6 +3,7 @@
 namespace App\Services\Seo\Services;
 
 use App\Enums\GoogleDomainType;
+use App\Enums\RegionType;
 use App\Models\SeoSite;
 use App\Services\Seo\DTOs\SiteDTO;
 use App\Services\Seo\DTOs\UpdateSiteDTO;
@@ -154,6 +155,11 @@ class SiteUserService
                 $targetData['language'] = $target->language;
             } else {
                 $targetData['lr'] = $target->lr;
+                // Добавляем название региона для Яндекс
+                if ($target->lr) {
+                    $regionType = RegionType::tryFrom($target->lr);
+                    $targetData['lr_name'] = $regionType ? $regionType->getLabel() : null;
+                }
             }
             
             return $targetData;
