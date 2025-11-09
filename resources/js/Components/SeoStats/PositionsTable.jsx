@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { router } from '@inertiajs/react';
+import { createPortal } from 'react-dom';
 
 export default function PositionsTable({
     keywords = [],
@@ -18,6 +19,7 @@ export default function PositionsTable({
     const [currentPage, setCurrentPage] = useState(1);
     const observerRef = useRef();
     const loadingRef = useRef();
+    const [tooltipState, setTooltipState] = useState({ visible: false, url: '', x: 0, y: 0 });
 
     const uniqueDates = useMemo(() => {
         const dates = new Set();
@@ -426,12 +428,30 @@ export default function PositionsTable({
                                             }
                                         };
 
+                                        const handleMouseEnter = (e) => {
+                                            if (isClickable && positionUrl) {
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                setTooltipState({
+                                                    visible: true,
+                                                    url: positionUrl,
+                                                    x: rect.left + rect.width / 2,
+                                                    y: rect.top
+                                                });
+                                            }
+                                        };
+
+                                        const handleMouseLeave = () => {
+                                            setTooltipState({ visible: false, url: '', x: 0, y: 0 });
+                                        };
+
                                         return (
                                             <td key={`${date}-${keyword.id}-${index}`} className={`w-12 h-12 px-1 py-1 text-center min-w-[100px] relative ${
                                                 isToday ? 'border-2 border-accent-blue' : ''
                                             }`}>
                                                 <div
                                                     onClick={handlePositionClick}
+                                                    onMouseEnter={handleMouseEnter}
+                                                    onMouseLeave={handleMouseLeave}
                                                     className={`w-full h-full flex flex-col items-center justify-center group ${
                                                         position === null ? 'bg-gray-200' :
                                                         position === 0 ? 'bg-gray-400' :
@@ -456,17 +476,6 @@ export default function PositionsTable({
                                                         }`}>
                                                             {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
                                                         </span>
-                                                    )}
-
-                                                    {/* Tooltip с URL */}
-                                                    {isClickable && positionUrl && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-80 max-w-[90vw]">
-                                                            <div className="text-gray-200 break-words whitespace-normal">
-                                                                {positionUrl}
-                                                            </div>
-                                                            {/* Стрелка тултипа */}
-                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
@@ -501,6 +510,25 @@ export default function PositionsTable({
                     </div>
                 )}
             </div>
+
+            {/* Tooltip с URL - рендерится через портал */}
+            {tooltipState.visible && typeof window !== 'undefined' && createPortal(
+                <div
+                    className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-lg pointer-events-none z-[99999] w-80 max-w-[90vw]"
+                    style={{
+                        left: `${tooltipState.x}px`,
+                        top: `${tooltipState.y - 10}px`,
+                        transform: 'translate(-50%, -100%)'
+                    }}
+                >
+                    <div className="text-gray-200 break-words whitespace-normal">
+                        {tooltipState.url}
+                    </div>
+                    {/* Стрелка тултипа */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>,
+                document.body
+            )}
 
             {/* Подвал таблицы */}
             <div className="px-6 py-3 border-t border-border-color bg-secondary-bg">

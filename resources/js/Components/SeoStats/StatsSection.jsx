@@ -21,6 +21,10 @@ export default function StatsSection({ keywords = [], positions = [], statistics
             console.log('Statistics from microservice:', statistics);
             console.log('Position distribution:', statistics.position_distribution);
             
+            var top_3 = (statistics.position_ranges['1_3'] || 0) 
+            var top_4_10 = (statistics.position_ranges['4_10'] || 0)  
+            var top_11_plus = (statistics.position_ranges['11_30'] || 0) + (statistics.position_ranges['31_50'] || 0) + (statistics.position_ranges['51_100'] || 0) + (statistics.position_ranges['100_plus'] || 0)
+
             return [
                 {
                     label: 'Не найдено',
@@ -29,17 +33,17 @@ export default function StatsSection({ keywords = [], positions = [], statistics
                 },
                 {
                     label: 'Топ-3 позиции',
-                    value: statistics.position_distribution.top_3 || 0,
+                    value: top_3,
                     color: '#10B981'
                 },
                 {
                     label: 'Позиции 4-10',
-                    value: (statistics.position_distribution.top_10 || 0) - (statistics.position_distribution.top_3 || 0),
+                    value: top_4_10,
                     color: '#F59E0B'
                 },
                 {
                     label: 'Позиции 11+',
-                    value: (statistics.position_distribution.top_20 || 0) - (statistics.position_distribution.top_10 || 0),
+                    value: top_11_plus,
                     color: '#EF4444'
                 }
             ];
