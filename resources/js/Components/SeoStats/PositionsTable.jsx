@@ -514,18 +514,24 @@ export default function PositionsTable({
             {/* Tooltip с URL - рендерится через портал */}
             {tooltipState.visible && typeof window !== 'undefined' && createPortal(
                 <div
-                    className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-lg pointer-events-none z-[99999] w-80 max-w-[90vw]"
+                    className="fixed px-3 py-2 bg-card-bg text-text-primary border border-border-color text-xs rounded-lg shadow-lg pointer-events-none z-[99999] w-80 max-w-[90vw]"
                     style={{
                         left: `${tooltipState.x}px`,
                         top: `${tooltipState.y - 10}px`,
                         transform: 'translate(-50%, -100%)'
                     }}
                 >
-                    <div className="text-gray-200 break-words whitespace-normal">
+                    <div className="text-text-muted break-words whitespace-normal">
                         {tooltipState.url}
                     </div>
                     {/* Стрелка тултипа */}
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                    <div 
+                        className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent"
+                        style={{ 
+                            borderTopColor: 'var(--card-bg)',
+                            filter: 'drop-shadow(0 1px 0 var(--border-color))'
+                        }}
+                    ></div>
                 </div>,
                 document.body
             )}
