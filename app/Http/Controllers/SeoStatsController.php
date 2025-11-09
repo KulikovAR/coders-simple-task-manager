@@ -251,11 +251,46 @@ class SeoStatsController extends Controller
             return response()->json(['error' => 'Нет доступа'], 403);
         }
 
+        return $this->getPositionsData($siteId, $filters, false);
+    }
+
+    public function getPublicPositions(string $token)
+    {
+        $site = \App\Models\SeoSite::where('public_token', $token)->first();
+
+        if (!$site) {
+            return response()->json(['error' => 'Страница не найдена'], 404);
+        }
+
+        $filters = [
+            'source' => request('source'),
+            'date_from' => request('date_from'),
+            'date_to' => request('date_to'),
+            'rank_from' => request('rank_from'),
+            'rank_to' => request('rank_to'),
+            'date_sort' => request('date_sort'),
+            'sort_type' => request('sort_type'),
+            'wordstat_sort' => request('wordstat_sort'),
+            'group_id' => request('group_id'),
+            'wordstat_query_type' => request('wordstat_query_type'),
+            'filter_group_id' => request('filter_group_id'),
+            'page' => request('page', 1),
+            'per_page' => request('per_page', 10),
+        ];
+
+        return $this->getPositionsData($site->go_seo_site_id, $filters, true);
+    }
+
+    private function getPositionsData(int $siteId, array $filters, bool $skipAuthCheck = false)
+    {
         $positionFilters = PositionFiltersDTO::fromRequest(['site_id' => $siteId, ...$filters]);
         
         $combinedFilters = $positionFilters->toQueryParams();
         
-        $site = $this->siteUserService->getSite($siteId);
+        $site = $skipAuthCheck 
+            ? $this->siteUserService->getSiteWithoutAuth($siteId)
+            : $this->siteUserService->getSite($siteId);
+            
         if ($site && $site->wordstatEnabled) {
             $combinedFilters['wordstat'] = true;
         }

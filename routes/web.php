@@ -40,6 +40,7 @@ Route::get('/seo', function () {
 
 // Публичный доступ к отчетам SEO
 Route::get('/public/seo-stats/{token}/reports', [App\Http\Controllers\SeoStatsController::class, 'publicReports'])->name('seo-stats.public-reports');
+Route::get('/public/seo-stats/{token}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPublicPositions'])->name('seo-stats.public-positions');
 
 Route::get('/main', function () {
     return Inertia::render('Main');

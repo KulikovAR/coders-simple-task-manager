@@ -8,7 +8,9 @@ export default function PositionsTable({
     positions = [],
     siteId,
     filters = {},
-    pagination = {}
+    pagination = {},
+    isPublic = false,
+    publicToken = null
 }) {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
     const [searchTerm, setSearchTerm] = useState('');
@@ -43,7 +45,11 @@ export default function PositionsTable({
 
         setLoading(true);
         try {
-            const response = await axios.get(`/seo-stats/${siteId}/positions`, {
+            const url = isPublic && publicToken
+                ? `/public/seo-stats/${publicToken}/positions`
+                : `/seo-stats/${siteId}/positions`;
+                
+            const response = await axios.get(url, {
                 params: {
                     ...filters,
                     page: currentPage + 1,
@@ -67,7 +73,7 @@ export default function PositionsTable({
         } finally {
             setLoading(false);
         }
-    }, [siteId, filters, currentPage, loading, hasMore]);
+    }, [siteId, filters, currentPage, loading, hasMore, isPublic, publicToken]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(

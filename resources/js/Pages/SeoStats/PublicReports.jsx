@@ -166,6 +166,8 @@ export default function SeoPublicReports({
                         siteId={project.id}
                         filters={filters}
                         pagination={pagination}
+                        isPublic={true}
+                        publicToken={publicToken}
                     />
                 </div>
             </div>
