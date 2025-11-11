@@ -111,8 +111,8 @@ class SiteUserService
                 'search_engine' => $target->search_engine,
                 'device' => $target->device ?? 'desktop',
                 'os' => $target->os,
-                'organic' => $target->organic ?? true,
-                'enabled' => $target->enabled ?? true,
+                'organic' => $target->organic !== null ? (bool)$target->organic : true,
+                'enabled' => $target->enabled !== null ? (bool)$target->enabled : true,
             ];
             
             if ($target->search_engine === 'google') {
@@ -263,8 +263,8 @@ class SiteUserService
                 'search_engine' => $target->search_engine,
                 'device' => $target->device ?? 'desktop',
                 'os' => $target->os,
-                'organic' => $target->organic ?? true,
-                'enabled' => $target->enabled ?? true,
+                'organic' => $target->organic !== null ? (bool)$target->organic : true,
+                'enabled' => $target->enabled !== null ? (bool)$target->enabled : true,
             ];
             
             if ($target->search_engine === 'google') {

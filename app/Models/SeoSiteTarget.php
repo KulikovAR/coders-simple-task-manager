@@ -19,6 +19,11 @@ class SeoSiteTarget extends Model
         'enabled',
     ];
 
+    protected $casts = [
+        'organic' => 'boolean',
+        'enabled' => 'boolean',
+    ];
+
     public function site()
     {
         return $this->belongsTo(SeoSite::class, 'seo_site_id');
