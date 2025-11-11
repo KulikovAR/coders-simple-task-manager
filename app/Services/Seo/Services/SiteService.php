@@ -267,14 +267,23 @@ class SiteService
         array $newKeywordsMap,
         array $existingKeywords
     ): void {
+        $keywordsToCreate = [];
+        
         foreach ($newKeywordsMap as $keywordValue => $keywordData) {
             $targetGroupId = $keywordData['group_id'];
             
             if (isset($existingKeywordsMap[$keywordValue])) {
                 $this->updateKeywordIfNeeded($existingKeywordsMap[$keywordValue], $targetGroupId);
             } else {
-                $this->microserviceClient->createKeyword($siteId, $keywordValue, $targetGroupId);
+                $keywordsToCreate[] = [
+                    'value' => $keywordValue,
+                    'group_id' => $targetGroupId,
+                ];
             }
+        }
+        
+        if (!empty($keywordsToCreate)) {
+            $this->microserviceClient->createKeywordsBatch($siteId, $keywordsToCreate);
         }
         
         foreach ($existingKeywords as $keyword) {

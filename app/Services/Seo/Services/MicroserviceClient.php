@@ -99,6 +99,31 @@ class MicroserviceClient
         }
     }
 
+    public function createKeywordsBatch(int $siteId, array $keywords): array
+    {
+        try {
+            $data = array_map(function ($keyword) use ($siteId) {
+                $item = [
+                    'site_id' => $siteId,
+                    'value' => $keyword['value'],
+                ];
+                
+                if (isset($keyword['group_id']) && $keyword['group_id'] !== null) {
+                    $item['group_id'] = $keyword['group_id'];
+                }
+                
+                return $item;
+            }, $keywords);
+            
+            $response = $this->client->post($this->baseUrl . '/api/keywords/batch', [
+                'json' => $data,
+            ]);
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR) ?? [];
+        } catch (GuzzleException $e) {
+            return [];
+        }
+    }
+
     public function updateKeyword(int $keywordId, ?int $groupId = null): bool
     {
         try {
