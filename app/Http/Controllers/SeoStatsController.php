@@ -112,10 +112,10 @@ class SeoStatsController extends Controller
         $success = $this->siteUserService->deleteSite($siteId);
 
         if (!$success) {
-            return response()->json(['error' => 'Нет доступа'], 403);
+            return response()->json(['error' => 'Нет доступа или ошибка удаления'], 403);
         }
 
-        return redirect()->route('seo-stats.index')->with('success', 'Проект удален');
+        return response()->json(['success' => true, 'message' => 'Проект удален']);
     }
 
     public function reports(int $siteId)

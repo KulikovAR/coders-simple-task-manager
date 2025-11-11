@@ -65,6 +65,20 @@ class MicroserviceClient
         }
     }
 
+    public function deleteSite(int $siteId): bool
+    {
+        try {
+            $response = $this->client->delete($this->baseUrl . '/api/sites/' . $siteId);
+            return $response->getStatusCode() === 200 || $response->getStatusCode() === 204;
+        } catch (GuzzleException $e) {
+            Log::error('Ошибка удаления сайта из микросервиса', [
+                'site_id' => $siteId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
     public function getKeywords(int $siteId): array
     {
         try {

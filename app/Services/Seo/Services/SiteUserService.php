@@ -189,11 +189,7 @@ class SiteUserService
             return false;
         }
 
-        SeoSite::where('user_id', Auth::id())
-            ->where('go_seo_site_id', $siteId)
-            ->delete();
-
-        return true;
+        return $this->siteService->deleteSite($siteId);
     }
 
     public function getSite(int $siteId): ?SiteDTO

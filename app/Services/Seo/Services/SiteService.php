@@ -117,6 +117,20 @@ class SiteService
         return null;
     }
 
+    public function deleteSite(int $siteId): bool
+    {
+        $success = $this->microserviceClient->deleteSite($siteId);
+        
+        if ($success) {
+            $localSite = SeoSite::where('go_seo_site_id', $siteId)->first();
+            if ($localSite) {
+                $localSite->delete();
+            }
+        }
+
+        return $success;
+    }
+
     public function updateSite(int $siteId, UpdateSiteDTO $dto): bool
     {
         $success = $this->update($siteId, $dto);

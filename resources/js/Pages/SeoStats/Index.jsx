@@ -129,6 +129,33 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
         }
     };
 
+    const handleDeleteProject = async (project) => {
+        if (!confirm(`Вы уверены, что хотите удалить проект "${project.name}"? Это действие нельзя отменить.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(route('seo-stats.destroy-site', project.id), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                router.reload({ only: ['sites'] });
+            } else {
+                alert(data.error || 'Ошибка при удалении проекта');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении проекта:', error);
+            alert('Ошибка при удалении проекта');
+        }
+    };
+
     const handleAddSite = (e) => {
         e.preventDefault();
         postSite(route('seo-stats.store-site'), {
@@ -316,6 +343,7 @@ export default function SeoStatsIndex({ auth, sites = [], activeTasks = {} }) {
                                                 project={site}
                                                 onViewReports={handleViewReports}
                                                 onEditProject={handleEditProject}
+                                                onDeleteProject={handleDeleteProject}
                                                 isEditingProject={isLoadingProjectData && editingProject?.id === site.id}
                                                 activeTask={activeTasks[site.id] || null}
                                             />

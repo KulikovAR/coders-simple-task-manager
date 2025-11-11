@@ -184,6 +184,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/{site}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPositions'])->name('seo-stats.positions');
     Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
     Route::put('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'updateSite'])->name('seo-stats.update-site');
+    Route::delete('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'destroy'])->name('seo-stats.destroy-site');
     Route::get('/seo-stats/sites/{site}/data', [App\Http\Controllers\SeoStatsController::class, 'getProjectData'])->name('seo-stats.project-data');
     Route::post('/seo-stats/keywords', [App\Http\Controllers\SeoStatsController::class, 'storeKeyword'])->name('seo-stats.store-keyword');
     Route::delete('/seo-stats/keywords/{keyword}', [App\Http\Controllers\SeoStatsController::class, 'destroyKeyword'])->name('seo-stats.destroy-keyword');
