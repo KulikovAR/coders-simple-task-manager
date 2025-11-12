@@ -28,7 +28,7 @@ export default function StatsSection({ keywords = [], positions = [], statistics
             return [
                 {
                     label: 'Не найдено',
-                    value: statistics.position_distribution.not_found || 0,
+                    value: statistics.position_ranges.not_found || 0,
                     color: '#6B7280'
                 },
                 {
