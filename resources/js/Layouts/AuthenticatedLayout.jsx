@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from '@inertiajs/react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 
 import NavLink from '@/Components/NavLink';
@@ -8,6 +7,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import MobileNotificationBell from '@/Components/MobileNotificationBell';
 import EmailVerificationBanner from '@/Components/EmailVerificationBanner';
+import ServiceSwitcher from '@/Components/ServiceSwitcher';
 import Waves from '@/Components/Waves';
 import YandexMetrika from '@/Components/YandexMetrika';
 
@@ -52,7 +52,7 @@ export default function Authenticated({ user, header, children, flash }) {
         <div className="min-h-screen bg-primary-bg text-text-primary relative overflow-x-hidden mobile-no-min-height">
             {/* Yandex Metrika */}
             <YandexMetrika />
-            
+
             {/* Waves Background */}
             <Waves
                 lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
@@ -73,9 +73,7 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
-                                <Link href="/dashboard" className="hover:opacity-80 transition-all duration-200 hover:scale-105 icon-glitch">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-text-primary" />
-                                </Link>
+                                <ServiceSwitcher />
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
@@ -303,7 +301,7 @@ export default function Authenticated({ user, header, children, flash }) {
                     <div className="animate-fade-in">
                         {/* Плашка подтверждения email */}
                         <EmailVerificationBanner user={user} status={flash?.status} />
-                        
+
                         {/* Отображаем flash-сообщения глобально */}
 
                         {children}

@@ -23,3 +23,11 @@ Schedule::command('files:cleanup')
     ->name('files-cleanup')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Очистка старых задач SEO распознавания
+Schedule::command('seo:cleanup-tasks')
+    ->daily()
+    ->at('03:00')
+    ->name('seo-cleanup-tasks')
+    ->withoutOverlapping()
+    ->runInBackground();

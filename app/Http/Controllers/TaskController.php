@@ -110,6 +110,24 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($request->validated(), $project, Auth::user());
 
+        $checklists = $request->input('checklists', '[]');
+
+        if (is_string($checklists)) {
+            $checklists = json_decode($checklists, true);
+        }
+
+        $items = $checklists['items'] ?? [];
+
+        if (is_array($items) && count($items) > 0) {
+            foreach ($items as $item) {
+                $task->checklists()->create([
+                    'title' => $item['title'] ?? '',
+                    'is_completed' => $item['is_completed'] ?? false,
+                    'sort_order' => $item['sort_order'] ?? 1,
+                ]);
+            }
+        }
+
         $task->load(['assignee', 'project.users', 'checklists']);
 
         $this->notificationService->taskCreated($task, Auth::user());

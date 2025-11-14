@@ -1,0 +1,156 @@
+<?php
+
+namespace App\Services\Seo\Services;
+
+use App\Services\Seo\Services\XmlStockTariffService;
+
+class RecognitionCostCalculator
+{
+    private XmlStockTariffService $tariffService;
+
+    public function __construct(XmlStockTariffService $tariffService)
+    {
+        $this->tariffService = $tariffService;
+    }
+
+    public function calculateRecognitionCost(
+        int $keywordsCount,
+        int $pagesPerKeyword = 10,
+        array $searchEngines = ['yandex', 'google'],
+        array $targetsCount = [],
+        array $targets = [],
+        array $pagesPerKeywordByEngine = []
+    ): array {
+        if (!$this->tariffService->isConfigured()) {
+            return [
+                'success' => false,
+                'error' => 'API настройки не заполнены',
+                'cost' => 0
+            ];
+        }
+
+        $totalCost = 0;
+        $costBreakdown = [];
+        $errors = [];
+
+        foreach ($searchEngines as $engine) {
+            $price = $this->getEnginePrice($engine);
+
+            if ($price === null) {
+                $errors[] = "Не удалось получить цену для {$engine}";
+                continue;
+            }
+
+            $enginePagesPerKeyword = $pagesPerKeywordByEngine[$engine] ?? $pagesPerKeyword;
+
+            if (!empty($targets)) {
+                $engineTargets = array_filter($targets, fn($t) => ($t['search_engine'] ?? null) === $engine);
+                $engineCost = 0;
+                $totalRequests = 0;
+
+                foreach ($engineTargets as $target) {
+                    if(!$target['enabled']) {
+                        continue;
+                    }
+
+                    if ($engine === 'yandex') {
+                        $organic = $target['organic'] ?? true;
+                        $targetPagesPerKeyword = $organic ? $enginePagesPerKeyword : 1;
+                    } else {
+                        $targetPagesPerKeyword = $enginePagesPerKeyword;
+                    }
+                    $targetCost = $this->calculateEngineCost($keywordsCount, $targetPagesPerKeyword, $price);
+                    $engineCost += $targetCost;
+                    $totalRequests += $keywordsCount * $targetPagesPerKeyword * 10;
+                }
+
+                $combinationsCount = count($engineTargets) ?: 1;
+            } else {
+                $combinationsCount = $targetsCount[$engine] ?? 1;
+                $engineCost = $this->calculateEngineCost($keywordsCount, $enginePagesPerKeyword, $price);
+                $engineCost *= $combinationsCount;
+                $totalRequests = $keywordsCount * $enginePagesPerKeyword * 10 * $combinationsCount;
+            }
+
+            $totalCost += $engineCost;
+
+            $costBreakdown[$engine] = [
+                'price_per_1000' => $price,
+                'keywords' => $keywordsCount,
+                'pages_per_keyword' => $enginePagesPerKeyword,
+                'positions_per_page' => 10,
+                'combinations_count' => $combinationsCount,
+                'total_requests' => $totalRequests,
+                'cost' => $engineCost
+            ];
+        }
+
+        $balance = $this->tariffService->getBalance();
+        $hasEnoughBalance = $balance !== null && $balance >= $totalCost;
+
+        return [
+            'success' => empty($errors),
+            'errors' => $errors,
+            'total_cost' => round($totalCost, 2),
+            'cost_breakdown' => $costBreakdown,
+            'balance' => $balance,
+            'has_enough_balance' => $hasEnoughBalance,
+            'keywords_count' => $keywordsCount,
+            'pages_per_keyword' => $pagesPerKeyword,
+            'search_engines' => $searchEngines
+        ];
+    }
+
+    private function getEnginePrice(string $engine): ?float
+    {
+        return match ($engine) {
+            'yandex' => $this->tariffService->getYandexPrice(),
+            'google' => $this->tariffService->getGooglePrice(),
+            'yandexlive' => $this->tariffService->getYandexLivePrice(),
+            default => null
+        };
+    }
+
+    private function calculateEngineCost(int $keywordsCount, int $pagesPerKeyword, float $pricePer1000): float
+    {
+        $totalRequests = $keywordsCount * $pagesPerKeyword;
+        $costPerRequest = $pricePer1000 / 1000;
+
+        return $totalRequests * $costPerRequest;
+    }
+
+    public function validateRecognitionRequest(
+        int $keywordsCount,
+        int $pagesPerKeyword = 10,
+        array $searchEngines = ['yandex', 'google'],
+        array $targetsCount = [],
+        array $targets = [],
+        array $pagesPerKeywordByEngine = []
+    ): array {
+        $costCalculation = $this->calculateRecognitionCost($keywordsCount, $pagesPerKeyword, $searchEngines, $targetsCount, $targets, $pagesPerKeywordByEngine);
+
+        if (!$costCalculation['success']) {
+            return [
+                'valid' => false,
+                'errors' => $costCalculation['errors']
+            ];
+        }
+
+        if (!$costCalculation['has_enough_balance']) {
+            return [
+                'valid' => false,
+                'errors' => [
+                    'Недостаточно средств на балансе. Требуется: ' .
+                    number_format($costCalculation['total_cost'], 2) .
+                    ' руб., доступно: ' .
+                    number_format($costCalculation['balance'], 2) . ' руб.'
+                ]
+            ];
+        }
+
+        return [
+            'valid' => true,
+            'cost_calculation' => $costCalculation
+        ];
+    }
+}

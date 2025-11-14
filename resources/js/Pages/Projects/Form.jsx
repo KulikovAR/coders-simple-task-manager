@@ -241,7 +241,7 @@ export default function Form({ auth, project = null, errors = {} }) {
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="btn btn-success"
+                                        className="btn btn-success text-white"
                                     >
                                         {processing ? (
                                             <div className="flex items-center">

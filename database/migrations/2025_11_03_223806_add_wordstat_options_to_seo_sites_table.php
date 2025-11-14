@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('seo_sites', function (Blueprint $table) {
+            $table->json('wordstat_options')->nullable()->after('wordstat_region');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('seo_sites', function (Blueprint $table) {
+            $table->dropColumn('wordstat_options');
+        });
+    }
+};

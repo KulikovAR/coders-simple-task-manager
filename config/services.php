@@ -45,11 +45,21 @@ return [
         'api_key' => env('OPENAI_API_KEY'),
         'api_url' => env('OPENAI_API_URL', 'https://api.openai.com/v1'),
     ],
-    
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'seo_microservice' => [
+        'url' => env('SEO_API_URL', 'http://host.docker.internal:8087'),
+        'timeout' => 60,
+    ],
+
+    'dadata' => [
+        'token' => env('DADATA_TOKEN'),
+        'url' => env('DADATA_URL', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/country'),
     ],
 
 ];

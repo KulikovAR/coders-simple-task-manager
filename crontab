@@ -1,0 +1,11 @@
+# Запуск проверки расписания парсинга каждую минуту
+* * * * * cd /var/www && php artisan seo:run-scheduled-parsing >> /var/www/storage/logs/scheduled-parsing.log 2>&1
+
+# Очистка старых задач SEO распознавания каждый день в 2:00
+0 2 * * * cd /var/www && php artisan seo:cleanup-tasks >> /var/www/storage/logs/cleanup-tasks.log 2>&1
+
+# Очистка старых задач Wordstat распознавания каждый день в 2:30
+30 2 * * * cd /var/www && php artisan seo:cleanup-wordstat-tasks >> /var/www/storage/logs/cleanup-wordstat-tasks.log 2>&1
+
+# Запуск queue worker при старте системы (альтернатива systemd)
+@reboot cd /var/www && nohup php artisan queue:work --queue=seo-recognition,wordstat-recognition,default --tries=3 --timeout=300 --sleep=3 --max-jobs=1000 --max-time=3600 >> /var/www/storage/logs/queue-worker.log 2>&1 &

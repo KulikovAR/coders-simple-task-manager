@@ -39,7 +39,6 @@ class CheckDeadlinesWithUserTime extends Command
 
         $now = Carbon::now();
 
-        // Получаем всех пользователей с настройками времени уведомлений
         $users = User::whereNotNull('deadline_notification_time')
             ->where('email_notifications', true)
             ->get();
@@ -64,20 +63,16 @@ class CheckDeadlinesWithUserTime extends Command
 
         $this->line("Проверяем дедлайны для пользователя: {$user->name} (время юзера: {$userNotificationTime}), время сейчас {$currentTime}");
 
-        // Проверяем, наступило ли время для отправки уведомлений этому пользователю
         if ($currentTime !== $userNotificationTime) {
             return;
         }
 
         $this->line("Проверяем дедлайны для пользователя: {$user->name} (время: {$userNotificationTime})");
 
-        // Задачи с дедлайном через 2 дня (48 часов)
         $this->checkDeadlinesInDays($user, $now, 2, 'До дедлайна остается 2 дня или 48 часов');
 
-        // Задачи с дедлайном через 1 день
         $this->checkDeadlinesInDays($user, $now, 1, 'До дедлайна остается 1 день');
 
-        // Задачи с дедлайном сегодня
         $this->checkDeadlinesInDays($user, $now, 0, 'Дедлайн сегодня');
     }
 

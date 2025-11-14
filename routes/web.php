@@ -13,59 +13,71 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskStatusController;
+use App\Http\Controllers\ApiBalanceController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
+    return Inertia::render('Main');
+});
+
+Route::get('/tm', function () {
     return Inertia::render('Landing', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
     ]);
-});
+})->name('tm');
 
-// Страница с информацией об ИИ-ассистенте
+Route::get('/seo', function () {
+    return Inertia::render('SeoLanding', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('seo');
+
+// Публичный доступ к отчетам SEO
+Route::get('/public/seo-stats/{token}/reports', [App\Http\Controllers\SeoStatsController::class, 'publicReports'])->name('seo-stats.public-reports');
+Route::get('/public/seo-stats/{token}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPublicPositions'])->name('seo-stats.public-positions');
+
+Route::get('/main', function () {
+    return Inertia::render('Main');
+})->name('main');
+
 Route::get('/ai-features', function () {
     return Inertia::render('AiAgent/Features');
 })->name('ai-features');
 
-// Страница FAQ
 Route::get('/faq', function () {
     return Inertia::render('Faq');
 })->name('faq');
 
-// API документация (заглушка для футера)
 Route::get('/api-docs', function () {
     return Inertia::render('ApiDocs');
 })->name('api-docs');
 
-    // Демо-страница RichTextEditor
     Route::get('/demo/rich-editor', function () {
         return Inertia::render('Demo/RichEditorDemo');
     })->name('demo.rich-editor');
 
-    // Демо-страница ИИ RichTextEditor
     Route::get('/demo/ai-rich-editor', function () {
         return Inertia::render('Demo/AiRichEditorDemo');
     })->name('demo.ai-rich-editor');
 
-    // Демо-страница загрузки файлов
     Route::get('/demo/file-upload', function () {
         return Inertia::render('Demo/FileUploadDemo');
     })->name('demo.file-upload');
 
-    // Тестовая страница FileExtension
     Route::get('/demo/file-extension-test', function () {
         return Inertia::render('Demo/FileExtensionTest');
     })->name('demo.file-extension-test');
 
-    // Тестовая страница загрузки файлов
     Route::get('/demo/file-upload-test', function () {
         return Inertia::render('Demo/FileUploadTest');
     })->name('demo.file-upload-test');
 
-    // Загрузка файлов для RichTextEditor
     Route::middleware('auth')->group(function () {
         Route::post('/file-upload', [App\Http\Controllers\FileUploadController::class, 'store'])->name('file-upload.store');
         Route::get('/file-upload/{attachment}/download', [App\Http\Controllers\FileUploadController::class, 'download'])->name('file-upload.download');
@@ -83,7 +95,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Уведомления
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
@@ -91,7 +102,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/read', [NotificationController::class, 'destroyRead'])->name('notifications.destroy-read');
 
-    // Проекты
     Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/create', [App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
@@ -105,14 +115,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'addMember'])->name('projects.members.add');
     Route::delete('/projects/{project}/members', [App\Http\Controllers\ProjectController::class, 'removeMember'])->name('projects.members.remove');
 
-    // Гантт диаграммы
     Route::get('/projects/{project}/gantt', [GanttController::class, 'show'])->name('projects.gantt');
     Route::put('/tasks/{task}/gantt', [GanttController::class, 'updateTask'])->name('tasks.gantt.update');
     Route::post('/gantt/dependencies', [GanttController::class, 'createDependency'])->name('gantt.dependencies.create');
     Route::delete('/gantt/dependencies/{dependency}', [GanttController::class, 'deleteDependency'])->name('gantt.dependencies.delete');
     Route::post('/projects/{project}/gantt/calculate-dates', [GanttController::class, 'calculateDates'])->name('projects.gantt.calculate-dates');
 
-    // Спринты
     Route::get('/projects/{project}/sprints', [App\Http\Controllers\SprintController::class, 'index'])->name('sprints.index');
     Route::get('/projects/{project}/sprints/create', [App\Http\Controllers\SprintController::class, 'create'])->name('sprints.create');
     Route::post('/projects/{project}/sprints', [App\Http\Controllers\SprintController::class, 'store'])->name('sprints.store');
@@ -121,7 +129,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'update'])->name('sprints.update');
     Route::delete('/projects/{project}/sprints/{sprint}', [App\Http\Controllers\SprintController::class, 'destroy'])->name('sprints.destroy');
 
-    // Статусы задач
     Route::get('/projects/{project}/statuses', [TaskStatusController::class, 'projectIndex'])->name('projects.statuses');
     Route::put('/projects/{project}/statuses', [TaskStatusController::class, 'updateProject'])->name('projects.statuses.update');
     Route::get('/projects/{project}/sprints/{sprint}/statuses', [TaskStatusController::class, 'sprintIndex'])->name('sprints.statuses');
@@ -131,10 +138,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('projects.statuses.api');
     Route::get('/projects/{project}/sprints/{sprint}/statuses/api', [TaskStatusController::class, 'getStatuses'])->name('sprints.statuses.api');
 
-    // Новый универсальный роут для получения контекстных статусов
     Route::get('/projects/{project}/contextual-statuses', [TaskStatusController::class, 'getContextualStatuses'])->name('projects.contextual-statuses');
 
-    // Задачи
     Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/create', [App\Http\Controllers\TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tasks', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
@@ -146,18 +151,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/tasks/{task}/priority', [App\Http\Controllers\TaskController::class, 'updatePriority'])->name('tasks.priority.update');
     Route::get('/projects/{project}/sprints-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectSprints'])->name('tasks.project.sprints');
     Route::get('/projects/{project}/statuses-for-tasks', [App\Http\Controllers\TaskController::class, 'getProjectStatuses'])->name('tasks.project.statuses');
-    
-    // Задачи по коду
+
     Route::get('/tasks/code/{code}', [App\Http\Controllers\TaskController::class, 'showByCode'])->name('tasks.show.by-code');
 
-    // Комментарии к задачам
     Route::get('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'index'])->name('tasks.comments.index');
     Route::post('/tasks/{task}/comments', [App\Http\Controllers\TaskCommentController::class, 'store'])->name('tasks.comments.store');
     Route::get('/comments/{comment}/edit', [App\Http\Controllers\TaskCommentController::class, 'edit'])->name('comments.edit');
     Route::put('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [App\Http\Controllers\TaskCommentController::class, 'destroy'])->name('comments.destroy');
 
-    // Чек-листы задач
     Route::get('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'index'])->name('tasks.checklists.index');
     Route::post('/tasks/{task}/checklists', [App\Http\Controllers\TaskChecklistController::class, 'store'])->name('tasks.checklists.store');
     Route::put('/tasks/{task}/checklists/reorder', [App\Http\Controllers\TaskChecklistController::class, 'reorder'])->name('tasks.checklists.reorder');
@@ -165,29 +167,67 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tasks/{task}/checklists/{checklist}', [App\Http\Controllers\TaskChecklistController::class, 'destroy'])->name('tasks.checklists.destroy');
     Route::put('/tasks/{task}/checklists/{checklist}/toggle', [App\Http\Controllers\TaskChecklistController::class, 'toggleStatus'])->name('tasks.checklists.toggle');
 
-    // ИИ-агент
     Route::get('/ai-agent', [App\Http\Controllers\AiAgentController::class, 'index'])->name('ai-agent.index');
-    
-    // Оптимизация текста с помощью ИИ
+
     Route::post('/ai-text-optimize', [AiTextOptimizationController::class, 'optimizeText'])->name('ai-text-optimize');
 
-    // Webhook'и
     Route::get('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'index'])->name('webhooks.index');
     Route::post('/projects/{project}/webhooks', [App\Http\Controllers\WebhookController::class, 'store'])->name('webhooks.store');
     Route::put('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'update'])->name('webhooks.update');
     Route::delete('/projects/{project}/webhooks/{webhook}', [App\Http\Controllers\WebhookController::class, 'destroy'])->name('webhooks.destroy');
     Route::post('/projects/{project}/webhooks/{webhook}/test', [App\Http\Controllers\WebhookController::class, 'test'])->name('webhooks.test');
     Route::post('/projects/{project}/webhooks/{webhook}/toggle', [App\Http\Controllers\WebhookController::class, 'toggle'])->name('webhooks.toggle');
+
+    Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'dashboard'])->name('seo-stats.dashboard');
+    Route::get('/seo-stats/projects', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
+    Route::get('/seo-stats/{site}/reports', [App\Http\Controllers\SeoStatsController::class, 'reports'])->name('seo-stats.reports');
+    Route::get('/seo-stats/{site}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPositions'])->name('seo-stats.positions');
+    Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
+    Route::put('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'updateSite'])->name('seo-stats.update-site');
+    Route::delete('/seo-stats/sites/{site}', [App\Http\Controllers\SeoStatsController::class, 'destroy'])->name('seo-stats.destroy-site');
+    Route::get('/seo-stats/sites/{site}/data', [App\Http\Controllers\SeoStatsController::class, 'getProjectData'])->name('seo-stats.project-data');
+    Route::post('/seo-stats/keywords', [App\Http\Controllers\SeoStatsController::class, 'storeKeyword'])->name('seo-stats.store-keyword');
+    Route::delete('/seo-stats/keywords/{keyword}', [App\Http\Controllers\SeoStatsController::class, 'destroyKeyword'])->name('seo-stats.destroy-keyword');
+    Route::get('/seo-stats/{site}/groups', [App\Http\Controllers\SeoStatsController::class, 'getGroups'])->name('seo-stats.groups');
+    Route::post('/seo-stats/{site}/groups', [App\Http\Controllers\SeoStatsController::class, 'storeGroup'])->name('seo-stats.store-group');
+    Route::put('/seo-stats/groups/{group}', [App\Http\Controllers\SeoStatsController::class, 'updateGroup'])->name('seo-stats.update-group');
+    Route::delete('/seo-stats/groups/{group}', [App\Http\Controllers\SeoStatsController::class, 'destroyGroup'])->name('seo-stats.destroy-group');
+    Route::post('/seo-stats/{site}/generate-public-token', [App\Http\Controllers\SeoStatsController::class, 'generatePublicToken'])->name('seo-stats.generate-public-token');
+    Route::post('/seo-stats/{site}/track-positions', [App\Http\Controllers\SeoStatsController::class, 'trackPositions'])->name('seo-stats.track-positions');
+    Route::get('/seo-stats/{site}/recognition-cost', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionCost'])->name('seo-stats.recognition-cost');
+    Route::post('/seo-stats/{site}/track-wordstat', [App\Http\Controllers\SeoStatsController::class, 'trackWordstatPositions'])->name('seo-stats.track-wordstat');
+    Route::get('/seo-stats/{site}/wordstat-cost', [App\Http\Controllers\SeoStatsController::class, 'getWordstatCost'])->name('seo-stats.wordstat-cost');
+    Route::get('/seo-stats/{site}/wordstat-recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatRecognitionStatus'])->name('seo-stats.wordstat-recognition-status');
+    Route::get('/seo-stats/wordstat-tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatTaskStatus'])->name('seo-stats.wordstat-task-status');
+    Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
+    Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
+    
+    Route::get('/geo/google-domains/search', [App\Http\Controllers\GeoController::class, 'getGoogleDomains'])->name('geo.google-domains.search');
+    Route::get('/geo/google-domains/{value}', [App\Http\Controllers\GeoController::class, 'getGoogleDomainByValue'])->name('geo.google-domains.show');
+    Route::get('/geo/regions', [App\Http\Controllers\GeoController::class, 'getAllRegions'])->name('geo.regions');
+    Route::get('/languages/search', [App\Http\Controllers\LanguageController::class, 'search'])->name('languages.search');
+    
+    // API роуты для баланса
+    Route::get('/api-balance', [ApiBalanceController::class, 'index'])->name('api-balance');
+
+    Route::get('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'getSettings'])->name('user.xml-api-settings.get');
+    Route::put('/user/xml-api-settings', [App\Http\Controllers\UserXmlApiSettingsController::class, 'updateSettings'])->name('user.xml-api-settings.update');
+
+    Route::get('/reports-history', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/export', [App\Http\Controllers\ReportController::class, 'export'])
+        ->middleware('ajax')
+        ->name('reports.export');
+    Route::get('/reports/{report}/status', [App\Http\Controllers\ReportController::class, 'status'])->name('reports.status');
+    Route::get('/reports/{report}/download', [App\Http\Controllers\ReportController::class, 'download'])->name('reports.download');
+    Route::get('/reports/{report}/show', [App\Http\Controllers\ReportController::class, 'show'])->name('reports.show');
 });
 
-// ИИ-агент API (без CSRF)
 Route::middleware(['auth', 'ai.agent'])->group(function () {
     Route::post('/ai-agent/process', [App\Http\Controllers\AiAgentController::class, 'processRequest'])
         ->name('ai-agent.process');
     Route::get('/ai-agent/commands', [App\Http\Controllers\AiAgentController::class, 'getCommands'])
         ->name('ai-agent.commands');
 
-    // История диалогов ИИ-агента
     Route::get('/ai-agent/conversations', [App\Http\Controllers\AiAgentController::class, 'getConversations'])
         ->name('ai-agent.conversations');
     Route::get('/ai-agent/conversations/{conversationId}/messages', [App\Http\Controllers\AiAgentController::class, 'getConversationMessages'])
@@ -200,12 +240,17 @@ Route::middleware(['auth', 'ai.agent'])->group(function () {
         ->name('ai-agent.stats');
 });
 
-// --- Оплата подписки ---
 Route::middleware(['auth'])->group(function () {
     Route::post('/payment/start', [\App\Http\Controllers\PaymentController::class, 'start'])->name('payment.start');
 });
 Route::post('/payment/webhook', [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
-// Telegram webhook перенесён в routes/api.php
+// Admin routes
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.index');
+    Route::get('/jobs', [App\Http\Controllers\Admin\AdminController::class, 'jobs'])->name('admin.jobs.index');
+    Route::get('/jobs/{id}', [App\Http\Controllers\Admin\AdminController::class, 'job'])->name('admin.jobs.show');
+});
+
 
 require __DIR__.'/auth.php';

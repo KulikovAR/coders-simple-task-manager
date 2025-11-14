@@ -7,12 +7,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "enqueue/rdkafka": "^0.10.26",
+        "guzzlehttp/guzzle": "^7.9",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.23",
         "laravel/telescope": "^5.11",
         "laravel/tinker": "^2.10.1",
+        "phpoffice/phpspreadsheet": "^5.1",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

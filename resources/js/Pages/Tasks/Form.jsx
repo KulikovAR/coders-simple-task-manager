@@ -132,6 +132,14 @@ export default function Form({ auth, task = null, projects = [], selectedProject
                     onSubmit={handleSubmit}
                     onCancel={handleCancel}
                     isModal={false}
+                    externalChecklists={task?.checklists || []}
+                    onChecklistChange={(updatedChecklists) => {
+                        setChecklists(updatedChecklists);
+                        setSelectedTask(prev => ({
+                            ...prev,
+                            checklists: updatedChecklists
+                        }));
+                    }}
                 />
             </div>
         </AuthenticatedLayout>

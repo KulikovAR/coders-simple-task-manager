@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\VerifyEmailNotification;
+use App\Models\UserXmlApiSettings;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -124,6 +125,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscriptionLimit(): HasOne
     {
         return $this->hasOne(SubscriptionUserLimit::class);
+    }
+
+    public function xmlApiSettings(): HasOne
+    {
+        return $this->hasOne(UserXmlApiSettings::class);
     }
 
     public function getRemainingAiRequests(): int
