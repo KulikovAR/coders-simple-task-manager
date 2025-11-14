@@ -65,7 +65,7 @@ class TaskController extends Controller
         }
 
         // Убеждаемся, что задачи загружены с полной информацией о статусах
-        $tasks->load(['status:id,name,color,project_id,sprint_id', 'project', 'assignees', 'assignee', 'reporter', 'sprint']);
+        $tasks->load(['status:id,name,color,project_id,sprint_id', 'project', 'assignee', 'reporter', 'sprint']);
 
         return Inertia::render('Tasks/Index', compact('tasks', 'projects', 'users', 'taskStatuses', 'sprints', 'filters'));
     }
@@ -128,12 +128,14 @@ class TaskController extends Controller
             }
         }
 
-        $task->load(['assignees', 'assignee', 'project.users', 'checklists']);
+        $task->load(['assignee', 'project.users', 'checklists']);
 
         $this->notificationService->taskCreated($task, Auth::user());
 
-        // Уведомляем всех ассайнов о назначении
-        $this->notificationService->taskAssigned($task, Auth::user());
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $assignee = $task->assignee;
+            $this->notificationService->taskAssigned($task, $assignee, Auth::user());
+        }
 
 
         // Проверяем, это Inertia запрос или обычный
@@ -157,7 +159,7 @@ class TaskController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Задача успешно создана.',
-                'task' => $task->load(['assignees', 'assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
+                'task' => $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
             ]);
         }
 
@@ -180,7 +182,7 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'assignees', 'reporter', 'comments.user', 'checklists']);
+        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user', 'checklists']);
 
         // Если это AJAX запрос из модалки доски, возвращаем JSON
         if ($request->header('X-Requested-With') === 'XMLHttpRequest' && $request->has('modal')) {
@@ -228,22 +230,19 @@ class TaskController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $task->load(['assignees', 'assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'checklists']);
+        $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'checklists']);
 
-        // $oldAssigneeId = $task->assignee_id;
-        $oldAssigneeIds = $task->assignees->pluck('id')->toArray();
+        $oldAssigneeId = $task->assignee_id;
 
         $task = $this->taskService->updateTask($task, $request->validated());
 
-        $newAssigneeIds = $task->assignees->pluck('id')->toArray();
-
-        $addedAssignees = $task->assignees->filter(fn($a) => !in_array($a->id, $oldAssigneeIds));
-
-        // Отправляем уведомления новым участникам
-        $this->notificationService->taskAssigned($task, Auth::user(), $addedAssignees->all());
-
-        // Если обновился статус/приоритет и есть ассайны, уведомляем всех
-        $this->notificationService->taskUpdated($task, Auth::user());
+        if ($task->assignee_id && $task->assignee_id != $oldAssigneeId) {
+            $assignee = $task->assignee;
+            $this->notificationService->taskAssigned($task, $assignee, Auth::user());
+        }
+        elseif ($oldAssigneeId === $task->assignee_id && $task->assignee_id) {
+            $this->notificationService->taskUpdated($task, Auth::user());
+        }
 
 
         // TODO ту мач условий
@@ -269,7 +268,7 @@ class TaskController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Задача успешно обновлена.',
-                'task' => $task->load(['assignees', 'assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
+                'task' => $task->load(['assignee', 'project', 'status:id,name,color,project_id,sprint_id', 'sprint'])
             ]);
         }
 
@@ -325,7 +324,7 @@ class TaskController extends Controller
         ]);
 
         // Загружаем связанные данные
-        $task->load(['status:id,name,color,project_id,sprint_id', 'assignees', 'assignee', 'reporter', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'project']);
 
         $oldStatus = $task->status->name;
         $newStatus = TaskStatus::findOrFail($request->status_id);
@@ -354,7 +353,7 @@ class TaskController extends Controller
             'priority' => 'required|in:low,medium,high',
         ]);
 
-        $task->load(['status:id,name,color,project_id,sprint_id','assignees', 'assignee', 'reporter', 'project']);
+        $task->load(['status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'project']);
 
         $oldPriority = $task->priority;
         $newPriority = $request->priority;
@@ -530,7 +529,7 @@ class TaskController extends Controller
         $members = collect([$project->owner])->merge($project->users)->unique('id')->values();
 
         // Загружаем полную информацию о задаче
-        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignees', 'assignee', 'reporter', 'comments.user', 'checklists']);
+        $task->load(['project.users', 'project.owner', 'sprint', 'status:id,name,color,project_id,sprint_id', 'assignee', 'reporter', 'comments.user', 'checklists']);
 
         // Формируем ссылку на доску проекта с фильтрацией по спринту
         $boardUrl = BoardUrlHelper::getBoardUrlFromTask($task);

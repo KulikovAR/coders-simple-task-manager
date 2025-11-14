@@ -78,7 +78,6 @@ const [hasChanges, setHasChanges] = useState(false);
         project_id: task?.project_id || '',
         sprint_id: task?.sprint_id || '',
         assignee_id: task?.assignee_id || '',
-        assignee_ids: task?.assignees?.map(a => a.id) || [],
         deadline: task?.deadline ? task.deadline.split('T')[0] : '',
         result: task?.result || '',
         merge_request: task?.merge_request || '',
@@ -418,7 +417,6 @@ const [hasChanges, setHasChanges] = useState(false);
             // Передаем данные формы вместе с чек-листами
             const formData = {
                 ...data,
-                assignee_ids: data.assignee_ids,
                 checklists: JSON.stringify(checklistData)
             };
             console.log('Sending task data:', formData); 
@@ -500,17 +498,8 @@ const [hasChanges, setHasChanges] = useState(false);
                 ) : type === 'select' ? (
                     <select
                         id={fieldName}
-                        value={data[fieldName]} // если multiple, это массив
-                        onChange={(e) => {
-                            if (options.multiple) {
-                                // преобразуем выбранные опции в массив чисел
-                                const selected = Array.from(e.target.selectedOptions).map(o => Number(o.value));
-                                setDataWithAutoSave(fieldName, selected);
-                            } else {
-                                setDataWithAutoSave(fieldName, e.target.value);
-                            }
-                        }}
-                        multiple={options.multiple} // добавляем атрибут multiple
+                        value={data[fieldName]}
+                        onChange={(e) => setDataWithAutoSave(fieldName, e.target.value)}
                         className={`${modalStyles.select} ${
                             hasError ? 'border-accent-red focus:ring-accent-red' : ''
                         }`}
@@ -665,21 +654,18 @@ const [hasChanges, setHasChanges] = useState(false);
                                         {/* Исполнитель */}
                                         <div>
                                             <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
-                                                Исполнители
+                                                Исполнитель
                                             </label>
                                             <select
-                                                multiple
-                                                value={data.assignee_ids}
-                                                onChange={(e) => {
-                                                    const selected = Array.from(e.target.selectedOptions).map(o => Number(o.value));
-                                                    setDataWithAutoSave('assignee_ids', selected);
-                                                }}
+                                                value={data.assignee_id}
+                                                onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
                                                 className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                             >
+                                                <option value="">Не назначен</option>
                                                 {availableMembers.map((user) => (
-                                                <option key={user.id} value={user.id}>
-                                                    {user.name}
-                                                </option>
+                                                    <option key={user.id} value={user.id}>
+                                                        {user.name}
+                                                    </option>
                                                 ))}
                                             </select>
                                         </div>
@@ -1020,21 +1006,18 @@ const [hasChanges, setHasChanges] = useState(false);
                                     {/* Исполнитель */}
                                     <div>
                                         <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
-                                            Исполнители
+                                            Исполнитель
                                         </label>
                                         <select
-                                            multiple
-                                            value={data.assignee_ids}
-                                            onChange={(e) => {
-                                                const selected = Array.from(e.target.selectedOptions).map(o => Number(o.value));
-                                                setDataWithAutoSave('assignee_ids', selected);
-                                            }}
+                                            value={data.assignee_id}
+                                            onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
                                             className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                         >
+                                            <option value="">Не назначен</option>
                                             {availableMembers.map((user) => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name}
-                                            </option>
+                                                <option key={user.id} value={user.id}>
+                                                    {user.name}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
@@ -1357,21 +1340,18 @@ const [hasChanges, setHasChanges] = useState(false);
                             {/* Исполнитель */}
                             <div>
                                 <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
-                                    Исполнители
+                                    Исполнитель
                                 </label>
                                 <select
-                                    multiple
-                                    value={data.assignee_ids}
-                                    onChange={(e) => {
-                                        const selected = Array.from(e.target.selectedOptions).map(o => Number(o.value));
-                                        setDataWithAutoSave('assignee_ids', selected);
-                                    }}
+                                    value={data.assignee_id}
+                                    onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
                                     className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                 >
+                                    <option value="">Не назначен</option>
                                     {availableMembers.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name}
-                                    </option>
+                                        <option key={user.id} value={user.id}>
+                                            {user.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -1770,21 +1750,18 @@ const [hasChanges, setHasChanges] = useState(false);
                                 {/* Исполнитель */}
                                 <div>
                                     <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
-                                        Исполнители
+                                        Исполнитель
                                     </label>
                                     <select
-                                        multiple
-                                        value={data.assignee_ids}
-                                        onChange={(e) => {
-                                            const selected = Array.from(e.target.selectedOptions).map(o => Number(o.value));
-                                            setDataWithAutoSave('assignee_ids', selected);
-                                        }}
+                                        value={data.assignee_id}
+                                        onChange={(e) => setDataWithAutoSave('assignee_id', e.target.value)}
                                         className="w-full bg-secondary-bg border border-border-color rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/20 transition-all"
                                     >
+                                        <option value="">Не назначен</option>
                                         {availableMembers.map((user) => (
-                                        <option key={user.id} value={user.id}>
-                                            {user.name}
-                                        </option>
+                                            <option key={user.id} value={user.id}>
+                                                {user.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -2048,10 +2025,10 @@ const [hasChanges, setHasChanges] = useState(false);
                             })}
 
                             {/* Исполнитель */}
-                            {renderField('assignee_ids', 'Исполнители', 'select', {
-                                multiple: true,
+                            {renderField('assignee_id', 'Исполнитель', 'select', {
                                 options: [
-                                    ...availableMembers.map(user => ({
+                                    { value: '', label: 'Не назначен' },
+                                    ...availableMembers.map((user) => ({
                                         value: user.id,
                                         label: `${user.name} ${user.email ? `(${user.email})` : ''}`
                                     }))

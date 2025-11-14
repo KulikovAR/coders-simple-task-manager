@@ -7,7 +7,6 @@ use App\Models\Sprint;
 use App\Rules\ValidTaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
-use Illuminate\Support\Facades\Log;
 
 class TaskRequest extends FormRequest
 {
@@ -24,8 +23,6 @@ class TaskRequest extends FormRequest
             'priority' => 'nullable|in:low,medium,high',
             'sprint_id' => 'nullable|integer',
             'assignee_id' => 'nullable|exists:users,id',
-            'assignee_ids' => 'nullable|array',
-            'assignee_ids.*' => 'integer|exists:users,id',
             'deadline' => 'nullable|date',
             'result' => 'nullable|string|max:65535',
             'merge_request' => 'nullable|url',
@@ -58,8 +55,6 @@ class TaskRequest extends FormRequest
             'project_id.exists' => 'Выбранный проект не существует.',
             'sprint_id.exists' => 'Выбранный спринт не существует.',
             'assignee_id.exists' => 'Выбранный исполнитель не существует.',
-            'assignee_ids.array' => 'Список исполнителей должен быть массивом',
-            'assignee_ids.*.exists' => 'Некоторые исполнители не существуют',
             'deadline.date' => 'Дедлайн должен быть корректной датой.',
             'merge_request.url' => 'Ссылка на merge request должна быть корректным URL.',
             'description.max' => 'слишком много символов',
@@ -107,34 +102,5 @@ class TaskRequest extends FormRequest
                 }
             }
         });
-    }
-
-    protected function prepareForValidation(): void
-    {
-        // Логируем как данные приходят "в сыром виде"
-        Log::info('TaskRequest raw input', [
-            'assignee_ids' => $this->input('assignee_ids'),
-            'all' => $this->all(),
-        ]);
-
-        // Приводим к массиву
-        if ($this->has('assignee_ids') && !is_array($this->assignee_ids)) {
-            $value = $this->assignee_ids;
-
-            if (is_string($value)) {
-                $value = preg_match('/^\[.*\]$/', $value)
-                    ? json_decode($value, true)
-                    : explode(',', $value);
-            }
-
-            $this->merge([
-                'assignee_ids' => is_array($value) ? $value : [],
-            ]);
-        }
-
-        // Логируем после преобразования
-        Log::info('TaskRequest normalized', [
-            'assignee_ids' => $this->assignee_ids,
-        ]);
     }
 }

@@ -244,37 +244,22 @@ export default function Show({ auth, task, boardUrl }) {
                                     </div>
                                 )}
 
-                                {/* Исполнители */}
-                                {task.assignees && task.assignees.length > 0 && (
-                                    <div className="flex justify-between items-start gap-4">
-                                        {/* Лейбл слева */}
-                                        <span className="text-sm text-text-muted flex-shrink-0">Исполнители:</span>
-
-                                        {/* Колонка исполнителей справа */}
-                                        <div className="flex flex-col gap-2">
-                                            {task.assignees.map((user) => (
-                                                <div key={user.id} className="flex items-center gap-2">
-                                                    {/* Аватар */}
-                                                    {user.avatar ? (
-                                                        <img
-                                                            src={user.avatar_url}
-                                                            alt="avatar"
-                                                            className="w-7 h-7 rounded-full object-cover border border-border-color"
-                                                        />
-                                                    ) : (
-                                                        <span className="w-7 h-7 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center border border-border-color">
-                                                            {user.name.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    )}
-                                                    {/* Имя и почта — прилипают к аватару */}
-                                                    <div className="flex flex-col text-sm text-text-primary">
-                                                        <span className="font-medium">{user.name}</span>
-                                                        {user.email && (
-                                                            <span className="text-xs text-text-muted">{user.email}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
+                                {/* Исполнитель */}
+                                {task.assignee && (
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                                        <span className="text-sm text-text-muted">Исполнитель:</span>
+                                        <div className="flex items-center gap-2 text-right sm:text-left">
+                                            {task.assignee.avatar ? (
+                                                <img src={task.assignee.avatar_url} alt="avatar" className="w-7 h-7 rounded-full object-cover border border-border-color" />
+                                            ) : (
+                                                <span className="w-7 h-7 rounded-full bg-accent-blue/20 text-accent-blue text-xs font-bold flex items-center justify-center border border-border-color">
+                                                    {task.assignee.name.charAt(0).toUpperCase()}
+                                                </span>
+                                            )}
+                                            <span className="block text-sm text-text-primary font-medium break-all sm:break-normal">{task.assignee.name}</span>
+                                            {task.assignee.email && (
+                                                <span className="block text-xs text-text-muted break-all sm:break-normal">{task.assignee.email}</span>
+                                            )}
                                         </div>
                                     </div>
                                 )}

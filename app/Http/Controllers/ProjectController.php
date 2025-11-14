@@ -90,7 +90,7 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['owner', 'tasks.assignees', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.project', 'taskStatuses', 'members.user']);
+        $project->load(['owner', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.project', 'taskStatuses', 'members.user']);
         
         // Проверяем, может ли пользователь добавить еще участников
         $currentMembersCount = $project->members()->count() + 1; // +1 для владельца
@@ -111,7 +111,7 @@ class ProjectController extends Controller
             abort(403, 'Доступ запрещен');
         }
 
-        $project->load(['tasks.assignees', 'tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
+        $project->load(['tasks.assignee', 'tasks.reporter', 'tasks.status:id,name,color,project_id,sprint_id', 'tasks.sprint', 'tasks.project', 'owner', 'users']);
 
         $sprints = $project->sprints()->orderBy('start_date', 'desc')->get();
         $activeSprint = $sprints->where('status', 'active')->first();

@@ -30,27 +30,25 @@ class NotificationService
     /**
      * Создать уведомление о назначении задачи
      */
-    public function taskAssigned(Task $task, ?User $fromUser = null, ?array $assignees = null): void
+    public function taskAssigned(Task $task, User $assignee, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $task->load(['project', 'assignees']);
-
-        $targets = $assignees ?? $task->assignees;
-
-        foreach ($targets as $assignee) {
-            if ($assignee->id !== $fromUserId) {
-                $this->createNotification(
-                    type: Notification::TYPE_TASK_ASSIGNED,
-                    userId: $assignee->id,
-                    fromUserId: $fromUserId,
-                    notifiable: $task,
-                    data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
-                    ]
-                );
-            }
+        if (($task->assignee_id && $task->assignee_id === Auth::id()) ||
+            ($assignee->id === ($fromUser?->id ?? Auth::id()))) {
+            return;
         }
+
+        $task->load(['project']);
+
+        $this->createNotification(
+            type: Notification::TYPE_TASK_ASSIGNED,
+            userId: $assignee->id,
+            fromUserId: $fromUser?->id ?? Auth::id(),
+            notifiable: $task,
+            data: [
+                'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+            ]
+        );
     }
 
     /**
@@ -58,24 +56,36 @@ class NotificationService
      */
     public function taskUpdated(Task $task, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $task->load(['assignees', 'reporter', 'project']);
+        $task->load(['assignee', 'reporter', 'project']);
 
-        $recipientIds = $task->assignees->pluck('id')->merge([$task->reporter_id])->unique();
+        // Не отправлять уведомление, если задача обновляется самим исполнителем
+        // или если обновляющий пользователь и исполнитель - одно лицо
+        if ($task->assignee_id && $task->assignee_id !== Auth::id() &&
+            $task->assignee_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_UPDATED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+                ]
+            );
+        }
 
-        foreach ($recipientIds as $userId) {
-            if ($userId && $userId !== $fromUserId) {
-                $this->createNotification(
-                    type: Notification::TYPE_TASK_UPDATED,
-                    userId: $userId,
-                    fromUserId: $fromUserId,
-                    notifiable: $task,
-                    data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
-                    ]
-                );
-            }
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
+            $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_UPDATED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+                ]
+            );
         }
     }
 
@@ -84,25 +94,38 @@ class NotificationService
      */
     public function taskMoved(Task $task, string $oldStatus, string $newStatus, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $task->load(['assignees', 'reporter', 'project']);
+        $task->load(['assignee', 'reporter', 'project']);
 
-        $recipientIds = $task->assignees->pluck('id')->merge([$task->reporter_id])->unique();
+        // Не отправлять уведомление, если задача перемещается самим исполнителем
+        // или если перемещающий пользователь и исполнитель - одно лицо
+        if ($task->assignee_id && $task->assignee_id !== Auth::id() &&
+            $task->assignee_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_MOVED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'status' => $this->sanitizeUtf8($newStatus),
+                    'old_status' => $this->sanitizeUtf8($oldStatus),
+                ]
+            );
+        }
 
-        foreach ($recipientIds as $userId) {
-            if ($userId && $userId !== $fromUserId) {
-                $this->createNotification(
-                    type: Notification::TYPE_TASK_MOVED,
-                    userId: $userId,
-                    fromUserId: $fromUserId,
-                    notifiable: $task,
-                    data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'status' => $this->sanitizeUtf8($newStatus),
-                        'old_status' => $this->sanitizeUtf8($oldStatus),
-                    ]
-                );
-            }
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
+            $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_MOVED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'status' => $this->sanitizeUtf8($newStatus),
+                    'old_status' => $this->sanitizeUtf8($oldStatus),
+                ]
+            );
         }
     }
 
@@ -111,19 +134,20 @@ class NotificationService
      */
     public function taskCreated(Task $task, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $task->load(['project', 'assignees']);
+        $task->load(['project.users']);
 
-        foreach ($task->assignees as $assignee) {
-            if ($assignee->id !== $fromUserId) {
+        $projectMembers = $task->project->users ?? collect();
+
+        foreach ($projectMembers as $member) {
+            if ($member->id !== Auth::id() && $member->id === $task->assignee_id) {
                 $this->createNotification(
                     type: Notification::TYPE_TASK_CREATED,
-                    userId: $assignee->id,
-                    fromUserId: $fromUserId,
+                    userId: $member->id,
+                    fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $task,
                     data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'project_name' => $this->sanitizeUtf8($task->project?->name ?? 'Неизвестный проект'),
+                        'task_title' => $task->title ?? 'Неизвестная задача',
+                        'project_name' => $task->project?->name ?? 'Неизвестный проект',
                     ]
                 );
             }
@@ -135,25 +159,35 @@ class NotificationService
      */
     public function taskPriorityChanged(Task $task, string $oldPriority, string $newPriority, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $task->load(['assignees', 'reporter', 'project']);
+        $task->load(['assignee', 'reporter', 'project']);
 
-        $recipientIds = $task->assignees->pluck('id')->merge([$task->reporter_id])->unique();
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_PRIORITY_CHANGED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'priority' => $this->sanitizeUtf8($this->translatePriority($newPriority)),
+                    'old_priority' => $this->sanitizeUtf8($this->translatePriority($oldPriority)),
+                ]
+            );
+        }
 
-        foreach ($recipientIds as $userId) {
-            if ($userId && $userId !== $fromUserId) {
-                $this->createNotification(
-                    type: Notification::TYPE_TASK_PRIORITY_CHANGED,
-                    userId: $userId,
-                    fromUserId: $fromUserId,
-                    notifiable: $task,
-                    data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'priority' => $this->sanitizeUtf8($this->translatePriority($newPriority)),
-                        'old_priority' => $this->sanitizeUtf8($this->translatePriority($oldPriority)),
-                    ]
-                );
-            }
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
+            $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_TASK_PRIORITY_CHANGED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $task,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'priority' => $this->sanitizeUtf8($this->translatePriority($newPriority)),
+                    'old_priority' => $this->sanitizeUtf8($this->translatePriority($oldPriority)),
+                ]
+            );
         }
     }
 
@@ -162,26 +196,37 @@ class NotificationService
      */
     public function commentAdded(TaskComment $comment, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
-        $comment->load(['task.assignees', 'task.reporter']);
+        $comment->load(['task.assignee', 'task.reporter']);
 
         $task = $comment->task;
-        $recipientIds = $task->assignees->pluck('id')->merge([$task->reporter_id])->unique();
 
-        foreach ($recipientIds as $userId) {
-            if ($userId && $userId !== $fromUserId) {
-                $this->createNotification(
-                    type: Notification::TYPE_COMMENT_ADDED,
-                    userId: $userId,
-                    fromUserId: $fromUserId,
-                    notifiable: $comment,
-                    data: [
-                        'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
-                        'task_id' => $task->id,
-                        'comment_preview' => $this->createCommentPreview($comment->content),
-                    ]
-                );
-            }
+        if ($task->assignee_id && $task->assignee_id !== Auth::id()) {
+            $this->createNotification(
+                type: Notification::TYPE_COMMENT_ADDED,
+                userId: $task->assignee_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $comment,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'task_id' => $task->id,
+                    'comment_preview' => $this->createCommentPreview($comment->content),
+                ]
+            );
+        }
+
+        if ($task->reporter_id && $task->reporter_id !== $task->assignee_id &&
+            $task->reporter_id !== Auth::id() && $task->reporter_id !== ($fromUser?->id ?? Auth::id())) {
+            $this->createNotification(
+                type: Notification::TYPE_COMMENT_ADDED,
+                userId: $task->reporter_id,
+                fromUserId: $fromUser?->id ?? Auth::id(),
+                notifiable: $comment,
+                data: [
+                    'task_title' => $this->sanitizeUtf8($task->title ?? 'Неизвестная задача'),
+                    'task_id' => $task->id,
+                    'comment_preview' => $this->createCommentPreview($comment->content),
+                ]
+            );
         }
     }
 
@@ -212,15 +257,16 @@ class NotificationService
      */
     public function sprintStarted(Sprint $sprint, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
         $sprint->load(['project.users']);
 
-        foreach ($sprint->project->users ?? collect() as $member) {
-            if ($member->id !== $fromUserId) {
+        $projectMembers = $sprint->project->users ?? collect();
+
+        foreach ($projectMembers as $member) {
+            if ($member->id !== Auth::id()) {
                 $this->createNotification(
                     type: Notification::TYPE_SPRINT_STARTED,
                     userId: $member->id,
-                    fromUserId: $fromUserId,
+                    fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
                     data: [
                         'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
@@ -236,15 +282,16 @@ class NotificationService
      */
     public function sprintEnded(Sprint $sprint, ?User $fromUser = null): void
     {
-        $fromUserId = $fromUser?->id ?? Auth::id();
         $sprint->load(['project.users']);
 
-        foreach ($sprint->project->users ?? collect() as $member) {
-            if ($member->id !== $fromUserId) {
+        $projectMembers = $sprint->project->users ?? collect();
+
+        foreach ($projectMembers as $member) {
+            if ($member->id !== Auth::id()) {
                 $this->createNotification(
                     type: Notification::TYPE_SPRINT_ENDED,
                     userId: $member->id,
-                    fromUserId: $fromUserId,
+                    fromUserId: $fromUser?->id ?? Auth::id(),
                     notifiable: $sprint,
                     data: [
                         'sprint_name' => $this->sanitizeUtf8($sprint->name ?? 'Неизвестный спринт'),
@@ -276,10 +323,10 @@ class NotificationService
      */
     public function deadlineApproaching(Task $task): void
     {
-        foreach ($task->assignees ?? collect() as $assignee) {
+        if ($task->assignee_id) {
             $this->createNotification(
                 type: Notification::TYPE_DEADLINE_APPROACHING,
-                userId: $assignee->id,
+                userId: $task->assignee_id,
                 fromUserId: null,
                 notifiable: $task,
                 data: [
@@ -295,10 +342,10 @@ class NotificationService
      */
     public function deadlineOverdue(Task $task): void
     {
-        foreach ($task->assignees ?? collect() as $assignee) {
+        if ($task->assignee_id) {
             $this->createNotification(
                 type: Notification::TYPE_DEADLINE_OVERDUE,
-                userId: $assignee->id,
+                userId: $task->assignee_id,
                 fromUserId: null,
                 notifiable: $task,
                 data: [
@@ -314,10 +361,10 @@ class NotificationService
      */
     public function deadlineApproachingWithCustomMessage(Task $task, string $customMessage): void
     {
-        foreach ($task->assignees ?? collect() as $assignee) {
+        if ($task->assignee_id) {
             $this->createNotification(
                 type: Notification::TYPE_DEADLINE_APPROACHING,
-                userId: $assignee->id,
+                userId: $task->assignee_id,
                 fromUserId: null,
                 notifiable: $task,
                 data: [
