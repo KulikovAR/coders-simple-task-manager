@@ -295,19 +295,19 @@ class SeoHtmlReportService
             </div>
             <div class="meta-item">
                 <div class="meta-label">Топ-3 позиции</div>
-                <div class="meta-value">' . ($stats['position_distribution']['top_3'] ?? 0) . '</div>
+                <div class="meta-value">' . ($stats['position_ranges']['1_3'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Позиции 4-10</div>
-                <div class="meta-value">' . ($stats['position_distribution']['top_10'] ?? 0) . '</div>
+                <div class="meta-value">' . ($stats['position_ranges']['4_10'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
-                <div class="meta-label">Позиции 11-20</div>
-                <div class="meta-value">' . ($stats['position_distribution']['top_20'] ?? 0) . '</div>
+                <div class="meta-label">Позиции 11-30</div>
+                <div class="meta-value">' . ($stats['position_ranges']['11_30'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Не найдено</div>
-                <div class="meta-value">' . ($stats['position_distribution']['not_found'] ?? 0) . '</div>
+                <div class="meta-value">' . ($stats['position_ranges']['not_found'] ?? 0) . '</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">Видимость</div>
@@ -401,13 +401,13 @@ class SeoHtmlReportService
         new Chart(ctx1, {
             type: "doughnut",
             data: {
-                labels: ["Топ-3", "4-10", "11-20", "Не найдено"],
+                labels: ["Топ-3", "4-10", "11-30", "Не найдено"],
                 datasets: [{
                     data: [
-                        statsData.position_distribution?.top_3 || 0,
-                        statsData.position_distribution?.top_10 || 0,
-                        statsData.position_distribution?.top_20 || 0,
-                        statsData.position_distribution?.not_found || 0
+                        (statsData.position_ranges && statsData.position_ranges["1_3"]) || 0,
+                        (statsData.position_ranges && statsData.position_ranges["4_10"]) || 0,
+                        (statsData.position_ranges && statsData.position_ranges["11_30"]) || 0,
+                        (statsData.position_ranges && statsData.position_ranges.not_found) || 0
                     ],
                     backgroundColor: ["#2d5a2d", "#8b5a00", "#8b0000", "#666666"],
                     borderWidth: 0,

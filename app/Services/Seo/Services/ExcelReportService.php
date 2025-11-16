@@ -202,10 +202,10 @@ class ExcelReportService
     {
         $sheet->setCellValue('A6', 'Статистика:');
         $sheet->setCellValue('A7', 'Ключевых слов: ' . ($statistics['keywords_count'] ?? 0));
-        $sheet->setCellValue('A8', 'Топ-3 позиции: ' . ($statistics['position_distribution']['top_3'] ?? 0));
-        $sheet->setCellValue('A9', 'Позиции 4-10: ' . ($statistics['position_distribution']['top_10'] ?? 0));
-        $sheet->setCellValue('A10', 'Позиции 11-20: ' . ($statistics['position_distribution']['top_20'] ?? 0));
-        $sheet->setCellValue('A11', 'Не найдено: ' . ($statistics['position_distribution']['not_found'] ?? 0));
+        $sheet->setCellValue('A8', 'Топ-3 позиции: ' . ($statistics['position_ranges']['1_3'] ?? 0));
+        $sheet->setCellValue('A9', 'Позиции 4-10: ' . ($statistics['position_ranges']['4_10'] ?? 0));
+        $sheet->setCellValue('A10', 'Позиции 11-30: ' . ($statistics['position_ranges']['11_30'] ?? 0));
+        $sheet->setCellValue('A11', 'Не найдено: ' . ($statistics['position_ranges']['not_found'] ?? 0));
         $sheet->setCellValue('A12', 'Видимость: ' . ($statistics['visible'] ?? 0));
 
         $sheet->getStyle('A6')->getFont()->setBold(true);
