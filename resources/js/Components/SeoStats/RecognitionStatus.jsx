@@ -53,6 +53,14 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
 
     if (recognitionStatus.status === 'pending' || recognitionStatus.status === 'processing' || 
         wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing') {
+        const activeStatus = wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' 
+            ? wordstatStatus 
+            : recognitionStatus;
+        const progressPercentage = activeStatus.progressPercentage || 0;
+        const title = wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' 
+            ? 'Парсинг Wordstat' 
+            : 'Снятие позиций';
+        
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
                 <div className="relative">
@@ -64,12 +72,30 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
                     </div>
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">
-                    {wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' 
-                        ? 'Парсинг Wordstat' 
-                        : 'Снятие позиций'
-                    }
+                    {title}
                 </h3>
-                <p className="text-text-muted">Пожалуйста, подождите...</p>
+                {progressPercentage > 0 && (
+                    <div className="mt-4 space-y-2">
+                        <div className="flex items-center justify-between text-sm text-text-muted mb-1">
+                            <span>Прогресс</span>
+                            <span className="font-medium text-text-primary">{progressPercentage}%</span>
+                        </div>
+                        <div className="w-full bg-secondary-bg rounded-full h-2 overflow-hidden">
+                            <div 
+                                className="h-2 bg-accent-blue rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${progressPercentage}%` }}
+                            />
+                        </div>
+                        {activeStatus.totalKeywords > 0 && (
+                            <p className="text-xs text-text-muted mt-1">
+                                Обработано: {activeStatus.processedKeywords || 0} из {activeStatus.totalKeywords}
+                            </p>
+                        )}
+                    </div>
+                )}
+                {progressPercentage === 0 && (
+                    <p className="text-text-muted">Пожалуйста, подождите...</p>
+                )}
             </div>
         );
     }

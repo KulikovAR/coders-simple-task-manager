@@ -68,8 +68,15 @@ class TrackingCompletionService
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
             $updateData['completed_at'] = now();
-        } elseif (isset($message['percent'])) {
-            $updateData['progress_percent'] = $message['percent'];
+        } elseif ($status === 'running' || isset($message['percent'])) {
+            // Обновляем статус на processing, если задача еще не завершена
+            if ($task->status !== 'completed' && $task->status !== 'failed') {
+                $updateData['status'] = 'processing';
+            }
+            // Обновляем проценты, если они есть в сообщении
+            if (isset($message['percent'])) {
+                $updateData['progress_percent'] = $message['percent'];
+            }
         } else {
             Log::info('Received unknown status for SEO task', [
                 'task_id' => $task->id,
@@ -85,6 +92,7 @@ class TrackingCompletionService
             'task_id' => $task->id,
             'external_task_id' => $task->external_task_id,
             'status' => $status,
+            'progress_percent' => $updateData['progress_percent'] ?? $task->progress_percent,
             'site_id' => $task->site_id
         ]);
     }
@@ -102,8 +110,15 @@ class TrackingCompletionService
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
             $updateData['completed_at'] = now();
-        } elseif (isset($message['percent'])) {
-            $updateData['progress_percent'] = $message['percent'];
+        } elseif ($status === 'running' || isset($message['percent'])) {
+            // Обновляем статус на processing, если задача еще не завершена
+            if ($task->status !== 'completed' && $task->status !== 'failed') {
+                $updateData['status'] = 'processing';
+            }
+            // Обновляем проценты, если они есть в сообщении
+            if (isset($message['percent'])) {
+                $updateData['progress_percent'] = $message['percent'];
+            }
         } else {
             Log::info('Received unknown status for Wordstat task', [
                 'task_id' => $task->id,
@@ -119,6 +134,7 @@ class TrackingCompletionService
             'task_id' => $task->id,
             'external_task_id' => $task->external_task_id,
             'status' => $status,
+            'progress_percent' => $updateData['progress_percent'] ?? $task->progress_percent,
             'site_id' => $task->site_id
         ]);
     }
