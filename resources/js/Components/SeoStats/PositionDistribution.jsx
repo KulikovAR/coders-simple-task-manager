@@ -19,32 +19,32 @@ export default function PositionDistribution({ positions = [], filters = {}, sta
         if (statistics.position_ranges) {
             console.log('Position distribution from microservice:', statistics);
             
-            const total = statistics.total_positions || 0;
+            const total = Number(statistics.total_positions || 0);
             
             return ranges.map(range => {
                 let count = 0;
                 
                 switch (range.label) {
                     case 'Не найдено':
-                        count = statistics.position_distribution?.not_found || 0;
+                        count = Number(statistics.position_ranges?.not_found || 0);
                         break;
                     case '1-3':
-                        count = statistics.position_ranges['1_3'] || 0;
+                        count = Number(statistics.position_ranges['1_3'] || 0);
                         break;
                     case '4-10':
-                        count = statistics.position_ranges['4_10'] || 0;
+                        count = Number(statistics.position_ranges['4_10'] || 0);
                         break;
                     case '11-30':
-                        count = statistics.position_ranges['11_30'] || 0;
+                        count = Number(statistics.position_ranges['11_30'] || 0);
                         break;
                     case '31-50':
-                        count = statistics.position_ranges['31_50'] || 0;
+                        count = Number(statistics.position_ranges['31_50'] || 0);
                         break;
                     case '51-100':
-                        count = statistics.position_ranges['51_100'] || 0;
+                        count = Number(statistics.position_ranges['51_100'] || 0);
                         break;
                     case '100+':
-                        count = statistics.position_ranges['100_plus'] || 0;
+                        count = Number(statistics.position_ranges['100_plus'] || 0);
                         break;
                 }
                 
