@@ -21,14 +21,19 @@ export default function StatsSection({ keywords = [], positions = [], statistics
             console.log('Statistics from microservice:', statistics);
             console.log('Position ranges:', statistics.position_ranges);
             
-            var top_3 = (statistics.position_ranges?.['1_3'] || 0) 
-            var top_4_10 = (statistics.position_ranges?.['4_10'] || 0)  
-            var top_11_plus = (statistics.position_ranges?.['11_30'] || 0) + (statistics.position_ranges?.['31_50'] || 0) + (statistics.position_ranges?.['51_100'] || 0) + (statistics.position_ranges?.['100_plus'] || 0)
+            // Преобразуем значения в числа для корректной работы
+            var top_3 = Number(statistics.position_ranges?.['1_3'] || 0);
+            var top_4_10 = Number(statistics.position_ranges?.['4_10'] || 0);
+            var top_11_plus = Number(statistics.position_ranges?.['11_30'] || 0) + 
+                             Number(statistics.position_ranges?.['31_50'] || 0) + 
+                             Number(statistics.position_ranges?.['51_100'] || 0) + 
+                             Number(statistics.position_ranges?.['100_plus'] || 0);
+            var not_found = Number(statistics.position_ranges?.not_found || 0);
 
-            return [
+            const result = [
                 {
                     label: 'Не найдено',
-                    value: statistics.position_ranges?.not_found || 0,
+                    value: not_found,
                     color: '#6B7280'
                 },
                 {
@@ -47,6 +52,11 @@ export default function StatsSection({ keywords = [], positions = [], statistics
                     color: '#EF4444'
                 }
             ];
+
+            console.log('PieChart data:', result);
+            console.log('Total:', result.reduce((sum, item) => sum + item.value, 0));
+
+            return result;
         }
 
         let filteredPositions = [];
