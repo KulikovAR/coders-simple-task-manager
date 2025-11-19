@@ -21,12 +21,14 @@ class SeoRecognitionTask extends Model
         'external_task_id',
         'started_at',
         'completed_at',
+        'engine_states',
     ];
 
     protected $casts = [
         'search_engines' => 'array',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'engine_states' => 'array',
     ];
 
     public function user()
