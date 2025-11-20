@@ -36,19 +36,6 @@ class SeoRecognitionTask extends Model
         return $this->belongsTo(User::class);
     }
 
-    // public function getProgressPercentageAttribute(): int
-    // {
-    //     if (isset($this->progress_percent) && $this->progress_percent > 0) {
-    //         return $this->progress_percent;
-    //     }
-        
-    //     if ($this->total_keywords === 0) {
-    //         return 0;
-    //     }
-        
-    //     return (int) round(($this->processed_keywords / $this->total_keywords) * 100);
-    // }
-
     public function isActive(): bool
     {
         return in_array($this->status, ['pending', 'processing']);
@@ -62,5 +49,33 @@ class SeoRecognitionTask extends Model
     public function isFailed(): bool
     {
         return $this->status === 'failed';
+    }
+
+    public function getExternalJobIds(): array
+    {
+        if (!empty($this->external_task_id)) {
+            return array_values(array_filter(array_map('trim', explode(',', $this->external_task_id))));
+        }
+        return [];
+    }
+
+    public function getEngineStates(): array
+    {
+        if (is_array($this->engine_states)) {
+            return $this->engine_states;
+        }
+
+        return [];
+    }
+
+    public function initEngineStates(array $jobs): void
+    {
+        $engineStates = $this->getEngineStates();
+        foreach ($jobs as $id) {
+            if (!isset($engineStates[$id])) {
+                $engineStates[$id] = ['percent' => 0, 'status' => 'processing'];
+            }
+        }
+        $this->engine_states = $engineStates;
     }
 }
