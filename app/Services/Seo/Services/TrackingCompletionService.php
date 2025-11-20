@@ -160,9 +160,9 @@ class TrackingCompletionService
 
     /**
      * @param mixed $taskId
-     * @return SeoRecognitionTask
+     * @return ?SeoRecognitionTask
      */
-    private function findSearchTask(mixed $taskId): SeoRecognitionTask
+    private function findSearchTask(mixed $taskId): ?SeoRecognitionTask
     {
         $seoTask = SeoRecognitionTask::where('external_task_id', $taskId)->first();
 
@@ -175,9 +175,9 @@ class TrackingCompletionService
 
     /**
      * @param mixed $taskId
-     * @return WordstatRecognitionTask
+     * @return ?WordstatRecognitionTask
      */
-    private function findWordstatTask(mixed $taskId): WordstatRecognitionTask
+    private function findWordstatTask(mixed $taskId): ?WordstatRecognitionTask
     {
         $wordstatTask = WordstatRecognitionTask::where('external_task_id', $taskId)->first();
 
