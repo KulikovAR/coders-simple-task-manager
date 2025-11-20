@@ -370,12 +370,12 @@ export default function SeoReports({
                     </div>
 
                     {/* Статус распознавания */}
-                    <RecognitionStatus 
+                    {/* <RecognitionStatus 
                         siteId={project.id} 
                         onComplete={handleRefreshData}
                         initialData={activeTask}
                         wordstatEnabled={project.wordstat_enabled}
-                    />
+                    /> */}
 
                     {/* Статистика позиций */}
                     <StatsSection 

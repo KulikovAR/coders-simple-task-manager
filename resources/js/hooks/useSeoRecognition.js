@@ -6,7 +6,7 @@ export function useSeoRecognition(siteId, initialData = null) {
             return {
                 status: initialData.status,
                 taskId: initialData.task_id,
-                progressPercentage: initialData.progress_percentage || 0,
+                progressPercentage: initialData.progress_percent || 0,
                 totalKeywords: initialData.total_keywords || 0,
                 processedKeywords: initialData.processed_keywords || 0,
                 errorMessage: initialData.error_message,
@@ -44,7 +44,16 @@ export function useSeoRecognition(siteId, initialData = null) {
                 const data = await response.json();
                 const previousStatus = previousStatusRef.current;
                 
-                setRecognitionStatus(data);
+                setRecognitionStatus({
+                    status: data.status,
+                    taskId: data.task_id,
+                    progressPercentage: data.progress_percent || 0,
+                    totalKeywords: data.total_keywords || 0,
+                    processedKeywords: data.processed_keywords || 0,
+                    errorMessage: data.error_message,
+                    startedAt: data.started_at,
+                    completedAt: data.completed_at,
+                });
                 
                 if (data.status === 'none' || data.status === 'completed' || data.status === 'failed') {
                     setIsPolling(false);

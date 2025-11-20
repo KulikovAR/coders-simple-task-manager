@@ -36,18 +36,18 @@ class SeoRecognitionTask extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getProgressPercentageAttribute(): int
-    {
-        if (isset($this->progress_percent) && $this->progress_percent > 0) {
-            return $this->progress_percent;
-        }
+    // public function getProgressPercentageAttribute(): int
+    // {
+    //     if (isset($this->progress_percent) && $this->progress_percent > 0) {
+    //         return $this->progress_percent;
+    //     }
         
-        if ($this->total_keywords === 0) {
-            return 0;
-        }
+    //     if ($this->total_keywords === 0) {
+    //         return 0;
+    //     }
         
-        return (int) round(($this->processed_keywords / $this->total_keywords) * 100);
-    }
+    //     return (int) round(($this->processed_keywords / $this->total_keywords) * 100);
+    // }
 
     public function isActive(): bool
     {

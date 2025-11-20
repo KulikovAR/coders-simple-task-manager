@@ -57,9 +57,7 @@ export default function RecognitionStatus({ siteId, onComplete, initialData = nu
             ? wordstatStatus 
             : recognitionStatus;
         const progressPercentage = activeStatus.progressPercentage || 0;
-        const title = wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' 
-            ? 'Парсинг Wordstat' 
-            : 'Снятие позиций';
+        const title = `${progressPercentage}%`;
         
         return (
             <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center mb-6">
