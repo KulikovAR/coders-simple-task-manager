@@ -70,10 +70,12 @@ class SeoRecognitionTask extends Model
 
     public function initEngineStates(array $jobs): void
     {
+        $engineStates = $this->getEngineStates();
         foreach ($jobs as $id) {
             if (!isset($engineStates[$id])) {
                 $engineStates[$id] = ['percent' => 0, 'status' => 'processing'];
             }
         }
+        $this->engine_states = $engineStates;
     }
 }

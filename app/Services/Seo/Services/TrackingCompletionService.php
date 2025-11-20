@@ -54,13 +54,13 @@ class TrackingCompletionService
         $percent = (int)($message['percent'] ?? null);
         $normalizedStatus = $this->normalizeStatus($status);
         $jobs = $task->getExternalJobIds();
-        $engineStates = $task->getEngineStates();
 
         $task->initEngineStates($jobs);
+        $engineStates = $task->getEngineStates();
 
         if ($jobId) {
             $engineStates[$jobId] = [
-                'percent' => max($engineStates[$jobId]['percent'], $this->clampPercent($percent)),
+                'percent' => max($engineStates[$jobId]['percent'] ?? 0, $this->clampPercent($percent)),
                 'status' => $normalizedStatus
             ];
         }
@@ -68,7 +68,7 @@ class TrackingCompletionService
         $aggregatedPercent = $this->getAggregatedPercent($jobs, $engineStates);
         $allCompleted = $this->isJobsCompleted($jobs, $engineStates);
 
-        $updateData = ['engine_states' => json_encode($engineStates, JSON_THROW_ON_ERROR)];
+        $updateData = ['engine_states' => $engineStates];
 
         if ($normalizedStatus === 'failed') {
             $updateData['status'] = 'failed';
