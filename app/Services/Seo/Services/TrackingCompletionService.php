@@ -5,15 +5,19 @@ namespace App\Services\Seo\Services;
 use App\Models\SeoRecognitionTask;
 use App\Models\WordstatRecognitionTask;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class TrackingCompletionService
 {
+    // TTL для кеша отложенных сообщений (в секундах)
+    private const PENDING_MESSAGE_TTL = 3600; // 1 час
+
     public function handleTrackingCompletion(array $message): void
     {
         try {
             $taskId = $message['job_id'] ?? $message['task_id'] ?? null;
             $status = $message['status'] ?? null;
-            
+
             if (!$taskId) {
                 Log::warning('Received tracking completion message without job_id or task_id', [
                     'message' => $message
@@ -23,12 +27,14 @@ class TrackingCompletionService
 
             Log::info('Processing tracking completion', [
                 'external_task_id' => $taskId,
-                'status' => $status
+                'status' => $status,
             ]);
 
+            // Ищем задачу прямо по полю external_task_id
             $seoTask = SeoRecognitionTask::where('external_task_id', $taskId)->first();
             $wordstatTask = WordstatRecognitionTask::where('external_task_id', $taskId)->first();
 
+            // Если не нашли, пробуем FIND_IN_SET (в случае, когда external_task_id — csv)
             if (!$seoTask) {
                 $seoTask = SeoRecognitionTask::whereRaw("FIND_IN_SET(?, external_task_id)", [$taskId])->first();
             }
@@ -37,16 +43,21 @@ class TrackingCompletionService
             }
 
             if ($seoTask) {
+                // Если есть отложенные сообщения для job-идентификаторов этой задачи — применяем их сначала
+                $this->processPendingMessagesForTask($seoTask);
+
+                // Теперь обработаем текущее сообщение
                 $this->updateSeoTask($seoTask, $status, $message);
             } elseif ($wordstatTask) {
                 $this->updateWordstatTask($wordstatTask, $status, $message);
             } else {
-                Log::warning('No task found for external_task_id', [
+                // Если не нашли — кешируем сообщение чтобы применить его, когда задача появится
+                $this->cachePendingMessage($taskId, $message);
+                Log::warning('No task found for external_task_id (cached message)', [
                     'external_task_id' => $taskId,
                     'message' => $message
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('Failed to process tracking completion', [
                 'message' => $message,
@@ -55,7 +66,98 @@ class TrackingCompletionService
         }
     }
 
-    private function updateSeoTask(SeoRecognitionTask $task, string $status, array $message): void
+    /**
+     * Обработка и применение отложенных сообщений для уже сохранённой задачи.
+     * Берём все job_id из external_task_id и ищем в кеше соответствующие сообщения.
+     */
+    private function processPendingMessagesForTask(SeoRecognitionTask $task): void
+    {
+        if (empty($task->external_task_id)) {
+            return;
+        }
+
+        $allJobIds = array_values(array_filter(array_map('trim', explode(',', $task->external_task_id))));
+        if (empty($allJobIds)) {
+            return;
+        }
+
+        foreach ($allJobIds as $jid) {
+            $pending = $this->getPendingMessages($jid);
+            if (empty($pending)) {
+                continue;
+            }
+
+            // Применяем сообщения в порядке добавления
+            foreach ($pending as $msg) {
+                try {
+                    // лог: какой job ид и сообщение применяем
+                    Log::info('Applying cached pending message for job', ['job_id' => $jid, 'message' => $msg]);
+
+                    // Обновляем задачу соответствующим сообщением
+                    $this->updateSeoTask($task, $msg['status'] ?? null, $msg);
+                } catch (\Exception $e) {
+                    Log::error('Failed to apply cached pending message', [
+                        'job_id' => $jid,
+                        'error' => $e->getMessage(),
+                        'message' => $msg
+                    ]);
+                }
+            }
+
+            // После применения — удаляем кеш для этого job
+            $this->deletePendingMessages($jid);
+        }
+    }
+
+    /**
+     * Кешируем сообщение, если задача ещё не создана/не привязана.
+     */
+    private function cachePendingMessage(string $jobId, array $message): void
+    {
+        try {
+            $key = $this->pendingKey($jobId);
+            // Получаем существующие, добавляем текущее в конец
+            $arr = Cache::get($key, []);
+            $arr[] = $message;
+            Cache::put($key, $arr, self::PENDING_MESSAGE_TTL);
+            Log::info('Cached pending tracking message', ['job_id' => $jobId, 'key' => $key, 'count' => count($arr)]);
+        } catch (\Exception $e) {
+            Log::error('Failed to cache pending tracking message', [
+                'job_id' => $jobId,
+                'error' => $e->getMessage(),
+                'message' => $message
+            ]);
+        }
+    }
+
+    private function getPendingMessages(string $jobId): array
+    {
+        try {
+            $key = $this->pendingKey($jobId);
+            $arr = Cache::get($key, []);
+            return is_array($arr) ? $arr : [];
+        } catch (\Exception $e) {
+            Log::error('Failed to get pending messages from cache', ['job_id' => $jobId, 'error' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    private function deletePendingMessages(string $jobId): void
+    {
+        try {
+            $key = $this->pendingKey($jobId);
+            Cache::forget($key);
+        } catch (\Exception $e) {
+            Log::error('Failed to delete pending messages from cache', ['job_id' => $jobId, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function pendingKey(string $jobId): string
+    {
+        return "seo:pending_messages:{$jobId}";
+    }
+
+    private function updateSeoTask(SeoRecognitionTask $task, ?string $status, array $message): void
     {
         $jobId = $message['job_id'] ?? $message['task_id'] ?? null;
         $percent = isset($message['percent']) ? (int)$message['percent'] : 0;
@@ -91,17 +193,41 @@ class TrackingCompletionService
 
         // Вычисляем агрегированный прогресс как среднее
         $totalPercent = 0;
-        foreach ($allJobIds as $jid) {
-            $totalPercent += $engineStates[$jid]['percent'] ?? 0;
+        if (!empty($allJobIds)) {
+            foreach ($allJobIds as $jid) {
+                $totalPercent += $engineStates[$jid]['percent'] ?? 0;
+            }
+        } else {
+            // fallback: если нет allJobIds, берём известные состояния (или текущий percent)
+            if (!empty($engineStates)) {
+                foreach ($engineStates as $st) {
+                    $totalPercent += $st['percent'] ?? 0;
+                }
+                $engineCount = max(1, count($engineStates));
+            } else {
+                $totalPercent = $this->clampPercent($percent);
+                $engineCount = 1;
+            }
         }
+
         $aggregated = (int) floor($totalPercent / max(1, $engineCount));
 
         // Статус completed только если все движки завершены
         $allCompleted = true;
-        foreach ($allJobIds as $jid) {
-            if (($engineStates[$jid]['status'] ?? '') !== 'completed') {
-                $allCompleted = false;
-                break;
+        if (!empty($allJobIds)) {
+            foreach ($allJobIds as $jid) {
+                if (($engineStates[$jid]['status'] ?? '') !== 'completed') {
+                    $allCompleted = false;
+                    break;
+                }
+            }
+        } else {
+            // если нет явных job list, проверяем по состояниям
+            foreach ($engineStates as $st) {
+                if (($st['status'] ?? '') !== 'completed') {
+                    $allCompleted = false;
+                    break;
+                }
             }
         }
 
@@ -129,7 +255,7 @@ class TrackingCompletionService
             'site_id' => $task->site_id,
             'external_task_id' => $task->external_task_id,
             'status' => $updateData['status'],
-            'progress_percent' => $updateData['progress_percent'],
+            'progress_percent' => $updateData['progress_percent'] ?? $task->progress_percent,
             'engine_states' => $engineStates,
         ]);
     }
