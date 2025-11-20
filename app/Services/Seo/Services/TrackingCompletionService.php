@@ -142,6 +142,14 @@ class TrackingCompletionService
 
         $task->update($updateData);
 
+        Log::info('SEO task engines state', [
+            'task_id' => $task->id,
+            'external_task_id' => $task->external_task_id,
+            'engine_states' => $engineStates,
+            'aggregated_progress_percent' => $aggregated,
+            'status' => $updateData['status'] ?? $task->status,
+        ]);
+
         Log::info('SEO task updated', [
             'task_id' => $task->id,
             'site_id' => $task->site_id,
