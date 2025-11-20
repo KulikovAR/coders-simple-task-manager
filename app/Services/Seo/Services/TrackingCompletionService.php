@@ -57,23 +57,21 @@ class TrackingCompletionService
 
     private function updateSeoTask(SeoRecognitionTask $task, string $status, array $message): void
     {
-        $updateData = [];
-
         $jobId = $message['job_id'] ?? $message['task_id'] ?? null;
         $percent = isset($message['percent']) ? (int)$message['percent'] : 0;
         $normalizedStatus = $this->normalizeStatus($status);
 
-        // Получаем список всех job_id
+        // Получаем все job_id для текущей задачи
         $allJobIds = !empty($task->external_task_id)
             ? array_values(array_filter(array_map('trim', explode(',', $task->external_task_id))))
             : [];
 
         $engineCount = count($allJobIds) ?: 1;
 
-        // Берем текущее состояние движков из БД или инициализируем
+        // Берём текущее состояние движков или инициализируем пустое
         $engineStates = is_array($task->engine_states) ? $task->engine_states : [];
 
-        // Инициализируем все движки, которых ещё нет в engineStates
+        // Инициализируем движки, которых ещё нет
         foreach ($allJobIds as $jid) {
             if (!isset($engineStates[$jid])) {
                 $engineStates[$jid] = ['percent' => 0, 'status' => 'processing'];
@@ -82,20 +80,23 @@ class TrackingCompletionService
 
         // Обновляем состояние текущего движка
         if ($jobId) {
+            // Никогда не уменьшаем прогресс старше сохранённого
             $engineStates[$jobId] = [
-                'percent' => $this->clampPercent($percent),
-                'status' => $normalizedStatus ?? ($engineStates[$jobId]['status'] ?? 'processing'),
+                'percent' => max($engineStates[$jobId]['percent'] ?? 0, $this->clampPercent($percent)),
+                'status' => $normalizedStatus === 'completed' || $normalizedStatus === 'failed'
+                            ? $normalizedStatus
+                            : ($engineStates[$jobId]['status'] ?? 'processing'),
             ];
         }
 
-        // Вычисляем агрегированный процент
+        // Вычисляем агрегированный прогресс как среднее
         $totalPercent = 0;
         foreach ($allJobIds as $jid) {
             $totalPercent += $engineStates[$jid]['percent'] ?? 0;
         }
         $aggregated = (int) floor($totalPercent / max(1, $engineCount));
 
-        // Статус: completed только если все движки завершены
+        // Статус completed только если все движки завершены
         $allCompleted = true;
         foreach ($allJobIds as $jid) {
             if (($engineStates[$jid]['status'] ?? '') !== 'completed') {
@@ -104,38 +105,32 @@ class TrackingCompletionService
             }
         }
 
+        $updateData = ['engine_states' => $engineStates];
+
         if ($normalizedStatus === 'failed') {
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
             $updateData['completed_at'] = now();
+            $updateData['progress_percent'] = $aggregated;
         } elseif ($allCompleted) {
             $updateData['status'] = 'completed';
-            $updateData['processed_keywords'] = $task->total_keywords;
             $updateData['progress_percent'] = 100;
+            $updateData['processed_keywords'] = $task->total_keywords;
             $updateData['completed_at'] = now();
         } else {
             $updateData['status'] = 'processing';
             $updateData['progress_percent'] = $aggregated;
         }
 
-        $updateData['engine_states'] = $engineStates;
-
         $task->update($updateData);
-
-        Log::info('SEO task engines state', [
-            'task_id' => $task->id,
-            'external_task_id' => $task->external_task_id,
-            'engine_states' => $engineStates,
-            'aggregated_progress_percent' => $updateData['progress_percent'] ?? $task->progress_percent,
-            'status' => $updateData['status'] ?? $task->status,
-        ]);
 
         Log::info('SEO task updated', [
             'task_id' => $task->id,
             'site_id' => $task->site_id,
             'external_task_id' => $task->external_task_id,
-            'status' => $updateData['status'] ?? $task->status,
-            'progress_percent' => $updateData['progress_percent'] ?? $task->progress_percent,
+            'status' => $updateData['status'],
+            'progress_percent' => $updateData['progress_percent'],
+            'engine_states' => $engineStates,
         ]);
     }
 
