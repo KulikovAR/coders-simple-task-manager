@@ -36,14 +36,16 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
     };
 
     if (recognitionStatus.status === 'pending' || recognitionStatus.status === 'processing' || isStarting) {
+        const progress = recognitionStatus.progressPercentage || 0;
+
         return (
             <button
                 disabled
                 className={`${getButtonClasses()} bg-gray-400 text-white cursor-not-allowed`}
-                title="Снятие позиций в процессе..."
+                title={`${progress}%`}
             >
                 <div className={`${getIconSize()} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
-                {isStarting ? 'Запуск...' : (recognitionStatus.status === 'pending' ? 'Ожидание...' : 'Снятие позиций...')}
+                {`${progress}%`}
             </button>
         );
     }

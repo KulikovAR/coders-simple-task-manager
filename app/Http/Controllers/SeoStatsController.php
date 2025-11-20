@@ -517,7 +517,7 @@ class SeoStatsController extends Controller
         return response()->json([
             'status' => $task->status,
             'task_id' => $task->id,
-            'progress_percentage' => $task->progress_percentage,
+            'progress_percent' => $task->progress_percent,
             'total_keywords' => $task->total_keywords,
             'processed_keywords' => $task->processed_keywords,
             'error_message' => $task->error_message,
@@ -665,7 +665,7 @@ class SeoStatsController extends Controller
         return response()->json([
             'status' => $task->status,
             'task_id' => $task->id,
-            'progress_percentage' => $task->progress_percentage,
+            'progress_percent' => $task->progress_percent,
             'total_keywords' => $task->total_keywords,
             'processed_keywords' => $task->processed_keywords,
             'error_message' => $task->error_message,

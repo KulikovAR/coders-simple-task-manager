@@ -36,14 +36,16 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
     };
 
     if (wordstatStatus.status === 'pending' || wordstatStatus.status === 'processing' || isStarting) {
+        const progress = wordstatStatus.progressPercentage || 0;
+
         return (
             <button
                 disabled
                 className={`${getButtonClasses()} bg-gray-400 text-white cursor-not-allowed`}
-                title="Парсинг Wordstat в процессе..."
+                title={`${progress}%`}
             >
                 <div className={`${getIconSize()} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
-                {isStarting ? 'Запуск...' : (wordstatStatus.status === 'pending' ? 'Ожидание...' : 'Парсинг Wordstat...')}
+                {`${progress}%`}
             </button>
         );
     }
