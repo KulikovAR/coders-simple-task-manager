@@ -68,7 +68,7 @@ class TrackingCompletionService
         $aggregatedPercent = $this->getAggregatedPercent($jobs, $engineStates);
         $allCompleted = $this->isJobsCompleted($jobs, $engineStates);
 
-        $updateData = ['engine_states' => $engineStates];
+        $updateData = ['engine_states' => json_encode($engineStates, JSON_THROW_ON_ERROR)];
 
         if ($normalizedStatus === 'failed') {
             $updateData['status'] = 'failed';
