@@ -60,20 +60,27 @@ class TrackingCompletionService
         $updateData = [];
 
         $jobId = $message['job_id'] ?? $message['task_id'] ?? null;
-        $percent = isset($message['percent']) ? (int) $message['percent'] : 0;
+        $percent = isset($message['percent']) ? (int)$message['percent'] : 0;
         $normalizedStatus = $this->normalizeStatus($status);
 
-        // Получаем список всех job_id для текущей задачи
+        // Получаем список всех job_id
         $allJobIds = !empty($task->external_task_id)
             ? array_values(array_filter(array_map('trim', explode(',', $task->external_task_id))))
             : [];
 
-        $engineCount = count($allJobIds) ?: (is_array($task->search_engines) ? count($task->search_engines) : 1);
+        $engineCount = count($allJobIds) ?: 1;
 
-        // Текущее состояние движков
+        // Берем текущее состояние движков из БД или инициализируем
         $engineStates = is_array($task->engine_states) ? $task->engine_states : [];
 
-        // Обновляем состояние конкретного движка
+        // Инициализируем все движки, которых ещё нет в engineStates
+        foreach ($allJobIds as $jid) {
+            if (!isset($engineStates[$jid])) {
+                $engineStates[$jid] = ['percent' => 0, 'status' => 'processing'];
+            }
+        }
+
+        // Обновляем состояние текущего движка
         if ($jobId) {
             $engineStates[$jobId] = [
                 'percent' => $this->clampPercent($percent),
@@ -81,24 +88,22 @@ class TrackingCompletionService
             ];
         }
 
-        // Вычисляем агрегированный прогресс
-        $engineKeys = !empty($allJobIds) ? $allJobIds : array_keys($engineStates);
+        // Вычисляем агрегированный процент
         $totalPercent = 0;
-        foreach ($engineKeys as $jid) {
+        foreach ($allJobIds as $jid) {
             $totalPercent += $engineStates[$jid]['percent'] ?? 0;
         }
         $aggregated = (int) floor($totalPercent / max(1, $engineCount));
 
-        // Проверяем, завершены ли все движки
+        // Статус: completed только если все движки завершены
         $allCompleted = true;
-        foreach ($engineKeys as $jid) {
+        foreach ($allJobIds as $jid) {
             if (($engineStates[$jid]['status'] ?? '') !== 'completed') {
                 $allCompleted = false;
                 break;
             }
         }
 
-        // Определяем статус задачи
         if ($normalizedStatus === 'failed') {
             $updateData['status'] = 'failed';
             $updateData['error_message'] = $message['error'] ?? 'Tracking failed';
@@ -117,7 +122,6 @@ class TrackingCompletionService
 
         $task->update($updateData);
 
-        // Логирование состояния для отладки
         Log::info('SEO task engines state', [
             'task_id' => $task->id,
             'external_task_id' => $task->external_task_id,
