@@ -122,7 +122,7 @@ export default function YandexTargetCard({
                                 )}
                             </div>
                         </div>
-                        <span className="text-sm font-medium text-text-primary">Органическая выдача</span>
+                        <span className="text-sm font-medium text-text-primary">Яндекс Live</span>
                     </label>
                     <p className="text-xs text-text-muted mt-1 ml-7">
                         Если выключено, стоимость рассчитывается как для 1 страницы независимо от лимита позиций

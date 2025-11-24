@@ -71,8 +71,33 @@ export default function ProjectTableRow({
                     )}
                     {project.search_engines?.includes('yandex') && (
                         <div className="flex items-center gap-1">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24">
-                                <path fill="#FF0000" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            <svg
+                                className="w-6 h-6"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <circle cx="12" cy="12" r="8" fill="white" />
+
+                                <g transform="translate(12 12)" fill="none" stroke="#FF0000" strokeWidth="2.5" strokeLinecap="round">
+
+                                    <line 
+                                        x1="0" y1="0"
+                                        x2={5 * Math.cos(-Math.PI/6)} 
+                                        y2={5 * Math.sin(-Math.PI/6)} 
+                                    />
+
+                                    <line 
+                                        x1="0" y1="0"
+                                        x2={5 * Math.cos(Math.PI/2)} 
+                                        y2={5 * Math.sin(Math.PI/2)} 
+                                    />
+
+                                    <line 
+                                        x1="0" y1="0"
+                                        x2={5 * Math.cos(7*Math.PI/6)} 
+                                        y2={5 * Math.sin(7*Math.PI/6)} 
+                                    />
+                                </g>
                             </svg>
                             <span className="text-xs text-text-muted">Yandex</span>
                         </div>
