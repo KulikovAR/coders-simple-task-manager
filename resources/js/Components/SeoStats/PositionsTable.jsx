@@ -321,10 +321,6 @@ export default function PositionsTable({
                             </svg>
                         </div>
 
-                        {/* Экспорт */}
-                        <button className="px-3 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors text-sm font-medium">
-                            Экспорт
-                        </button>
                     </div>
                 </div>
             </div>
