@@ -57,7 +57,7 @@ export default function PieChart({ data = [] }) {
 
     return (
         <div className="flex flex-col items-center">
-            <div className="w-full h-72 pt-4">
+            <div className="w-full h-72 pt-4" style={{ height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <RechartsPieChart>
                         <Pie
