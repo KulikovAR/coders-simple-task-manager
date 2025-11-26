@@ -23,6 +23,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@heroicons/react": "^2.2.0",
         "@react-spring/parallax": "^10.0.1",
         "@react-spring/web": "^10.0.1",
         "@tiptap/extension-image": "^3.2.0",

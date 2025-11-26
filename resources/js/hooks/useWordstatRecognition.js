@@ -12,6 +12,9 @@ export function useWordstatRecognition(siteId, initialData = null) {
                 errorMessage: initialData.error_message,
                 startedAt: initialData.started_at,
                 completedAt: initialData.completed_at,
+                stockHighload: initialData.xml_stock_highload ?? false,
+                riverHighload: initialData.xml_river_highload ?? false,
+                xmlServer: initialData.xml_server ?? null,
             };
         }
         return {
@@ -23,6 +26,9 @@ export function useWordstatRecognition(siteId, initialData = null) {
             errorMessage: null,
             startedAt: null,
             completedAt: null,
+            stockHighload: false,
+            riverHighload: false,
+            xmlServer: null,
         };
     });
     const [isPolling, setIsPolling] = useState(() => {
@@ -53,6 +59,9 @@ export function useWordstatRecognition(siteId, initialData = null) {
                     errorMessage: data.error_message,
                     startedAt: data.started_at,
                     completedAt: data.completed_at,
+                    stockHighload: data.xml_stock_highload ?? false,
+                    riverHighload: data.xml_river_highload ?? false,
+                    xmlServer: data.xml_server ?? null,
                 });
                 
                 if (data.status === 'none' || data.status === 'completed' || data.status === 'failed') {
