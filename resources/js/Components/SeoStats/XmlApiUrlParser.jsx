@@ -6,179 +6,218 @@ export default function XmlApiUrlParser({
     placeholder = "Введите URL API...",
     className = "",
     allowedDomains = [],
-    apiType = 'google' // 'google' или 'wordstat'
+    apiType = 'google'
 }) {
+    const [mode, setMode] = useState("url"); // url | manual
     const [url, setUrl] = useState('');
-    const [parsedData, setParsedData] = useState({
-        baseUrl: '',
-        userId: '',
-        apiKey: ''
-    });
+    const [parsedData, setParsedData] = useState({ baseUrl: '', userId: '', apiKey: '' });
     const [errors, setErrors] = useState({});
 
-    // Определяем разрешенные домены в зависимости от типа API
+    // Разрешённые домены
     const getAllowedDomains = () => {
-        if (apiType === 'google') {
-            return ['https://xmlstock.com'];
-        } else if (apiType === 'wordstat') {
-            return ['https://xmlriver.com'];
-        }
+        if (apiType === 'google') return ['xmlstock.com', 'xmlriver.com'];
+        if (apiType === 'wordstat') return ['xmlriver.com'];
         return allowedDomains;
     };
 
-    // Функция валидации домена
+    // Валидация домена
     const validateDomain = (baseUrl) => {
-        const allowedDomains = getAllowedDomains();
-        const isValid = allowedDomains.some(domain => baseUrl.startsWith(domain));
-
-        if (!isValid && baseUrl) {
-            const domainNames = allowedDomains.map(d => d.replace(/^https?:\/\//, '')).join(' или ');
-            return `Домен должен быть: ${domainNames}`;
-        }
+        if (!baseUrl) return null;
+        const allowed = getAllowedDomains().map(d => d.toLowerCase());
+        let hostname = baseUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+        const isValid = allowed.some(d => hostname === d || hostname.endsWith(`.${d}`));
+        if (!isValid) return `Домен должен быть: ${allowed.join(' или ')}`; 
         return null;
     };
 
+    const normalizeUrl = (str) => {
+        if (!str) return str;
+        if (/^[a-z]+:\/\//i.test(str)) return str;
+        return 'https://' + str;
+    };
+
+    // нормализует baseUrl в корневой домен
+    const normalizeBaseToRoot = (raw) => {
+        if (!raw) return '';
+        try {
+            const u = new URL(normalizeUrl(raw));
+            const hostname = u.hostname.toLowerCase().replace(/^www\./, '');
+            const allowed = getAllowedDomains();
+            const matched = allowed.find(d => hostname === d || hostname.endsWith(`.${d}`));
+            const root = matched || hostname;
+            return `${u.protocol}//${root}`;
+        } catch (e) {
+            const cleaned = raw.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+            const allowed = getAllowedDomains();
+            const matched = allowed.find(d => cleaned === d || cleaned.endsWith(`.${d}`));
+            const root = matched || cleaned;
+            return `https://${root}`;
+        }
+    };
+
+    useEffect(() => {
+        if (parsedData.baseUrl && !url) {
+            // собираем полный URL из базы
+            const base = parsedData.baseUrl.replace(/\/+$/, '');
+            const p = [];
+            if (parsedData.userId) p.push(`user=${parsedData.userId}`);
+            if (parsedData.apiKey) p.push(`key=${parsedData.apiKey}`);
+            const fullUrl = p.length ? `${base}?${p.join("&")}` : base;
+
+            setUrl(fullUrl);
+        }
+    }, [parsedData, url]);
+
+    // Init из value
     useEffect(() => {
         if (value && typeof value === 'object') {
             setParsedData(value);
-            // Создаем URL из объекта для отображения
-            const urlString = value.baseUrl ? `${value.baseUrl}?user=${value.userId}&key=${value.apiKey}` : '';
-            setUrl(urlString);
+            if (mode === 'manual' && value.baseUrl) {
+                const base = value.baseUrl.replace(/\/+$/, '');
+                let generated = base + (value.userId ? `?user=${value.userId}` : '') + (value.apiKey ? `${value.userId ? '&' : '?'}key=${value.apiKey}` : '');
+                setUrl(generated);
+            }
         } else if (value && typeof value === 'string') {
             setUrl(value);
-            parseUrl(value);
+            if (mode === 'url') parseUrl(value);
         }
-    }, [value]);
+    }, [value, mode]);
 
+    // Парсинг URL → поля
     const parseUrl = (urlString) => {
         const newErrors = {};
-
         try {
-            const url = new URL(urlString);
-            const params = new URLSearchParams(url.search);
-
+            const normalized = normalizeUrl(urlString);
+            const urlObj = new URL(normalized);
+            const params = new URLSearchParams(urlObj.search);
             const userId = params.get('user') || '';
             const apiKey = params.get('key') || '';
-            const baseUrl = `${url.protocol}//${url.host}`;
-
-            // Валидация домена
+            const hostname = urlObj.hostname.toLowerCase();
+            const allowed = getAllowedDomains();    
+            const matchedDomain = allowed.find(d => hostname === d || hostname.endsWith(`.${d}`));
+            const baseUrl = matchedDomain ? `${urlObj.protocol}//${matchedDomain}` : `${urlObj.protocol}//${hostname}`;
             const domainError = validateDomain(baseUrl);
-            if (domainError) {
-                newErrors.baseUrl = domainError;
-            }
+            if (domainError) newErrors.baseUrl = domainError;
 
-            const parsed = {
-                baseUrl,
-                userId,
-                apiKey
-            };
-
+            const parsed = { baseUrl, userId, apiKey };
             setParsedData(parsed);
             setErrors(newErrors);
             onChange(parsed, newErrors);
         } catch (error) {
             newErrors.url = 'Некорректный URL';
-            setParsedData({
-                baseUrl: '',
-                userId: '',
-                apiKey: ''
-            });
+            setParsedData({ baseUrl: '', userId: '', apiKey: '' });
             setErrors(newErrors);
-            onChange({
-                baseUrl: '',
-                userId: '',
-                apiKey: ''
-            }, newErrors);
+            onChange({ baseUrl: '', userId: '', apiKey: '' }, newErrors);
         }
     };
 
     const handleUrlChange = (e) => {
         const newUrl = e.target.value;
         setUrl(newUrl);
-        parseUrl(newUrl);
-    };
+        if (mode === "url") parseUrl(newUrl);
+    };  
 
     const handleFieldChange = (field, value) => {
-        const newData = { ...parsedData, [field]: value };
+        let newData = { ...parsedData };
         const newErrors = { ...errors };
-
-        // Валидация домена при изменении baseUrl
         if (field === 'baseUrl') {
-            const domainError = validateDomain(value);
-            if (domainError) {
-                newErrors.baseUrl = domainError;
-            } else {
-                delete newErrors.baseUrl;
+            const normalizedBase = normalizeBaseToRoot(value);
+            newData.baseUrl = normalizedBase;
+            if (mode === 'manual') {
+                const domainError = validateDomain(normalizedBase);
+                if (domainError) newErrors.baseUrl = domainError;
+                else delete newErrors.baseUrl;
             }
+        } else {
+            newData[field] = value;
         }
 
         setParsedData(newData);
         setErrors(newErrors);
+
+        if (mode === "manual") {
+            const base = (newData.baseUrl || '').replace(/\/+$/, '');
+            let generated = base;
+            const p = [];
+            if (newData.userId) p.push(`user=${newData.userId}`);
+            if (newData.apiKey) p.push(`key=${newData.apiKey}`);
+            if (p.length) generated += `?${p.join("&")}`;
+            setUrl(generated);  
+            onChange(newData, newErrors);
+            return;
+        }
+
         onChange(newData, newErrors);
     };
 
     return (
         <div className={`space-y-3 ${className}`}>
+            {/* SELECT режима */}
             <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                    URL API
-                </label>
-                <input
-                    type="url"
-                    value={url}
-                    onChange={handleUrlChange}
-                    placeholder={placeholder}
-                    className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
-                        errors.url ? 'border-accent-red' : 'border-border-color'
-                    }`}
-                />
-                {errors.url && (
-                    <p className="mt-1 text-sm text-accent-red">{errors.url}</p>
-                )}
+                <label className="block text-sm font-medium text-text-primary mb-2">Способ ввода</label>
+                <select
+                    value={mode}
+                    onChange={(e) => setMode(e.target.value)}
+                    className="w-full px-3 py-2 border border-border-color bg-secondary-bg rounded-lg"
+                >
+                    <option value="url">Вставить готовый URL</option>
+                    <option value="manual">Ручной ввод параметров</option>
+                </select>
             </div>
 
+            {/* URL API */}
+            <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">URL API</label>
+                <input
+                    type="text"
+                    value={url}
+                    disabled={mode !== "url"}
+                    onChange={handleUrlChange}
+                    placeholder={placeholder}   
+                    className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary ${mode !== "url" ? "opacity-50 cursor-not-allowed" : ""} ${errors.url ? "border-accent-red" : "border-border-color"}`}
+                />
+                {errors.url && <p className="mt-1 text-sm text-accent-red">{errors.url}</p>}
+            </div>
+
+            {/* Остальные поля */}
             <div className="grid grid-cols-3 gap-3">
+                {/* Base URL */}
                 <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                        Base URL
-                    </label>
+                    <label className="block text-sm font-medium text-text-primary mb-2">Base URL</label>
                     <input
                         type="text"
                         value={parsedData.baseUrl}
+                        disabled={mode !== "manual"}
                         onChange={(e) => handleFieldChange('baseUrl', e.target.value)}
-                        placeholder="https://api.example.com"
-                        className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20 ${
-                            errors.baseUrl ? 'border-accent-red' : 'border-border-color'
-                        }`}
+                        placeholder="https://xmlstock.com"
+                        className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary ${mode !== "manual" ? "opacity-50 cursor-not-allowed" : ""} ${errors.baseUrl ? "border-accent-red" : "border-border-color"}`}
                     />
-                    {errors.baseUrl && (
-                        <p className="mt-1 text-sm text-accent-red">{errors.baseUrl}</p>
-                    )}
+                    {errors.baseUrl && <p className="mt-1 text-sm text-accent-red">{errors.baseUrl}</p>}
                 </div>
 
+                {/* User ID */}
                 <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                        User ID
-                    </label>
+                    <label className="block text-sm font-medium text-text-primary mb-2">User ID</label>
                     <input
                         type="text"
                         value={parsedData.userId}
+                        disabled={mode !== "manual"}
                         onChange={(e) => handleFieldChange('userId', e.target.value)}
                         placeholder="12345"
-                        className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                        className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary ${mode !== "manual" ? "opacity-50 cursor-not-allowed" : ""} ${errors.userId ? "border-accent-red" : "border-border-color"}`}
                     />
                 </div>
 
+                {/* API Key */}
                 <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                        API Key
-                    </label>
+                    <label className="block text-sm font-medium text-text-primary mb-2">API Key</label>
                     <input
                         type="text"
                         value={parsedData.apiKey}
+                        disabled={mode !== "manual"}
                         onChange={(e) => handleFieldChange('apiKey', e.target.value)}
-                        placeholder="a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
-                        className="w-full px-3 py-2 border border-border-color rounded-lg bg-secondary-bg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue/20"
+                        placeholder="a1b2c3..."
+                        className={`w-full px-3 py-2 border rounded-lg bg-secondary-bg text-text-primary ${mode !== "manual" ? "opacity-50 cursor-not-allowed" : ""} ${errors.apiKey ? "border-accent-red" : "border-border-color"}`}
                     />
                 </div>
             </div>
