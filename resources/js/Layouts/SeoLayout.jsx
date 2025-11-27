@@ -12,7 +12,7 @@ import YandexMetrika from '@/Components/YandexMetrika';
 import ServiceSwitcher from '@/Components/ServiceSwitcher';
 import ApiBalanceDisplay from '@/Components/ApiBalanceDisplay';
 
-export default function SeoLayout({ user, header, children, flash }) {
+export default function SeoLayout({ user, header, children, flash, disableWaves = false }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [theme, setTheme] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -49,20 +49,22 @@ export default function SeoLayout({ user, header, children, flash }) {
             {/* Yandex Metrika */}
             <YandexMetrika />
 
-            {/* Waves Background */}
-            <Waves
-                lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
-                backgroundColor="transparent"
-                waveSpeedX={0.015}
-                waveSpeedY={0.008}
-                waveAmpX={25}
-                waveAmpY={12}
-                friction={0.92}
-                tension={0.008}
-                maxCursorMove={60}
-                xGap={20}
-                yGap={50}
-            />
+            {/* Waves Background (can be disabled per-page) */}
+            {!disableWaves && (
+                <Waves
+                    lineColor={theme === 'dark' ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"}
+                    backgroundColor="transparent"
+                    waveSpeedX={0.015}
+                    waveSpeedY={0.008}
+                    waveAmpX={25}
+                    waveAmpY={12}
+                    friction={0.92}
+                    tension={0.008}
+                    maxCursorMove={60}
+                    xGap={20}
+                    yGap={50}
+                />
+            )}
             <div className="relative z-9999">
             <nav className="border-b border-border-color bg-card-bg/80 shadow-lg">
                 <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 safe-area-inset-x">

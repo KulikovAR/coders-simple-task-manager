@@ -107,7 +107,7 @@ export default function SeoReports({
 
     if (!project) {
         return (
-            <SeoLayout user={auth.user}>
+            <SeoLayout user={auth.user} disableWaves={false}>
                 <Head title="Ошибка" />
                 <div className="min-h-screen bg-primary-bg p-6 flex items-center justify-center">
                     <div className="bg-card-bg border border-border-color rounded-xl p-8 text-center">
@@ -179,7 +179,7 @@ export default function SeoReports({
     const uniqueDates = getUniqueDates();
 
     return (
-        <SeoLayout user={auth.user}>
+        <SeoLayout user={auth.user} disableWaves={false}>
             <Head title={`Отчеты - ${project.name}`} />
 
             <div className="min-h-screen bg-primary-bg p-6">

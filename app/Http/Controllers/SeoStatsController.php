@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SeoState;
 use App\Services\Seo\DTOs\UpdateSiteDTO;
 use App\Services\Seo\DTOs\PositionFiltersDTO;
 use App\Services\Seo\Services\SiteUserService;
@@ -14,6 +15,7 @@ use App\Services\Seo\Services\ApiBalanceManager;
 use App\Services\Seo\Services\RecognitionCostCalculator;
 use App\Services\Seo\Services\WordstatCostCalculator;
 use App\Services\Seo\Services\ReportsFiltersService;
+use App\Services\Seo\Services\UserXmlService;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +29,7 @@ class SeoStatsController extends Controller
         private PositionTrackingService $positionTrackingService,
         private MicroserviceClient $microserviceClient,
         private RecognitionTaskService $recognitionTaskService,
+        private UserXmlService $userXmlService,
         private WordstatRecognitionTaskService $wordstatRecognitionTaskService,
         private ApiBalanceManager $apiBalanceManager,
         private ReportsFiltersService $filtersService,
@@ -509,9 +512,17 @@ class SeoStatsController extends Controller
         }
 
         $task = $this->recognitionTaskService->getActiveTaskForSite($siteId);
+        $seoState = SeoState::first();
+        $xmlInfo = $this->userXmlService->getCurrentUserXmlServer();
+        // Log::info('XML Info', ['xmlInfo' => $xmlInfo]);
 
         if (!$task) {
-            return response()->json(['status' => 'none']);
+            return response()->json([
+                'status' => 'none',
+                'xml_server' => $xmlInfo['server'] ?? null,
+                'xml_stock_highload' => $seoState?->xml_stock_highload ?? false,
+                'xml_river_highload' => $seoState?->xml_river_highload ?? false,
+            ]);
         }
 
         return response()->json([
@@ -523,6 +534,9 @@ class SeoStatsController extends Controller
             'error_message' => $task->error_message,
             'started_at' => $task->started_at,
             'completed_at' => $task->completed_at,
+            'xml_server' => $xmlInfo['server'] ?? null,
+            'xml_stock_highload' => $seoState?->xml_stock_highload ?? false,
+            'xml_river_highload' => $seoState?->xml_river_highload ?? false,
         ]);
     }
 
@@ -657,9 +671,16 @@ class SeoStatsController extends Controller
         }
 
         $task = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
+        $xmlInfo = $this->userXmlService->getCurrentUserWordstatXmlServer();
+        $seoState = SeoState::first();
 
         if (!$task) {
-            return response()->json(['status' => 'none']);
+            return response()->json([
+                'status' => 'none',
+                'xml_server' => $xmlInfo['server'] ?? null,
+                'xml_stock_highload' => $seoState?->xml_stock_highload ?? false,
+                'xml_river_highload' => $seoState?->xml_river_highload ?? false,
+            ]);
         }
 
         return response()->json([
@@ -671,6 +692,9 @@ class SeoStatsController extends Controller
             'error_message' => $task->error_message,
             'started_at' => $task->started_at,
             'completed_at' => $task->completed_at,
+            'xml_server' => $xmlInfo['server'] ?? null,
+            'xml_stock_highload' => $seoState?->xml_stock_highload ?? false,
+            'xml_river_highload' => $seoState?->xml_river_highload ?? false,
         ]);
     }
 

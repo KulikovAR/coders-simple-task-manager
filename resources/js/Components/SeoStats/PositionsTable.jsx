@@ -1,7 +1,20 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import PositionCell from '@/Components/SeoStats/PositionCell';
+import Tooltip from '@/Components/SeoStats/Tooltip';
 import { router } from '@inertiajs/react';
 import { createPortal } from 'react-dom';
+
+function useThrottle(callback, delay = 16) {
+    const lastCall = useRef(0);
+    return (...args) => {
+        const now = performance.now();
+        if (now - lastCall.current >= delay) {
+            callback(...args);
+            lastCall.current = now;
+        }
+    };
+}
 
 export default function PositionsTable({
     keywords = [],
@@ -19,9 +32,14 @@ export default function PositionsTable({
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const observerRef = useRef();
     const loadingRef = useRef();
-    const [tooltipState, setTooltipState] = useState({ visible: false, url: '', x: 0, y: 0 });
+    // const [tooltipState, setTooltipState] = useState({ visible: false, url: '', x: 0, y: 0 });
+
+    const tooltipRef = useRef(null);
+
+    useEffect(() => {
+        tooltipRef.current = new Tooltip();
+    }, []);
 
     const uniqueDates = useMemo(() => {
         const dates = new Set();
@@ -125,38 +143,49 @@ export default function PositionsTable({
         return filtered;
     }, [allKeywords, searchTerm, sortConfig]);
 
+    const positionsMatrix = useMemo(() => {
+        const matrix = {};
+        allPositions.forEach(pos => {
+            if (!pos.keyword_id || !pos.date) return;
+            const dateOnly = pos.date.split('T')[0];
+            const keyWithSource = `${pos.keyword_id}-${dateOnly}-${pos.source}`;
+            matrix[keyWithSource] = pos;
+
+            // создаём ключ для getPositionForKeyword (первый не-wordstat)
+            if (pos.source !== 'wordstat') {
+                const keyDefault = `${pos.keyword_id}-${dateOnly}`;
+                if (!matrix[keyDefault]) matrix[keyDefault] = pos;
+            }
+        });
+        return matrix;
+    }, [allPositions]);
+
+    const getPositionForKeyword = (keywordId, date) => {
+        return positionsMatrix[`${keywordId}-${date}`] || null;
+    };
+
     const getFrequencyForKeyword = (keywordId) => {
         if (!Array.isArray(allPositions)) return null;
-
-        const wordstatPosition = allPositions.find(pos =>
-            pos.keyword_id === keywordId && pos.source === 'wordstat'
-        );
+        const wordstatPosition = allPositions.find(pos => pos.keyword_id === keywordId && pos.source === 'wordstat');
         return wordstatPosition ? wordstatPosition.rank : null;
     };
 
-    const getPositionForKeyword = (keywordId, date) => {
-        if (!Array.isArray(allPositions)) return null;
-
-        const position = allPositions.find(pos => {
-            const posDateOnly = pos.date ? pos.date.split('T')[0] : '';
-            return pos.keyword_id === keywordId && posDateOnly === date && pos.source !== 'wordstat';
+    const positionChangeMap = useMemo(() => {
+        const map = new Map();
+        uniqueDates.forEach((date, index) => {
+            if (index >= uniqueDates.length - 1) return;
+            filteredAndSortedKeywords.forEach(k => {
+                const current = getPositionForKeyword(k.id, date);
+                const prev = getPositionForKeyword(k.id, uniqueDates[index + 1]);
+                const change = current?.rank != null && prev?.rank != null ? prev.rank - current.rank : null;
+                map.set(`${k.id}-${date}`, change);
+            });
         });
-        return position || null;
-    };
+        return map;
+    }, [filteredAndSortedKeywords, uniqueDates, positionsMatrix]);
 
     const getPositionChange = (keywordId, date) => {
-        const dates = uniqueDates;
-        const currentIndex = dates.indexOf(date);
-        // Теперь предыдущая дата справа (индекс +1), так как даты идут от новой к старой
-        if (currentIndex < 0 || currentIndex >= dates.length - 1) return null;
-
-        const currentPositionObj = getPositionForKeyword(keywordId, date);
-        const previousPositionObj = getPositionForKeyword(keywordId, dates[currentIndex + 1]);
-
-        if (!currentPositionObj || !previousPositionObj || !currentPositionObj.rank || !previousPositionObj.rank) return null;
-
-        // Положительное значение = улучшение (позиция стала выше), отрицательное = ухудшение
-        return previousPositionObj.rank - currentPositionObj.rank;
+        return positionChangeMap.get(`${keywordId}-${date}`) || null;
     };
 
     const handleSort = (key) => {
@@ -176,6 +205,16 @@ export default function PositionsTable({
         }
         return null;
     };
+
+    // const handleTooltipShow = useCallback((url, rect) => {
+    //     setTooltipState({ visible: true, url, x: rect.left + rect.width / 2, y: rect.top });
+    // }, []);
+
+    // const handleTooltipHide = useCallback(() => {
+    //     setTooltipState(prev => ({ ...prev, visible: false, url: '', x: 0, y: 0 }));
+    // }, []);
+
+    // const throttledTooltipShow = useThrottle(handleTooltipShow, 16);
 
     const handleDateClick = (date) => {
         const currentSort = getDateSortState(date);
@@ -282,10 +321,6 @@ export default function PositionsTable({
                             </svg>
                         </div>
 
-                        {/* Экспорт */}
-                        <button className="px-3 py-2 bg-accent-blue text-white rounded-lg hover:bg-accent-blue/90 transition-colors text-sm font-medium">
-                            Экспорт
-                        </button>
                     </div>
                 </div>
             </div>
@@ -419,73 +454,21 @@ export default function PositionsTable({
                                     {/* Позиции по датам */}
                                     {uniqueDates.map((date, index) => {
                                         const positionObj = getPositionForKeyword(keyword.id, date);
-                                        const position = positionObj ? positionObj.rank : null;
-                                        const positionUrl = positionObj ? positionObj.url : null;
                                         const change = getPositionChange(keyword.id, date);
                                         const today = new Date().toISOString().split('T')[0];
                                         const isToday = date === today;
-                                        const isClickable = positionUrl !== null && positionUrl !== undefined;
-
-                                        const handlePositionClick = (e) => {
-                                            if (isClickable && positionUrl) {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                window.open(positionUrl, '_blank', 'noopener,noreferrer');
-                                            }
-                                        };
-
-                                        const handleMouseEnter = (e) => {
-                                            if (isClickable && positionUrl) {
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                setTooltipState({
-                                                    visible: true,
-                                                    url: positionUrl,
-                                                    x: rect.left + rect.width / 2,
-                                                    y: rect.top
-                                                });
-                                            }
-                                        };
-
-                                        const handleMouseLeave = () => {
-                                            setTooltipState({ visible: false, url: '', x: 0, y: 0 });
-                                        };
 
                                         return (
-                                            <td key={`${date}-${keyword.id}-${index}`} className={`w-12 h-12 px-1 py-1 text-center min-w-[100px] relative ${
-                                                isToday ? 'border-2 border-accent-blue' : ''
-                                            }`}>
-                                                <div
-                                                    onClick={handlePositionClick}
-                                                    onMouseEnter={handleMouseEnter}
-                                                    onMouseLeave={handleMouseLeave}
-                                                    className={`w-full h-full flex flex-col items-center justify-center group ${
-                                                        position === null ? 'bg-gray-200' :
-                                                        position === 0 ? 'bg-gray-400' :
-                                                        position <= 3 ? 'bg-green-500' :
-                                                        position <= 10 ? 'bg-yellow-500' :
-                                                        'bg-red-500'
-                                                    } ${isToday ? 'ring-2 ring-accent-blue ring-offset-1' : ''} ${
-                                                        isClickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
-                                                    }`}
-                                                >
-                                                    <span className={`text-sm font-bold ${
-                                                        position === null ? 'text-gray-600' :
-                                                        'text-white'
-                                                    } ${isToday ? 'text-lg' : ''}`}>
-                                                        {position !== null ? position : '-'}
-                                                    </span>
-                                                    {change !== null && (
-                                                        <span className={`text-xs font-medium ${
-                                                            change > 0 ? 'text-green-200' :
-                                                            change < 0 ? 'text-red-200' :
-                                                            'text-gray-200'
-                                                        }`}>
-                                                            {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        );
+                                            <PositionCell
+                                                key={`${date}-${keyword.id}-${index}`}
+                                                position={positionObj?.rank ?? null}
+                                                change={change}
+                                                isToday={isToday}
+                                                url={positionObj?.url ?? null}
+                                                onTooltipShow={(url, rect) => tooltipRef.current?.show({ x: rect.left + rect.width / 2, y: rect.top, url })}
+                                                onTooltipHide={() => tooltipRef.current?.hide()}
+                                            />
+                                        )
                                     })}
 
                                 </tr>
@@ -516,31 +499,6 @@ export default function PositionsTable({
                     </div>
                 )}
             </div>
-
-            {/* Tooltip с URL - рендерится через портал */}
-            {tooltipState.visible && typeof window !== 'undefined' && createPortal(
-                <div
-                    className="fixed px-3 py-2 bg-card-bg text-text-primary border border-border-color text-xs rounded-lg shadow-lg pointer-events-none z-[99999] w-80 max-w-[90vw]"
-                    style={{
-                        left: `${tooltipState.x}px`,
-                        top: `${tooltipState.y - 10}px`,
-                        transform: 'translate(-50%, -100%)'
-                    }}
-                >
-                    <div className="text-text-muted break-words whitespace-normal">
-                        {tooltipState.url}
-                    </div>
-                    {/* Стрелка тултипа */}
-                    <div 
-                        className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent"
-                        style={{ 
-                            borderTopColor: 'var(--card-bg)',
-                            filter: 'drop-shadow(0 1px 0 var(--border-color))'
-                        }}
-                    ></div>
-                </div>,
-                document.body
-            )}
 
             {/* Подвал таблицы */}
             <div className="px-6 py-3 border-t border-border-color bg-secondary-bg">

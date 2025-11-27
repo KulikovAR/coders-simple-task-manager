@@ -53,6 +53,9 @@ export function useSeoRecognition(siteId, initialData = null) {
                     errorMessage: data.error_message,
                     startedAt: data.started_at,
                     completedAt: data.completed_at,
+                    stockHighload: data.xml_stock_highload ?? false,
+                    riverHighload: data.xml_river_highload ?? false,
+                    xmlServer: data.xml_server ?? null,
                 });
                 
                 if (data.status === 'none' || data.status === 'completed' || data.status === 'failed') {

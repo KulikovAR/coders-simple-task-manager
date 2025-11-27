@@ -3,6 +3,7 @@
 namespace App\Services\Seo\Services;
 
 use App\Models\SeoRecognitionTask;
+use App\Models\SeoState;
 use App\Models\WordstatRecognitionTask;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +30,19 @@ class TrackingCompletionService
                 'external_task_id' => $taskId,
                 'status' => $status,
             ]);
+
+            $stockHighload = $message['xml_stock_highload'] ?? null;
+            $riverHighload = $message['xml_river_highload'] ?? null;
+
+            if ($stockHighload !== null || $riverHighload !== null) {
+                $seoState = SeoState::first(); // берем запись с id=1
+                if ($seoState) {
+                    $seoState->update([
+                        'xml_stock_highload' => $stockHighload ?? $seoState->xml_stock_highload,
+                        'xml_river_highload' => $riverHighload ?? $seoState->xml_river_highload,
+                    ]);
+                }
+            }
 
             $seoTask = $this->findSearchTask($taskId);
             $wordstatTask = $this->findWordstatTask($taskId);

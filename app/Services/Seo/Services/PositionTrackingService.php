@@ -56,12 +56,14 @@ class PositionTrackingService
 
     private function callMicroserviceMethod(string $searchEngine, array $trackData): bool
     {
-        return match ($searchEngine) {
+        $result = match ($searchEngine) {
             'google' => $this->microserviceClient->trackGooglePositions($trackData),
             'yandex' => $this->microserviceClient->trackYandexPositions($trackData),
             'wordstat' => $this->microserviceClient->trackWordstatPositions($trackData),
             default => $this->microserviceClient->trackSitePositionsWithFilters($trackData),
         };
+
+        return is_array($result) ? ($result['success'] ?? true) : (bool)$result;
     }
 
     private function buildTrackDataFromProject(SiteDTO $site, string $searchEngine): TrackPositionsDTO
