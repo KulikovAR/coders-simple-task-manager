@@ -17,7 +17,7 @@ export default function XmlApiSettings({
                     Настройки XML API для Google/Yandex
                 </h3>
                 <p className="text-sm text-text-muted mb-4">
-                    Настройте кастомные API для получения данных из Google и Yandex. 
+                    Настройте кастомные API для получения данных из Google и Yandex. 111
                     Можете вставить полный URL или заполнить поля отдельно.
                 </p>
                 

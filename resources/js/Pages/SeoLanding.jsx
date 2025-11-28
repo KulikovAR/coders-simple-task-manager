@@ -191,16 +191,16 @@ export default function SeoLanding({ auth }) {
                 </header>
 
                 <main className="relative pt-24">
+                    {/* Секция возможностей */}
+                    <FeaturesSection
+                        registerRef={(ref) => registerSection('features', ref)}
+                    />
+
                     {/* Героическая секция */}
                     <HeroSection
                         isLoaded={isLoaded}
                         auth={auth}
                         registerRef={(ref) => registerSection('hero', ref)}
-                    />
-
-                    {/* Секция возможностей */}
-                    <FeaturesSection
-                        registerRef={(ref) => registerSection('features', ref)}
                     />
 
                     {/* Секция ИИ-ассистента */}
