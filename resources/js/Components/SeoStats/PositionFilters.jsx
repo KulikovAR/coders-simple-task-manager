@@ -39,6 +39,18 @@ export default function PositionFilters({
         html: null
     });
 
+    // Состояние сворачивания фильтров (свернуты по умолчанию, если нет активных фильтров)
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        const saved = localStorage.getItem('seoFiltersCollapsed');
+        if (saved !== null) return saved === 'true';
+        // Проверяем, есть ли активные фильтры
+        const hasActive = localFilters.group_id || localFilters.filter_group_id || 
+                         localFilters.wordstat_query_type || localFilters.rank_from || 
+                         localFilters.rank_to || localFilters.date_from || localFilters.date_to ||
+                         filters.date_sort || filters.sort_type || filters.wordstat_sort;
+        return !hasActive;
+    });
+
     // Получаем первую доступную комбинацию для текущего поисковика
     const getDefaultTargetId = (source) => {
         if (!targets || targets.length === 0) return '';
@@ -239,27 +251,55 @@ export default function PositionFilters({
     return (
         <>
             {/* Блок фильтров */}
-            <div className="card mb-6">
-                <div className="card-header">
-                    <h3 className="card-title">Фильтры позиций</h3>
+            <div className="bg-card-bg border border-border-color rounded-xl mb-3">
+                <div className="flex items-center justify-between p-3">
+                    <button
+                        onClick={() => {
+                            setIsCollapsed(!isCollapsed);
+                            localStorage.setItem('seoFiltersCollapsed', (!isCollapsed).toString());
+                        }}
+                        className="flex items-center gap-2 text-sm font-medium text-text-primary hover:text-accent-blue transition-colors"
+                    >
+                        <svg 
+                            className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span>Фильтры позиций</span>
+                        {hasActiveFilters && (
+                            <span className="px-2 py-0.5 bg-white/20 text-white rounded-full text-xs">
+                                Активно
+                            </span>
+                        )}
+                    </button>
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={clearFilters}
-                            className="btn btn-secondary"
-                        >
-                            Сбросить
-                        </button>
-                        <button
-                            onClick={applyFilters}
-                            data-filter-apply
-                            className="btn btn-primary"
-                        >
-                            Применить
-                        </button>
+                        {!isCollapsed && (
+                            <>
+                                <button
+                                    onClick={clearFilters}
+                                    className="px-3 py-1.5 text-xs text-text-muted hover:text-text-primary transition-colors"
+                                >
+                                    Сбросить
+                                </button>
+                                <button
+                                    onClick={applyFilters}
+                                    data-filter-apply
+                                    className="px-3 py-1.5 border border-border-color rounded-lg hover:bg-secondary-bg transition-colors text-xs font-medium text-text-primary"
+                                >
+                                    Применить
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
-            <div className={`grid grid-cols-1 gap-4 ${project.wordstat_enabled ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
+                {!isCollapsed && (
+                <div className="px-3 pb-3">
+
+                <div className={`grid grid-cols-1 gap-3 ${project.wordstat_enabled ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
                 {/* Поисковая система */}
                 <div>
                     <label className="block text-sm font-medium text-text-primary mb-2">
@@ -416,8 +456,8 @@ export default function PositionFilters({
             </div>
 
             {hasActiveFilters && (
-                <div className="mt-4 p-4 bg-accent-blue/10 border border-accent-blue/20 rounded-lg">
-                    <div className="flex items-start gap-2 text-sm text-accent-blue mb-2">
+                <div className="mt-4 p-4 bg-white/10 border border-white/20 rounded-lg">
+                    <div className="flex items-start gap-2 text-sm text-white mb-2">
                         <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                         </svg>
@@ -425,7 +465,7 @@ export default function PositionFilters({
                     </div>
                     <div className="flex flex-wrap gap-2 ml-6">
                         {localFilters.group_id && (
-                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                            <span className="px-3 py-1 bg-white/20 border border-white/30 rounded-full text-xs font-medium text-white flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                 </svg>
@@ -460,7 +500,7 @@ export default function PositionFilters({
                             }
                             const label = parts.length > 0 ? parts.join(', ') : `Комбинация #${target.id}`;
                             return (
-                                <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                                <span className="px-3 py-1 bg-white/20 border border-white/30 rounded-full text-xs font-medium text-white flex items-center gap-1">
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
@@ -469,7 +509,7 @@ export default function PositionFilters({
                             );
                         })()}
                         {localFilters.wordstat_query_type && (
-                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                            <span className="px-3 py-1 bg-white/20 border border-white/30 rounded-full text-xs font-medium text-white flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
@@ -480,7 +520,7 @@ export default function PositionFilters({
                             </span>
                         )}
                         {rankLabel && (
-                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                            <span className="px-3 py-1 bg-white/20 border border-white/30 rounded-full text-xs font-medium text-white flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
@@ -488,7 +528,7 @@ export default function PositionFilters({
                             </span>
                         )}
                         {hasDateFilters && (
-                            <span className="px-3 py-1 bg-accent-blue/20 border border-accent-blue/30 rounded-full text-xs font-medium text-accent-blue flex items-center gap-1">
+                            <span className="px-3 py-1 bg-white/20 border border-white/30 rounded-full text-xs font-medium text-white flex items-center gap-1">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -543,6 +583,8 @@ export default function PositionFilters({
                     </div>
                 </div>
             )}
+                </div>
+                )}
             </div>
         </>
     );

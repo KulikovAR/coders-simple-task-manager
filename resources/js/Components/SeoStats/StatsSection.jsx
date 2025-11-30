@@ -130,41 +130,30 @@ export default function StatsSection({ keywords = [], positions = [], statistics
     }
 
     return (
-        <div className="mb-6 bg-card-bg border border-border-color rounded-xl overflow-hidden relative">
-            {/* Кнопка сворачивания в правом верхнем углу */}
-            <button
-                onClick={toggleCollapse}
-                className="absolute top-3 right-3 z-10 p-1.5 bg-secondary-bg hover:bg-accent-blue/10 border border-border-color rounded-md text-text-muted hover:text-accent-blue transition-all duration-200 shadow-sm hover:shadow-md"
-                title={isCollapsed ? 'Развернуть статистику' : 'Свернуть статистику'}
-            >
-                {isCollapsed ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        <div className="mb-3 bg-card-bg border border-border-color rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between p-3">
+                <button
+                    onClick={toggleCollapse}
+                    className="flex items-center gap-2 text-sm font-medium text-text-primary hover:text-accent-blue transition-colors"
+                >
+                    <svg 
+                        className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
-                ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                    </svg>
-                )}
-            </button>
+                    <span>Статистика позиций</span>
+                </button>
+            </div>
 
-            {isCollapsed ? (
-                // Свернутое состояние - маленькая полоска
-                <div className="h-12 flex items-center px-4">
-                    <div className="flex items-center gap-2 text-text-primary">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        <span className="text-sm font-medium">Статистика позиций</span>
-                    </div>
-                </div>
-            ) : (
-                // Развернутое состояние - полная статистика
-                <div className="p-6">
+            {!isCollapsed && (
+                <div className="px-3 pb-3">
                     {/* Сетка с компонентами статистики */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         {/* Круговая диаграмма */}
-                        <div className="bg-secondary-bg border border-border-color rounded-xl p-6">
+                        <div className="bg-secondary-bg border border-border-color rounded-xl p-4">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2 bg-accent-green/10 rounded-lg">
                                     <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">

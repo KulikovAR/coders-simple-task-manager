@@ -42,13 +42,9 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
     };
 
     const getButtonClasses = () => {
-        const baseClasses = 'rounded-lg transition-colors flex items-center gap-2';
+        const baseClasses = 'rounded-lg transition-colors flex items-center gap-2 px-3 py-1.5 text-xs font-medium';
 
-        if (size === 'small') {
-            return `${baseClasses} px-3 py-1.5 text-xs font-medium`;
-        }
-
-        return `${baseClasses} px-4 py-2 text-sm font-medium`;
+        return baseClasses;
     };
 
     const getIconSize = () => {
@@ -61,7 +57,7 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
         return (
             <button
                 disabled
-                className={`${getButtonClasses()} bg-gray-400 text-white cursor-not-allowed relative`}
+                className={`${getButtonClasses()} bg-green-600/50 text-white cursor-not-allowed relative`}
                 title={`${progress}%`}
             >
                 <div className={`${getIconSize()} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
@@ -86,7 +82,7 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
         return (
             <button
                 onClick={() => setShowModal(true)}
-                className={`${getButtonClasses()} bg-red-500 text-white hover:bg-red-600 relative`}
+                className={`${getButtonClasses()} bg-green-600 text-white hover:bg-green-700 relative`}
                 title="Повторить снятие позиций"
             >
                 <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +109,7 @@ export default function TrackPositionsButton({ siteId, size = 'default', initial
         <>
             <button
                 onClick={() => setShowModal(true)}
-                className={`${getButtonClasses()} bg-accent-green text-white hover:bg-accent-green/90 relative`}
+                className={`${getButtonClasses()} bg-green-600 text-white hover:bg-green-700 relative`}
                 title="Снять позиции"
             >
                 <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">

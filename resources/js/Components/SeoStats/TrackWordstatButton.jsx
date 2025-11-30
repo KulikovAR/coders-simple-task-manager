@@ -42,13 +42,9 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
     };
 
     const getButtonClasses = () => {
-        const baseClasses = 'rounded-lg transition-colors flex items-center gap-2';
+        const baseClasses = 'rounded-lg transition-colors flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-border-color';
 
-        if (size === 'small') {
-            return `${baseClasses} px-3 py-1.5 text-xs font-medium`;
-        }
-
-        return `${baseClasses} px-4 py-2 text-sm font-medium`;
+        return baseClasses;
     };
 
     const getIconSize = () => {
@@ -61,7 +57,7 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
         return (
             <button
                 disabled
-                className={`${getButtonClasses()} bg-gray-400 text-white cursor-not-allowed relative`}
+                className={`${getButtonClasses()} bg-transparent text-text-muted cursor-not-allowed relative opacity-50`}
                 title={`${progress}%`}
             >
                 <div className={`${getIconSize()} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
@@ -86,7 +82,7 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
         return (
             <button
                 onClick={() => setShowModal(true)}
-                className={`${getButtonClasses()} bg-red-500 text-white hover:bg-red-600 relative`}
+                className={`${getButtonClasses()} bg-transparent text-red-500 hover:bg-red-50 border-red-500 relative`}
                 title="Повторить парсинг Wordstat"
             >
                 <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +109,7 @@ export default function TrackWordstatButton({ siteId, size = 'default', initialD
         <>
             <button
                 onClick={() => setShowModal(true)}
-                className={`${getButtonClasses()} bg-blue-500 text-white hover:bg-blue-600 relative`}
+                className={`${getButtonClasses()} bg-transparent text-text-primary hover:bg-secondary-bg relative`}
                 title="Запустить парсинг Wordstat"
             >
                 <svg className={getIconSize()} fill="none" stroke="currentColor" viewBox="0 0 24 24">
