@@ -177,7 +177,10 @@ export default function PositionsTable({
             filteredAndSortedKeywords.forEach(k => {
                 const current = getPositionForKeyword(k.id, date);
                 const prev = getPositionForKeyword(k.id, uniqueDates[index + 1]);
-                const change = current?.rank != null && prev?.rank != null ? prev.rank - current.rank : null;
+                // Не вычисляем изменение, если текущая или предыдущая позиция равна 0 (позиция не найдена)
+                const change = current?.rank != null && prev?.rank != null && current.rank !== 0 && prev.rank !== 0 
+                    ? prev.rank - current.rank 
+                    : null;
                 map.set(`${k.id}-${date}`, change);
             });
         });

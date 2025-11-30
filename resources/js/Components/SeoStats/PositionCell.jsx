@@ -37,7 +37,7 @@ const PositionCell = React.memo(({ position, change, isToday, url, onTooltipShow
                 <span className={`text-sm font-bold ${position === null ? 'text-gray-600' : 'text-white'} ${isToday ? 'text-lg' : ''}`}>
                     {position ?? '-'}
                 </span>
-                {change !== null && (
+                {change !== null && position !== 0 && (
                     <span className={`text-xs font-medium ${change > 0 ? 'text-green-200' : change < 0 ? 'text-red-200' : 'text-gray-200'}`}>
                         {change > 0 ? '↑' : change < 0 ? '↓' : '='} {Math.abs(change)}
                     </span>
