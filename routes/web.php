@@ -180,7 +180,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/seo-stats', [App\Http\Controllers\SeoStatsController::class, 'dashboard'])->name('seo-stats.dashboard');
     Route::get('/seo-stats/projects', [App\Http\Controllers\SeoStatsController::class, 'index'])->name('seo-stats.index');
-у    Route::get('/seo-stats/{site}/pagespeed', [App\Http\Controllers\SeoStatsController::class, 'getPageSpeed'])->name('seo-stats.pagespeed');
     Route::get('/seo-stats/{site}/reports', [App\Http\Controllers\SeoStatsController::class, 'reports'])->name('seo-stats.reports');
     Route::get('/seo-stats/{site}/positions', [App\Http\Controllers\SeoStatsController::class, 'getPositions'])->name('seo-stats.positions');
     Route::post('/seo-stats/sites', [App\Http\Controllers\SeoStatsController::class, 'storeSite'])->name('seo-stats.store-site');
@@ -198,6 +197,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/{site}/recognition-cost', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionCost'])->name('seo-stats.recognition-cost');
     Route::post('/seo-stats/{site}/track-wordstat', [App\Http\Controllers\SeoStatsController::class, 'trackWordstatPositions'])->name('seo-stats.track-wordstat');
     Route::get('/seo-stats/{site}/wordstat-cost', [App\Http\Controllers\SeoStatsController::class, 'getWordstatCost'])->name('seo-stats.wordstat-cost');
+    Route::get('/seo-stats/{site}/pagespeed', [App\Http\Controllers\SeoStatsController::class, 'getPageSpeed'])->name('seo-stats.pagespeed');
     Route::get('/seo-stats/{site}/wordstat-recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatRecognitionStatus'])->name('seo-stats.wordstat-recognition-status');
     Route::get('/seo-stats/wordstat-tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatTaskStatus'])->name('seo-stats.wordstat-task-status');
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
