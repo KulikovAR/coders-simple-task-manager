@@ -62,4 +62,9 @@ return [
         'url' => env('DADATA_URL', 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/country'),
     ],
 
+    'google_pagespeed' => [
+        'api_key' => env('GOOGLE_PAGESPEED_API_KEY'),
+        'api_url' => env('GOOGLE_PAGESPEED_API_URL', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'),
+    ],
+
 ];

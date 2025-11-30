@@ -6,6 +6,7 @@ import StatsSection from '@/Components/SeoStats/StatsSection';
 import RecognitionStatus from '@/Components/SeoStats/RecognitionStatus';
 import TrackPositionsButton from '@/Components/SeoStats/TrackPositionsButton';
 import TrackWordstatButton from '@/Components/SeoStats/TrackWordstatButton';
+import PageSpeedCard from '@/Components/SeoStats/PageSpeedCard';
 import { useSeoRecognition } from '@/hooks/useSeoRecognition';
 import { useState } from 'react';
 import axios from 'axios';
@@ -368,6 +369,13 @@ export default function SeoReports({
                             </div>
                         </div>
                     </div>
+
+                    {/* PageSpeed Insights */}
+                    {project.domain && (
+                        <div className="mb-6">
+                            <PageSpeedCard siteId={project.id} domain={project.domain} />
+                        </div>
+                    )}
 
                     {/* Статус распознавания */}
                     {/* <RecognitionStatus 

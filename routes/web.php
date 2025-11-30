@@ -201,6 +201,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/seo-stats/wordstat-tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getWordstatTaskStatus'])->name('seo-stats.wordstat-task-status');
     Route::get('/seo-stats/{site}/recognition-status', [App\Http\Controllers\SeoStatsController::class, 'getRecognitionStatus'])->name('seo-stats.recognition-status');
     Route::get('/seo-stats/tasks/{task}/status', [App\Http\Controllers\SeoStatsController::class, 'getTaskStatus'])->name('seo-stats.task-status');
+    Route::get('/seo-stats/{site}/pagespeed', [App\Http\Controllers\SeoStatsController::class, 'getPageSpeed'])->name('seo-stats.pagespeed');
     
     Route::get('/geo/google-domains/search', [App\Http\Controllers\GeoController::class, 'getGoogleDomains'])->name('geo.google-domains.search');
     Route::get('/geo/google-domains/{value}', [App\Http\Controllers\GeoController::class, 'getGoogleDomainByValue'])->name('geo.google-domains.show');

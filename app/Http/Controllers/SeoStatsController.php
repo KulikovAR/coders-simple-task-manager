@@ -16,6 +16,7 @@ use App\Services\Seo\Services\RecognitionCostCalculator;
 use App\Services\Seo\Services\WordstatCostCalculator;
 use App\Services\Seo\Services\ReportsFiltersService;
 use App\Services\Seo\Services\UserXmlService;
+use App\Services\Seo\Services\PageSpeedService;
 use App\Http\Requests\CreateSiteRequest;
 use App\Http\Requests\UpdateSiteRequest;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +35,8 @@ class SeoStatsController extends Controller
         private ApiBalanceManager $apiBalanceManager,
         private ReportsFiltersService $filtersService,
         private RecognitionCostCalculator $costCalculator,
-        private WordstatCostCalculator $wordstatCostCalculator
+        private WordstatCostCalculator $wordstatCostCalculator,
+        private PageSpeedService $pageSpeedService
     ) {}
 
     public function index()
@@ -826,6 +828,47 @@ class SeoStatsController extends Controller
             }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Ошибка удаления группы'], 500);
+        }
+    }
+
+    public function getPageSpeed(int $siteId)
+    {
+        if (!$this->siteUserService->hasAccessToSite($siteId)) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        $site = $this->siteUserService->getSite($siteId);
+        if (!$site) {
+            return response()->json(['error' => 'Сайт не найден'], 404);
+        }
+
+        $domain = $site->domain;
+        if (empty($domain)) {
+            return response()->json(['error' => 'Домен не указан'], 400);
+        }
+
+        // Убеждаемся, что URL начинается с http:// или https://
+        $url = $domain;
+        if (!preg_match('/^https?:\/\//', $url)) {
+            $url = 'https://' . $url;
+        }
+
+        try {
+            $mobileData = $this->pageSpeedService->getPageSpeedData($url, 'mobile');
+            $desktopData = $this->pageSpeedService->getPageSpeedData($url, 'desktop');
+
+            return response()->json([
+                'success' => true,
+                'mobile' => $mobileData,
+                'desktop' => $desktopData,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('PageSpeed API error', [
+                'site_id' => $siteId,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['error' => 'Ошибка получения данных PageSpeed'], 500);
         }
     }
 }
