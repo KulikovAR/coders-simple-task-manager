@@ -12,7 +12,7 @@ export default function PageSpeedCard({ siteId, domain }) {
         setError(null);
         
         try {
-            const response = await axios.get(route('seo-stats.pagespeed', siteId));
+            const response = await axios.get(`/seo-stats/${siteId}/pagespeed`);
             
             if (response.data.success) {
                 setData(response.data);
