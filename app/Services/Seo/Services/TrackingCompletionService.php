@@ -48,9 +48,6 @@ class TrackingCompletionService
             $wordstatTask = $this->findWordstatTask($taskId);
 
             if ($seoTask) {
-                // Если есть отложенные сообщения для job-идентификаторов этой задачи — применяем их сначала
-                $this->processPendingMessagesForTask($seoTask);
-
                 // Теперь обработаем текущее сообщение
                 $this->updateSeoTask($seoTask, $status, $message);
             } elseif ($wordstatTask) {
