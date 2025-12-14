@@ -32,6 +32,26 @@ export default function AdminLayout({ user, children }) {
                             </div>
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <Link
+                                    href="/admin"
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
+                                        route().current('admin.index')
+                                            ? 'border-red-400 text-white'
+                                            : 'border-transparent text-gray-300 hover:text-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href="/admin/stats"
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
+                                        route().current('admin.stats.*')
+                                            ? 'border-red-400 text-white'
+                                            : 'border-transparent text-gray-300 hover:text-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Статистика
+                                </Link>
+                                <Link
                                     href="/admin/jobs"
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
                                         route().current('admin.jobs.*')
