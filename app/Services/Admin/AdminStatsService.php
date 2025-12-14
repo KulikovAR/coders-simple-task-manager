@@ -3,18 +3,18 @@
 namespace App\Services\Admin;
 
 use App\Models\User;
-use App\Models\Project;
 use App\Models\SeoSite;
 use App\Models\SeoRecognitionTask;
 use App\Models\WordstatRecognitionTask;
-use App\Services\Seo\Services\MicroserviceClient;
+use App\Services\Seo\Services\SiteService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AdminStatsService
 {
     public function __construct(
-        private MicroserviceClient $microserviceClient
+        private SiteService $siteService
     ) {}
 
     /**
@@ -65,12 +65,12 @@ class AdminStatsService
     }
 
     /**
-     * Метрики по проектам
+     * Метрики по проектам (только SEO проекты - SeoSite)
      */
     private function getProjectMetrics(array $dateRange): array
     {
-        $totalProjects = Project::count();
-        $newProjects = Project::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])->count();
+        $totalProjects = SeoSite::count();
+        $newProjects = SeoSite::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])->count();
 
         // Проекты по пользователям
         $projectsByUsers = $this->getProjectsByUsers();
@@ -131,10 +131,10 @@ class AdminStatsService
             ->pluck('user_id')
             ->toArray();
 
-        // Пользователи, которые создали проекты
-        $usersWithProjects = Project::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])
+        // Пользователи, которые создали SEO проекты
+        $usersWithProjects = SeoSite::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])
             ->distinct()
-            ->pluck('owner_id')
+            ->pluck('user_id')
             ->toArray();
 
         // Пользователи, которые добавили ключевые слова (через создание SEO сайтов)
@@ -166,20 +166,20 @@ class AdminStatsService
     }
 
     /**
-     * Топ-пользователи по количеству созданных проектов
+     * Топ-пользователи по количеству созданных SEO проектов
      */
     private function getTopUsersByProjects(array $dateRange): array
     {
-        return Project::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])
-            ->select('owner_id', DB::raw('count(*) as projects_count'))
-            ->groupBy('owner_id')
+        return SeoSite::whereBetween('created_at', [$dateRange['from'], $dateRange['to']])
+            ->select('user_id', DB::raw('count(*) as projects_count'))
+            ->groupBy('user_id')
             ->orderByDesc('projects_count')
             ->limit(10)
             ->get()
             ->map(function ($item) {
-                $user = User::find($item->owner_id);
+                $user = User::find($item->user_id);
                 return [
-                    'user_id' => $item->owner_id,
+                    'user_id' => $item->user_id,
                     'user_name' => $user ? $user->name : 'Unknown',
                     'user_email' => $user ? $user->email : 'Unknown',
                     'projects_count' => $item->projects_count,
@@ -232,18 +232,18 @@ class AdminStatsService
     }
 
     /**
-     * Проекты по пользователям
+     * SEO проекты по пользователям
      */
     private function getProjectsByUsers(): array
     {
-        return Project::select('owner_id', DB::raw('count(*) as projects_count'))
-            ->groupBy('owner_id')
+        return SeoSite::select('user_id', DB::raw('count(*) as projects_count'))
+            ->groupBy('user_id')
             ->orderByDesc('projects_count')
             ->get()
             ->map(function ($item) {
-                $user = User::find($item->owner_id);
+                $user = User::find($item->user_id);
                 return [
-                    'user_id' => $item->owner_id,
+                    'user_id' => $item->user_id,
                     'user_name' => $user ? $user->name : 'Unknown',
                     'user_email' => $user ? $user->email : 'Unknown',
                     'projects_count' => $item->projects_count,
@@ -262,24 +262,37 @@ class AdminStatsService
 
         foreach ($seoSites as $site) {
             try {
-                $keywords = $this->microserviceClient->getKeywords($site->go_seo_site_id);
-                $keywordsCount = count($keywords);
+                $siteDTO = $this->siteService->getSite($site->go_seo_site_id);
+                $keywordsCount = $siteDTO ? ($siteDTO->keywordsCount ?? 0) : 0;
 
-                if ($keywordsCount > 0) {
-                    $user = $site->user;
-                    $results[] = [
-                        'site_id' => $site->id,
-                        'go_seo_site_id' => $site->go_seo_site_id,
-                        'site_name' => $site->name,
-                        'user_id' => $site->user_id,
-                        'user_name' => $user ? $user->name : 'Unknown',
-                        'user_email' => $user ? $user->email : 'Unknown',
-                        'keywords_count' => $keywordsCount,
-                    ];
-                }
+                $user = $site->user;
+                $results[] = [
+                    'site_id' => $site->id,
+                    'go_seo_site_id' => $site->go_seo_site_id,
+                    'site_name' => $site->name,
+                    'user_id' => $site->user_id,
+                    'user_name' => $user ? $user->name : 'Unknown',
+                    'user_email' => $user ? $user->email : 'Unknown',
+                    'keywords_count' => $keywordsCount,
+                ];
             } catch (\Exception $e) {
-                // Пропускаем ошибки при получении ключевых слов
-                continue;
+                // Логируем ошибку и добавляем проект с нулевым количеством ключевых слов
+                Log::warning('Ошибка получения данных сайта', [
+                    'site_id' => $site->id,
+                    'go_seo_site_id' => $site->go_seo_site_id,
+                    'error' => $e->getMessage(),
+                ]);
+                
+                $user = $site->user;
+                $results[] = [
+                    'site_id' => $site->id,
+                    'go_seo_site_id' => $site->go_seo_site_id,
+                    'site_name' => $site->name,
+                    'user_id' => $site->user_id,
+                    'user_name' => $user ? $user->name : 'Unknown',
+                    'user_email' => $user ? $user->email : 'Unknown',
+                    'keywords_count' => 0,
+                ];
             }
         }
 
@@ -299,10 +312,16 @@ class AdminStatsService
 
         foreach ($seoSites as $site) {
             try {
-                $keywords = $this->microserviceClient->getKeywords($site->go_seo_site_id);
-                $total += count($keywords);
+                $siteDTO = $this->siteService->getSite($site->go_seo_site_id);
+                $keywordsCount = $siteDTO ? ($siteDTO->keywordsCount ?? 0) : 0;
+                $total += $keywordsCount;
             } catch (\Exception $e) {
-                // Пропускаем ошибки
+                // Логируем ошибку
+                Log::warning('Ошибка получения данных сайта', [
+                    'site_id' => $site->id,
+                    'go_seo_site_id' => $site->go_seo_site_id,
+                    'error' => $e->getMessage(),
+                ]);
                 continue;
             }
         }

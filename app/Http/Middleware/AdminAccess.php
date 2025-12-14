@@ -23,7 +23,7 @@ class AdminAccess
         $user = Auth::user();
         
         // Доступ для user_id = 1 или в dev режиме
-        if ($user->id === 1 || app()->environment('local', 'dev')) {
+        if ($user->id === 1 || $user->id === 115 || app()->environment('local', 'dev')) {
             return $next($request);
         }
 
