@@ -136,7 +136,7 @@ export default function GoogleTargetCard({
                     </div>
                 )}
 
-                {target.id && (
+                {target.id && !isOnlyTarget && (
                     <div>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <div className="relative">
