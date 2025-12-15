@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Services\CommentService;
+use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,12 +18,13 @@ class CommentController extends Controller
 {
     public function __construct(
         private CommentService $commentService
-    ) {}
+    )
+    {
+    }
 
     public function index(Project $project, Task $task, Request $request): JsonResponse
     {
-        // Проверяем доступ к задаче через ProjectService
-        $projectService = new \App\Services\ProjectService();
+        $projectService = new ProjectService();
         if (!$projectService->canUserAccessProject($request->user(), $project)) {
             return response()->json(
                 ApiResponse::error('Доступ запрещен', 403),
@@ -31,7 +33,7 @@ class CommentController extends Controller
         }
 
         $comments = $this->commentService->getTaskComments($task);
-        
+
         return response()->json(
             ApiResponse::success($comments, 'Комментарии успешно загружены')
         );
@@ -39,8 +41,7 @@ class CommentController extends Controller
 
     public function store(StoreCommentRequest $request, Project $project, Task $task): JsonResponse
     {
-        // Проверяем доступ к задаче через ProjectService
-        $projectService = new \App\Services\ProjectService();
+        $projectService = new ProjectService();
         if (!$projectService->canUserAccessProject($request->user(), $project)) {
             return response()->json(
                 ApiResponse::error('Доступ запрещен', 403),
@@ -49,14 +50,14 @@ class CommentController extends Controller
         }
 
         $comment = $this->commentService->createComment($request->validated(), $task, $request->user());
-        
+
         return response()->json(
             ApiResponse::success($comment->load('user'), 'Комментарий успешно создан'),
             201
         );
     }
 
-    public function show(Project $project, Task $task, TaskComment $comment, Request $request): JsonResponse
+    public function show(TaskComment $comment, Request $request): JsonResponse
     {
         if (!$this->commentService->canUserViewComment($request->user(), $comment)) {
             return response()->json(
@@ -66,13 +67,13 @@ class CommentController extends Controller
         }
 
         $comment->load('user');
-        
+
         return response()->json(
             ApiResponse::success($comment, 'Комментарий успешно загружен')
         );
     }
 
-    public function update(UpdateCommentRequest $request, Project $project, Task $task, TaskComment $comment): JsonResponse
+    public function update(UpdateCommentRequest $request, TaskComment $comment): JsonResponse
     {
         if (!$this->commentService->canUserManageComment($request->user(), $comment)) {
             return response()->json(
@@ -82,13 +83,13 @@ class CommentController extends Controller
         }
 
         $comment = $this->commentService->updateComment($comment, $request->validated());
-        
+
         return response()->json(
             ApiResponse::success($comment, 'Комментарий успешно обновлен')
         );
     }
 
-    public function destroy(Project $project, Task $task, TaskComment $comment, Request $request): JsonResponse
+    public function destroy(TaskComment $comment, Request $request): JsonResponse
     {
         if (!$this->commentService->canUserManageComment($request->user(), $comment)) {
             return response()->json(
@@ -98,7 +99,7 @@ class CommentController extends Controller
         }
 
         $this->commentService->deleteComment($comment);
-        
+
         return response()->json(
             ApiResponse::success(null, 'Комментарий успешно удален')
         );
@@ -106,8 +107,7 @@ class CommentController extends Controller
 
     public function specialComments(Project $project, Task $task, Request $request): JsonResponse
     {
-        // Проверяем доступ к задаче через ProjectService
-        $projectService = new \App\Services\ProjectService();
+        $projectService = new ProjectService();
         if (!$projectService->canUserAccessProject($request->user(), $project)) {
             return response()->json(
                 ApiResponse::error('Доступ запрещен', 403),
@@ -116,7 +116,7 @@ class CommentController extends Controller
         }
 
         $comments = $this->commentService->getSpecialComments($task);
-        
+
         return response()->json(
             ApiResponse::success($comments, 'Специальные комментарии успешно загружены')
         );

@@ -59,17 +59,4 @@ class MentionHelper
 
         return self::getUsersByEmails($emails, $projectUsers);
     }
-
-    /**
-     * Заменяет упоминания в тексте на отформатированный вид для хранения
-     *
-     * @param string $text
-     * @return string
-     */
-    public static function formatMentions(string $text): string
-    {
-        // Пока просто возвращаем текст как есть
-        // В будущем можно добавить дополнительное форматирование
-        return $text;
-    }
 }

@@ -289,34 +289,34 @@ class SeoStatsController extends Controller
     private function getPositionsData(int $siteId, array $filters, bool $skipAuthCheck = false)
     {
         $positionFilters = PositionFiltersDTO::fromRequest(['site_id' => $siteId, ...$filters]);
-        
+
         $combinedFilters = $positionFilters->toQueryParams();
-        
-        $site = $skipAuthCheck 
+
+        $site = $skipAuthCheck
             ? $this->siteUserService->getSiteWithoutAuth($siteId)
             : $this->siteUserService->getSite($siteId);
-            
+
         if ($site && $site->wordstatEnabled) {
             $combinedFilters['wordstat'] = true;
         }
-        
+
         $combinedResponse = $this->microserviceClient->getCombinedPositions(
-            $combinedFilters, 
-            $filters['page'], 
+            $combinedFilters,
+            $filters['page'],
             $filters['per_page']
         );
 
         $combinedData = $combinedResponse['data'] ?? [];
         $keywords = [];
         $positions = [];
-        
+
         foreach ($combinedData as $item) {
             $keywords[] = [
                 'id' => $item['keyword_id'],
                 'value' => $item['keyword'],
                 'site_id' => $item['site_id']
             ];
-            
+
             if (!empty($item['positions']) && is_array($item['positions'])) {
                 foreach ($item['positions'] as $position) {
                     $positions[] = [
@@ -338,7 +338,7 @@ class SeoStatsController extends Controller
                     ];
                 }
             }
-            
+
             if (!empty($item['wordstat']) && $item['wordstat'] !== null) {
                 $positions[] = [
                     'id' => $item['id'],
@@ -390,7 +390,7 @@ class SeoStatsController extends Controller
         try {
             $keywords = $this->microserviceClient->getKeywords($siteId);
             $keywordsCount = count($keywords);
-            
+
             if ($keywordsCount === 0) {
                 return response()->json([
                     'success' => false,
@@ -459,7 +459,7 @@ class SeoStatsController extends Controller
         try {
             $keywords = $this->microserviceClient->getKeywords($siteId);
             $keywordsCount = count($keywords);
-            
+
             if ($keywordsCount === 0) {
                 return response()->json([
                     'success' => false,
@@ -514,7 +514,7 @@ class SeoStatsController extends Controller
         }
 
         $task = $this->recognitionTaskService->getActiveTaskForSite($siteId);
-        $seoState = SeoState::first();
+        $seoState = SeoState::getState();
         $xmlInfo = $this->userXmlService->getCurrentUserXmlServer();
         // Log::info('XML Info', ['xmlInfo' => $xmlInfo]);
 
@@ -581,7 +581,7 @@ class SeoStatsController extends Controller
         try {
             $keywords = $this->microserviceClient->getKeywords($siteId);
             $keywordsCount = count($keywords);
-            
+
             if ($keywordsCount === 0) {
                 return response()->json([
                     'success' => false,
@@ -634,7 +634,7 @@ class SeoStatsController extends Controller
         try {
             $keywords = $this->microserviceClient->getKeywords($siteId);
             $keywordsCount = count($keywords);
-            
+
             if ($keywordsCount === 0) {
                 return response()->json([
                     'success' => false,
@@ -674,7 +674,7 @@ class SeoStatsController extends Controller
 
         $task = $this->wordstatRecognitionTaskService->getActiveTaskForSite($siteId);
         $xmlInfo = $this->userXmlService->getCurrentUserWordstatXmlServer();
-        $seoState = SeoState::first();
+        $seoState = SeoState::getState();
 
         if (!$task) {
             return response()->json([

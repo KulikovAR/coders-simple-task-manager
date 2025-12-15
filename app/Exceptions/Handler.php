@@ -6,6 +6,7 @@ use App\Http\Resources\ApiResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -31,7 +32,6 @@ class Handler extends ExceptionHandler
             //
         });
 
-        // Обработка API ошибок
         $this->renderable(function (Throwable $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return $this->handleApiException($e, $request);
@@ -58,13 +58,13 @@ class Handler extends ExceptionHandler
             );
         }
 
-        // Для других ошибок возвращаем общее сообщение
+
         $statusCode = 500;
-        
-        if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+
+        if ($e instanceof HttpException) {
             $statusCode = $e->getStatusCode();
         }
-        
+
         return response()->json(
             ApiResponse::error(
                 $statusCode === 500 ? 'Internal server error' : $e->getMessage(),
@@ -73,4 +73,4 @@ class Handler extends ExceptionHandler
             $statusCode
         );
     }
-} 
+}

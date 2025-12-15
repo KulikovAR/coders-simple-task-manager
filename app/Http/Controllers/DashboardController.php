@@ -14,8 +14,10 @@ class DashboardController extends Controller
 {
     public function __construct(
         private SubscriptionService $subscriptionService
-    ) {}
-    
+    )
+    {
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -65,7 +67,6 @@ class DashboardController extends Controller
             'user_connected' => !empty($user->telegram_chat_id),
         ];
 
-        // Получаем информацию о подписке пользователя и возможности создания проекта
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
         $canCreateProject = $this->subscriptionService->canCreateProject($user);
 

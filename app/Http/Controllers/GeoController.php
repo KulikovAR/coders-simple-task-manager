@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\GoogleDomainType;
 use App\Services\Seo\Services\GeoService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GeoController extends Controller
 {
@@ -19,9 +19,9 @@ class GeoController extends Controller
     public function getGoogleDomains(Request $request): JsonResponse
     {
         $query = $request->input('query', '');
-        
+
         $domains = GoogleDomainType::list();
-        
+
         $filtered = [];
         foreach ($domains as $value => $label) {
             if (empty($query) || stripos($value, $query) !== false || stripos($label, $query) !== false) {
@@ -42,7 +42,7 @@ class GeoController extends Controller
     public function getGoogleDomainByValue(Request $request, string $value): JsonResponse
     {
         $domain = GoogleDomainType::tryFrom($value);
-        
+
         if (!$domain) {
             return response()->json([
                 'success' => false,

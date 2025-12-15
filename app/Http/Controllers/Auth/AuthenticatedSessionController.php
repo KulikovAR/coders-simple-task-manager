@@ -34,7 +34,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Отправляем письмо подтверждения для неподтвержденных пользователей
         $user = Auth::user();
         if ($user instanceof User && !$user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();

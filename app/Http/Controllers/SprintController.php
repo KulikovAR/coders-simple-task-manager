@@ -14,9 +14,11 @@ use Inertia\Inertia;
 class SprintController extends Controller
 {
     public function __construct(
-        private SprintService $sprintService,
+        private SprintService  $sprintService,
         private ProjectService $projectService
-    ) {}
+    )
+    {
+    }
 
     public function index(Project $project)
     {

@@ -221,7 +221,7 @@ enum GoogleDomainType: string
     public function getId(): ?int
     {
         static $domainIds = null;
-        
+
         if ($domainIds === null) {
             $domainIds = [];
             $csvPath = base_path('domains.csv');
@@ -238,7 +238,7 @@ enum GoogleDomainType: string
                 }
             }
         }
-        
+
         return $domainIds[$this->value] ?? null;
     }
 }

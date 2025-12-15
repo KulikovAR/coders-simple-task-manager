@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Ai\FlexibleAiAgentService;
+use App\Models\AiConversation;
 use App\Services\Ai\CommandRegistry;
-use App\Services\Ai\ContextProviders\UserContextProvider;
-use App\Services\Ai\ContextProviders\ProjectContextProvider;
-use App\Services\Ai\ContextProviders\UsersContextProvider;
-use App\Services\Ai\ContextProviders\EnumsContextProvider;
 use App\Services\Ai\ContextProviders\DynamicStatusContextProvider;
-use App\Services\Ai\ContextProviders\SprintContextProvider;
+use App\Services\Ai\ContextProviders\EnumsContextProvider;
 use App\Services\Ai\ContextProviders\LazyContextProvider;
-use App\Services\ProjectService;
-use App\Services\TaskService;
-use App\Services\SprintService;
-use App\Services\CommentService;
+use App\Services\Ai\ContextProviders\ProjectContextProvider;
+use App\Services\Ai\ContextProviders\SprintContextProvider;
+use App\Services\Ai\ContextProviders\UserContextProvider;
+use App\Services\Ai\ContextProviders\UsersContextProvider;
+use App\Services\Ai\FlexibleAiAgentService;
 use App\Services\AiConversationService;
+use App\Services\CommentService;
+use App\Services\ProjectService;
+use App\Services\SprintService;
 use App\Services\SubscriptionService;
+use App\Services\TaskService;
 use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,15 +34,11 @@ class AiAgentController extends Controller
         $this->subscriptionService = $subscriptionService;
     }
 
-    /**
-     * Показать интерфейс ИИ-агента
-     */
     public function index()
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
 
-        // Получаем информацию о лимитах запросов к ИИ
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
         $aiRequestsRemaining = $user->getRemainingAiRequests();
 
@@ -74,29 +71,25 @@ class AiAgentController extends Controller
         $message = $request->input('message');
         $sessionId = $request->input('session_id');
 
-        // Проверяем, есть ли у пользователя доступные запросы к ИИ
-        if (!$this->subscriptionService->canUseAi($user)) {
-                    // Получаем информацию о текущем тарифе
-        $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
 
-        return response()->json([
-            'success' => false,
-            'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
-            'subscription' => [
-                'name' => $subscriptionInfo['name'],
-                'ai_requests_remaining' => $user->getRemainingAiRequests(),
-                'ai_requests_reset_at' => $user->ai_requests_reset_at,
-            ]
-        ], 403);
+        if (!$this->subscriptionService->canUseAi($user)) {
+            $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Превышен лимит запросов к ИИ-ассистенту. Пожалуйста, обновите тариф.',
+                'subscription' => [
+                    'name' => $subscriptionInfo['name'],
+                    'ai_requests_remaining' => $user->getRemainingAiRequests(),
+                    'ai_requests_reset_at' => $user->ai_requests_reset_at,
+                ]
+            ], 403);
         }
 
-        // Обрабатываем запрос
         $result = $this->aiAgentService->processRequest($message, $user, $sessionId);
 
-        // Увеличиваем счетчик использованных запросов
         $this->subscriptionService->processAiUsage($user);
 
-        // Добавляем информацию о лимитах в ответ
         $result['subscription'] = [
             'ai_requests_remaining' => $user->getRemainingAiRequests(),
             'ai_requests_reset_at' => $user->ai_requests_reset_at,
@@ -105,9 +98,6 @@ class AiAgentController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Получить историю диалогов пользователя
-     */
     public function getConversations(Request $request)
     {
         $user = Auth::user();
@@ -128,16 +118,13 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Получить сообщения конкретного диалога
-     */
     public function getConversationMessages(Request $request, $conversationId)
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
         $perPage = $request->get('per_page', 20);
 
-        $conversation = \App\Models\AiConversation::where('id', $conversationId)
+        $conversation = AiConversation::where('id', $conversationId)
             ->where('user_id', $user->id)
             ->firstOrFail();
 
@@ -156,9 +143,6 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Создать новый диалог
-     */
     public function createConversation()
     {
         $user = Auth::user();
@@ -172,15 +156,12 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Удалить диалог
-     */
     public function deleteConversation($conversationId)
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
 
-        $conversation = \App\Models\AiConversation::where('id', $conversationId)
+        $conversation = AiConversation::where('id', $conversationId)
             ->where('user_id', $user->id)
             ->firstOrFail();
 
@@ -192,14 +173,11 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Получить статистику пользователя
-     */
     public function getStats()
     {
         $user = Auth::user();
         $conversationService = app(AiConversationService::class);
-        
+
         $subscriptionInfo = $this->subscriptionService->getUserSubscriptionInfo($user);
         $aiRequestsRemaining = $user->getRemainingAiRequests();
 
@@ -217,9 +195,6 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Получить доступные команды (для отладки)
-     */
     public function getCommands()
     {
         $commandRegistry = $this->createCommandRegistry();
@@ -230,9 +205,6 @@ class AiAgentController extends Controller
         ]);
     }
 
-    /**
-     * Создать экземпляр гибкого ИИ-агента
-     */
     private function createFlexibleAiAgentService(): FlexibleAiAgentService
     {
         $commandRegistry = $this->createCommandRegistry();
@@ -251,9 +223,6 @@ class AiAgentController extends Controller
         return new FlexibleAiAgentService($commandRegistry, $contextProviders, app(AiConversationService::class));
     }
 
-    /**
-     * Создать реестр команд
-     */
     private function createCommandRegistry(): CommandRegistry
     {
         return new CommandRegistry(

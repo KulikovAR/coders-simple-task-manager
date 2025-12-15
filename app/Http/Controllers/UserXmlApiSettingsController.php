@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Services\Seo\Services\UserXmlApiSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +10,9 @@ class UserXmlApiSettingsController extends Controller
 {
     public function __construct(
         private UserXmlApiSettingsService $xmlApiSettingsService
-    ) {}
+    )
+    {
+    }
 
     public function getSettings(): JsonResponse
     {

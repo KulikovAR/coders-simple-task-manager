@@ -12,7 +12,7 @@ enum CommentType: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::GENERAL => 'Общий комментарий',
             self::TESTING_FEEDBACK => 'Отзыв тестирования',
             self::REVIEW_COMMENT => 'Комментарий ревью',
@@ -23,9 +23,9 @@ enum CommentType: string
 
     public function getColor(): string
     {
-        return match($this) {
+        return match ($this) {
             self::GENERAL => '#6B7280',
-            self::TESTING_FEEDBACK => '#8B5CF6', // Фиолетовый для выделения
+            self::TESTING_FEEDBACK => '#8B5CF6',
             self::REVIEW_COMMENT => '#F59E0B',
             self::BUG_REPORT => '#EF4444',
             self::FEATURE_REQUEST => '#10B981',
@@ -34,7 +34,7 @@ enum CommentType: string
 
     public function getIcon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::GENERAL => '💬',
             self::TESTING_FEEDBACK => '🧪',
             self::REVIEW_COMMENT => '👁️',
@@ -45,7 +45,7 @@ enum CommentType: string
 
     public function isSpecial(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::TESTING_FEEDBACK => true,
             default => false,
         };
@@ -55,4 +55,4 @@ enum CommentType: string
     {
         return array_column(self::cases(), 'value');
     }
-} 
+}

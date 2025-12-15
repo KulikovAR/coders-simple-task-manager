@@ -13,17 +13,11 @@ use Inertia\Inertia;
 
 class PasswordResetController extends Controller
 {
-    /**
-     * Показать форму запроса сброса пароля
-     */
     public function showForgotPasswordForm()
     {
         return Inertia::render('Auth/ForgotPassword');
     }
 
-    /**
-     * Отправить ссылку для сброса пароля
-     */
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
@@ -41,9 +35,6 @@ class PasswordResetController extends Controller
         }
     }
 
-    /**
-     * Показать форму сброса пароля
-     */
     public function showResetForm(Request $request, string $token)
     {
         return Inertia::render('Auth/ResetPassword', [
@@ -52,9 +43,6 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    /**
-     * Сбросить пароль
-     */
     public function reset(Request $request)
     {
         $request->validate([

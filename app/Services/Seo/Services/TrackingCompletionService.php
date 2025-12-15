@@ -6,13 +6,9 @@ use App\Models\SeoRecognitionTask;
 use App\Models\SeoState;
 use App\Models\WordstatRecognitionTask;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class TrackingCompletionService
 {
-    // TTL для кеша отложенных сообщений (в секундах)
-    private const PENDING_MESSAGE_TTL = 3600; // 1 час
-
     public function handleTrackingCompletion(array $message): void
     {
         try {
@@ -20,9 +16,7 @@ class TrackingCompletionService
             $status = $message['status'] ?? null;
 
             if (!$taskId) {
-                Log::warning('Received tracking completion message without job_id or task_id', [
-                    'message' => $message
-                ]);
+                Log::warning('Received tracking completion message without job_id or task_id', compact('message'));
                 return;
             }
 
@@ -35,7 +29,7 @@ class TrackingCompletionService
             $riverHighload = $message['xml_river_highload'] ?? null;
 
             if ($stockHighload !== null || $riverHighload !== null) {
-                $seoState = SeoState::first(); // берем запись с id=1
+                $seoState = SeoState::getState();
                 if ($seoState) {
                     $seoState->update([
                         'xml_stock_highload' => $stockHighload ?? $seoState->xml_stock_highload,

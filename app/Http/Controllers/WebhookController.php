@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Webhook;
 use App\Models\Project;
+use App\Models\Webhook;
 use App\Services\WebhookService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -26,11 +26,11 @@ class WebhookController extends Controller
     {
 
         $webhooks = $project->webhooks()
-            ->with(['user', 'logs' => function($query) {
+            ->with(['user', 'logs' => function ($query) {
                 $query->latest()->limit(5);
             }])
             ->get()
-            ->map(function($webhook) {
+            ->map(function ($webhook) {
                 $stats = $this->webhookService->getWebhookStats($webhook);
                 return [
                     'id' => $webhook->id,
@@ -60,11 +60,11 @@ class WebhookController extends Controller
     {
 
         $webhooks = $project->webhooks()
-            ->with(['user', 'logs' => function($query) {
+            ->with(['user', 'logs' => function ($query) {
                 $query->latest()->limit(5);
             }])
             ->get()
-            ->map(function($webhook) {
+            ->map(function ($webhook) {
                 $stats = $this->webhookService->getWebhookStats($webhook);
                 return [
                     'id' => $webhook->id,
@@ -268,7 +268,7 @@ class WebhookController extends Controller
         $webhook->update(['is_active' => !$webhook->is_active]);
 
         $message = $webhook->is_active ? 'Webhook активирован' : 'Webhook деактивирован';
-        
+
         return redirect()->route('webhooks.index', $project)
             ->with('success', $message);
     }

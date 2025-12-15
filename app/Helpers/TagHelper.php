@@ -16,13 +16,10 @@ class TagHelper
             return null;
         }
 
-        // Заменяем все запятые на пробелы
         $tagsString = str_replace(',', ' ', $tagsString);
 
-        // Разбиваем по пробелам, чистим пробелы и убираем пустые значения
         $tags = array_filter(array_map('trim', preg_split('/\s+/', $tagsString)));
 
-        // Приводим к нижнему регистру, убираем дубликаты и сортируем
         $tags = array_unique(array_map('mb_strtolower', $tags));
         sort($tags);
 
@@ -50,7 +47,7 @@ class TagHelper
         $needles = array_map('mb_strtolower', $needles);
 
         foreach ($needles as $needle) {
-            if (!in_array($needle, $haystack)) {
+            if (!in_array($needle, $haystack, true)) {
                 return false;
             }
         }
@@ -86,12 +83,10 @@ class TagHelper
         }
 
         foreach ($tags as $tag) {
-            // Проверяем длину тега (от 2 до 50 символов)
             if (mb_strlen($tag) < 2 || mb_strlen($tag) > 50) {
                 return false;
             }
 
-            // Проверяем, что тег содержит только разрешенные символы
             if (!preg_match('/^[a-zа-яё0-9\-_]+$/ui', $tag)) {
                 return false;
             }

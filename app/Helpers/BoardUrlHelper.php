@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Models\Task;
+
 class BoardUrlHelper
 {
     /**
@@ -14,18 +16,18 @@ class BoardUrlHelper
     public static function getBoardUrl(int $projectId, ?int $sprintId = null): string
     {
         $url = route('projects.board', $projectId);
-        
+
         if ($sprintId) {
             $url .= '?sprint_id=' . $sprintId;
         }
-        
+
         return $url;
     }
 
     /**
      * Формирует URL для доски проекта на основе задачи
      *
-     * @param \App\Models\Task $task
+     * @param Task $task
      * @return string|null
      */
     public static function getBoardUrlFromTask($task): ?string

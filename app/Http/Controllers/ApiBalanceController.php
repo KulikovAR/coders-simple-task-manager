@@ -17,7 +17,7 @@ class ApiBalanceController extends Controller
     public function index(): JsonResponse
     {
         $balances = $this->balanceManager->getBalances();
-        
+
         return response()->json([
             'success' => true,
             'data' => $balances->toArray()

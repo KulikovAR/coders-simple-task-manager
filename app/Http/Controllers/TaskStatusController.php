@@ -5,20 +5,20 @@ namespace App\Http\Controllers;
 use App\Exceptions\StatusHasTasksException;
 use App\Models\Project;
 use App\Models\Sprint;
-use App\Models\TaskStatus;
 use App\Services\ProjectService;
 use App\Services\TaskStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class TaskStatusController extends Controller
 {
     public function __construct(
         private TaskStatusService $taskStatusService,
-        private ProjectService $projectService
-    ) {}
+        private ProjectService    $projectService
+    )
+    {
+    }
 
     /**
      * Показать форму управления статусами проекта
@@ -155,33 +155,17 @@ class TaskStatusController extends Controller
             'statuses.*.color' => ['required', 'string', 'regex:/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/'],
         ]);
 
-        try {
-            $updatedStatuses = $this->taskStatusService->updateSprintStatuses($sprint, $request->statuses);
+        $updatedStatuses = $this->taskStatusService->updateSprintStatuses($sprint, $request->statuses);
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Статусы спринта успешно обновлены',
-                    'statuses' => $updatedStatuses,
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'Статусы спринта успешно обновлены');
-        } catch (StatusHasTasksException $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'status_names' => $e->getStatusNames(),
-                ], 422);
-            }
-
-            // Для Inertia-запросов возвращаем ошибки валидации
-            return redirect()->back()->withErrors([
-                'message' => $e->getMessage(),
-                'status_names' => $e->getStatusNames(),
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Статусы спринта успешно обновлены',
+                'statuses' => $updatedStatuses,
             ]);
         }
+
+        return redirect()->back()->with('success', 'Статусы спринта успешно обновлены');
     }
 
     /**

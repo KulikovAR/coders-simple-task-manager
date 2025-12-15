@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\Seo\Services\LanguageService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LanguageController extends Controller
 {

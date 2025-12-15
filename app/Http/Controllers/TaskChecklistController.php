@@ -25,8 +25,7 @@ class TaskChecklistController extends Controller
         }
 
         $checklists = $task->checklists()->orderBy('sort_order', 'asc')->get();
-        
-        // Для AJAX запросов или тестов возвращаем JSON
+
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -34,7 +33,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаем страницу
         return Inertia::render('Tasks/Show', [
             'task' => $task->load(['checklists' => function($query) {
                 $query->orderBy('sort_order', 'asc');
@@ -60,7 +58,6 @@ class TaskChecklistController extends Controller
             'is_completed' => false,
         ]);
 
-        // Для AJAX запросов или тестов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -69,7 +66,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаемся назад
         return redirect()->back()->with('success', 'Чек-лист успешно создан');
     }
 
@@ -94,7 +90,6 @@ class TaskChecklistController extends Controller
             'title' => $request->title,
         ]);
 
-        // Для AJAX запросов или тестов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -103,7 +98,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаемся назад
         return redirect()->back()->with('success', 'Чек-лист успешно обновлен');
     }
 
@@ -122,7 +116,6 @@ class TaskChecklistController extends Controller
 
         $checklist->delete();
 
-        // Для AJAX запросов или тестов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -130,7 +123,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаемся назад
         return redirect()->back()->with('success', 'Чек-лист успешно удален');
     }
 
@@ -151,7 +143,6 @@ class TaskChecklistController extends Controller
             'is_completed' => !$checklist->is_completed,
         ]);
 
-        // Для AJAX запросов или тестов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -160,7 +151,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаемся назад
         return redirect()->back()->with('success', 'Статус чек-листа успешно обновлен');
     }
 
@@ -189,7 +179,6 @@ class TaskChecklistController extends Controller
 
         $checklists = $task->checklists()->orderBy('sort_order', 'asc')->get();
 
-        // Для AJAX запросов или тестов возвращаем JSON
         if ($request->ajax() || $request->wantsJson() || app()->environment('testing')) {
             return response()->json([
                 'success' => true,
@@ -198,7 +187,6 @@ class TaskChecklistController extends Controller
             ]);
         }
 
-        // Для Inertia возвращаемся назад
         return redirect()->back()->with('success', 'Порядок чек-листов успешно обновлен');
     }
 }

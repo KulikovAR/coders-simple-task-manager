@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\RegionType;
 use App\Http\Controllers\Controller;
 use App\Services\DaDataService;
-use App\Enums\RegionType;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class DaDataController extends Controller
 {

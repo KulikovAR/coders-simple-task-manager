@@ -14,9 +14,11 @@ use Inertia\Inertia;
 class GanttController extends Controller
 {
     public function __construct(
-        private GanttService $ganttService,
+        private GanttService   $ganttService,
         private ProjectService $projectService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Показать Гантт диаграмму проекта
@@ -30,11 +32,7 @@ class GanttController extends Controller
         $sprintId = $request->get('sprint_id');
         $ganttData = $this->ganttService->getProjectGanttData($project, $sprintId);
 
-        return Inertia::render('Projects/Gantt', [
-            'project' => $project,
-            'ganttData' => $ganttData,
-            'sprintId' => $sprintId,
-        ]);
+        return Inertia::render('Projects/Gantt', compact('project', 'ganttData', 'sprintId'));
     }
 
     /**
@@ -118,9 +116,7 @@ class GanttController extends Controller
 
         $success = $this->ganttService->deleteDependency($dependency->id);
 
-        return response()->json([
-            'success' => $success,
-        ]);
+        return response()->json(compact('success'));
     }
 
     /**

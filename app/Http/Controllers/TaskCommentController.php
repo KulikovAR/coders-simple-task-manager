@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\MentionHelper;
+use App\Http\Requests\TaskCommentRequest;
 use App\Models\Task;
 use App\Models\TaskComment;
-use App\Http\Requests\TaskCommentRequest;
 use App\Services\NotificationService;
 use App\Services\TaskCommentService;
 use App\Services\TaskService;
-use App\Helpers\MentionHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -16,10 +16,12 @@ use Inertia\Inertia;
 class TaskCommentController extends Controller
 {
     public function __construct(
-        private TaskCommentService $taskCommentService,
-        private TaskService $taskService,
+        private TaskCommentService  $taskCommentService,
+        private TaskService         $taskService,
         private NotificationService $notificationService
-    ) {}
+    )
+    {
+    }
 
     public function index(Task $task)
     {
@@ -58,7 +60,6 @@ class TaskCommentController extends Controller
             }
         }
 
-        // Если это AJAX запрос, возвращаем JSON
         if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             return response()->json([
                 'success' => true,
@@ -91,7 +92,6 @@ class TaskCommentController extends Controller
 
         $comment = $this->taskCommentService->updateComment($comment, $request->validated());
 
-        // Если это AJAX запрос, возвращаем JSON
         if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             return response()->json([
                 'success' => true,
@@ -112,8 +112,7 @@ class TaskCommentController extends Controller
 
         $task = $comment->task;
         $this->taskCommentService->deleteComment($comment);
-
-        // Если это AJAX запрос, возвращаем JSON
+        
         if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             return response()->json([
                 'success' => true,

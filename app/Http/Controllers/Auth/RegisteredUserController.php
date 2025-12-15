@@ -19,7 +19,7 @@ use Inertia\Response;
 class RegisteredUserController extends Controller
 {
     protected SubscriptionService $subscriptionService;
-    
+
     public function __construct(SubscriptionService $subscriptionService)
     {
         $this->subscriptionService = $subscriptionService;
@@ -50,14 +50,12 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        
-        // Назначаем пользователю бесплатный тариф
+
         $freeSubscription = Subscription::where('slug', 'free')->first();
         if ($freeSubscription) {
             $this->subscriptionService->assignSubscriptionToUser($user, $freeSubscription);
         }
-        
-        // Создаем запись для отслеживания использования хранилища
+
         SubscriptionUserLimit::create([
             'user_id' => $user->id,
             'storage_used_bytes' => 0
@@ -65,7 +63,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Отправляем письмо подтверждения email
         $user->sendEmailVerificationNotification();
 
         Auth::login($user);

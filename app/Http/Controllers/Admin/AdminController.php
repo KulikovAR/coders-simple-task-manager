@@ -5,18 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\AdminService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class AdminController extends Controller
 {
     public function __construct(
         private AdminService $adminService
-    ) {}
+    )
+    {
+    }
 
-    /**
-     * Главная страница админки
-     */
     public function index()
     {
         return Inertia::render('Admin/Dashboard', [
@@ -24,13 +23,10 @@ class AdminController extends Controller
         ]);
     }
 
-    /**
-     * Список джобов с пагинацией
-     */
     public function jobs(Request $request)
     {
         $filters = $request->only(['site_id', 'status', 'page', 'per_page']);
-        
+
         $jobsData = $this->adminService->getTrackingJobs($filters);
 
         return Inertia::render('Admin/Jobs/Index', [
@@ -42,9 +38,6 @@ class AdminController extends Controller
         ]);
     }
 
-    /**
-     * Детали конкретного джоба
-     */
     public function job(string $id)
     {
         $job = $this->adminService->getTrackingJob($id);

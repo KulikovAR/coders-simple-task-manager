@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Payment;
 use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
@@ -58,7 +58,6 @@ class PaymentController extends Controller
 
     public function webhook(Request $request)
     {
-        $event = $request->input('event');
         $object = $request->input('object');
         if (!$object || !isset($object['id'])) {
             return response()->json(['success' => false, 'message' => 'Некорректные данные'], 400);

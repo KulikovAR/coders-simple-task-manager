@@ -19,4 +19,9 @@ class SeoState extends Model
     ];
 
     public $timestamps = true;
+
+    public static function getState(): self
+    {
+        return self::first();
+    }
 }

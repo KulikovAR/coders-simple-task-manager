@@ -12,7 +12,7 @@ class CommentController extends Controller
     public function store(CommentRequest $request, Task $task)
     {
         $commentService = app(CommentService::class);
-        
+
         $comment = $commentService->createComment([
             'content' => $request->input('content'),
             'type' => $request->type,
@@ -26,7 +26,7 @@ class CommentController extends Controller
         $this->authorize('update', $comment);
 
         $commentService = app(CommentService::class);
-        
+
         $comment = $commentService->updateComment($comment, $request->validated());
 
         return back()->with('success', 'Комментарий обновлен.');
@@ -37,7 +37,7 @@ class CommentController extends Controller
         $this->authorize('delete', $comment);
 
         $commentService = app(CommentService::class);
-        
+
         $commentService->deleteComment($comment);
 
         return back()->with('success', 'Комментарий удален.');
