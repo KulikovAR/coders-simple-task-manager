@@ -232,11 +232,12 @@ class TrackingCompletionService
     {
         $allCompleted = true;
         foreach ($jobs as $jid) {
-            if ((($engineStates[$jid]['status'] ?? '') !== 'completed') || $engineStates[$jid]['percent'] === 100) {
+            if ((($engineStates[$jid]['status'] ?? '') !== 'completed') && $engineStates[$jid]['percent'] !== 100) {
                 $allCompleted = false;
                 break;
             }
         }
+
         return $allCompleted;
     }
 }
