@@ -48,13 +48,17 @@ class SeoSiteTargetService
             ->whereNotIn('id', $idsToKeep)
             ->delete();
 
-        // Если для сайта осталась ровно одна комбинация, она всегда должна быть включена
+        // Если для сайта по каждому поисковику осталась ровно одна комбинация, она всегда должна быть включена
         $remainingTargets = SeoSiteTarget::where('seo_site_id', $seoSiteId)->get();
-        if ($remainingTargets->count() === 1) {
-            $single = $remainingTargets->first();
-            if (!$single->enabled) {
-                $single->enabled = true;
-                $single->save();
+        $groupedByEngine = $remainingTargets->groupBy('search_engine');
+
+        foreach ($groupedByEngine as $engine => $engineTargets) {
+            if ($engineTargets->count() === 1) {
+                $single = $engineTargets->first();
+                if (!$single->enabled) {
+                    $single->enabled = true;
+                    $single->save();
+                }
             }
         }
     }

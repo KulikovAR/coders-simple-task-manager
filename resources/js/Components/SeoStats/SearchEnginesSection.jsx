@@ -67,9 +67,9 @@ export default function SearchEnginesSection({
     const googleTargets = targets?.filter(t => t.search_engine === 'google') || [];
     const yandexTargets = targets?.filter(t => t.search_engine === 'yandex') || [];
 
-    // Общее количество комбинаций для проекта (по всем поисковикам)
-    const totalTargetsCount = (targets || []).length;
-    const isOnlyTarget = totalTargetsCount <= 1;
+    // Единственная комбинация считается отдельно для каждого поисковика
+    const isOnlyGoogleTarget = googleTargets.length <= 1;
+    const isOnlyYandexTarget = yandexTargets.length <= 1;
 
     const handleGoogleTargetChange = (index, updatedTarget) => {
         const newTargets = [...googleTargets];
@@ -174,7 +174,7 @@ export default function SearchEnginesSection({
                                     index={index}
                                     onChange={(updated) => handleGoogleTargetChange(index, updated)}
                                     onRemove={() => handleGoogleTargetRemove(index)}
-                                    isOnlyTarget={isOnlyTarget}
+                                    isOnlyTarget={isOnlyGoogleTarget}
                                     errors={{
                                         domain: errors?.targets?.[`google_${index}_domain`],
                                         region: errors?.targets?.[`google_${index}_region`],
@@ -245,7 +245,7 @@ export default function SearchEnginesSection({
                                     index={index}
                                     onChange={(updated) => handleYandexTargetChange(index, updated)}
                                     onRemove={() => handleYandexTargetRemove(index)}
-                                    isOnlyTarget={isOnlyTarget}
+                                    isOnlyTarget={isOnlyYandexTarget}
                                     errors={{
                                         lr: errors?.targets?.[`yandex_${index}_lr`],
                                         device: errors?.targets?.[`yandex_${index}_device`],
