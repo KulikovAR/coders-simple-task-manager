@@ -112,7 +112,7 @@ export default function YandexTargetCard({
                             />
                             <div className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors ${
                                 target.organic !== false
-                                    ? 'bg-accent-blue border-accent-blue' 
+                                    ? 'bg-accent-blue border-accent-blue'
                                     : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
                             } ${target.id ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                 {target.organic !== false && (
@@ -141,7 +141,7 @@ export default function YandexTargetCard({
                                 />
                                 <div className={`w-4 h-4 border-2 rounded flex items-center justify-center transition-colors ${
                                     target.enabled !== false
-                                        ? 'bg-accent-blue border-accent-blue' 
+                                        ? 'bg-accent-blue border-accent-blue'
                                         : 'bg-secondary-bg border-border-color hover:border-accent-blue/50'
                                 }`}>
                                     {target.enabled !== false && (
@@ -151,7 +151,7 @@ export default function YandexTargetCard({
                                     )}
                                 </div>
                             </div>
-                            <span className="text-sm font-medium text-text-primary">Включено</span>
+                            <span className="text-sm font-medium text-text-primary">Включить/Выключить</span>
                         </label>
                         <p className="text-xs text-text-muted mt-1 ml-7">
                             Если выключено, распознавание по этому target не выполняется
