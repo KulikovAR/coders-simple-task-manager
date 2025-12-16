@@ -1,16 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState, useRef } from 'react';
-// import Waves from '@/Components/Waves';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 // Компоненты лендинга
 import HeroSection from '@/Components/Landing/HeroSection';
 import FeaturesSection from '@/Components/Landing/FeaturesSection';
-import AiAssistantSection from '@/Components/Landing/AiAssistantSection';
 import ScreenshotsSection from '@/Components/Landing/ScreenshotsSection';
+import AiAssistantSection from '@/Components/Landing/AiAssistantSection';
 import BenefitsSection from '@/Components/Landing/BenefitsSection';
 import PricingSection from '@/Components/Landing/PricingSection';
-import CtaSection from '@/Components/Landing/CtaSection';
 import Footer from '@/Components/Landing/Footer';
 import YandexMetrika from '@/Components/YandexMetrika';
 
@@ -21,13 +19,11 @@ export default function Landing({ auth }) {
     const sectionsRef = useRef({});
 
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'light');
         document.body.setAttribute('data-page', 'Landing');
 
-        // Плавное появление страницы
         setTimeout(() => setIsLoaded(true), 100);
 
-        // Настройка наблюдения за секциями для активного меню
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -36,7 +32,6 @@ export default function Landing({ auth }) {
             });
         }, { threshold: 0.3 });
 
-        // Наблюдение за всеми секциями
         Object.values(sectionsRef.current).forEach(section => {
             if (section) observer.observe(section);
         });
@@ -55,7 +50,6 @@ export default function Landing({ auth }) {
         }
     };
 
-    // Регистрация ссылки на секцию
     const registerSection = (id, ref) => {
         if (ref && !sectionsRef.current[id]) {
             sectionsRef.current[id] = ref;
@@ -79,120 +73,109 @@ export default function Landing({ auth }) {
                 <meta name="twitter:description" content="Проекты, спринты, канбан, теги, дедлайны, комментарии, webhook интеграции и ИИ‑ассистент." />
                 <meta name="twitter:image" content="/og-image.jpg" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta name="theme-color" content="#0a0a0a" />
+                <meta name="theme-color" content="#ffffff" />
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "SoftwareApplication",
-                        "name": "379ТМ",
-                        "description": "Таск‑менеджер класса Pro с ИИ. Проекты, спринты, канбан, теги, дедлайны, уведомления и webhook интеграции.",
-                        "applicationCategory": "BusinessApplication",
-                        "operatingSystem": "Web",
-                        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
-                    })}
-                </script>
             </Head>
 
-            <div className="min-h-screen bg-black text-text-primary relative overflow-hidden">
-                {/* Yandex Metrika */}
+            <div className="min-h-screen bg-white text-black">
                 <YandexMetrika />
-                
-                {/* Навигация */}
-                <header className={`fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-                    <nav className="max-w-7xl mx-auto px-6 py-4">
+
+                {/* Навигация в стиле Rocketbank */}
+                <header className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                    <nav className="max-w-6xl mx-auto px-6 py-6">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <ApplicationLogo className="h-9 w-auto" />
-                            </div>
-                            <div className="hidden md:flex items-center gap-8 text-sm">
+                            <ApplicationLogo className="h-8 w-auto text-black" />
+                            
+                            <div className="hidden md:flex items-center gap-10">
                                 <button
                                     onClick={() => navClick('features')}
-                                    className={`${activeSection === 'features' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'features' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                    className={`text-sm ${activeSection === 'features' ? 'text-black font-medium' : 'text-gray-500'} hover:text-black transition-colors`}
                                 >
                                     Возможности
                                 </button>
                                 <button
                                     onClick={() => navClick('screenshots')}
-                                    className={`${activeSection === 'screenshots' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'screenshots' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                    className={`text-sm ${activeSection === 'screenshots' ? 'text-black font-medium' : 'text-gray-500'} hover:text-black transition-colors`}
                                 >
                                     Интерфейс
                                 </button>
                                 <button
                                     onClick={() => navClick('ai-assistant')}
-                                    className={`${activeSection === 'ai-assistant' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'ai-assistant' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                    className={`text-sm ${activeSection === 'ai-assistant' ? 'text-black font-medium' : 'text-gray-500'} hover:text-black transition-colors`}
                                 >
                                     ИИ‑ассистент
                                 </button>
                                 <button
                                     onClick={() => navClick('benefits')}
-                                    className={`${activeSection === 'benefits' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'benefits' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                    className={`text-sm ${activeSection === 'benefits' ? 'text-black font-medium' : 'text-gray-500'} hover:text-black transition-colors`}
                                 >
                                     Преимущества
                                 </button>
                                 <button
                                     onClick={() => navClick('pricing')}
-                                    className={`${activeSection === 'pricing' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300 relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all after:duration-300 ${activeSection === 'pricing' ? 'after:w-full' : 'after:w-0'} hover:after:w-full`}
+                                    className={`text-sm ${activeSection === 'pricing' ? 'text-black font-medium' : 'text-gray-500'} hover:text-black transition-colors`}
                                 >
                                     Тарифы
                                 </button>
-                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
+                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-black transition-colors">
                                     Поддержка
                                 </a>
                                 {auth.user ? (
-                                    <Link href={route('dashboard')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 transform hover:-translate-y-0.5">
+                                    <Link href={route('dashboard')} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors !text-white">
                                         Открыть дашборд
                                     </Link>
                                 ) : (
                                     <div className="flex items-center gap-4">
-                                        <Link href={route('login')} className="text-white hover:text-accent-blue transition-all duration-300">
+                                        <Link href={route('login')} className="text-sm text-gray-500 hover:text-black transition-colors">
                                             Вход
                                         </Link>
-                                        <Link href={route('register')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 transform hover:-translate-y-0.5">
-                                            Начать
+                                        <Link href={route('register')} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors !text-white">
+                                            <span className="!text-white">Начать</span>
                                         </Link>
                                     </div>
                                 )}
                             </div>
+
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="md:hidden w-10 h-10 grid place-items-center rounded-lg border border-border-color/50 hover:border-accent-blue/50 hover:bg-accent-blue/10 transition-all duration-300"
+                                className="md:hidden w-8 h-8 grid place-items-center"
                             >
-                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <svg className="w-6 h-6 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d={isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
                                 </svg>
                             </button>
                         </div>
+                        
                         {isMobileMenuOpen && (
-                            <div className="md:hidden mt-4 pt-4 border-t border-border-color/30 flex flex-col gap-5">
-                                <button onClick={() => navClick('features')} className={`text-left ${activeSection === 'features' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
+                            <div className="md:hidden mt-6 pt-6 border-t border-gray-200 flex flex-col gap-4">
+                                <button onClick={() => navClick('features')} className="text-left text-sm text-gray-500 hover:text-black transition-colors">
                                     Возможности
                                 </button>
-                                <button onClick={() => navClick('ai-assistant')} className={`text-left ${activeSection === 'ai-assistant' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
-                                    ИИ‑ассистент
-                                </button>
-                                <button onClick={() => navClick('screenshots')} className={`text-left ${activeSection === 'screenshots' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
+                                <button onClick={() => navClick('screenshots')} className="text-left text-sm text-gray-500 hover:text-black transition-colors">
                                     Интерфейс
                                 </button>
-                                <button onClick={() => navClick('benefits')} className={`text-left ${activeSection === 'benefits' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
+                                <button onClick={() => navClick('ai-assistant')} className="text-left text-sm text-gray-500 hover:text-black transition-colors">
+                                    ИИ‑ассистент
+                                </button>
+                                <button onClick={() => navClick('benefits')} className="text-left text-sm text-gray-500 hover:text-black transition-colors">
                                     Преимущества
                                 </button>
-                                <button onClick={() => navClick('pricing')} className={`text-left ${activeSection === 'pricing' ? 'text-white font-medium' : 'text-gray-400'} hover:text-white transition-all duration-300`}>
+                                <button onClick={() => navClick('pricing')} className="text-left text-sm text-gray-500 hover:text-black transition-colors">
                                     Тарифы
                                 </button>
-                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-all duration-300">
+                                <a href="https://t.me/itteam379manager" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-black transition-colors">
                                     Поддержка
                                 </a>
                                 {auth.user ? (
-                                    <Link href={route('dashboard')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300">
+                                    <Link href={route('dashboard')} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium text-center mt-2 !text-white">
                                         Открыть дашборд
                                     </Link>
                                 ) : (
-                                    <div className="flex flex-col gap-4">
-                                        <Link href={route('login')} className="text-white hover:text-accent-blue transition-all duration-300">
+                                    <div className="flex flex-col gap-3 mt-2">
+                                        <Link href={route('login')} className="text-sm text-gray-500 hover:text-black transition-colors">
                                             Вход
                                         </Link>
-                                        <Link href={route('register')} className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-5 py-2.5 rounded-lg font-medium text-center hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300">
+                                        <Link href={route('register')} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium text-center hover:bg-gray-800 transition-colors !text-white">
                                             Начать
                                         </Link>
                                     </div>
@@ -202,41 +185,34 @@ export default function Landing({ auth }) {
                     </nav>
                 </header>
 
-                <main className="relative pt-24">
-                    {/* Героическая секция */}
+                <main className="relative">
                     <HeroSection
                         isLoaded={isLoaded}
                         auth={auth}
                         registerRef={(ref) => registerSection('hero', ref)}
                     />
 
-                    {/* Секция возможностей */}
                     <FeaturesSection
                         registerRef={(ref) => registerSection('features', ref)}
                     />
 
-                    {/* Секция скриншотов */}
                     <ScreenshotsSection
                         registerRef={(ref) => registerSection('screenshots', ref)}
                     />
 
-                    {/* Секция ИИ-ассистента */}
                     <AiAssistantSection
                         registerRef={(ref) => registerSection('ai-assistant', ref)}
                     />
 
-                    {/* Секция преимуществ */}
                     <BenefitsSection
                         registerRef={(ref) => registerSection('benefits', ref)}
                     />
 
-                    {/* Секция тарифов */}
                     <PricingSection
                         registerRef={(ref) => registerSection('pricing', ref)}
                     />
                 </main>
 
-                {/* Футер */}
                 <Footer />
             </div>
         </>

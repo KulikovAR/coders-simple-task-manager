@@ -25,7 +25,6 @@ const PricingSection = ({ registerRef }) => {
             buttonText: 'Начать бесплатно',
             buttonLink: route('register'),
             highlighted: false,
-            bgClass: 'bg-secondary-bg/70'
         },
         {
             name: 'Команда',
@@ -42,11 +41,10 @@ const PricingSection = ({ registerRef }) => {
             buttonText: 'Связаться с менеджером',
             buttonLink: 'https://t.me/itteam379manager',
             highlighted: false,
-            bgClass: 'bg-secondary-bg/70'
         },
         {
             name: 'Команда + ИИ',
-                            price: '999 ₽',
+            price: '999 ₽',
             priceDescription: 'за человека в месяц',
             description: 'Максимальная продуктивность с ИИ',
             features: [
@@ -59,7 +57,6 @@ const PricingSection = ({ registerRef }) => {
             buttonText: 'Связаться с менеджером',
             buttonLink: 'https://t.me/itteam379manager',
             highlighted: true,
-            bgClass: 'bg-gradient-to-b from-accent-blue/20 to-accent-purple/20'
         }
     ];
 
@@ -67,73 +64,65 @@ const PricingSection = ({ registerRef }) => {
         <section
             ref={sectionRef}
             id="pricing"
-            className="max-w-7xl mx-auto px-6 py-24"
+            className="max-w-6xl mx-auto px-6 py-32"
         >
-            <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-tight">
+            <div className="text-center mb-20">
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-6 tracking-tight leading-tight">
                     Тарифные планы
                 </h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                     Выберите оптимальный тариф для вашей команды
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {plans.map((plan, index) => (
-                    <div 
-                        key={index} 
-                        className={`${plan.bgClass} border ${plan.highlighted ? 'border-accent-blue/30' : 'border-border-color'} rounded-2xl p-8 hover:border-accent-blue/20 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg relative flex flex-col`}
+                    <div
+                        key={index}
+                        className={`bg-white border-2 ${plan.highlighted ? 'border-black' : 'border-gray-200'} rounded-3xl p-10 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-2 relative flex flex-col`}
                     >
                         {plan.highlighted && (
-                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-accent-blue to-accent-purple text-white px-4 py-1 rounded-full text-sm font-medium">
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-black px-6 py-2 rounded-full text-sm font-bold !text-white">
                                 Популярный выбор
                             </div>
                         )}
-                        
-                        <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+
+                        <h3 className="text-2xl font-bold text-black mb-3">{plan.name}</h3>
                         <div className="flex items-baseline mb-6">
-                            <span className="text-4xl font-bold text-white">{plan.price}</span>
+                            <span className="text-5xl font-bold text-black">{plan.price}</span>
                             {plan.priceDescription && (
-                                <span className="text-text-secondary ml-2">{plan.priceDescription}</span>
+                                <span className="text-gray-600 ml-3 text-sm">{plan.priceDescription}</span>
                             )}
                         </div>
-                        <p className="text-text-secondary mb-6">{plan.description}</p>
-                        
-                        <ul className="space-y-4 flex-grow">
+                        <p className="text-gray-600 mb-8 leading-relaxed">{plan.description}</p>
+
+                        <ul className="space-y-5 flex-grow mb-8">
                             {plan.features.map((feature, i) => (
                                 <li key={i} className="flex items-start">
-                                    <svg className="w-5 h-5 text-accent-green mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="w-6 h-6 text-black mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span className="text-text-primary">{feature}</span>
+                                    <span className="text-gray-700 font-medium">{feature}</span>
                                 </li>
                             ))}
                         </ul>
-                        
-                        <div className="mt-6">
+
+                        <div className="mt-auto">
                             {plan.name === 'Бесплатный' ? (
                                 <Link
                                     href={plan.buttonLink}
-                                    className={`w-full block text-center py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                                        plan.highlighted
-                                            ? 'bg-gradient-to-r from-accent-blue to-accent-purple text-white hover:shadow-lg hover:shadow-accent-blue/20'
-                                            : 'bg-secondary-bg border border-border-color hover:border-accent-blue/30 text-white'
-                                    }`}
+                                    className="w-full block text-center py-4 px-4 rounded-full font-semibold transition-all duration-300 bg-black hover:bg-gray-800 !text-white"
                                 >
-                                    {plan.buttonText}
+                                    <span className="!text-white">{plan.buttonText}</span>
                                 </Link>
                             ) : (
                                 <a
                                     href={plan.buttonLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`w-full block text-center py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                                        plan.highlighted
-                                            ? 'bg-gradient-to-r from-accent-blue to-accent-purple text-white hover:shadow-lg hover:shadow-accent-blue/20'
-                                            : 'bg-secondary-bg border border-border-color hover:border-accent-blue/30 text-white'
-                                    }`}
+                                    className="w-full block text-center py-4 px-4 rounded-full font-semibold transition-all duration-300 bg-black hover:bg-gray-800 !text-white"
                                 >
-                                    {plan.buttonText}
+                                    <span className="!text-white">{plan.buttonText}</span>
                                 </a>
                             )}
                         </div>
@@ -142,11 +131,11 @@ const PricingSection = ({ registerRef }) => {
             </div>
 
             {/* Эксклюзивный тариф */}
-            <div className="mt-16 bg-gradient-to-r from-accent-blue/10 to-accent-purple/10 border border-border-color rounded-2xl p-8 hover:border-accent-blue/20 transition-all duration-300">
+            <div className="mt-20 bg-gray-50 border-2 border-gray-200 rounded-3xl p-10 hover:border-gray-300 transition-all duration-300">
                 <div className="flex flex-col md:flex-row items-center justify-between">
                     <div>
-                        <h3 className="text-2xl font-bold text-white mb-2">Тариф "Эксклюзив"</h3>
-                        <p className="text-text-secondary mb-4 md:mb-0">
+                        <h3 className="text-2xl font-bold text-black mb-3">Тариф "Эксклюзив"</h3>
+                        <p className="text-gray-600 mb-4 md:mb-0 leading-relaxed">
                             Если вы не нашли тариф, который подходит Вам и Вашей команде, свяжитесь с нашим менеджером.
                             Мы разработаем индивидуальное решение под ваши потребности.
                         </p>
@@ -155,9 +144,9 @@ const PricingSection = ({ registerRef }) => {
                         href="https://t.me/itteam379manager"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-accent-blue to-accent-purple text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 whitespace-nowrap"
+                        className="bg-black px-8 py-4 rounded-full font-semibold hover:bg-gray-800 transition-colors whitespace-nowrap !text-white"
                     >
-                        Связаться с менеджером
+                        <span className="!text-white">Связаться с менеджером</span>
                     </a>
                 </div>
             </div>
