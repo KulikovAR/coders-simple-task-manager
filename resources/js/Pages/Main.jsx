@@ -90,9 +90,9 @@ export default function Main({ auth }) {
                 </Link>
                 <Link
                   href="/seo-stats"
-                  className="px-4 py-2 rounded-md bg-black text-white hover:bg-black/90 transition-colors whitespace-nowrap"
+                  className="px-4 py-2 rounded-md bg-black text-white hover:bg-black/90 transition-colors whitespace-nowrap !text-white"
                 >
-                  в систему
+                  <span className="!text-white">в систему</span>
                 </Link>
               </div>
             </div>
