@@ -122,7 +122,7 @@ export default function Landing({ auth }) {
                                 </a>
                                 {auth.user ? (
                                     <Link href={route('dashboard')} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors !text-white">
-                                        Открыть дашборд
+                                        <span className="!text-white">Открыть дашборд</span>
                                     </Link>
                                 ) : (
                                     <div className="flex items-center gap-4">
